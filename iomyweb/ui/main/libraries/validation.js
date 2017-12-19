@@ -317,6 +317,7 @@ $.extend(IomyRe.validation, {
         return mResults;
     },
     
+    // TODO: Finish this off and play around with it.
     isFormFieldValid : function (mField) {
         //-------------------------------------------------//
         // Variables
@@ -431,10 +432,8 @@ $.extend(IomyRe.validation, {
     /**
      * Checks an IPv4 address to see if it's in a valid format.
      * 
-     * @param {type} sIPAddress                IP Address to validate.
+     * @param {type} sIPAddress              IP Address to validate.
      * @returns {map}                        The map containing result information including whether it's valid and any error message.
-     * 
-     * @throws MissingArgumentException        if the address is not given, of course.
      */
     isIPv4AddressValid : function (sIPAddress) {
         //-------------------------------------------------//
@@ -442,56 +441,56 @@ $.extend(IomyRe.validation, {
         //-------------------------------------------------//
         var bError                    = false;
         var aErrorMessages            = [];
-        var aThreeDots                = [];
-        var aIPAddressParts           = [];
         var bIPAddressFormatError     = false;
         var mResult                   = {};
         
         //-------------------------------------------------//
         // Check that the IP address is given.
         //-------------------------------------------------//
-        if (sIPAddress === null || sIPAddress === undefined || sIPAddress === false || sIPAddress.length === 0) {
-            throw new MissingArgumentException("Where is the IPv4 address?");
-        }
-        
-        //-------------------------------------------------//
-        // Are there three dots in the IP Address?         //
-        //-------------------------------------------------//
-        aThreeDots = sIPAddress.match(/\./g);
+        if (sIPAddress === null || sIPAddress === undefined || sIPAddress === false || sIPAddress === "") {
+            bError = true;
+            aErrorMessages.push("IP address must be given.");
+        } else {
 
-        if (aThreeDots === null || aThreeDots.length !== 3) {
-            bError = true; // No. FAIL!
-            aErrorMessages.push("There must be only 4 parts separated by dots ('.') in an IPv4 address.");
-        }
-        
-        //---------------------------------------------------------//
-        // There are three dots. Are the four parts valid numbers? //
-        //---------------------------------------------------------//
-        aIPAddressParts = sIPAddress.split('.');
+            //-------------------------------------------------//
+            // Are there three dots in the IP Address?         //
+            //-------------------------------------------------//
+            var aThreeDots = sIPAddress.match(/\./g);
 
-        // Check each number
-        for (var i = 0; i < aIPAddressParts.length; i++) {
-            for (var j = 0; j < aIPAddressParts[i].length; j++) {
-                // Spaces and the plus symbol are ignored by isNaN(). isNaN() covers the rest.
-                if (aIPAddressParts[i].charAt(j) === ' ' || aIPAddressParts[i].charAt(j) === '+' || isNaN(aIPAddressParts[i].charAt(j))) {
-                    bIPAddressFormatError = true; // INVALID CHARACTER
+            if (aThreeDots === null || aThreeDots.length !== 3 || sIPAddress.charAt(0) === '.' || sIPAddress.charAt( sIPAddress.length - 1 ) === '.') {
+                bError = true; // No. FAIL!
+                aErrorMessages.push("IP Address: There must be only 4 parts separated by dots ('.') in an IPv4 address.");
+            }
+
+            //---------------------------------------------------------//
+            // There are three dots. Are the four parts valid numbers? //
+            //---------------------------------------------------------//
+            var aIPAddressParts = sIPAddress.split('.');
+
+            // Check each number
+            for (var i = 0; i < aIPAddressParts.length; i++) {
+                for (var j = 0; j < aIPAddressParts[i].length; j++) {
+                    // Spaces and the plus symbol are ignored by isNaN(). isNaN() covers the rest.
+                    if (aIPAddressParts[i].charAt(j) === ' ' || aIPAddressParts[i].charAt(j) === '+' || isNaN(aIPAddressParts[i].charAt(j))) {
+                        bIPAddressFormatError = true; // INVALID CHARACTER
+                        break;
+                    }
+                }
+
+                if (aIPAddressParts[i].length > 1 && aIPAddressParts[i].charAt(0) === "0") {
+                    bError = true;
+                    aErrorMessages.push("IP Address: One of the numbers start with '0'.");
+                }
+
+                if (bIPAddressFormatError === true) {
+                    bError = true;
+                    aErrorMessages.push("IP Address: One of the numbers contains invalid characters.");
+                    break;
+                } else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
+                    bError = true;
+                    aErrorMessages.push("IP Address: One of the numbers is greater than 255 or a negative number.");
                     break;
                 }
-            }
-
-            if (aIPAddressParts[i].length > 1 && aIPAddressParts[i].charAt(0) === "0") {
-                bError = true;
-                aErrorMessages.push("One of the numbers start with '0'.");
-            }
-
-            if (bIPAddressFormatError === true) {
-                bError = true;
-                aErrorMessages.push("One of the numbers contains invalid characters.");
-                break;
-            } else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
-                bError = true;
-                aErrorMessages.push("One of the numbers is greater than 255 or a negative number.");
-                break;
             }
         }
         
@@ -516,22 +515,22 @@ $.extend(IomyRe.validation, {
         //-------------------------------------------------//
         var bError                    = false;
         var aErrorMessages            = [];
-        var aInvalidChars             = [];
         var mResult                   = {};
         
         //-------------------------------------------------//
         // Check that the IP address is given.
         //-------------------------------------------------//
         if (sIPPort === null || sIPPort === undefined || sIPPort === false || sIPPort.length === 0) {
-            throw new MissingArgumentException("Where is the IPv4 port?");
-        }
-        
-        //aDigits            = sIPPort.match(/[0-9]/g);
-        aInvalidChars    = sIPPort.match(/[^0-9]/g);
-        
-        if (aInvalidChars !== null) {
             bError = true;
-            aErrorMessages.push("The port contains invalid character(s).");
+            aErrorMessages.push("IP Port must be given.");
+            
+        } else {
+            var aInvalidChars    = sIPPort.match(/[^0-9]/g);
+
+            if (aInvalidChars !== null) {
+                bError = true;
+                aErrorMessages.push("IP Port: The port contains invalid character(s).");
+            }
         }
         
         //-------------------------------------------------//
@@ -612,15 +611,16 @@ $.extend(IomyRe.validation, {
     },
     
     /**
-     * Checks a given password to determine if it is secure enough to be suitable
-     * for iOmy.
+     * Checks a given password to determine if it is secure enough to be
+     * suitable for iOmy.
      * 
      * WARNING: Do not use this function for checking passwords that are
-     * required for accessing a device via the network. The passwords set on the
-     * device may or may not conform to the same rules as the iOmy passwords.
+     * required for accessing a device via the network. The passwords set on
+     * devices will most likely not be subject to the same stringent security
+     * standards.
      * 
-     * This password checker is mostly used to check that new passwords,
-     * especially user passwords, are secure enough to be used in iOmy.
+     * This password checker is used to check that new passwords, especially
+     * user passwords, are secure enough to be used in iOmy.
      * 
      * @param {string} sPassword
      * @returns {map}
@@ -980,6 +980,185 @@ $.extend(IomyRe.validation, {
         mResults.aErrorMessages = aErrorMessages;
         
         return mResults;
+    },
+    
+    validateEditIPWebCamForm : function (mData) {
+        var self            = this;
+        var bError          = false;
+        var aErrorMessages  = [];
+        
+        var fnAppendError = function (sErrorMessages) {
+            bError = true;
+            aErrorMessages.push(sErrorMessages);
+        };
+        
+        //-- Protocol (e.g. http) --//
+        if (mData.Protocol === undefined || mData.Protocol === null ||
+            mData.Protocol === "")
+        {
+            fnAppendError("URL protocol is required.");
+        }
+        
+        //-- IP Address --//
+        var mInfo = self.isIPv4AddressValid(mData.IPAddress);
+
+        if (!mInfo.bValid) {
+            bError = true;
+            aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+        }
+        
+        //-- IP Port --//
+        mInfo = self.isIPv4PortValid(mData.IPPort);
+
+        if (!mInfo.bValid) {
+            bError = true;
+            aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+        }
+
+        //-- Stream Path --//
+        if (mData.Path === undefined || mData.Path === null ||
+            mData.Path === "")
+        {
+            fnAppendError("Stream path is required.");
+        }
+        
+        return {
+            bIsValid : !bError,
+            aErrorMessages : aErrorMessages
+        };
+    },
+    
+    validateNewDeviceData : function (sDeviceType, mData) {
+        var self            = this;
+        var bError          = false;
+        var aErrorMessages  = [];
+        
+        var sDisplayNameMissing = "Display name is required.";
+        
+        var fnAppendError = function (sErrorMessages) {
+            bError = true;
+            aErrorMessages.push(sErrorMessages);
+        };
+        
+        // An anonymous function to check the Display name.
+        var fnCheckDisplayName = function () {
+            if (mData.DisplayName === undefined || mData.DisplayName === null ||
+                mData.DisplayName === "")
+            {
+                fnAppendError(sDisplayNameMissing);
+            }
+        };
+        
+        // An anonymous function to check the IP Address.
+        var fnCheckIPAddress = function () {
+            var mInfo = self.isIPv4AddressValid(mData.IPAddress);
+
+            if (!mInfo.bValid) {
+                bError = true;
+                aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+            }
+        };
+        
+        // An anonymous function to check the IP Port.
+        var fnCheckIPPort = function () {
+            var mInfo = self.isIPv4PortValid(mData.IPPort);
+
+            if (!mInfo.bValid) {
+                bError = true;
+                aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+            }
+        };
+        
+        switch (sDeviceType) {
+            // Onvif Camera Device
+            case "linkType"+IomyRe.devices.onvif.LinkTypeId :
+                fnCheckDisplayName();
+                fnCheckIPAddress();
+                fnCheckIPPort();
+                
+                break;
+            
+            // Philips Hue Bridge
+            case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
+                fnCheckDisplayName();
+                fnCheckIPAddress();
+                fnCheckIPPort();
+                
+                if (mData.DeviceToken === undefined || mData.DeviceToken === null ||
+                    mData.DeviceToken === "")
+                {
+                    fnAppendError("Device token is required");
+                }
+                
+                break;
+            
+            // Open Weather Map
+            case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
+                fnCheckDisplayName();
+                
+                if (mData.StationCode === undefined || mData.StationCode === null ||
+                    mData.StationCode === "")
+                {
+                    fnAppendError("Station code is required");
+                }
+                
+                if (mData.KeyCode === undefined || mData.KeyCode === null ||
+                    mData.KeyCode === "")
+                {
+                    fnAppendError("Key code is required");
+                }
+                
+                break;
+            
+            // IP Webcam Stream
+            case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
+                fnCheckIPAddress();
+                fnCheckIPPort();
+                
+                if (mData.LinkName === undefined || mData.LinkName === null ||
+                    mData.LinkName === "")
+                {
+                    fnAppendError("Device name is required.");
+                }
+                
+                if (mData.DisplayName === undefined || mData.DisplayName === null ||
+                mData.DisplayName === "")
+                {
+                    fnAppendError("Stream name is required.");
+                }
+                
+                if (mData.Protocol === undefined || mData.Protocol === null ||
+                    mData.Protocol === "")
+                {
+                    fnAppendError("URL protocol is required.");
+                }
+                
+                if (mData.Path === undefined || mData.Path === null ||
+                    mData.Path === "")
+                {
+                    fnAppendError("Stream path is required.");
+                }
+                
+                break;
+                
+            // Onvif Stream
+            case "thingType"+IomyRe.devices.onvif.ThingTypeId :
+                if (mData.CameraName === undefined || mData.CameraName === null ||
+                    mData.CameraName === "")
+                {
+                    fnAppendError("Stream name is required.");
+                }
+                
+                break;
+                
+            default :
+                throw new IllegalArgumentException("Invalid device type");
+        }
+        
+        return {
+            bIsValid : !bError,
+            aErrorMessages : aErrorMessages
+        };
     }
     
 });

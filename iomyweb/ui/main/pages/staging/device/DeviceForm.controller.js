@@ -118,8 +118,6 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         if (oController.bEditExisting) {
             oController.iThingTypeId = IomyRe.common.ThingList["_"+oController.iThingId].TypeId;
 
-            console.log(oController.iThingTypeId);
-
             if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
                 oView.byId("DevType").setVisible( false );
                 oView.byId("DevSettings").setVisible( true );
@@ -360,6 +358,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     oJSON.CurrentDevice.Password    = mData.password;
                 };
                 
+                fnComplete(); // Just to wipe the old data.
+                
                 IomyRe.devices.ipcamera.loadCameraInformation({
                     thingID : oController.iThingId,
                     
@@ -573,175 +573,190 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         oController.ToggleSubmitCancelButtons(false);
         
         //--------------------------------------------------------------------//
-        // Prepare the URL and parameters for the call to create a device.
+        // Validate input first. If everything checks out, then create the
+        // device. Otherwise, show an error popup and stop.
         //--------------------------------------------------------------------//
-        switch (sDevTypeKey) {
-            // Onvif Camera Device
-            case "linkType"+IomyRe.devices.onvif.LinkTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("onvif"),
-                    data : {
-                        "Mode" : "AddNewOnvifServer",
-                        "HubId" : oCurrentFormData.Hub,
-                        "RoomId" : oCurrentFormData.Room,
-                        "DisplayName" : oCurrentFormData.DisplayName,
-                        "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
-                        "DeviceOnvifPort" : oCurrentFormData.IPPort,
-                        "OnvifUsername" : oCurrentFormData.Username,
-                        "OnvifPassword" : oCurrentFormData.Password
-                    }
-                };
-                break;
-            
-            // Philips Hue Bridge
-            case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("philipshue"),
-                    data : {
-                        "Mode" : "AddNewBridge",
-                        "HubId" : oCurrentFormData.Hub,
-                        "RoomId" : oCurrentFormData.Room,
-                        "DisplayName" : oCurrentFormData.DisplayName,
-                        "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
-                        "DevicePort" : oCurrentFormData.IPPort,
-                        "DeviceUserToken" : oCurrentFormData.DeviceToken
-                    }
-                };
-                break;
-            
-            // Open Weather Map
-            case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("weather"),
-                    data : {
-                        "Mode" : "AddWeatherStation",
-                        "HubId" : oCurrentFormData.Hub,
-                        "DisplayName" : oCurrentFormData.DisplayName,
-                        "WeatherType" : "OpenWeatherMap",
-                        "Username" : oCurrentFormData.KeyCode,
-                        "StationCode" : oCurrentFormData.StationCode,
-                        "RoomId" : oCurrentFormData.Room,
-                        "Data" : "{\"Name\" : \""+oCurrentFormData.DisplayName+"\"}"
-                    }
-                };
-                break;
-            
-            // IP Webcam Stream
-            case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("ipcamera"),
-                    data : {
-                        "Mode" : "AddNewIPCamera",
-                        "HubId" : oCurrentFormData.Hub,
-                        "RoomId" : oCurrentFormData.Room,
-                        "IPCamType" : oCurrentFormData.IPCamType,
-                        "Data" : JSON.stringify({
-                            "NetworkAddress"    : oCurrentFormData.IPAddress,
-                            "NetworkPort"       : oCurrentFormData.IPPort,
-                            "Protocol"          : oCurrentFormData.Protocol,
-                            "Path"              : oCurrentFormData.Path,
-                            "DisplayName"       : oCurrentFormData.DisplayName,
-                            "LinkName"          : oCurrentFormData.LinkName,
-                            "Username"          : oCurrentFormData.Username,
-                            "Password"          : oCurrentFormData.Password
-                        })
-                    }
-                };
-                break;
-                
-            // Onvif Stream
-            case "thingType"+IomyRe.devices.onvif.ThingTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("onvif"),
-                    data : {
-                        "Mode" : "NewThing",
-                        "LinkId" : oCurrentFormData.OnvifServer,
-                        "StreamProfile" : oCurrentFormData.StreamProfile,
-                        "ThumbnailProfile" : oCurrentFormData.ThumbnailProfile,
-                        "CameraName" : oCurrentFormData.CameraName
-                    }
-                };
-                break;
-                
-            default :
-                throw new IllegalArgumentException("Invalid device type");
-            
-        }
+        var mInputInfo = IomyRe.validation.validateNewDeviceData(sDevTypeKey, oCurrentFormData);
         
-        mData.onSuccess = function (response, data) {
-            if (data.Error !== true) {
-                jQuery.sap.log.debug("Success: "+JSON.stringify(response));
-                jQuery.sap.log.debug("Success: "+JSON.stringify(data));
-
-                //--------------------------------------------------------------//
-                // Find the new Link ID                                         //
-                //--------------------------------------------------------------//
-                var iLinkId = 0;
-
-                // Should be in this variable
-                if (data.Data !== undefined) {
-                    if (data.Data.LinkId !== undefined) {
-                        iLinkId = data.Data.LinkId;
-                    }
-                // I found the Open Weather Map feed link ID in this variable!
-                } else if (data.WeatherStation !== undefined) {
-                    if (data.WeatherStation.LinkId !== undefined) {
-                        iLinkId = data.WeatherStation.LinkId;
-                    }
+        if (!mInputInfo.bIsValid) {
+            IomyRe.common.showError(mInputInfo.aErrorMessages.join("\n\n"), "Error",
+                function () {
+                    oController.ToggleSubmitCancelButtons(true);
                 }
-                
-                IomyRe.common.RefreshCoreVariables({
-                    onSuccess : function () {
-                        oController.RefreshModel({
-                            onSuccess : function () {
-                                IomyRe.common.showMessage({
-                                    text : "Device successfully created",
-                                    view : oView
-                                });
+            )
+        } else {
+        
+            //--------------------------------------------------------------------//
+            // Prepare the URL and parameters for the call to create a device.
+            //--------------------------------------------------------------------//
+            switch (sDevTypeKey) {
+                // Onvif Camera Device
+                case "linkType"+IomyRe.devices.onvif.LinkTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("onvif"),
+                        data : {
+                            "Mode" : "AddNewOnvifServer",
+                            "HubId" : oCurrentFormData.Hub,
+                            "RoomId" : oCurrentFormData.Room,
+                            "DisplayName" : oCurrentFormData.DisplayName,
+                            "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
+                            "DeviceOnvifPort" : oCurrentFormData.IPPort,
+                            "OnvifUsername" : oCurrentFormData.Username,
+                            "OnvifPassword" : oCurrentFormData.Password
+                        }
+                    };
+                    break;
 
-                                if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                    oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
-                                    
-                                    //oCurrentFormData.OnvifServer = iLinkId;
-                                    oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
+                // Philips Hue Bridge
+                case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("philipshue"),
+                        data : {
+                            "Mode" : "AddNewBridge",
+                            "HubId" : oCurrentFormData.Hub,
+                            "RoomId" : oCurrentFormData.Room,
+                            "DisplayName" : oCurrentFormData.DisplayName,
+                            "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
+                            "DevicePort" : oCurrentFormData.IPPort,
+                            "DeviceUserToken" : oCurrentFormData.DeviceToken
+                        }
+                    };
+                    break;
 
-                                } else {
-                                    oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
-                                    //IomyRe.common.NavigationChangePage("pBlock", {}, true);
-                                }
-                                
-                                if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+IomyRe.devices.onvif.ThingTypeId) {
-                                    oController.ToggleOnvifStreamControls(false);
-                                    oView.byId("SelectOnvifServer").setEnabled(true);
-                                    oView.byId("ButtonCancel").setEnabled(true);
-                                } else {
-                                    oController.ToggleSubmitCancelButtons(true);
-                                }
-                                
-                            }
-                        });
-                    }
-                });
-            } else {
-                jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
-                IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
-                    oView.byId("ButtonSubmit").setEnabled(false);
-                });
+                // Open Weather Map
+                case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("weather"),
+                        data : {
+                            "Mode" : "AddWeatherStation",
+                            "HubId" : oCurrentFormData.Hub,
+                            "DisplayName" : oCurrentFormData.DisplayName,
+                            "WeatherType" : "OpenWeatherMap",
+                            "Username" : oCurrentFormData.KeyCode,
+                            "StationCode" : oCurrentFormData.StationCode,
+                            "RoomId" : oCurrentFormData.Room,
+                            "Data" : "{\"Name\" : \""+oCurrentFormData.DisplayName+"\"}"
+                        }
+                    };
+                    break;
+
+                // IP Webcam Stream
+                case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("ipcamera"),
+                        data : {
+                            "Mode" : "AddNewIPCamera",
+                            "HubId" : oCurrentFormData.Hub,
+                            "RoomId" : oCurrentFormData.Room,
+                            "IPCamType" : oCurrentFormData.IPCamType,
+                            "Data" : JSON.stringify({
+                                "NetworkAddress"    : oCurrentFormData.IPAddress,
+                                "NetworkPort"       : oCurrentFormData.IPPort,
+                                "Protocol"          : oCurrentFormData.Protocol,
+                                "Path"              : oCurrentFormData.Path,
+                                "DisplayName"       : oCurrentFormData.DisplayName,
+                                "LinkName"          : oCurrentFormData.LinkName,
+                                "Username"          : oCurrentFormData.Username,
+                                "Password"          : oCurrentFormData.Password
+                            })
+                        }
+                    };
+                    break;
+
+                // Onvif Stream
+                case "thingType"+IomyRe.devices.onvif.ThingTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("onvif"),
+                        data : {
+                            "Mode" : "NewThing",
+                            "LinkId" : oCurrentFormData.OnvifServer,
+                            "StreamProfile" : oCurrentFormData.StreamProfile,
+                            "ThumbnailProfile" : oCurrentFormData.ThumbnailProfile,
+                            "CameraName" : oCurrentFormData.CameraName
+                        }
+                    };
+                    break;
+
+                default :
+                    throw new IllegalArgumentException("Invalid device type");
+
             }
-            
-        };
-        
-        mData.onFail = function (error) {
-            jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-            IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "", function () {
-                oController.ToggleSubmitCancelButtons(true);
-            });
-        };
-        
-        //--------------------------------------------------------------------//
-        // Run the request to create a device.
-        //--------------------------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest(mData);
+
+            mData.onSuccess = function (response, data) {
+                if (data.Error !== true) {
+                    jQuery.sap.log.debug("Success: "+JSON.stringify(response));
+                    jQuery.sap.log.debug("Success: "+JSON.stringify(data));
+
+                    //--------------------------------------------------------------//
+                    // Find the new Link ID                                         //
+                    //--------------------------------------------------------------//
+                    var iLinkId = 0;
+
+                    // Should be in this variable
+                    if (data.Data !== undefined) {
+                        if (data.Data.LinkId !== undefined) {
+                            iLinkId = data.Data.LinkId;
+                        }
+                    // I found the Open Weather Map feed link ID in this variable!
+                    } else if (data.WeatherStation !== undefined) {
+                        if (data.WeatherStation.LinkId !== undefined) {
+                            iLinkId = data.WeatherStation.LinkId;
+                        }
+                    }
+
+                    IomyRe.common.RefreshCoreVariables({
+                        onSuccess : function () {
+                            oController.RefreshModel({
+                                onSuccess : function () {
+                                    IomyRe.common.showMessage({
+                                        text : "Device successfully created",
+                                        view : oView
+                                    });
+
+                                    if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                        oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
+
+                                        //oCurrentFormData.OnvifServer = iLinkId;
+                                        oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
+
+                                    } else {
+                                        oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
+                                        //IomyRe.common.NavigationChangePage("pBlock", {}, true);
+                                    }
+
+                                    if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+IomyRe.devices.onvif.ThingTypeId) {
+                                        oController.ToggleOnvifStreamControls(false);
+                                        oView.byId("SelectOnvifServer").setEnabled(true);
+                                        oView.byId("ButtonCancel").setEnabled(true);
+                                    } else {
+                                        oController.ToggleSubmitCancelButtons(true);
+                                    }
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
+                    IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
+                        oView.byId("ButtonSubmit").setEnabled(false);
+                    });
+                }
+
+            };
+
+            mData.onFail = function (error) {
+                jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
+                IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "", function () {
+                    oController.ToggleSubmitCancelButtons(true);
+                });
+            };
+
+            //--------------------------------------------------------------------//
+            // Run the request to create a device.
+            //--------------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest(mData);
+        }
     },
     
     EditDevice : function () {
@@ -831,6 +846,12 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
         
         try {
+            var mInputInfo = IomyRe.validation.validateEditIPWebCamForm(oCurrentFormData);
+            
+            if (!mInputInfo.bIsValid) {
+                throw new IllegalArgumentException(mInputInfo.aErrorMessages.join("\n\n"));
+            }
+            
             if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
                 IomyRe.devices.ipcamera.submitWebcamInformation({
                     thingID             : oController.iThingId,
@@ -873,7 +894,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         } catch (e) {
             IomyRe.common.showError(e.message, "Failed to update settings",
                 function () {
-                    oController.ToggleSubmitCancelButtons(true);
+                    oController.ToggleEditIPWebcamControls(true);
                 }
             );
         }
@@ -1010,7 +1031,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             
             onSuccess : function (result) {
                 
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 
                 var oLogContents = oView.byId("TelnetOutput").getValue();
                 

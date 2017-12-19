@@ -175,6 +175,7 @@ $.extend(IomyRe.common,{
     //============================================//
     NavPagesNavigationArray         : [],            //-- ARRAY:            This array holds the list of Pages (and Parameters).    --//
     NavPagesCurrentIndex            : -1,            //-- INTEGER:        This is the index of what page the User is on. NOTE: 0 indicates that the user is on the "Navigation Main" Page (or "Login" Page)    --//
+    mHelpData                       : {},            //-- Map:         This is where the help information will be stored before the user can login --//
     
     //============================================//
     //== Boolean flags                          ==//
@@ -2701,6 +2702,8 @@ $.extend(IomyRe.common,{
                 var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
                 oApp.getPage(sPageName).byId("openMenu").setText("Hi, "+sDisplayName);
             }
+            
+            IomyRe.help.addHelpMessage(sPageName);
         }
         
         //--------------------------------------------------------------------//
@@ -2804,6 +2807,7 @@ $.extend(IomyRe.common,{
         
         return true;
     },
+    
     
     //============================================================================//
     //== FORM FRAGMENT FUNCTIONS                                                ==//
