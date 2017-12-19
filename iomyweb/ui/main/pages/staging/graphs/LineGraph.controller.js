@@ -126,7 +126,7 @@ sap.ui.controller("pages.staging.graphs.LineGraph", {
 					oController.Graph_Data = [];
 					
 					$.each( aData.Data,function(index, aLineData) {
-						oController.Graph_Data.push( [aLineData.LastTimestamp, aLineData.Value]);
+						oController.Graph_Data.push( [aLineData.Timestamp, aLineData.Value]);
 					});
 					
 					//----------------------------//
