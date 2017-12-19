@@ -96,7 +96,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
             var mThing      = IomyRe.common.ThingList["_"+oController.iThingId];
             var sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
 
-            mRule = IomyRe.rules.RulesList[sSerialCode];
+            mRule = JSON.parse(JSON.stringify(IomyRe.rules.RulesList[sSerialCode]));
             mRule.Ontime = IomyRe.time.GetDateFromMilitaryTime(mRule.Ontime);
             mRule.Offtime = IomyRe.time.GetDateFromMilitaryTime(mRule.Offtime);
             
@@ -147,10 +147,10 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 		}
 	},
     
-    cancelChanges : function () {
-		IomyRe.common.NavigationTriggerBackForward();
-	},
-    
+//    cancelChanges : function () {
+//		IomyRe.common.NavigationTriggerBackForward();
+//	},
+//    
     saveRule : function () {
         var oController         = this;
         var oView               = this.getView();
@@ -208,11 +208,11 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 				}
 			});
 		} else {
-			IomyRe.common.showMessage({
-				text : aErrorMessages.join('\n')
-			});
-			
-			oController.ToggleControls(true);
+			IomyRe.common.showError(aErrorMessages.join('\n\n'), "Error",
+                function () {
+                    oController.ToggleControls(true);
+                }
+            );
 		}
         
     },
