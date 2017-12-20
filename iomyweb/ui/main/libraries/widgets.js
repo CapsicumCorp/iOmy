@@ -160,6 +160,8 @@ $.extend( IomyRe.widgets, {
 		var oNavUsers;			//-- OBJECT:	Stores the UI5 List Item that holds the Users Select			--//
 		var oNavLinks;			//-- OBJECT:	Stores the UI5 List Item that holds the Important Links Select  --//
 		var oNavLegal;			//-- OBJECT:	Stores the UI5 List Item that holds the Legal Select			--//
+		var oNavAdvanced;		//-- OBJECT:	Stores the UI5 List Item that holds the Advanced Telnet Select	--//
+		var oNavCapsicum;		//-- OBJECT:	Stores the UI5 List Item that holds Powered by Capsicum      	--//
 	
 		//----------------------------------------------------//
 		//-- 2.0 - Create ToolHeader Side Content           --//
@@ -244,6 +246,19 @@ $.extend( IomyRe.widgets, {
 			}
 		});
 		
+		oNavAdvanced = new sap.tnt.NavigationListItem ({
+			icon: "sap-icon://settings",
+			text: "Advanced",
+			select : function () {
+				IomyRe.common.NavigationChangePage( "pTelnet" , {} , true);
+			}
+		});
+		
+		oNavCapsicum = new sap.tnt.NavigationListItem ({
+			icon: "",
+			text: "Powered by Capsicum"
+		});
+		
 		
 		//----------------------------------------------------//
 		//-- 3.0 - Create the Tool Side NavigationList      --//
@@ -252,21 +267,20 @@ $.extend( IomyRe.widgets, {
 			expanded : true,
 			item : new sap.tnt.NavigationList ({
 				items : [
-					oNavHome, oNavDevices, oNavPremise, oNavRoom, oNavRules, oNavUsers
-				]
-			})
-/* ,
-			fixedItem : new sap.tnt.NavigationList ({
-				items : [
-					oNavLinks, oNavLegal
+					oNavHome, oNavDevices, oNavPremise, oNavRoom, oNavRules, oNavUsers, oNavAdvanced
 				]
 			}),
+			fixedItem : new sap.tnt.NavigationList ({
+				items : [
+					oNavCapsicum
+				]
+			}), /*
 			footer : new sap.tnt.NavigationList ({
 				items : [
 					
 				]
-			})
-*/
+			}) */
+
 		});
 		
 		//----------------------------------------------------//
