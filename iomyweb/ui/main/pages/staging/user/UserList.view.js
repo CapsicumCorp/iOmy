@@ -122,7 +122,7 @@ sap.ui.jsview("pages.staging.user.UserList", {
                                         new sap.m.ToolbarSpacer({}),
                                         new sap.m.ToolbarSpacer({}),
                                         new sap.m.ToolbarSpacer({}),
-                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({})
                                     ]
                                 })
                             ],

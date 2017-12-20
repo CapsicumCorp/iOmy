@@ -84,7 +84,7 @@ sap.ui.jsview("pages.staging.RulesList", {
 					height: "100%",
 					vertical : true,
 					content : [
-                        new sap.ui.table.Table ({
+                        new sap.ui.table.Table (oView.createId("RulesTable"), {
                             rows: "{/RulesList}",
                             extension : [
                                 new sap.m.Toolbar ({
@@ -100,9 +100,9 @@ sap.ui.jsview("pages.staging.RulesList", {
                                         new sap.m.Button({
                                             text: "Discard",
                                             type: sap.m.ButtonType.Reject,
-                                            //press : function () {
-                                            //	IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
-                                            //}
+                                            press : function () {
+                                            	oController.DiscardRule();
+                                            }
                                         }),
                                         new sap.m.ToolbarSpacer({}),
                                         new sap.m.ToolbarSpacer({}),
