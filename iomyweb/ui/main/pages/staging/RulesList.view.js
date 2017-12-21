@@ -90,14 +90,14 @@ sap.ui.jsview("pages.staging.RulesList", {
                                 new sap.m.Toolbar ({
                                     selectionMode:"MultiToggle",
                                     content : [
-                                        new sap.m.Button ({
+                                        new sap.m.Button (oView.createId("ButtonAdd"), {
                                             text: "Add",
                                             type: sap.m.ButtonType.Accept,
                                             press : function () {
                                                 IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
                                             }
                                         }),
-                                        new sap.m.Button({
+                                        new sap.m.Button(oView.createId("ButtonDiscard"), {
                                             text: "Discard",
                                             type: sap.m.ButtonType.Reject,
                                             press : function () {

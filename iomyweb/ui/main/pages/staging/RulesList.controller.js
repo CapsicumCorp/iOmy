@@ -60,6 +60,13 @@ sap.ui.controller("pages.staging.RulesList", {
 		
 	},
     
+    ToggleControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("ButtonAdd").setEnabled(bEnabled);
+        oView.byId("ButtonDiscard").setEnabled(bEnabled);
+    },
+    
     LoadList : function () {
         var oController = this;
         var oView       = oController.getView();
@@ -163,6 +170,8 @@ sap.ui.controller("pages.staging.RulesList", {
         var oView               = oController.getView();
         var aSelectedRules      = oController.GetSelectedRules();
         
+        oController.ToggleControls(false);
+        
         // Only run if there are things selected and that the user pressed OK.
         if (aSelectedRules.length > 0) {
             IomyRe.common.showConfirmQuestion("Are you sure you wish to discard the selected rule(s)?", "",
@@ -172,7 +181,10 @@ sap.ui.controller("pages.staging.RulesList", {
                             oController.deleteRulesFromList(aSelectedRules);
                         } catch (error) {
                             $.sap.log.error(error.name + ": " + error.message);
+                            oController.ToggleControls(true);
                         }
+                    } else {
+                        oController.ToggleControls(true);
                     }
                 }
             );
@@ -221,10 +233,12 @@ sap.ui.controller("pages.staging.RulesList", {
                     text : "Rules successfully removed."
                 });
 
+                oController.RefreshModel(oController, {});
                 oController.ToggleControls(true);
             } else if (iSuccesses > 0 && iErrors > 0) {
                 IomyRe.common.showWarning("Some rules could not be removed:\n\n"+aErrors.join("\n\n"), "Warning",
                     function () {
+                        oController.RefreshModel(oController, {});
                         oController.ToggleControls(true);
                     }
                 );
@@ -250,9 +264,9 @@ sap.ui.controller("pages.staging.RulesList", {
 
                 if (mRule.EventType === "On") {
                     mData.rule.Ontime = "";
-                    mData.rule.Offtime = IomyRe.time.GetMilitaryTimeFromDate(mRuleListEntry.Offtime);
+                    mData.rule.Offtime = mRuleListEntry.Offtime;
                 } else if (mRule.EventType === "Off") {
-                    mData.rule.Ontime = IomyRe.time.GetMilitaryTimeFromDate(mRuleListEntry.Ontime);
+                    mData.rule.Ontime = mRuleListEntry.Ontime;
                     mData.rule.Offtime = "";
                 }
 
