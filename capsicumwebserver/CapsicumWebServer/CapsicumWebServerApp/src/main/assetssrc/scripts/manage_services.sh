@@ -142,7 +142,7 @@ template_to_conf_php() {
     phptimezone="$1"
 		shift
   fi
-  cat "${sbin}/etc/php/php.ini.template" | ${SED} "s*%datafolder%*${app}_" | ${SED} "s_%phpram%_${phpram}_" | ${SED} "s_%phptimezone%_${phptimezone}_" > "${sbin}/etc/php/php.ini"
+  cat "${sbin}/etc/php/php.ini.template" | ${SED} "s*%datafolder%*${app}*" | ${SED} "s_%phpram%_${phpram}_" | ${SED} "s_%phptimezone%_${phptimezone}_" > "${sbin}/etc/php/php.ini"
 }
 
 # Args: mysqlport
