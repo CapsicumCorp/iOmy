@@ -635,7 +635,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                             "Username" : oCurrentFormData.KeyCode,
                             "StationCode" : oCurrentFormData.StationCode,
                             "RoomId" : oCurrentFormData.Room,
-                            "Data" : "{\"Name\" : \""+oCurrentFormData.DisplayName+"\"}"
+                            "Data" : JSON.stringify({
+                                "LinkName" : oCurrentFormData.DisplayName,
+                                "ThingName" : oCurrentFormData.DisplayName
+                            })
                         }
                     };
                     break;
