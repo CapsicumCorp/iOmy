@@ -395,7 +395,7 @@ sap.ui.controller("pages.staging.Device", {
                                         customContent : new sap.m.Link ({
                                             text: "Take Screenshot",
                                             press : function () {
-                                                IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId } , false);
+                                                IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Thumbnail" } , false);
                                                 
                                             }
                                         })
@@ -416,6 +416,8 @@ sap.ui.controller("pages.staging.Device", {
                                         
                                     } else {
                                         try {
+                                            
+                                            /*
                                             IomyRe.devices.onvif.getStreamURL({
                                                 ThingId : mDevice.DeviceId,
 
@@ -430,6 +432,10 @@ sap.ui.controller("pages.staging.Device", {
                                                     IomyRe.common.showError(response.responseText, "Couldn't load the stream");
                                                 }
                                             });
+                                            */
+                                            IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Player" } , false);
+                                            
+                                            
                                         } catch (ex) {
                                             IomyRe.common.showError(ex.message, "Couldn't load the stream");
                                         }

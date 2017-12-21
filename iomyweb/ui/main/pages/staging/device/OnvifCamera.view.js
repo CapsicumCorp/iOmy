@@ -113,14 +113,15 @@ sap.ui.jsview("pages.staging.device.OnvifCamera", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
+
 				new sap.m.ScrollContainer ({
-                    width: "100%",
+                    //width: "100%",
                     height: "100%",
                     vertical : true,
                     content : [
-                        IomyRe.widgets.DeviceToolbar(oController, ""),
+                        IomyRe.widgets.DeviceToolbar(oController, "Onvif Stream"),
                         
-                        new sap.m.VBox({
+                        new sap.m.VBox( oView.createId("PageContainer_Thumbnail"), {
                             items : [
                                 //------------------------------------------------------------------//
                                 // Screenshot
@@ -181,9 +182,85 @@ sap.ui.jsview("pages.staging.device.OnvifCamera", {
                                     ]
                                 }).addStyleClass("PadAll3px PadTop15px")
                             ]
-                        }).addStyleClass("maxwidth550px HorizontalCenter")
-                    ]
-                })
+                        }).addStyleClass("maxwidth550px HorizontalCenter"),
+
+
+
+						new sap.m.VBox( oView.createId("PageContainer_Player"), {
+							items : [
+								new sap.m.ScrollContainer(  {
+									vertical: true,
+									width: "100%",
+									content: [
+										new sap.m.VBox ({
+											items : [
+												new sap.ui.core.HTML( oView.createId("PlayerFrame"), {
+													preferDOM: true,
+													content: ""
+												})
+											]
+										}).addStyleClass("ChildFlexGrow ChildTextCenter"),
+									]
+								}),
+								new sap.m.FlexBox ({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items: [
+										new sap.m.VBox ({
+											width: "200px",
+											items: [
+												//-- TODO: The UI team needs to replace these characters with Icons so that they have the same look. --//
+												new sap.m.Button ({
+													height: "50px",
+													width: "200px",
+													text: "^",
+													press : function () {
+														oController.PTZMoveUp();
+													}
+												}),
+												new sap.m.HBox ({
+													items : [
+														new sap.m.Button ({
+															height: "50px",
+															width: "50px",
+															text: "<",
+															press : function () {
+																oController.PTZMoveLeft();
+															}
+														}),
+														new sap.m.Button ({
+															height: "50px",
+															width: "90px",
+															text:"Center"
+														}).addStyleClass("MarLeft5px MarRight5px"),
+														new sap.m.Button ({
+															height: "50px",
+															width: "50px",
+															text: ">",
+															press : function () {
+																oController.PTZMoveRight();
+															}
+														}),
+													]
+												}),
+												new sap.m.Button ({
+													height: "50px",
+													width: "200px",
+													text: "v",
+													press : function () {
+														oController.PTZMoveDown();
+													}
+												}),
+											]
+										}).addStyleClass("ElementCenter"),
+									]
+								})
+							]
+						}) //-- END VBOX PageContainer_Player --//
+					]
+				})
+
 			]
 		}).addStyleClass("MainBackground");
 	}

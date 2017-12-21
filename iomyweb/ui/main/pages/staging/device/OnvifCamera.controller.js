@@ -51,6 +51,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
     sThumbnailProfileUrl : null,
     
     oTimeoutThumbnailRefresh : null,
+    sMode: "",
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -77,7 +78,22 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                 oView.wSnapshotTimeField.setText("Loading...");
                 
                 oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+evt.data.ThingId].DisplayName );
-
+				
+				//-- Store the Page Mode --//
+				oController.sMode = "Thumbnail";
+				
+				if( typeof evt.data.Mode!=="undefined") {
+					oController.sMode = evt.data.Mode;
+				}
+				
+				if( oController.sMode==="Player" ) {
+					oView.byId("PageContainer_Thumbnail").setVisible( false );
+					oView.byId("PageContainer_Player").setVisible( true );
+				} else {
+					oView.byId("PageContainer_Thumbnail").setVisible( true );
+					oView.byId("PageContainer_Player").setVisible( false );
+				}
+				
                 oController.loadProfile();
 			}
 		});
@@ -181,7 +197,10 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
             
             onSuccess : function (response) {
                 jQuery.sap.log.debug(JSON.stringify(response));
-                oController.loadThumbnail();
+                if( oController.sMode==="Thumbnail" ) {
+                    oController.loadThumbnail();
+                }
+                
             },
 
             onFail : function (sErrMesg) {
@@ -189,7 +208,9 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                 IomyRe.common.showError(sErrMesg, "Error",
                     function () {
                         // Unlock all the PTZ buttons
-                        oController.setPTZButtonsEnabled(true);
+                        if( oController.sMode==="Thumbnail" ) {
+                            oController.setPTZButtonsEnabled(true);
+                        }
                     }
                 );
             }
@@ -290,6 +311,45 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
     },
     
     //---------------------------------------------------//
+    //-- Sets the FFMPEG Player up                     --//
+    //---------------------------------------------------//
+    loadFFMPEGPlayer : function() {
+        var oController = this;
+        var oView       = this.getView();
+        
+        var sFrameUrl = "<iframe height='300px' width='700' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.oThing.Id+"'></iframe>";
+        
+        try {
+			IomyRe.apiphp.AjaxRequest({
+				url: IomyRe.apiphp.APILocation("onvifthumbnail"),
+				type: "POST",
+				data: { 
+					"Mode":    "SetupStream", 
+					"ThingId": oController.oThing.Id
+				},
+				onSuccess : function( sExpectedDataType, aAjaxData ) {
+				
+					var oPlayerFrame = oView.byId("PlayerFrame");
+					if( oPlayerFrame!==undefined && oPlayerFrame!==null && oPlayerFrame!==false ) {
+						//-- Set the Player Up --//
+						oPlayerFrame.setContent( sFrameUrl );
+					}
+				},
+				onFail : function(response) {
+					//-- TODO: Fix error message --//
+					IomyRe.common.showError(response.message, "Error Changing Device Status");
+				},
+			});
+            
+        } catch( e001 ) {
+            //-- TODO: Error Message --//
+        }
+        
+        
+        
+    },
+    
+    //---------------------------------------------------//
     // Profile Load
     //---------------------------------------------------//
     
@@ -321,6 +381,8 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
         sNameWhereClause = aNameWhereClause.join(" or ");
         sUrlWhereClause = aUrlWhereClause.join(" or ");
         
+        
+        
         // Start loading the profile names
         IomyRe.apiodata.AjaxRequest({
             Url             : IomyRe.apiodata.ODataLocation("datashortstring"),
@@ -345,7 +407,6 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                     onSuccess : function (type, data) {
                         var oRoomInfo       = IomyRe.common.RoomsList["_"+oController.oThing.PremiseId]["_"+oController.oThing.RoomId];
                         var sThumbnailUrl   = IomyRe.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+oController.oThing.Id;
-        
                         
                         if (data.length > 0) {
                             oController.sStreamProfileUrl        = data[0].DATAMEDSTRING_VALUE;
@@ -355,12 +416,34 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                         // Display the location of the camera.
                         oView.wLocationField.setText(oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName);
                     
-                        // Set the CSS rule using the API URL with parameters
-                        document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
-
-                        oController.loadThumbnail();
+                        
+                        
+                        
+                        //-- TODO: UI Team needs to setup a way to toggle between "FFMPEG Player" & "Thumbnail" modes --//
+                        var sPageMode = "Player";
+                        
+                        
+                        if( sPageMode==="Player" ) {
+                            //----------------------------------------//
+                            //-- IF FFMPEG PLAYER MODE              --//
+                            //----------------------------------------//
+                            oController.loadFFMPEGPlayer();
+                            
+                        } else {
+                            //----------------------------------------//
+                            //-- IF THUMBNAIL MODE                  --//
+                            //----------------------------------------//
+                            
+                            // Set the CSS rule using the API URL with parameters
+                            document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
+                            
+                            oController.loadThumbnail();
+                            
+                        }
+                        
+                        
+                        
                     },
-                    
                     onFail : function (response) {
                         jQuery.sap.log.error("Error loading the profile URLs: "+JSON.stringify(response));
                         IomyRe.common.showError("Error loading the profile URLs");
