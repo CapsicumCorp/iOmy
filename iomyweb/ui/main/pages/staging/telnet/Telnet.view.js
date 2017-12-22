@@ -74,42 +74,6 @@ sap.ui.jsview("pages.staging.telnet.Telnet", {
 			}
 		});
 		
-		oView.wToggleShowDebug = new sap.m.Button({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-			type:"Default",
-			text: "Show Debug",
-			
-			press : function () {
-				oController.ExecuteCommand("debug output show");
-			}
-		}).addStyleClass("cTelnetButton");
-		
-		oView.wBtnCheckLink = new sap.m.Button({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-			type:"Default",
-			text: "Show Version",
-			
-			press : function () {
-				oController.ExecuteCommand("versioninfo");
-			}
-		}).addStyleClass("cTelnetButton");
-		
-		oView.wBtnListDevices = new sap.m.Button({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-			type:"Default",
-			text: "Show Modules",
-			
-			press : function () {
-				oController.ExecuteCommand("modulesinfo");
-			}
-		}).addStyleClass("cTelnetButton");
-		
 		return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "MJPEG",
 			header : IomyRe.widgets.getToolPageHeader( oController ),
@@ -152,6 +116,87 @@ sap.ui.jsview("pages.staging.telnet.Telnet", {
 										oView.wToggleShowDebug,
 										oView.wBtnCheckLink,
 										oView.wBtnListDevices
+									]
+								}).addStyleClass("TextCenter"),
+                                
+                                //-- Row 1 --//
+                                new sap.m.HBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+                                        //-- Debug Output --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Show Debug",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("debug output show");
+                                            }
+                                        }),
+                                        
+                                        //-- Version Info --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Show Version",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("versioninfo");
+                                            }
+                                        }),
+                                        
+                                        //-- Modules Info --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Show Modules",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("modulesinfo");
+                                            }
+                                        })
+									]
+								}).addStyleClass("TextCenter"),
+                                
+                                //-- Row 2 --//
+                                new sap.m.HBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+                                        //-- Get RapidHA Information --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Get RapidHA Info",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("get_rapidha_info");
+                                            }
+                                        }),
+                                        
+                                        //-- Get Zigbee Information --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Get Zigbee Info",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("get_zigbee_info");
+                                            }
+                                        })
 									]
 								}).addStyleClass("TextCenter")
 							]
