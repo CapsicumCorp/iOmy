@@ -170,7 +170,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                     ]
                                                 }),
                                             ]
-                                        }),
+                                        }) /* ,
                                         new sap.ui.layout.BlockLayoutRow ({
                                             content : [ 
                                                 new sap.ui.layout.BlockLayoutCell ({
@@ -190,7 +190,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                     ]
                                                 })
                                             ]
-                                        })
+                                        }) */
                                     ]
                                 })
                             ]

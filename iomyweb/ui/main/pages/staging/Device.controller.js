@@ -286,7 +286,6 @@ sap.ui.controller("pages.staging.Device", {
                                 }
                             })
                         );
-
                         break;
 
                     //--------------------------------------------------------//
@@ -416,8 +415,6 @@ sap.ui.controller("pages.staging.Device", {
                                         
                                     } else {
                                         try {
-                                            
-                                            /*
                                             IomyRe.devices.onvif.getStreamURL({
                                                 ThingId : mDevice.DeviceId,
 
@@ -432,8 +429,8 @@ sap.ui.controller("pages.staging.Device", {
                                                     IomyRe.common.showError(response.responseText, "Couldn't load the stream");
                                                 }
                                             });
-                                            */
-                                            IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Player" } , false);
+                                            
+                                            //IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Player" } , false);
                                             
                                             
                                         } catch (ex) {

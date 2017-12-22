@@ -419,11 +419,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                         
                         
                         
-                        //-- TODO: UI Team needs to setup a way to toggle between "FFMPEG Player" & "Thumbnail" modes --//
-                        var sPageMode = "Player";
-                        
-                        
-                        if( sPageMode==="Player" ) {
+                        if( oController.sMode==="Player" ) {
                             //----------------------------------------//
                             //-- IF FFMPEG PLAYER MODE              --//
                             //----------------------------------------//
