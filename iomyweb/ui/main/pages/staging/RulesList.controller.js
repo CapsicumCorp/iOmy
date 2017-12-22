@@ -170,11 +170,15 @@ sap.ui.controller("pages.staging.RulesList", {
         var oView               = oController.getView();
         var aSelectedRules      = oController.GetSelectedRules();
         
+        var sWarningMessage = "Deleting a rule will remove both the \"On\" and \"Off\" events " +
+            "associated with this device from the table.\n\n" +
+            "Are you sure you wish to discard the selected rule(s)?";
+        
         oController.ToggleControls(false);
         
         // Only run if there are things selected and that the user pressed OK.
         if (aSelectedRules.length > 0) {
-            IomyRe.common.showConfirmQuestion("Are you sure you wish to discard the selected rule(s)?", "",
+            IomyRe.common.showConfirmQuestion(sWarningMessage, "Discard Rule",
                 function (oAction) {
                     if (oAction === sap.m.MessageBox.Action.OK) {
                         try {
@@ -205,8 +209,7 @@ sap.ui.controller("pages.staging.RulesList", {
     deleteRulesFromList : function (aList, iSuccesses, iErrors, aErrors) {
         var oController     = this;
         var mRule           = aList.shift();
-        var mRuleListEntry  = IomyRe.rules.RulesList[mRule.DeviceSerial];
-        var iHubId          = IomyRe.functions.getHubConnectedToThing(mRule.DeviceId).HubId;
+        var iHubId;
         
         //--------------------------------------------------------------//
         // Set the success and error counts to zero.
@@ -214,88 +217,51 @@ sap.ui.controller("pages.staging.RulesList", {
         if (iSuccesses === undefined || iSuccesses === null) {
             iSuccesses = 0;
         }
-        
+
         if (iErrors === undefined || iErrors === null) {
             iErrors = 0;
         }
-        
+
         if (aErrors === undefined || aErrors === null) {
             aErrors = [];
         }
         
         //--------------------------------------------------------------//
-        // Define the function that runs when all of the rules have been
-        // removed.
+        // Only begin to delete the rule if it exists in the rules list.
         //--------------------------------------------------------------//
-        var fnComplete = function () {
-            if (iSuccesses > 0 && iErrors === 0) {
-                IomyRe.common.showMessage({
-                    text : "Rules successfully removed."
-                });
-
-                oController.RefreshModel(oController, {});
-                oController.ToggleControls(true);
-            } else if (iSuccesses > 0 && iErrors > 0) {
-                IomyRe.common.showWarning("Some rules could not be removed:\n\n"+aErrors.join("\n\n"), "Warning",
-                    function () {
-                        oController.RefreshModel(oController, {});
-                        oController.ToggleControls(true);
-                    }
-                );
-            } else if (iSuccesses === 0 && iErrors > 0) {
-                IomyRe.common.showError("Failed to delete the rules:\n\n"+aErrors.join("\n\n"), "Error",
-                    function () {
-                        oController.ToggleControls(true);
-                    }
-                );
-            }
-        };
-        
-        try {
+        if (IomyRe.rules.RulesList[mRule.DeviceSerial] !== undefined) {
+            //-- Get the hub ID. --//
+            iHubId = IomyRe.functions.getHubConnectedToThing(mRule.DeviceId).HubId;
+            
             //--------------------------------------------------------------//
-            // Find out whether to simply remove a time rule or the entire
-            // entry in the rule list.
+            // Define the function that runs when all of the rules have been
+            // removed.
             //--------------------------------------------------------------//
-            if (mRuleListEntry.Ontime !== null && mRuleListEntry.Offtime !== null) {
-                var mData = {
-                    hubID : iHubId,
-                    rule : {Serial : mRule.DeviceSerial}
-                };
+            var fnComplete = function () {
+                if (iSuccesses > 0 && iErrors === 0) {
+                    IomyRe.common.showMessage({
+                        text : "Rules successfully removed."
+                    });
 
-                if (mRule.EventType === "On") {
-                    mData.rule.Ontime = "";
-                    mData.rule.Offtime = mRuleListEntry.Offtime;
-                } else if (mRule.EventType === "Off") {
-                    mData.rule.Ontime = mRuleListEntry.Ontime;
-                    mData.rule.Offtime = "";
+                    oController.RefreshModel(oController, {});
+                    oController.ToggleControls(true);
+                } else if (iSuccesses > 0 && iErrors > 0) {
+                    IomyRe.common.showWarning("Some rules could not be removed:\n\n"+aErrors.join("\n\n"), "Warning",
+                        function () {
+                            oController.RefreshModel(oController, {});
+                            oController.ToggleControls(true);
+                        }
+                    );
+                } else if (iSuccesses === 0 && iErrors > 0) {
+                    IomyRe.common.showError("Failed to delete the rules:\n\n"+aErrors.join("\n\n"), "Error",
+                        function () {
+                            oController.ToggleControls(true);
+                        }
+                    );
                 }
+            };
 
-                mData.onSuccess = function () {
-                    if (aList.length === 0) {
-                        iSuccesses++;
-                        fnComplete();
-                    } else {
-                        oController.deleteRulesFromList(aList, ++iSuccesses, iErrors, aErrors);
-                    }
-                };
-
-                mData.onFail = function (sError) {
-                    aErrors.push(sError);
-
-                    if (aList.length === 0) {
-                        iErrors++;
-                        fnComplete();
-                    } else {
-                        oController.deleteRulesFromList(aList, iSuccesses, ++iErrors, aErrors);
-                    }
-                };
-
-                //--------------------------------------------------------------//
-                // Begin deleting the rule(s).
-                //--------------------------------------------------------------//
-                IomyRe.rules.applyRule(mData);
-
-            } else {
+            try {
                 //--------------------------------------------------------------//
                 // Begin deleting the rule(s).
                 //--------------------------------------------------------------//
@@ -323,10 +289,16 @@ sap.ui.controller("pages.staging.RulesList", {
                         }
                     }
                 });
+            } catch (e) {
+                $.sap.log.error("Error removing rule!");
+                $.sap.log.error(e.name + ": " + e.message);
             }
-        } catch (e) {
-            $.sap.log.error("Error removing rule!");
-            $.sap.log.error(e.name + ": " + e.message);
+        } else {
+            if (aList.length === 0) {
+                fnComplete();
+            } else {
+                oController.deleteRulesFromList(aList, iSuccesses, iErrors, aErrors);
+            }
         }
     }
 
