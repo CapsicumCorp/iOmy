@@ -295,6 +295,7 @@ $.extend(IomyRe.rules, {
         var aErrorMessages  = [];
         var sURL            = IomyRe.apiphp.APILocation("devicerules");
         var aTimeRules      = [];
+        var bReloadRules    = true;
         var mRulesConfig;
         var iHub;
         var fnSuccess;
@@ -348,6 +349,13 @@ $.extend(IomyRe.rules, {
                 fnFail = function () {};
             } else {
                 fnFail = mSettings.onFail;
+            }
+		
+            //----------------------------------------------------------------//
+            // OPTIONAL: Are we reloading rules or not?
+            //----------------------------------------------------------------//
+            if (mSettings.reloadRules !== undefined && mSettings.reloadRules !== null) {
+                bReloadRules = mSettings.reloadRules;
             }
             
         } else {
@@ -549,7 +557,7 @@ $.extend(IomyRe.rules, {
         var bError          = false;
         var aErrorMessages  = [];
         var me              = this;
-        var sSerialCode;
+        var aSerialCode;
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -573,7 +581,11 @@ $.extend(IomyRe.rules, {
             if (mSettings.Serial === undefined || mSettings.Serial === null) {
                 fnAppendError("The serial number for the device must be specified.");
             } else {
-                sSerialCode = mSettings.Serial;
+                if (typeof mSettings.Serial === "string") {
+                    aSerialCode.push(mSettings.Serial);
+                } else if (typeof mSettings.Serial === "array") {
+                    aSerialCode = mSettings.Serial;
+                }
             }
             
             //----------------------------------------------------------------//
@@ -591,7 +603,11 @@ $.extend(IomyRe.rules, {
         // Remove the rule from memory and save the changes.
         //--------------------------------------------------------------------//
         try {
-            delete me.RulesList[ sSerialCode ];
+            for (var i = 0; i < aSerialCode.length; i++) {
+                if (me.RulesList[ aSerialCode[i] ] !== undefined) {
+                    delete me.RulesList[ aSerialCode[i] ];
+                }
+            }
 
             me.saveRules(mSettings);
         } catch (error) {
