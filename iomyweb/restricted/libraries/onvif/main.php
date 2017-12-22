@@ -2967,16 +2967,19 @@ class PHPOnvif {
 			$sScript .= SITE_BASE."/../scripts/run_ffmpeg.sh ";
 			//$sScript .= "ffmpeg ";
 			
-			//-- 4.2  --//
+			//-- 4.2 - System Directory --//
+			$sScript .= "/system ".SITE_BASE."/..";
+			
+			//-- 4.3  --//
 			$sScript .= "-v info ";
 			
-			//-- 4.3 - Stream Location --//
+			//-- 4.4 - Stream Location --//
 			$sScript .= " -i ".$sUrl." ";
 			
-			//-- 4.4  --//
+			//-- 4.5  --//
 			$sScript .= "-c:v copy -c:a copy -bufsize 1835k -pix_fmt yuv420p -flags -global_header -hls_time 10 -hls_list_size 6 -hls_wrap 10 -start_number 1 ";
 			
-			//-- 4.5 - FolderPath and file --//
+			//-- 4.6 - FolderPath and file --//
 			$sScript .= $sFilePath;
 			
 			//------------------------------------------------//
