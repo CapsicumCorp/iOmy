@@ -346,7 +346,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
         var sDialogTitle;
         
         oController.ToggleSubmitCancelButtons(false);
-        
+
         if (iNumOfDevices > 0) {
             var sErrMessage = "There ";
 
@@ -357,7 +357,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
             }
 
             sErrMessage += " still assigned to this room.\n\n";
-            sErrMessage += "Move the devices from this room before deleting it.";
+            sErrMessage += "Move any devices from this room before deleting it.";
 
             IomyRe.common.showError(sErrMessage, "Error",
                 function () {
@@ -365,58 +365,61 @@ sap.ui.controller("pages.staging.room.RoomForm", {
                 }
             );
 
-        }
+        } else {
 
-        //-- Ask the user to confirm the deletion first. --//
-        IomyRe.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-            function (oAction) {
-                if (oAction === sap.m.MessageBox.Action.OK) {
-                    try {
-                        oController.deleteRoom({
-                            roomID      : oController.mRoomData.RoomId,
-                            
-                            onSuccess   : function () {
-                                IomyRe.common.showMessage({
-                                    text : oController.mRoomData.RoomName + " successfully removed."
-                                });
-                                
-                                oController.ToggleSubmitCancelButtons(true);
-                                IomyRe.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
-                            },
-                            
-                            onFail : function (sErrorMessage) {
-                                IomyRe.common.showError(sErrorMessage, "Error",
-                                    function () {
-                                        oController.ToggleSubmitCancelButtons(true);
-                                    }
-                                );
+            //-- Ask the user to confirm the deletion. --//
+            IomyRe.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
+                function (oAction) {
+                    if (oAction === sap.m.MessageBox.Action.OK) {
+                        try {
+                            oController.deleteRoom({
+                                roomID      : oController.mRoomData.RoomId,
+
+                                onSuccess   : function () {
+                                    IomyRe.common.showMessage({
+                                        text : oController.mRoomData.RoomName + " successfully removed."
+                                    });
+
+                                    oController.ToggleSubmitCancelButtons(true);
+                                    IomyRe.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
+                                },
+
+                                onFail : function (sErrorMessage) {
+                                    IomyRe.common.showError(sErrorMessage, "Error",
+                                        function () {
+                                            oController.ToggleSubmitCancelButtons(true);
+                                        }
+                                    );
+                                }
+                            });
+
+                        } catch (err) {
+
+                            if (err.name === "DevicesStillInRoomException") {
+                                sDialogTitle = "Devices still assigned";
+
+                            } else if (err.name === "AttemptToDeleteOnlyRoomException") {
+                                // NOTE: This is probably not needed anymore with the way the "Unassigned" pseudo-room works.
+                                sDialogTitle = "Only room registered";
+
+                            } else {
+                                sDialogTitle = "Error";
                             }
-                        });
 
-                    } catch (err) {
-
-                        if (err.name === "DevicesStillInRoomException") {
-                            sDialogTitle = "Devices still assigned";
-
-                        } else if (err.name === "AttemptToDeleteOnlyRoomException") {
-                            // NOTE: This is probably not needed anymore with the way the "Unassigned" pseudo-room works.
-                            sDialogTitle = "Only room registered";
+                            IomyRe.common.showError(err.message, sDialogTitle,
+                                function () {
+                                    oController.ToggleSubmitCancelButtons(true);
+                                }
+                            );
 
                         }
 
-                        IomyRe.common.showError(err.message, sDialogTitle,
-                            function () {
-                                oController.ToggleSubmitCancelButtons(true);
-                            }
-                        );
-
+                    } else {
+                        oController.ToggleSubmitCancelButtons(true);
                     }
-                    
-                } else {
-                    oController.ToggleSubmitCancelButtons(true);
                 }
-            }
-        );
+            );
+        }
     },
 	
 	ToggleButtonsAndView: function ( oController, bEditing ) {
@@ -498,7 +501,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
                         }
 
                         sErrMessage += " still assigned to this room.\n\n";
-                        sErrMessage += "Remove the devices from this room before deleting it.";
+                        sErrMessage += "Move any devices from this room before deleting it.";
 
                         jQuery.sap.log.error(sErrMessage);
                         fnAppendError(sErrMessage);
@@ -542,8 +545,13 @@ sap.ui.controller("pages.staging.room.RoomForm", {
                 }
             }
             
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join('\n\n'));
+            }
+            
         } else {
-            fnAppendError(sRoomIDMissing)
+            fnAppendError(sRoomIDMissing);
+            throw new MissingSettingsMapException(aErrorMessages.join('\n\n'));
         }
         
 //        //--------------------------------------------------------------------//
