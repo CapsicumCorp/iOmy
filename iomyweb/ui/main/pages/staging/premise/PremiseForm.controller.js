@@ -157,23 +157,23 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
         var oController = this;
         var oView       = oController.getView();
         var mPremise    = JSON.parse( JSON.stringify(IomyRe.common.PremiseList["_"+oController.iPremiseId]) );
+        var oModel      = new sap.ui.model.json.JSONModel({
+            "Information"   : mPremise,
+            "Address"       : oController.mPremiseAddress,
+            "Options"       : {
+                "BedroomCount"  : IomyRe.common.PremiseBedroomsOptions,
+                "FloorCount"    : IomyRe.common.PremiseFloorsOptions,
+                "OccupantCount" : IomyRe.common.PremiseOccupantsOptions,
+                "RoomCount"     : IomyRe.common.PremiseRoomsOptions,
+
+                "Regions"   : IomyRe.common.Regions,
+                "Languages" : IomyRe.common.Languages,
+                "Timezones" : IomyRe.common.Timezones
+            }
+        })
         
-        oView.setModel(
-            new sap.ui.model.json.JSONModel({
-                "Information"   : mPremise,
-                "Address"       : oController.mPremiseAddress,
-                "Options"       : {
-                    "BedroomCount"  : IomyRe.common.PremiseBedroomsOptions,
-                    "FloorCount"    : IomyRe.common.PremiseFloorsOptions,
-                    "OccupantCount" : IomyRe.common.PremiseOccupantsOptions,
-                    "RoomCount"     : IomyRe.common.PremiseRoomsOptions,
-                    
-                    "Regions"   : IomyRe.common.Regions,
-                    "Languages" : IomyRe.common.Languages,
-                    "Timezones" : IomyRe.common.Timezones
-                }
-            })
-        );
+        oModel.setSizeLimit(420);
+        oView.setModel(oModel);
 
     },
     
