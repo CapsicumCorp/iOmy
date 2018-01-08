@@ -171,8 +171,10 @@ sap.ui.controller("pages.staging.Device", {
         
         if (oController.bEditing) {
             oJSON.CameraTapInstructions = "Tap to edit details";
+            oJSON.MotionSensorInstructions = "Tap to edit details";
         } else {
             oJSON.CameraTapInstructions = "Tap to view stream";
+            oJSON.MotionSensorInstructions = "Tap to view more information";
         }
         
         oView.setModel( 
@@ -531,17 +533,20 @@ sap.ui.controller("pages.staging.Device", {
                                 numberUnit: "Loading...",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Enable Alarm"
-                                        })
-                                    }),
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Disable Alarm"
-                                        })
+                                        text: "{/MotionSensorInstructions}"
                                     })
+//                                    new sap.m.ObjectAttribute ({
+//                                        text: "link",
+//                                        customContent : new sap.m.Link ({
+//                                            text: "Enable Alarm"
+//                                        })
+//                                    }),
+//                                    new sap.m.ObjectAttribute ({
+//                                        text: "link",
+//                                        customContent : new sap.m.Link ({
+//                                            text: "Disable Alarm"
+//                                        })
+//                                    })
                                 ],
                                 press : function () {
                                     if (oController.bEditing) {
