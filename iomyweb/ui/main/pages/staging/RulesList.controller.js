@@ -155,14 +155,14 @@ sap.ui.controller("pages.staging.RulesList", {
         var oView               = oController.getView();
         var oTable              = oView.byId("RulesTable");
         var aSelectedIndices    = oTable.getSelectedIndices();
-        var aSelectedRows       = [];
+        var aSelectedRules      = [];
         var aRuleList           = oView.getModel().getProperty("/RulesList");
         
         for (var i = 0; i < aSelectedIndices.length; i++) {
-            aSelectedRows.push(aRuleList[aSelectedIndices[i]]);
+            aSelectedRules.push(aRuleList[aSelectedIndices[i]]);
         }
         
-        return aSelectedRows;
+        return aSelectedRules;
     },
     
     DiscardRule : function () {
@@ -174,11 +174,11 @@ sap.ui.controller("pages.staging.RulesList", {
             "associated with this device from the table.\n\n" +
             "Are you sure you wish to discard the selected rule(s)?";
         
-        oController.ToggleControls(false);
-        
         // Only run if there are things selected and that the user pressed OK.
         try {
             if (aSelectedRules.length > 0) {
+                oController.ToggleControls(false);
+                
                 IomyRe.common.showConfirmQuestion(sWarningMessage, "Discard Rule",
                     function (oAction) {
                         if (oAction === sap.m.MessageBox.Action.OK) {
@@ -212,27 +212,12 @@ sap.ui.controller("pages.staging.RulesList", {
      */
     deleteRulesFromList : function (aList) {
         var oController     = this;
-        var mRule           = aList.shift();
+        var mRule           = aList[0];
         var aSerialCodes    = [];
         var iHubId;
         
-        //--------------------------------------------------------------//
-        // Set the success and error counts to zero.
-        //--------------------------------------------------------------//
-        if (iSuccesses === undefined || iSuccesses === null) {
-            iSuccesses = 0;
-        }
-
-        if (iErrors === undefined || iErrors === null) {
-            iErrors = 0;
-        }
-
-        if (aErrors === undefined || aErrors === null) {
-            aErrors = [];
-        }
-        
         for (var i = 0; i < aList.length; i++) {
-            aSerialCodes.push(aList[i]);
+            aSerialCodes.push(aList[i].DeviceSerial);
         }
         
         //--------------------------------------------------------------//
@@ -313,6 +298,9 @@ sap.ui.controller("pages.staging.RulesList", {
             } catch (e) {
                 $.sap.log.error("Error removing rule!");
                 $.sap.log.error(e.name + ": " + e.message);
+
+                oController.RefreshModel(oController, {});
+                oController.ToggleControls(true);
             }
 //         } else {
 //             if (aList.length === 0) {
