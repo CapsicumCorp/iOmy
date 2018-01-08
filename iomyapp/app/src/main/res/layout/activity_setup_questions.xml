@@ -39,7 +39,7 @@
             <RadioButton
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Download demo data and install iOmy in demonstration mode (Download size is about 300MB. Will take up around 1.7GB!)"
+                android:text="Download demo data and install iOmy in demonstration mode (Download size is about 75MB. Will take up around 266MB.)"
                 android:id="@+id/installDemo"
                 android:checked="false"
                 android:onClick="enableNextButton" />
