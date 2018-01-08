@@ -1181,6 +1181,8 @@ $.extend(IomyRe.common,{
         var aOrderBy        = [ "ROOMS_PREMISE_FK", "ROOMTYPE_OUTDOORS", "ROOMS_PK" ];
         
         me.RoomsList = {};
+        me.AllRoomsList = {};
+        
         //------------------------//
         //-- ODATA REQUEST        --//
         //------------------------//
