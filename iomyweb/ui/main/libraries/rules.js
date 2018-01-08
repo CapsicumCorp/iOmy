@@ -557,7 +557,7 @@ $.extend(IomyRe.rules, {
         var bError          = false;
         var aErrorMessages  = [];
         var me              = this;
-        var aSerialCode;
+        var aSerialCode		= [];
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -581,9 +581,10 @@ $.extend(IomyRe.rules, {
             if (mSettings.Serial === undefined || mSettings.Serial === null) {
                 fnAppendError("The serial number for the device must be specified.");
             } else {
+            	console.log(typeof mSettings.Serial);
                 if (typeof mSettings.Serial === "string") {
                     aSerialCode.push(mSettings.Serial);
-                } else if (typeof mSettings.Serial === "array") {
+                } else /*if (typeof mSettings.Serial === "array")*/ {
                     aSerialCode = mSettings.Serial;
                 }
             }
