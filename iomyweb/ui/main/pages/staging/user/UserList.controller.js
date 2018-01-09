@@ -113,6 +113,7 @@ sap.ui.controller("pages.staging.user.UserList", {
                     },
                     onFail: function (response) {
                         jQuery.sap.log.error("Error with the 'AdminUserList' API Request! "+response.responseText);
+                        oController.RefreshModel(oController, {})
                     }
                 });
             } else {
@@ -131,6 +132,7 @@ sap.ui.controller("pages.staging.user.UserList", {
         var oView           = oController.getView();
         var aUsers          = [];
         var sUserState      = "";
+        var oModel;
         
         if (oConfig.data) {
             
@@ -158,11 +160,11 @@ sap.ui.controller("pages.staging.user.UserList", {
             //------------------------------------------------//
             //-- Build and Bind Model to the View           --//
             //------------------------------------------------//
-            oView.setModel( 
-                new sap.ui.model.json.JSONModel({
-                    "UserList": aUsers
-                })
-            );
+            oModel = new sap.ui.model.json.JSONModel({
+                "UserList": aUsers
+            });
+            
+            oView.setModel(oModel);
 
             //------------------------------------------------//
             //-- Trigger the onSuccess Event                --//
@@ -171,7 +173,12 @@ sap.ui.controller("pages.staging.user.UserList", {
                 oConfig.onSuccess();
             }
         } else {
-            throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
+            oModel = new sap.ui.model.json.JSONModel({
+                "UserList": []
+            });
+            
+            oView.setModel(oModel);
+            //throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
         }
     },
     

@@ -81,6 +81,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		var oView            = oController.getView();
 		var aUserData = {};
         var aRoomData = JSON.parse(JSON.stringify(IomyRe.common.AllRoomsList))
+        var oModel    = new sap.ui.model.json.JSONModel({});
         
         aRoomData['_0'] = {
             RoomId: "0",
@@ -88,16 +89,19 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         };
 		
 		//------------------------------------------------//
-		//-- Setup New UserData Array                --//
+		//-- Setup New UserData Array                   --//
 		//------------------------------------------------//
 		if( typeof IomyRe.common.UserInfo!=="undefined" ) {
 			aUserData = JSON.parse(JSON.stringify(IomyRe.common.UserInfo ));
 		}
+        
+        //-- Make sure the previous data isn't shown before refresh. --//
+        oView.setModel( oModel );
 		
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
-		var oModel = new sap.ui.model.json.JSONModel({
+		oModel = new sap.ui.model.json.JSONModel({
 			"Regions":               IomyRe.common.Regions,
 			"Languages":             IomyRe.common.Languages,
 			"Timezones":             IomyRe.common.Timezones,
@@ -138,7 +142,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		});
 		
 		oModel.setSizeLimit(420);
-		oView.setModel( oModel );	
+		oView.setModel( oModel );
 		
 		//------------------------------------------------//
 		//-- Trigger the onSuccess Event                --//
@@ -153,8 +157,13 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		if( iPremiseId>=1 ) {
 			var sPremiseCode    = "_"+iPremiseId;
 			var aPremise        = IomyRe.common.PremiseList[sPremiseCode];
-			
-            var iPremiseOwner   = aPremise.PermOwner;
+			var iPremiseOwner;
+            
+            if (aPremise !== undefined) {
+            	iPremiseOwner = aPremise.PermOwner;
+			} else {
+				iPremiseOwner = 0;
+			}
             
             return iPremiseOwner === 1;
             

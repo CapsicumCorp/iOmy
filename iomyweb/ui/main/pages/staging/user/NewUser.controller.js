@@ -167,7 +167,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
         var fnAppendError   = function (sErrorMessage) {
             bError = true;
             aErrorMessages.push(sErrorMessage);
-        }
+        };
 		
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
@@ -291,7 +291,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
                         "AddressLanguage" :      oCurrentFormData.LanguageId,
                         "Username" :             oCurrentFormData.Username,
                         "NewPassword" :          oCurrentFormData.Password,
-                        "Data" :                 "{\"Username\":\""+oCurrentFormData.DBUser+"\",\"Password\":\""+oCurrentFormData.DBPassword+"\",\"URI\":\"localhost\"}",
+                        "Data" :                 "{\"Username\":\""+oCurrentFormData.DBUser+"\",\"Password\":\""+oCurrentFormData.DBPassword+"\",\"URI\":\"localhost\"}"
                     },
 					onSuccess: function ( sType, mData ) {
 						//-- Premise Permissions Section --//
@@ -307,18 +307,18 @@ sap.ui.controller("pages.staging.user.NewUser", {
 										var iRoomAdmin = 0;
 										
 										//-- If check to see what permissions need to be passed --//
-										if (oCurrentFormData.PremPermId === 2 ) {
+										if (oCurrentFormData.PremPermId == 2 ) {
 											//-- Read Access--//
 											iPremiseRead = 1;
 											iPremiseWrite = 0;
 											iRoomAdmin = 0; 
-										} else if (oCurrentFormData.PremPermId === 3) {
+										} else if (oCurrentFormData.PremPermId == 3) {
 											//-- Read/Write Access--//
 											iPremiseRead = 1;
 											iPremiseWrite = 1;
 											iRoomAdmin = 0;
 											
-										} else if (oCurrentFormData.PremPermId === 4) {
+										} else if (oCurrentFormData.PremPermId == 4) {
 											//-- Room Admin Access--//
 											iPremiseRead = 1;
 											iPremiseWrite = 1;
@@ -384,37 +384,57 @@ sap.ui.controller("pages.staging.user.NewUser", {
 													if (data.Error === false) {
 														oController.InsertNewRoomPermissions(oController, sType, mData);
 													} else {
-														jQuery.sap.log.error("There was an error updating the premise permissions: "+data.ErrMesg);
+														jQuery.sap.log.error("There was an error updating the premise permissions: "+mData.ErrMesg);
+                                                        oController.ToggleSubmitCancelButtons(true);
 													}
 												},
 												onFail : function (response) {
 													jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
+                                                    
+                                                    IomyRe.common.showError( response.responseText, "Error",
+                                                        function () {
+                                                            oController.ToggleSubmitCancelButtons(true);
+                                                        }
+                                                    );
 												}
 											});
 										}
 									} else {
 										jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller!");
+                                        oController.ToggleSubmitCancelButtons(true);
 									}
 									
 								} catch( e3 ) {
 									jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller! "+e3.message);
+                                    oController.ToggleSubmitCancelButtons(true);
 								}
 							} else {
 								jQuery.sap.log.error("Error with the 'UpdateRoomPerms' successful API result in the 'RoomForm' controller!");
+                                oController.ToggleSubmitCancelButtons(true);
 							}
 						} catch( e2 ) {
 							jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'RoomForm' controller! "+e2.message);
+                            oController.ToggleSubmitCancelButtons(true);
 						}
 					},
-					onFail: function () {
+					onFail: function (response) {
 						//if( aConfig.onFail ) {
 						//	aConfig.onFail();
 						//}
-						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' API Request when inserting Room Permissions in the 'RoomForm' controller!");
+						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' API Request when inserting Room Permissions in the 'RoomForm' controller!\n\n" + response.responseText);
+                        IomyRe.common.showError( response.responseText, "Error",
+                            function () {
+                                oController.ToggleSubmitCancelButtons(true);
+                            }
+                        );
 					}
 				});
 			} else {
-				IomyRe.common.showError( aErrorMessages.join("\n\n"), "Error" );
+				IomyRe.common.showError( aErrorMessages.join("\n\n"), "Error",
+                    function () {
+                        oController.ToggleSubmitCancelButtons(true);
+                    }
+                );
 			}
 		} catch( e1 ) {
 			jQuery.sap.log.error("Error with 'AddRoom' in the 'RoomForm' controller! "+e1.message);
@@ -437,21 +457,21 @@ sap.ui.controller("pages.staging.user.NewUser", {
 						var iRoomStateToggle = 0;
 						
 						//-- If check to see what permissions need to be passed --//
-						if (oCurrentFormData.PremPermId === 2 ) {
+						if (oCurrentFormData.RoomPermId == 2 ) {
 							//-- Read Access--//
 							iRoomRead = 1;
 							iRoomDataRead = 1;
 							iRoomWrite = 0;
 							iRoomStateToggle = 0;
 							
-						} else if (oCurrentFormData.RoomPremId === 3) {
+						} else if (oCurrentFormData.RoomPermId == 3) {
 							//-- Read / Device Toggle Access--//
 							iRoomRead = 1;
 							iRoomDataRead = 1;
 							iRoomWrite = 0;
 							iRoomStateToggle = 1;
 							
-						} else if (oCurrentFormData.RoomPremId === 4) {
+						} else if (oCurrentFormData.RoomPermId == 4) {
 							//-- Read/Write Access--//
 							iRoomRead = 1;
 							iRoomDataRead = 1;
@@ -533,7 +553,13 @@ sap.ui.controller("pages.staging.user.NewUser", {
 									IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
 								},
 								onFail : function (response) {
-									jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
+									jQuery.sap.log.error("There was an error updating the room permissions: "+JSON.stringify(response));
+                                    
+                                    IomyRe.common.showError( response.responseText, "Error",
+                                        function () {
+                                            oController.ToggleSubmitCancelButtons(true);
+                                        }
+                                    );
 								}
 							});
 						}
@@ -555,7 +581,6 @@ sap.ui.controller("pages.staging.user.NewUser", {
 	getObjectPageTitle : function (oController) {
 		var sObjectTitle = "";
 		var oPageHeader = "";
-		console.log(oController.bEditable);
 		
 		sObjectTitle = "Add User";
 
@@ -601,6 +626,6 @@ sap.ui.controller("pages.staging.user.NewUser", {
 			$.sap.log.error("ToggleButtonsAndView: Critcal Error:"+e1.message);
 			return false;
 		}
-	},
+	}
 
 });
