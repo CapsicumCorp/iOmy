@@ -168,6 +168,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	//== 2.1 - Refresh User Information                     ==//
 	//========================================================//
 	RefreshUserInfo: function( oController, oConfig ) {
+        var oView = this.getView();
+        
 		//-- Function for refreshing the desired User Info --//
 		try {
 			IomyRe.apiphp.AjaxRequest({
@@ -195,6 +197,20 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							if( bUserFound===true ) {
 								oController.mModelData.Previous.UserInfo = mUserData;
 								oController.mModelData.UserInfo = JSON.parse( JSON.stringify( oController.mModelData.Previous.UserInfo ) );
+                                
+                                //-- If the current user was edited... --//
+                                if (oController.iUserId == IomyRe.common.UserInfo.UserId) {
+                                    IomyRe.common.RefreshUserInfoList({
+                                        
+                                        onSuccess : function () {
+                                            var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+                                            oView.byId("openMenu").setText("Hi, "+sDisplayName);
+                                        }
+                                        
+                                    });
+                                    
+                                }
+                                
 								//-- Perform the "onSuccess" function if applicable --//
 								if( oConfig.onSuccess ) {
 									try {
@@ -207,7 +223,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 								}
 							} else {
 								//-- ERROR: User not found --//
-								IOMy.common.showError("Cannot find data on the desired User!", "Edit User");
+								IomyRe.common.showError("Cannot find data on the desired User!", "Edit User");
 								
 								//-- Perform the "onFail" function if applicable --//
 								if(oConfig.onFail) {
@@ -217,7 +233,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							
 						} else {
 							//-- ERROR: --//
-							IOMy.common.showError("API has refused access to the UserList! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							IomyRe.common.showError("API has refused access to the UserList! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -233,7 +249,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					}
 				},
 				onFail: function( sResponse ) {
-					IOMy.common.showError("API has refused access to the UserList! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					IomyRe.common.showError("API has refused access to the UserList! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -280,7 +296,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- ERROR:     --//
 							//----------------//
-							IOMy.common.showError("API has refused access to the Premise list! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							IomyRe.common.showError("API has refused access to the Premise list! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -301,7 +317,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//----------------//
 					//-- ERROR:     --//
 					//----------------//
-					IOMy.common.showError("API has refused access to the Premise list! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					IomyRe.common.showError("API has refused access to the Premise list! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -374,7 +390,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- ERROR:     --//
 							//----------------//
-							IOMy.common.showError("API has refused access to the Premise permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							IomyRe.common.showError("API has refused access to the Premise permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -395,7 +411,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//----------------//
 					//-- ERROR:     --//
 					//----------------//
-					IOMy.common.showError("API has refused access to the Premise permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					IomyRe.common.showError("API has refused access to the Premise permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -466,7 +482,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- ERROR:     --//
 							//----------------//
-							IOMy.common.showError("API has refused access to the Room permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							IomyRe.common.showError("API has refused access to the Room permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -488,7 +504,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//-- ERROR:     --//
 					//----------------//
 					
-					IOMy.common.showError("API has refused access to the Room permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					IomyRe.common.showError("API has refused access to the Room permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -538,7 +554,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- ERROR:     --//
 							//----------------//
-							IOMy.common.showError("API has refused access to the Room list! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							IomyRe.common.showError("API has refused access to the Room list! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -559,7 +575,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//----------------//
 					//-- ERROR:     --//
 					//----------------//
-					IOMy.common.showError("API has refused access to the Room list! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					IomyRe.common.showError("API has refused access to the Room list! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
