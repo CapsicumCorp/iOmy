@@ -101,15 +101,19 @@ sap.ui.controller("pages.staging.Room", {
         var oView       = this.getView();
         var sTitle      = oView.byId("ToolbarTitle").getText();
         
-        //-- Remove the "Edit " prefix --//
-        if (sTitle.indexOf("Edit ") === 0) {
-            sTitle = sTitle.replace("Edit ", "");
-            oView.byId("ToolbarTitle").setText(sTitle);
-        }
-        
-        //-- If we're editing add the prefix "Edit ". --//
-        if (oController.bEditing) {
-            oView.byId("ToolbarTitle").setText( "Edit " + sTitle );
+        try {
+            //-- Remove the "Edit " prefix --//
+            if (sTitle.indexOf("Edit ") === 0) {
+                sTitle = sTitle.replace("Edit ", "");
+                oView.byId("ToolbarTitle").setText(sTitle);
+            }
+            
+            //-- If we're editing add the prefix "Edit ". --//
+            if (oController.bEditing) {
+                oView.byId("ToolbarTitle").setText( "Edit " + sTitle );
+            }
+        } catch (e1) {
+            jQuery.sap.log.error("Error with changing the title prefix:"+e1.message); 
         }
     },
     
@@ -182,70 +186,73 @@ sap.ui.controller("pages.staging.Room", {
                  * If we are not omitting the room
                  *     Display it.
                  */
-                if (mFirstRoom === null) {
-                    mFirstRoom = mRoom;
-                    iDeviceCount = IomyRe.functions.getNumberOfDevicesInRoom(mFirstRoom.RoomId);
-                    iRoomCount = IomyRe.functions.getNumberOfRoomsInPremise(mFirstRoom.PremiseId);
-                    
-                    if (mFirstRoom.RoomName === "Unassigned" && (iDeviceCount === 0 || iRoomCount === 1) ) {
-                        bOmitEntry = true;
-                        bHasRooms = false;
+                try {
+                    if (mFirstRoom === null) {
+                        mFirstRoom = mRoom;
+                        iDeviceCount = IomyRe.functions.getNumberOfDevicesInRoom(mFirstRoom.RoomId);
+                        iRoomCount = IomyRe.functions.getNumberOfRoomsInPremise(mFirstRoom.PremiseId);
                         
-                    } else if (mFirstRoom.RoomName === "Unassigned") {
-                        bRoomIsUnassigned = true;
+                        if (mFirstRoom.RoomName === "Unassigned" && (iDeviceCount === 0 || iRoomCount === 1) ) {
+                            bOmitEntry = true;
+                            bHasRooms = false;
+                            
+                        } else if (mFirstRoom.RoomName === "Unassigned") {
+                            bRoomIsUnassigned = true;
+                        }
                     }
-                }
-                
-                if (bRoomIsUnassigned) {
-                    sModelReference = "{/UnassignedTapInstructions}";
-                } else {
-                    sModelReference = "{/RoomTapInstructions}";
-                }
-                
-                if (!bOmitEntry) {
-                    wList.addItem(
-                        new sap.m.ObjectListItem (oView.createId("entry"+mRoom.RoomId), {        
-                            title: mRoom.RoomName,
-                            type: "Active",
-                            number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
-                            numberUnit: "Devices",
-                            attributes : [
-//                                new sap.m.ObjectAttribute ({
-//                                    text: "link",
-//                                    customContent : new sap.m.Link ({
-//                                        text: "Toggle Room State"
-//                                    })
-//                                }),
-//                                new sap.m.ObjectAttribute ({
-//                                    text: "Status: On"
-//                                })
-                                new sap.m.ObjectAttribute ({
-                                    text: sModelReference
-                                })
-                            ],
-                            press : function () {
-                                var mPageDataTemp = {};
-                                var bIsUnassigned = bRoomIsUnassigned;
-                                
-                                mPageDataTemp.RoomId = mRoom.RoomId;
-                                mPageDataTemp.PremiseId = mRoom.PremiseId;
-                                
-                                if (oController.bEditing && !bIsUnassigned) {
-                                    // The user can edit any room except the Unassigned "room".
+                    
+                    if (bRoomIsUnassigned) {
+                        sModelReference = "{/UnassignedTapInstructions}";
+                    } else {
+                        sModelReference = "{/RoomTapInstructions}";
+                    }
+                    
+                    if (!bOmitEntry) {
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mRoom.RoomId), {        
+                                title: mRoom.RoomName,
+                                type: "Active",
+                                number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
+                                numberUnit: "Devices",
+                                attributes : [
+    //                                new sap.m.ObjectAttribute ({
+    //                                    text: "link",
+    //                                    customContent : new sap.m.Link ({
+    //                                        text: "Toggle Room State"
+    //                                    })
+    //                                }),
+    //                                new sap.m.ObjectAttribute ({
+    //                                    text: "Status: On"
+    //                                })
+                                    new sap.m.ObjectAttribute ({
+                                        text: sModelReference
+                                    })
+                                ],
+                                press : function () {
+                                    var mPageDataTemp = {};
+                                    var bIsUnassigned = bRoomIsUnassigned;
                                     
-                                    mPageDataTemp.bEditing = true;
-                                    IomyRe.common.NavigationChangePage( "pRoomForm" , mPageDataTemp , false);
+                                    mPageDataTemp.RoomId = mRoom.RoomId;
+                                    mPageDataTemp.PremiseId = mRoom.PremiseId;
                                     
-                                } else if (!oController.bEditing) {
-                                    // Otherwise, the user won't be looking to edit, so allow the user access to Unassigned.
-                                    IomyRe.common.NavigationChangePage( "pDevice" , mPageDataTemp, false);
+                                    if (oController.bEditing && !bIsUnassigned) {
+                                        // The user can edit any room except the Unassigned "room".
+                                        
+                                        mPageDataTemp.bEditing = true;
+                                        IomyRe.common.NavigationChangePage( "pRoomForm" , mPageDataTemp , false);
+                                        
+                                    } else if (!oController.bEditing) {
+                                        // Otherwise, the user won't be looking to edit, so allow the user access to Unassigned.
+                                        IomyRe.common.NavigationChangePage( "pDevice" , mPageDataTemp, false);
+                                    }
+                                    
                                 }
-                                
-                            }
-                        })
-                    );
+                            })
+                        );
+                    }
+                } catch (e1) {
+                    jQuery.sap.log.error("Error with Building the RoomList:"+e1.message); 
                 }
-                
             });
             
             //----------------------------------------------------------------//
@@ -268,11 +275,7 @@ sap.ui.controller("pages.staging.Room", {
                         }
                     })
                 );
-            }
-            
-        });
-        
-        
-    }
-    
+            }        
+        });  
+    }    
 });

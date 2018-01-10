@@ -228,12 +228,11 @@ $.extend(IomyRe.common,{
             //================================================//
             success: function(response) {
                 //================================================//
-                //== Initialise variables                        ==//
+                //== Initialise variables                       ==//
                 //================================================//
-                var sErrMesg = "";        //-- STRING: Used to store an error message should an error occur --//
                 
                 //================================================//
-                //== 2.A - User is currently logged in            ==//
+                //== 2.A - User is currently logged in          ==//
                 //================================================//
                 if (response.login===true) {
                     aConfig.OnUserSessionActive(response);
@@ -302,17 +301,21 @@ $.extend(IomyRe.common,{
         var callbackFn = fnCallback || function(){};
         var cssClass = sCssClass || "";
         
-        // open a fully configured message box
-        sap.m.MessageBox.show(
-            sMessage,
-            {
-                icon: sap.m.MessageBox.Icon.ERROR,
-                title: sTitle,
-                actions: sap.m.MessageBox.Action.CLOSE,
-                onClose: callbackFn,
-                styleClass : cssClass
-            }
-        );
+        try {
+            // open a fully configured message box
+            sap.m.MessageBox.show(
+                sMessage,
+                {
+                    icon: sap.m.MessageBox.Icon.ERROR,
+                    title: sTitle,
+                    actions: sap.m.MessageBox.Action.CLOSE,
+                    onClose: callbackFn,
+                    styleClass : cssClass
+                }
+            );
+        } catch (e1) {
+            $.sap.error.log("Error with displaying the MessageBox:"+e1.message);
+        }
     },
     
     /**

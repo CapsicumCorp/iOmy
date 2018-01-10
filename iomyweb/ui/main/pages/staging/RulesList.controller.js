@@ -69,7 +69,6 @@ sap.ui.controller("pages.staging.RulesList", {
     
     LoadList : function () {
         var oController = this;
-        var oView       = oController.getView();
         
         IomyRe.rules.loadRules({
             hubID : 1,
@@ -79,7 +78,13 @@ sap.ui.controller("pages.staging.RulesList", {
             },
             
             onFail : function (sErrMessage) {
-                
+                jQuery.sap.log.error("Unable to Load the rules list:"+e1.message);
+				 IomyRe.common.showError(sErrMessage, "Error",
+                    function () {
+                        oStatusAttribute.setText( "Unable to load rules" );
+                        oCallingWidget.setEnabled(true);
+                    }
+                );
             }
         });
     },
@@ -99,32 +104,34 @@ sap.ui.controller("pages.staging.RulesList", {
 		//-- Create the model-friendly data from the rules list             --//
 		//--------------------------------------------------------------------//
         $.each(aaThingList, function (sI, mThing) {
-            
-            if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
-                sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
-                mRule = aaRulesList[sSerialCode];
-                
-                if (mRule !== undefined && mRule !== null) {
-                    aRules.push({
-                        "DeviceId"      : mThing.Id,
-                        "DeviceName"    : mThing.DisplayName,
-                        "DeviceType"    : mThing.TypeName,
-                        "DeviceSerial"  : sSerialCode,
-                        "EventType"     : "On",
-                        "EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
-                    });
-
-                    aRules.push({
-                        "DeviceId"      : mThing.Id,
-                        "DeviceName"    : mThing.DisplayName,
-                        "DeviceType"    : mThing.TypeName,
-                        "DeviceSerial"  : sSerialCode,
-                        "EventType"     : "Off",
-                        "EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Offtime ), "", true, false)
-                    });
-                }
-            }
-            
+			try { 
+				if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+					sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+					mRule = aaRulesList[sSerialCode];
+					
+					if (mRule !== undefined && mRule !== null) {
+						aRules.push({
+							"DeviceId"      : mThing.Id,
+							"DeviceName"    : mThing.DisplayName,
+							"DeviceType"    : mThing.TypeName,
+							"DeviceSerial"  : sSerialCode,
+							"EventType"     : "On",
+							"EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
+						});
+	
+						aRules.push({
+							"DeviceId"      : mThing.Id,
+							"DeviceName"    : mThing.DisplayName,
+							"DeviceType"    : mThing.TypeName,
+							"DeviceSerial"  : sSerialCode,
+							"EventType"     : "Off",
+							"EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Offtime ), "", true, false)
+						});
+					}
+				}
+			} catch (e1) {
+				jQuery.sap.log.error("Error with RefreshModel:"+e1.message); 
+			}
         });
         
 		//------------------------------------------------//

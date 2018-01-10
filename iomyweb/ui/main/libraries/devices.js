@@ -134,14 +134,17 @@ $.extend(IomyRe.devices,{
                 
             },
             onSuccess : function( sExpectedDataType, aAjaxData ) {
-                if (aAjaxData.Error !== true) {
-                    if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
-                        IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+                try {
+                    if (aAjaxData.Error !== true) {
+                        if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
+                            IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+                        }
+                        fnSuccess(aAjaxData.ThingStatus);
+                    } else {
+                        fnFail(aAjaxData.ErrMesg);
                     }
-
-                    fnSuccess(aAjaxData.ThingStatus);
-                } else {
-                    fnFail(aAjaxData.ErrMesg);
+                } catch (e1) {
+                    jQuery.sap.log.error("An error has occured within the RunSwitch Ajax Request onSuccess: "+e1.message);
                 }
             }
         });
@@ -155,14 +158,20 @@ $.extend(IomyRe.devices,{
      */
     GetLinkOfThing : function(iThingId) {
         var iLinkId = IomyRe.common.ThingList["_"+iThingId].LinkId;
-        
         var oLink = null;
-        // Using the Link List found in common because the scope is global.
-        if (IomyRe.common.LinkList["_"+iLinkId] !== undefined) {
-            oLink = IomyRe.common.getLink(iLinkId);
+        
+        try {
+            // Using the Link List found in common because the scope is global.
+            if (IomyRe.common.LinkList["_"+iLinkId] !== undefined) {
+                oLink = IomyRe.common.getLink(iLinkId);
+            }
+            return oLink;
+        
+        } catch (e1) {
+            jQuery.sap.log.error("An error has occured within RecursiveLoadAjaxData: "+e1.message);
+            return null;
         }
         
-        return oLink;
     },
     
     /**
@@ -184,7 +193,6 @@ $.extend(IomyRe.devices,{
         //------------------------------------------------------------//
         // Declare variables
         //------------------------------------------------------------//
-        var me                = this; // Capture the scope of the current controller
         var bError            = false;
         var aErrorMessages    = [];
         var sUrl              = IomyRe.apiphp.APILocation("link");
@@ -729,51 +737,58 @@ $.extend(IomyRe.devices,{
      * @returns {string} Page ID of the appropriate device page.
      */
     getDevicePageID : function (iThingTypeId) {
-        //-- Zigbee Netvox Smart Plug --//
-        if( iThingTypeId===2 ) {
-            return IomyRe.devices.zigbeesmartplug.DevicePageID;
-            
-        //-- Philips Hue --//
-        } else if( iThingTypeId===13 ) {
-            return IomyRe.devices.philipshue.DevicePageID;
-            
-        //-- Onvif Stream --//
-        } else if ( iThingTypeId===12) {
-            return IomyRe.devices.onvif.DevicePageID;
-            
-        //-- Motion Sensor --//
-        } else if ( iThingTypeId===3) {
-            return IomyRe.devices.motionsensor.DevicePageID;
-            
-        //-- Temperature Sensor --//
-        } else if ( iThingTypeId===4) {
-            return IomyRe.devices.temperaturesensor.DevicePageID;
-            
-        //-- DevelCo Energy Meter --//
-        } else if ( iThingTypeId===10) {
-            return IomyRe.devices.develco.DevicePageID;
-            
-        //-- Weather Feed --//
-        } else if ( iThingTypeId===14) {
-            return IomyRe.devices.weatherfeed.DevicePageID;
-            
-        //-- IP Camera --//
-        } else if ( iThingTypeId===18) {
-            return IomyRe.devices.ipcamera.DevicePageID;
+        try {
+            //-- Zigbee Netvox Smart Plug --//
+            if( iThingTypeId===2 ) {
+                return IomyRe.devices.zigbeesmartplug.DevicePageID;
+                
+            //-- Philips Hue --//
+            } else if( iThingTypeId===13 ) {
+                return IomyRe.devices.philipshue.DevicePageID;
+                
+            //-- Onvif Stream --//
+            } else if ( iThingTypeId===12) {
+                return IomyRe.devices.onvif.DevicePageID;
+                
+            //-- Motion Sensor --//
+            } else if ( iThingTypeId===3) {
+                return IomyRe.devices.motionsensor.DevicePageID;
+                
+            //-- Temperature Sensor --//
+            } else if ( iThingTypeId===4) {
+                return IomyRe.devices.temperaturesensor.DevicePageID;
+                
+            //-- DevelCo Energy Meter --//
+            } else if ( iThingTypeId===10) {
+                return IomyRe.devices.develco.DevicePageID;
+                
+            //-- Weather Feed --//
+            } else if ( iThingTypeId===14) {
+                return IomyRe.devices.weatherfeed.DevicePageID;
+                
+            //-- IP Camera --//
+            } else if ( iThingTypeId===18) {
+                return IomyRe.devices.ipcamera.DevicePageID;
+            }
+        } catch (e1) {
+            jQuery.sap.log.error("Error: Getting Device Page ID:"+e1.message); 
         }
     },
     
     getSerialCodeOfDevice : function (iThingId) {
         var sSerialCode = null;
-        
-        $.each(IomyRe.common.ThingList, function (sI, mThing) {
-            if (mThing.Id == iThingId) {
-                sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
-                return false;
-            }
-        });
-        
-        return sSerialCode;
+        try {
+            $.each(IomyRe.common.ThingList, function (sI, mThing) {
+                if (mThing.Id == iThingId) {
+                    sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+                    return false;
+                }
+            });
+            return sSerialCode;
+        } catch (e1) {
+            jQuery.sap.log.error("Error: Getting Serial Code of Device:"+e1.message);
+            return null;
+        }
     },
     
     GetUITaskList: function( mSettings ) {
@@ -955,10 +970,6 @@ $.extend(IomyRe.devices,{
         var iTypeId;
         var mThing;
         var mIOs;
-        
-        var fHueConversionRate;
-        var fSaturationConversionRate;
-        var fLightConversionRate;
         
         var sThingIDMissing         = "Thing ID (thingID) must be given.";
         
