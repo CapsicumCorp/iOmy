@@ -168,7 +168,7 @@ $.extend(IomyRe.devices,{
             return oLink;
         
         } catch (e1) {
-            jQuery.sap.log.error("An error has occured within RecursiveLoadAjaxData: "+e1.message);
+            jQuery.sap.log.error("An error has occured within GetLinkOfThing: "+e1.message);
             return null;
         }
         
@@ -836,38 +836,44 @@ $.extend(IomyRe.devices,{
         //-- 2.0 - Fetch TASKS                --//
         //------------------------------------//
         
-        if( mSettings.deviceData.IOs!==undefined ) {
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.zigbeesmartplug.ThingTypeId ) {
-                aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList(mSettings);
+        try {
+            if( mSettings.deviceData.IOs!==undefined ) {
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.zigbeesmartplug.ThingTypeId ) {
+                    aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList(mSettings);
+                }
+
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.weatherfeed.ThingTypeId ) {
+                    aTasks = IomyRe.devices.weatherfeed.GetUITaskList(mSettings);
+                }
+
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.motionsensor.ThingTypeId ) {
+                    aTasks = IomyRe.devices.motionsensor.GetUITaskList(mSettings);
+                }
+
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.philipshue.ThingTypeId ) {
+                    aTasks = IomyRe.devices.philipshue.GetUITaskList(mSettings);
+                }
+
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.csrmesh.ThingTypeId ) {
+                    aTasks = IomyRe.devices.csrmesh.GetUITaskList(mSettings);
+                }
+
+    //            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.ipcamera.ThingTypeId ) {
+    //                aTasks = IomyRe.devices.ipcamera.GetUITaskList(mSettings);
+    //            }
+    //            
+    //            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.onvif.ThingTypeId ) {
+    //                aTasks = IomyRe.devices.onvif.GetUITaskList(mSettings);
+    //            }
+
+            } else {
+                //-- TODO: Write a error message --//
+                jQuery.sap.log.error("Device "+mSettings.deviceData.DisplayName+" has no IOs");
             }
-            
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.weatherfeed.ThingTypeId ) {
-                aTasks = IomyRe.devices.weatherfeed.GetUITaskList(mSettings);
-            }
-            
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.motionsensor.ThingTypeId ) {
-                aTasks = IomyRe.devices.motionsensor.GetUITaskList(mSettings);
-            }
-            
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.philipshue.ThingTypeId ) {
-                aTasks = IomyRe.devices.philipshue.GetUITaskList(mSettings);
-            }
-            
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.csrmesh.ThingTypeId ) {
-                aTasks = IomyRe.devices.csrmesh.GetUITaskList(mSettings);
-            }
-            
-//            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.ipcamera.ThingTypeId ) {
-//                aTasks = IomyRe.devices.ipcamera.GetUITaskList(mSettings);
-//            }
-//            
-//            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.onvif.ThingTypeId ) {
-//                aTasks = IomyRe.devices.onvif.GetUITaskList(mSettings);
-//            }
-            
-        } else {
-            //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+mSettings.deviceData.DisplayName+" has no IOs");
+        } catch (e) {
+            // Something else has gone hideously wrong.
+            $.sap.log.error("Fatal error generating request list for device ("+e.name+"): " + e.message);
+            throw e;
         }
         
         return aTasks;

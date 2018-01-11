@@ -1357,10 +1357,23 @@ $.extend(IomyRe.functions, {
         var mFoundRoom  = null;
         
         if (mIDInfo.bIsValid) {
+            //----------------------------------------------------------------//
+            // Check if the premise ID is given and valid and use that to fetch
+            // the room data.
+            //----------------------------------------------------------------//
             if (iPremiseId !== undefined && iPremiseId !== null) {
-                mFoundRoom = IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId];
+                var mPremiseIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                
+                if (mPremiseIDInfo.bIsValid) {
+                    mFoundRoom = IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId];
+                } else {
+                    throw new IllegalArgumentException(mPremiseIDInfo.aErrorMessages.join('\n'));
+                }
                 
             } else {
+                //----------------------------------------------------------------//
+                // Otherwise, loop through each premise to find the room.
+                //----------------------------------------------------------------//
                 $.each(IomyRe.common.RoomsList, function (sI, mPremise) {
                     if (sI !== undefined && sI !== null && mPremise !== undefined && mPremise !== null) {
                         var bFound = false;
@@ -1386,7 +1399,7 @@ $.extend(IomyRe.functions, {
                 });
             }
         } else {
-            throw new IllegalArgumentException(mIDInfo.aErrorMessages.join('\n'));
+            throw new IllegalArgumentException(mIDInfo.aErrorMessages.join('\n\n'));
         }
         
         return mFoundRoom;
@@ -1403,6 +1416,27 @@ $.extend(IomyRe.functions, {
         //----------------------------------------------------------//
         // Declare variables and define default arguments
         //----------------------------------------------------------//
+        var bError          = false;
+        var aErrorMessages  = [];
+        
+        var sDate       = ""; // Set according to the given format
+        var sTime       = "";
+        var sTimestamp  = "";
+        
+        var iHour;
+        var vMinutes;
+        var vSeconds;
+        var sSuffix;
+
+        var iYear;
+        var vMonth;
+        var vDay;
+
+        if (date === undefined || date === null || !(date instanceof Date)) {
+            bError = true;
+            aErrorMessages.push("Date must be given");
+        }
+        
         if (bShowTime === undefined) {
             bShowTime = true;
         }
@@ -1411,70 +1445,93 @@ $.extend(IomyRe.functions, {
             bShowSeconds = true;
         }
         
-        var iHour       = date.getHours();
-        var vMinutes    = date.getMinutes();
-        var vSeconds    = date.getSeconds();
-        var sSuffix     = "";
-        
-        var iYear       = date.getFullYear();
-        var vMonth      = date.getMonth() + 1;
-        var vDay        = date.getDate();
-        
-        var sDate       = ""; // Set according to the given format
-        var sTime       = "";
-        
-        if (iHour >= 12) {
-            sSuffix = "PM";
-        } else {
-            sSuffix = "AM";
-        }
-        
-        iHour = iHour % 12;
-        if (iHour === 0) {
-            iHour = 12;
-        }
-        
-        if (vMonth < 10) {
-            vMonth = "0"+vMonth;
-        }
-        
-        if (vDay < 10) {
-            vDay = "0"+vDay;
-        }
-        
-        if (vSeconds < 10) {
-            vSeconds = "0"+vSeconds;
-        }
-        
-        if (vMinutes < 10) {
-            vMinutes = "0"+vMinutes;
-        }
-        
-        if (sFormat === undefined) {
-            sFormat = "dd/mm/yyyy";
-        }
-        
-        if (sFormat === "dd/mm/yyyy" || sFormat === "dd/mm/yy") {
-            sDate = vDay+"/"+vMonth+"/"+iYear+" ";
-        } else if (sFormat === "mm/dd/yyyy" || sFormat === "mm/dd/yy") {
-            sDate = vMonth+"/"+vDay+"/"+iYear+" ";
-        } else if (sFormat === "yyyy/mm/dd" || sFormat === "yy/mm/dd") {
-            sDate = iYear+"/"+vMonth+"/"+vDay+" ";
-        } else if (sFormat === "yyyy-mm-dd" || sFormat === "yy-mm-dd") {
-            sDate = iYear+"-"+vMonth+"-"+vDay+" ";
-        } else {
-            sDate = "";
-        }
-        
-        if (bShowTime) {
-            if (bShowSeconds) {
-                sTime = iHour + ":" + vMinutes + ":" + vSeconds + sSuffix;
-            } else {
-                sTime = iHour + ":" + vMinutes + sSuffix;
+        //--------------------------------------------------------------------//
+        // Process the date.
+        //--------------------------------------------------------------------//
+        try {
+            iYear       = date.getFullYear();
+            vMonth      = date.getMonth() + 1;
+            vDay        = date.getDate();
+
+            if (vMonth < 10) {
+                vMonth = "0"+vMonth;
             }
+
+            if (vDay < 10) {
+                vDay = "0"+vDay;
+            }
+            
+            if (sFormat === undefined) {
+                sFormat = "dd/mm/yyyy";
+            }
+
+            if (sFormat === "dd/mm/yyyy" || sFormat === "dd/mm/yy") {
+                sDate = vDay+"/"+vMonth+"/"+iYear+" ";
+            } else if (sFormat === "mm/dd/yyyy" || sFormat === "mm/dd/yy") {
+                sDate = vMonth+"/"+vDay+"/"+iYear+" ";
+            } else if (sFormat === "yyyy/mm/dd" || sFormat === "yy/mm/dd") {
+                sDate = iYear+"/"+vMonth+"/"+vDay+" ";
+            } else if (sFormat === "yyyy-mm-dd" || sFormat === "yy-mm-dd") {
+                sDate = iYear+"-"+vMonth+"-"+vDay+" ";
+            } else {
+                sDate = "";
+            }
+
+        } catch (e) {
+            sDate = "";
+            $.sap.log.error("Error processing the date ("+e.name+"): " + e.message);
         }
         
-        return sDate + sTime;
+        //--------------------------------------------------------------------//
+        // Process the time.
+        //--------------------------------------------------------------------//
+        try {
+            iHour       = date.getHours();
+            vMinutes    = date.getMinutes();
+            vSeconds    = date.getSeconds();
+            sSuffix     = "";
+
+            if (iHour >= 12) {
+                sSuffix = "PM";
+            } else {
+                sSuffix = "AM";
+            }
+
+            iHour = iHour % 12;
+            if (iHour === 0) {
+                iHour = 12;
+            }
+            
+            if (vSeconds < 10) {
+                vSeconds = "0"+vSeconds;
+            }
+
+            if (vMinutes < 10) {
+                vMinutes = "0"+vMinutes;
+            }
+            
+            if (bShowTime) {
+                if (bShowSeconds) {
+                    sTime = iHour + ":" + vMinutes + ":" + vSeconds + sSuffix;
+                } else {
+                    sTime = iHour + ":" + vMinutes + sSuffix;
+                }
+            }
+        } catch (e) {
+            sTime = "";
+            $.sap.log.error("Error creating the time ("+e.name+"): " + e.message);
+        }
+        
+        //--------------------------------------------------------------------//
+        // Create the timestamp string. If it's empty, return N/A.
+        //--------------------------------------------------------------------//
+        sTimestamp = sDate + sTime;
+        
+        if (sTimestamp === "") {
+            return "N/A";
+        } else {
+            return sTimestamp;
+        }
     },
     
     //------------------------------------------------------------------------//
@@ -1485,6 +1542,10 @@ $.extend(IomyRe.functions, {
         getRoomPermissionLevel : function (mSettings) {
             var iLevel  = 1;        // No Access for default
 
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingArgumentException("Permission settings are required.");
+            }
+            
             //----------------------------------------------------//
             // Determine the permission level the current user has
             //----------------------------------------------------//
@@ -1513,6 +1574,10 @@ $.extend(IomyRe.functions, {
         getMostCommonPermissionForAllRooms : function (aPermissionLevels) {
             var iMin = null;
 
+            if (aPermissionLevels === undefined || aPermissionLevels === null) {
+                throw new MissingArgumentException("Array of permission levels is required.");
+            }
+
             for (var i = 0; i < aPermissionLevels.length; i++) {
                 if (iMin === null) {
                     iMin = aPermissionLevels[i];
@@ -1531,7 +1596,10 @@ $.extend(IomyRe.functions, {
             var iRoomStateToggle = 0;
 
             //-- If check to see what permissions need to be passed --//
-            if (iLevel === 2 ) {
+            if (iLevel === undefined || iLevel === null) {
+                throw new MissingArgumentException("Permission level must be given.");
+                
+            } else if (iLevel === 2 ) {
                 //-- Read Access--//
                 iRoomRead = 1;
                 iRoomDataRead = 1;
@@ -1569,9 +1637,16 @@ $.extend(IomyRe.functions, {
         },
         
         isUserRoomAdminForPremise : function (iPremiseId) {
-            var iRoomAdmin = IomyRe.common.PremiseList["_"+iPremiseId].PermRoomAdmin;
+            var mPremiseValidation = IomyRe.validation.isPremiseIDValid(iPremiseId);
+            var bIsAdmin = false;
             
-            return iRoomAdmin === 1;
+            if (mPremiseValidation.bIsValid) {
+                bIsAdmin = IomyRe.common.PremiseList["_"+iPremiseId].PermRoomAdmin === 1;
+            } else {
+                throw new InvalidArgumentException(mPremiseValidation.aErrorMessages.join('\n\n'));
+            }
+            
+            return bIsAdmin;
         },
         
         fetchRoomPermissions : function (mSettings) {
@@ -1598,6 +1673,7 @@ $.extend(IomyRe.functions, {
             var fnAppendError = function (sErrorMessages) {
                 bError = true;
                 aErrorMessages.push(sErrorMessages);
+                jQuery.sap.log.error(sErrorMessages);
             };
             
             //----------------------------------------------------------------//
@@ -1700,7 +1776,7 @@ $.extend(IomyRe.functions, {
                 }
                 
                 if (bError) {
-                    throw new IllegalArgumentException(aErrorMessages.join('\n'));
+                    throw new IllegalArgumentException(aErrorMessages.join('\n\n'));
                 }
                 
             } else {
@@ -1715,115 +1791,127 @@ $.extend(IomyRe.functions, {
             // for that room.
             //----------------------------------------------------------------//
             if (iRoomId != 0) {
-                //--------------------------------------------------------------------//
-                // Load and display the permissions for the currently selected user.
-                //--------------------------------------------------------------------//
-                IomyRe.apiphp.AjaxRequest({
-                    url : sUrl,
-                    data : {
-                        "Mode" : "LookupRoomPerms",
-                        "UserId" : iUserId,
-                        "RoomId" : iRoomId
-                    },
-
-                    onSuccess : function (responseType, data) {
-                        if (data.Error === false) {
-                            try {
-                                var data = data.Data;
-                                var iLevel = self.getRoomPermissionLevel(data);
-
-                                fnSuccess(iLevel, data);
-
-                            } catch (e) {
-                                jQuery.sap.log.error("There was an error setting the permissions on the screen: "+e.message);
-                                fnFail("(BUG IF YOU SEE THIS!)\n"+e.message);
-                            }
-                        } else {
-                            fnFail(data.ErrMesg)
-                        }
-                    },
-
-                    onFail : function (response) {
-                        jQuery.sap.log.error("There was an error accessing the premise permissions: "+JSON.stringify(response));
-                        fnFail(response.responseText);
-                    }
-
-                });
-            } else {
-                //----------------------------------------------------------------//
-                // We will need to lookup permissions for every room in a given
-                // premise.
-                //----------------------------------------------------------------//
-                var aPermissionLevels   = [];
-                var aRequests           = [];
-                var oRequestQueue       = null;
-
-                //----------------------------------------------------------------//
-                // Prepare each request.
-                //----------------------------------------------------------------//
-                $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
-                    
-                    aRequests.push({
-                        library : "php",
-                        url     : sUrl,
-                        data    : {
+                try {
+                    //--------------------------------------------------------------------//
+                    // Load and display the permissions for the currently selected user.
+                    //--------------------------------------------------------------------//
+                    IomyRe.apiphp.AjaxRequest({
+                        url : sUrl,
+                        data : {
                             "Mode" : "LookupRoomPerms",
                             "UserId" : iUserId,
-                            "RoomId" : mRoom.RoomId
+                            "RoomId" : iRoomId
                         },
 
                         onSuccess : function (responseType, data) {
-                            if (data.Error === false) {
-                                try {
-                                    var data    = data.Data;
-                                    var iLevel  = self.getRoomPermissionLevel(data);
+                            try {
+                                if (data.Error === false) {
+                                    var data = data.Data;
+                                    var iLevel = self.getRoomPermissionLevel(data);
 
-                                    aPermissionLevels.push(iLevel);
-
-                                } catch (e) {
-                                    jQuery.sap.log.error("There was an error setting the permissions on the screen: "+e.message);
-                                    aErrorMessages.push("(BUG IF YOU SEE THIS!)\n"+e.message);
+                                    fnSuccess(iLevel, data);
+                                } else {
+                                    fnFail(data.ErrMesg)
                                 }
-                            } else {
-                                aErrorMessages.push(data.ErrMesg);
+                            } catch (e) {
+                                fnFail("Error in the success callback for fetching room permissons:\n" + e.name + ": " + e.message);
                             }
                         },
 
                         onFail : function (response) {
-                            jQuery.sap.log.error("There was an error accessing the premise permissions: "+JSON.stringify(response));
-                            aErrorMessages.push(response.responseText);
+                            fnFail(response.responseText);
                         }
 
                     });
-                });
-                
-                //----------------------------------------------------------------//
-                // Run the requests.
-                //----------------------------------------------------------------//
-                oRequestQueue = new AjaxRequestQueue({
-                    requests            : aRequests,
-                    concurrentRequests  : 2,
-                    
-                    onSuccess : function () {
-                        var iLevel = self.getMostCommonPermissionForAllRooms(aPermissionLevels);
-                        
-                        if (aErrorMessages.length > 0) {
-                            fnWarning(iLevel, aErrorMessages.join('\n'));
-                        } else {
-                            fnSuccess(iLevel);
+                } catch (e) {
+                    fnAppendError("Error looking up the room permission level:\n" + e.name + ": " + e.message);
+                }
+            } else {
+                try {
+                    //----------------------------------------------------------------//
+                    // We will need to lookup permissions for every room in a given
+                    // premise.
+                    //----------------------------------------------------------------//
+                    var aPermissionLevels   = [];
+                    var aRequests           = [];
+                    var oRequestQueue       = null;
+
+                    //----------------------------------------------------------------//
+                    // Prepare each request.
+                    //----------------------------------------------------------------//
+                    $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
+
+                        aRequests.push({
+                            library : "php",
+                            url     : sUrl,
+                            data    : {
+                                "Mode" : "LookupRoomPerms",
+                                "UserId" : iUserId,
+                                "RoomId" : mRoom.RoomId
+                            },
+
+                            onSuccess : function (responseType, data) {
+                                try {
+                                    if (data.Error === false) {
+                                        var data    = data.Data;
+                                        var iLevel  = self.getRoomPermissionLevel(data);
+
+                                        aPermissionLevels.push(iLevel);
+                                    } else {
+                                        aErrorMessages.push(data.ErrMesg);
+                                    }
+                                } catch (e) {
+                                    aErrorMessages.push("Error processing the permission level of a room (ID: "+mRoom.RoomId+"):\n\n" + e.name + ": " + e.message);
+                                }
+                            },
+
+                            onFail : function (response) {
+                                aErrorMessages.push(response.responseText);
+                            }
+
+                        });
+                    });
+
+                    //----------------------------------------------------------------//
+                    // Run the requests.
+                    //----------------------------------------------------------------//
+                    oRequestQueue = new AjaxRequestQueue({
+                        requests            : aRequests,
+                        concurrentRequests  : 2,
+
+                        onSuccess : function () {
+                            try {
+                                var iLevel = self.getMostCommonPermissionForAllRooms(aPermissionLevels);
+
+                                if (aErrorMessages.length > 0) {
+                                    fnWarning(iLevel, aErrorMessages.join('\n\n'));
+                                } else {
+                                    fnSuccess(iLevel);
+                                }
+                            } catch (e) {
+                                aErrorMessages.push("Error in the success callback of the request queue:\n" + e.name + ": " + e.message);
+                                fnWarning(iLevel, aErrorMessages.join('\n\n'));
+                            }
+                        },
+
+                        onWarning : function () {
+                            var iLevel = self.getMostCommonPermissionForAllRooms(aPermissionLevels);
+
+                            fnWarning(iLevel, aErrorMessages.join('\n\n'));
+                        },
+
+                        onFail : function () {
+                            fnFail(aErrorMessages.join('\n\n'));
                         }
-                    },
-                    
-                    onWarning : function () {
-                        var iLevel = self.getMostCommonPermissionForAllRooms(aPermissionLevels);
-                        
-                        fnWarning(iLevel, aErrorMessages.join('\n'));
-                    },
-                    
-                    onFail : function () {
-                        fnFail(aErrorMessages.join('\n'));
-                    }
-                });
+                    });
+                } catch (e) {
+                    fnAppendError("Error fetching the most common permissions for all rooms:\n" + e.name + ": " + e.message);
+                }
+            }
+            
+            //-- If there were any fatal errors, throw an exception. --//
+            if (bError) {
+                throw new iOmyException(aErrorMessages.join('\n\n'));
             }
         },
 
@@ -1852,6 +1940,7 @@ $.extend(IomyRe.functions, {
             var fnAppendError = function (sErrorMessages) {
                 bError = true;
                 aErrorMessages.push(sErrorMessages);
+                jQuery.sap.log.error(sErrorMessages);
             };
             
             //----------------------------------------------------------------//
@@ -1868,7 +1957,7 @@ $.extend(IomyRe.functions, {
             // Process the settings map.
             //----------------------------------------------------------------//
             if (mSettings !== undefined && mSettings !== null) {
-                
+
                 //------------------------------------------------------------//
                 // Find the User ID
                 //------------------------------------------------------------//
@@ -1877,13 +1966,13 @@ $.extend(IomyRe.functions, {
                 } else {
                     fnAppendError(sNoUserIDMessage);
                 }
-                
+
                 //------------------------------------------------------------//
                 // Find and either validate the room ID or find the premise ID.
                 //------------------------------------------------------------//
                 if (mSettings.roomID !== undefined && mSettings.roomID !== null) {
                     iRoomId = mSettings.roomID;
-                    
+
                     //------------------------------------------------------------//
                     // If the ID is 0, we're finding out the permissions for all
                     // rooms. Make sure the premise is specified and is valid.
@@ -1891,7 +1980,7 @@ $.extend(IomyRe.functions, {
                     if (iRoomId == 0) {
                         if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
                             iPremiseId = mSettings.premiseID;
-                            
+
                             var mPremiseIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
 
                             if (!mPremiseIDInfo.bIsValid) {
@@ -1900,7 +1989,7 @@ $.extend(IomyRe.functions, {
                         } else {
                             fnAppendError(sNoPremiseIDMessage);
                         }
-                        
+
                     } else {
                         //------------------------------------------------------------//
                         // Otherwise, validate the room ID.
@@ -1911,11 +2000,11 @@ $.extend(IomyRe.functions, {
                             aErrorMessages = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
                         }
                     }
-                    
+
                 } else {
                     fnAppendError(sNoRoomIDMessage);
                 }
-                
+
                 //------------------------------------------------------------//
                 // Find the permission level
                 //------------------------------------------------------------//
@@ -1924,21 +2013,21 @@ $.extend(IomyRe.functions, {
                 } else {
                     fnAppendError(sNoLevelMessage);
                 }
-                
+
                 //------------------------------------------------------------//
                 // Check that the success callback is provided. If so, make
                 // sure that a function was given.
                 //------------------------------------------------------------//
                 if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
                     fnSuccess = mSettings.onSuccess;
-                    
+
                     if (typeof fnSuccess !== "function") {
                         fnAppendError("Success callback function is not a valid function. Received a "+typeof fnSuccess);
                     }
                 } else {
                     fnSuccess = function () {};
                 }
-                
+
                 //------------------------------------------------------------//
                 // Check that the warning callback is provided. If so, make
                 // sure that a function was given.
@@ -1952,123 +2041,155 @@ $.extend(IomyRe.functions, {
                 } else {
                     fnWarning = function () {};
                 }
-                
+
                 //------------------------------------------------------------//
                 // Check that the failure callback is provided. If so, make
                 // sure that a function was given.
                 //------------------------------------------------------------//
                 if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
                     fnFail = mSettings.onFail;
-                    
+
                     if (typeof fnSuccess !== "function") {
                         fnAppendError("Failure callback function is not a valid function. Received a "+typeof fnFail);
                     }
                 } else {
                     fnFail = function () {};
                 }
-                
+
                 if (bError) {
-                    throw new IllegalArgumentException(aErrorMessages.join('\n'));
+                    throw new IllegalArgumentException(aErrorMessages.join('\n\n'));
                 }
-                
+
             } else {
                 fnAppendError(sNoUserIDMessage);
                 fnAppendError(sNoRoomIDMessage);
                 fnAppendError(sNoLevelMessage);
-                
-                throw new MissingSettingsMapException(aErrorMessages.join);
+
+                throw new MissingSettingsMapException(aErrorMessages.join('\n\n'));
             }
             
-            //----------------------------------------------------------------//
-            // Fetch the permission status
-            //----------------------------------------------------------------//
-            mPermissions    = self.getIndividualRoomPermissionForALevel(iLevel);
-
-            tiRead          = mPermissions.Read;
-            tiDataRead      = mPermissions.DataRead;
-            tiWrite         = mPermissions.Write;
-            tiStateToggle   = mPermissions.StateToggle;
-            
-            if (iRoomId != 0) {
-                IomyRe.apiphp.AjaxRequest({
-                    url : sUrl,
-                    data : {
-                        "Mode" : "UpdateRoomPerms",
-                        "UserId" : iUserId,
-                        "RoomId" : iRoomId,
-                        "Data" : "{\"Read\":"+tiRead+",\"DataRead\":"+tiDataRead+",\"Write\":"+tiWrite+",\"StateToggle\":"+tiStateToggle+"}"
-                    },
-
-                    onSuccess : function (responseType, data) {
-                        if (data.Error !== true) {
-                            fnSuccess();
-                        } else {
-                            fnFail(data.ErrMesg);
-                        }
-                    },
-
-                    onFail : function (response) {
-                        fnFail(response.responseType);
-                    }
-
-                });
-            } else {
+            try {
                 //----------------------------------------------------------------//
-                // We will need to lookup permissions for every room in a given
-                // premise.
+                // Fetch the permission status
                 //----------------------------------------------------------------//
-                var aRequests           = [];
-                var oRequestQueue       = null;
-                
-                $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
+                mPermissions    = self.getIndividualRoomPermissionForALevel(iLevel);
 
-                    aRequests.push({
-                        library : "php",
-                        url     : sUrl,
-                        data    : {
-                            "Mode" : "UpdateRoomPerms",
-                            "UserId" : iUserId,
-                            "RoomId" : mRoom.RoomId,
-                            "Data" : "{\"Read\":"+tiRead+",\"DataRead\":"+tiDataRead+",\"Write\":"+tiWrite+",\"StateToggle\":"+tiStateToggle+"}"
-                        },
+                tiRead          = mPermissions.Read;
+                tiDataRead      = mPermissions.DataRead;
+                tiWrite         = mPermissions.Write;
+                tiStateToggle   = mPermissions.StateToggle;
 
-                        onSuccess : function (responseType, data) {
-                            if (data.Error) {
-                                aErrorMessages.push(data.ErrMesg);
+                if (iRoomId != 0) {
+                    try {
+                        IomyRe.apiphp.AjaxRequest({
+                            url : sUrl,
+                            data : {
+                                "Mode" : "UpdateRoomPerms",
+                                "UserId" : iUserId,
+                                "RoomId" : iRoomId,
+                                "Data" : "{\"Read\":"+tiRead+",\"DataRead\":"+tiDataRead+",\"Write\":"+tiWrite+",\"StateToggle\":"+tiStateToggle+"}"
+                            },
+
+                            onSuccess : function (responseType, data) {
+                                try {
+                                    if (data.Error !== true) {
+                                        fnSuccess();
+                                    } else {
+                                        fnFail(data.ErrMesg);
+                                    }
+                                } catch (e) {
+                                    fnFail("Error running success callback updating permissions for a single room:\n" + e.name + ": " + e.message);
+                                }
+                            },
+
+                            onFail : function (response) {
+                                fnFail(response.responseType);
                             }
-                        },
 
-                        onFail : function (response) {
-                            aErrorMessages.push(response.responseText);
-                        }
-
-                    });
-
-                });
-                
-                //----------------------------------------------------------------//
-                // Run the requests.
-                //----------------------------------------------------------------//
-                oRequestQueue = new AjaxRequestQueue({
-                    requests            : aRequests,
-                    concurrentRequests  : 2,
-                    
-                    onSuccess : function () {
-                        if (aErrorMessages.length > 0) {
-                            fnWarning(aErrorMessages.join('\n'));
-                        } else {
-                            fnSuccess();
-                        }
-                    },
-                    
-                    onWarning : function () {
-                        fnWarning(aErrorMessages.join('\n'));
-                    },
-                    
-                    onFail : function () {
-                        fnFail(aErrorMessages.join('\n'));
+                        });
+                    } catch (e) {
+                        fnAppendError("Error updating permissions for a single room:\n" + e.name + ": " + e.message);
                     }
-                });
+
+                } else {
+                    //----------------------------------------------------------------//
+                    // We will need to lookup permissions for every room in a given
+                    // premise.
+                    //----------------------------------------------------------------//
+                    var aRequests           = [];
+                    var oRequestQueue       = null;
+
+                    try {
+                        $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
+
+                            aRequests.push({
+                                library : "php",
+                                url     : sUrl,
+                                data    : {
+                                    "Mode" : "UpdateRoomPerms",
+                                    "UserId" : iUserId,
+                                    "RoomId" : mRoom.RoomId,
+                                    "Data" : "{\"Read\":"+tiRead+",\"DataRead\":"+tiDataRead+",\"Write\":"+tiWrite+",\"StateToggle\":"+tiStateToggle+"}"
+                                },
+
+                                onSuccess : function (responseType, data) {
+                                    try {
+                                        if (data.Error) {
+                                            aErrorMessages.push(data.ErrMesg);
+                                        }
+                                    } catch (e) {
+                                        aErrorMessages.push("Error running success callback updating permissions for a single room (ID: \""+mRoom.RoomId+"\"):\n" + e.name + ": " + e.message);
+                                    }
+                                },
+
+                                onFail : function (response) {
+                                    aErrorMessages.push(response.responseText);
+                                }
+
+                            });
+
+                        });
+
+                        //----------------------------------------------------------------//
+                        // Run the requests.
+                        //----------------------------------------------------------------//
+                        oRequestQueue = new AjaxRequestQueue({
+                            requests            : aRequests,
+                            concurrentRequests  : 2,
+
+                            onSuccess : function () {
+                                try {
+                                    if (aErrorMessages.length > 0) {
+                                        fnWarning(aErrorMessages.join('\n\n'));
+                                    } else {
+                                        fnSuccess();
+                                    }
+                                } catch (e) {
+                                    aErrorMessages.push("Error updating permissions for multiple rooms:\n\n" + e.name + ": " + e.message);
+                                    fnWarning(iLevel, aErrorMessages.join('\n\n'));
+                                }
+                            },
+
+                            onWarning : function () {
+                                fnWarning(aErrorMessages.join('\n\n'));
+                            },
+
+                            onFail : function () {
+                                fnFail(aErrorMessages.join('\n\n'));
+                            }
+                        });
+
+                    } catch (e) {
+                        fnAppendError("Error updating permissions for multiple rooms:\n" + e.name + ": " + e.message);
+                    }
+                }
+            } catch (e) {
+                fnAppendError("Error updating room permissions:\n" + e.name + ": " + e.message);
+            }
+            
+            //-- If there were any fatal errors, throw an exception. --//
+            if (bError) {
+                throw new iOmyException(aErrorMessages.join('\n\n'));
             }
         }
         

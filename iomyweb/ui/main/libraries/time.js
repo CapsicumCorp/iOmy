@@ -56,32 +56,49 @@ $.extend(IomyRe.time,{
 		var iMinute         = 0;
 		var iSecond         = 0;
 		var aResult         = {};
+        
 		//----------------------------------------------------//
-		//-- 2.0 - Extract Time Data                        --//
+        //-- 2.0 - Check the date argument                  --//
 		//----------------------------------------------------//
-		iYear    = oDate.getFullYear();
-		iMonth   = oDate.getMonth();
-		iDay     = oDate.getDate();
-		iHour    = oDate.getHours();
-		iMinute  = oDate.getMinutes();
-		iSecond  = oDate.getSeconds();
-		
-		//----------------------------------------------------//
-		//-- 3.0 - Store in an array                        --//
-		//----------------------------------------------------//
-		aResult = {
-			"year":		iYear,
-			"month":	iMonth,
-			"day":		iDay,
-			"hour":		iHour,
-			"minute":	iMinute,
-			"second":	iSecond
-		};
-		
-		//----------------------------------------------------//
-		//-- 9.0 - Return Results                           --//
-		//----------------------------------------------------//
-		return aResult;
+        if (oDate === undefined || oDate === null) {
+            throw new MissingArgumentException("Date must be given.");
+        } else if (!(oDate instanceof Date)) {
+            throw new IllegalArgumentException("A valid date must be given.");
+        }
+        
+        try {
+            //----------------------------------------------------//
+            //-- 3.0 - Extract Time Data                        --//
+            //----------------------------------------------------//
+            iYear    = oDate.getFullYear();
+            iMonth   = oDate.getMonth();
+            iDay     = oDate.getDate();
+            iHour    = oDate.getHours();
+            iMinute  = oDate.getMinutes();
+            iSecond  = oDate.getSeconds();
+
+            //----------------------------------------------------//
+            //-- 4.0 - Store in an array                        --//
+            //----------------------------------------------------//
+            aResult = {
+                "year":		iYear,
+                "month":	iMonth,
+                "day":		iDay,
+                "hour":		iHour,
+                "minute":	iMinute,
+                "second":	iSecond
+            };
+
+            //----------------------------------------------------//
+            //-- 9.0 - Return Results                           --//
+            //----------------------------------------------------//
+            return aResult;
+            
+        } catch (e) {
+            e.message = "Error in IomyRe.time.ExtractTimeDataFromJSDate:\n" + e.message;
+            $.sap.log.error(e.message);
+            throw e;
+        }
 		
 	},
 	
@@ -107,25 +124,32 @@ $.extend(IomyRe.time,{
 		//-- 2.0 - Calculate Timestamp                      --//
 		//----------------------------------------------------//
 		
-		//-- IF BACKDATE IS SET				--//
-		if( IomyRe.time.bBackdateUTS===true ) {
-			iCurrentTimestamp = IomyRe.time.iDefaultBackdateUTS;
-			
-			
-		//-- ELSE IF ROUNDTIME IS SET		--//
-		} else if(IomyRe.time.bRoundTime===true  ) {
-			iCurrentTimestamp = Math.floor( iUTS / (1000 * IomyRe.time.iSecondsToRound) ) * IomyRe.time.iSecondsToRound;
-			
-			
-		//-- ELSE DO NORMAL CONVERSION		--//
-		} else {
-			iCurrentTimestamp = Math.floor( iUTS / 1000 );
-		}
-		
-		//----------------------------------------------------//
-		//-- 9.0 - Return Results                           --//
-		//----------------------------------------------------//
-		return iCurrentTimestamp;
+        try {
+            //-- IF BACKDATE IS SET				--//
+            if( IomyRe.time.bBackdateUTS===true ) {
+                iCurrentTimestamp = IomyRe.time.iDefaultBackdateUTS;
+
+
+            //-- ELSE IF ROUNDTIME IS SET		--//
+            } else if(IomyRe.time.bRoundTime===true  ) {
+                iCurrentTimestamp = Math.floor( iUTS / (1000 * IomyRe.time.iSecondsToRound) ) * IomyRe.time.iSecondsToRound;
+
+
+            //-- ELSE DO NORMAL CONVERSION		--//
+            } else {
+                iCurrentTimestamp = Math.floor( iUTS / 1000 );
+            }
+
+            //----------------------------------------------------//
+            //-- 9.0 - Return Results                           --//
+            //----------------------------------------------------//
+            return iCurrentTimestamp;
+            
+        } catch (e) {
+            e.message = "Error in IomyRe.time.GetCurrentUTS:\n" + e.message;
+            $.sap.log.error(e.message);
+            throw e;
+        }
 		
 	},
 	
@@ -152,74 +176,76 @@ $.extend(IomyRe.time,{
 		var iStartStamp			= 0;			//-- INTEGER:			Used to store the result of this function call (UnixTS startstamp) --//
 		var sPeriodToLowercase	= "";			//-- STRING:			Used to store the TimePeriod in lower case for the condition checks --//
 		
+		//-- 1.1 - If period is undefined then use the day period   --//
+		if( typeof sPeriod === 'undefined' ) {
+			sPeriod = "day";
+		}
+		
 		//-- 1.2 - If parameter is undefined then use the preset    --//
 		if( typeof iEndStamp === 'undefined' ) {
 			iEndStamp = IomyRe.time.GetCurrentUTS();
 		}
 		
-		sPeriodToLowercase = sPeriod.toLowerCase();
-		
-		//------------------------------------------------------------//
-		//-- 2.0 - Calculate Timestamp                              --//
-		//------------------------------------------------------------//
-		switch( sPeriodToLowercase ) {
-			case "10min":
-				
-				
-			case "30min":
-				
-				
-			case "6hour":
-				
-				
-			case "day":
-				iStartStamp = ( iEndStamp - (86400) );
-				break;
-				
-			case "week":
-				iStartStamp = ( iEndStamp - (86400 * 7) );
-				break;
-				
-			case "fortnight":
-				iStartStamp = ( iEndStamp - (86400 * 14) );
-				break;
-				
-			case "month":
-				iStartStamp = ( iEndStamp - (86400 * 31) );
-				break;
-				
-			case "quarter":
-				iStartStamp = ( iEndStamp - (86400 * 91) );
-				break;
-				
-			case "year":
-				iStartStamp = ( iEndStamp - (86400 * 365) );
-				break;
-				
-			case "epoch":
-				iStartStamp = 0;
-				break;
-				
-				
-			default:
-				console.log("");
-		}
-		
-		//------------------------------------------------------------//
-		//-- 3.0 - Check the results                                --//
-		//------------------------------------------------------------//
-		
-		
-		
-		
-		
-		//------------------------------------------------------------//
-		//-- 9.0 - Return Results                                   --//
-		//------------------------------------------------------------//
-		
-		
-		return iStartStamp;
-		
+        try {
+            sPeriodToLowercase = sPeriod.toLowerCase();
+
+            //------------------------------------------------------------//
+            //-- 2.0 - Calculate Timestamp                              --//
+            //------------------------------------------------------------//
+            switch( sPeriodToLowercase ) {
+                case "10min":
+
+
+                case "30min":
+
+
+                case "6hour":
+
+
+                case "day":
+                    iStartStamp = ( iEndStamp - (86400) );
+                    break;
+
+                case "week":
+                    iStartStamp = ( iEndStamp - (86400 * 7) );
+                    break;
+
+                case "fortnight":
+                    iStartStamp = ( iEndStamp - (86400 * 14) );
+                    break;
+
+                case "month":
+                    iStartStamp = ( iEndStamp - (86400 * 31) );
+                    break;
+
+                case "quarter":
+                    iStartStamp = ( iEndStamp - (86400 * 91) );
+                    break;
+
+                case "year":
+                    iStartStamp = ( iEndStamp - (86400 * 365) );
+                    break;
+
+                case "epoch":
+                    iStartStamp = 0;
+                    break;
+
+
+                default:
+                    $.sap.log.error("Time period '"+sPeriod+"' is invalid.");
+            }
+            //------------------------------------------------------------//
+            //-- 9.0 - Return Results                                   --//
+            //------------------------------------------------------------//
+
+
+            return iStartStamp;
+
+        } catch (e) {
+            e.message = "Error in IomyRe.time.GetStartStampForTimePeriod:\n" + e.message;
+            $.sap.log.error(e.message);
+            throw e;
+        }
 	},
 	
 	/**
@@ -233,7 +259,6 @@ $.extend(IomyRe.time,{
         //--------------------------------------------------------------------//
         // Variables
         //--------------------------------------------------------------------//
-        var me              = this;
         var sMilitaryTime   = "";
         var iHours;
         var iMinutes;
@@ -245,25 +270,32 @@ $.extend(IomyRe.time,{
             throw new MissingArgumentException("Date must be given!");
         }
         
-        //--------------------------------------------------------------------//
-        // Take the hours and minutes and create a string with the military time
-        //--------------------------------------------------------------------//
-        iHours = date.getHours();
-        iMinutes = date.getMinutes();
-        
-        if (iHours < 10) {
-            sMilitaryTime += "0" + iHours;
-        } else {
-            sMilitaryTime += iHours;
+        try {
+            //--------------------------------------------------------------------//
+            // Take the hours and minutes and create a string with the military time
+            //--------------------------------------------------------------------//
+            iHours = date.getHours();
+            iMinutes = date.getMinutes();
+
+            if (iHours < 10) {
+                sMilitaryTime += "0" + iHours;
+            } else {
+                sMilitaryTime += iHours;
+            }
+
+            if (iMinutes < 10) {
+                sMilitaryTime += "0" + iMinutes;
+            } else {
+                sMilitaryTime += iMinutes;
+            }
+
+            return sMilitaryTime;
+            
+        } catch (e) {
+            e.message = "Error in IomyRe.time.GetMilitaryTimeFromDate:\n" + e.message;
+            $.sap.log.error(e.message);
+            throw e;
         }
-        
-        if (iMinutes < 10) {
-            sMilitaryTime += "0" + iMinutes;
-        } else {
-            sMilitaryTime += iMinutes;
-        }
-        
-        return sMilitaryTime;
     },
 	
     /**
@@ -276,7 +308,6 @@ $.extend(IomyRe.time,{
         //--------------------------------------------------------------------//
         // Variables
         //--------------------------------------------------------------------//
-        var me              = this;
         var bError          = false;
         var aErrorMessages  = [];
         var date;
@@ -286,53 +317,61 @@ $.extend(IomyRe.time,{
         var fnAppendError = function (sErrMesg) {
             bError = true;
             aErrorMessages.push(sErrMesg);
+            $.sap.error.log(sErrMesg);
         };
         
-        //--------------------------------------------------------------------//
-        // Check the time argument
-        //--------------------------------------------------------------------//
-        if (sMilTime !== undefined) {
-            if (sMilTime.length !== 4) {
-                fnAppendError("Military time is not 4 digits long!");
+        try {
+            //--------------------------------------------------------------------//
+            // Check the time argument
+            //--------------------------------------------------------------------//
+            if (sMilTime !== undefined) {
+                if (sMilTime.length !== 4) {
+                    fnAppendError("Military time is not 4 digits long!");
+                }
+
+                if (isNaN(sMilTime)) {
+                    fnAppendError("Military time is not a valid number!");
+                }
+            } else {
+                throw new MissingArgumentException("Hours and minutes in military time must be given!");
             }
+
+            if (bError) {
+                throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
+            }
+
+            //--------------------------------------------------------------------//
+            // Check that the hour and minute figures are valid.
+            //--------------------------------------------------------------------//
+            iHours      = sMilTime.substr(0,2);
+            iMinutes    = sMilTime.substr(2,4);
+
+            if (iHours > 23) {
+                fnAppendError("Hour must be between 0 and 23");
+            }
+
+            if (iMinutes > 59) {
+                fnAppendError("Minutes must be between 0 and 59");
+            }
+
+            if (bError) {
+                throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
+            }
+
+            //--------------------------------------------------------------------//
+            // Take the military time and create a date object with the input.
+            //--------------------------------------------------------------------//
+            date = new Date();
+            date.setHours(parseInt(iHours));
+            date.setMinutes(parseInt(iMinutes));
+
+            return date;
             
-            if (isNaN(sMilTime)) {
-                fnAppendError("Military time is not a valid number!");
-            }
-        } else {
-            throw new MissingArgumentException("Hours and minutes in military time must be given!");
+        } catch (e) {
+            e.message = "Error in IomyRe.time.GetDateFromMilitaryTime:\n" + e.message;
+            $.sap.log.error(e.message);
+            throw e;
         }
-        
-        if (bError) {
-            throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
-        }
-        
-        //--------------------------------------------------------------------//
-        // Check that the hour and minute figures are valid.
-        //--------------------------------------------------------------------//
-        iHours      = sMilTime.substr(0,2);
-        iMinutes    = sMilTime.substr(2,4);
-        
-        if (iHours > 23) {
-            fnAppendError("Hour must be between 0 and 23");
-        }
-        
-        if (iMinutes > 59) {
-            fnAppendError("Minutes must be between 0 and 59");
-        }
-        
-        if (bError) {
-            throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
-        }
-        
-        //--------------------------------------------------------------------//
-        // Take the military time and create a date object with the input.
-        //--------------------------------------------------------------------//
-        date = new Date();
-        date.setHours(parseInt(iHours));
-        date.setMinutes(parseInt(iMinutes));
-        
-        return date;
     }
 	
 	

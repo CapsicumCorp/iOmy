@@ -26,7 +26,6 @@ $.sap.declare("IomyRe.devices",true);
 IomyRe.devices.weatherfeed = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.weatherfeed,{
-    Devices: [],
     
     LinkTypeId        : 8,
     ThingTypeId       : 14,
@@ -41,10 +40,9 @@ $.extend(IomyRe.devices.weatherfeed,{
      * @returns {String}
      */
     GetWeatherIcon : function (sText) {
-        //===============================================\\
+        //===============================================//
         // DECLARE VARIABLES
-        //===============================================\\
-        var me              = this;              // Captures the scope of this device module
+        //===============================================//
         var sIcon           = "";
         
         if (sText === "Clear") {
@@ -80,56 +78,63 @@ $.extend(IomyRe.devices.weatherfeed,{
             throw new IllegalArgumentException("Wind direction cardinal must be between 0 and 360.")
         }
         
-        if( (fCardinality > 348.75 && fCardinality <= 360.0) || (fCardinality >= 0 && fCardinality <= 11.25) ) {
-            sDirection = "N";
-            
-        } else if (fCardinality > 11.25 && fCardinality <= 33.75 ) {
-            sDirection = "NNE";
-            
-        } else if (fCardinality > 33.75 && fCardinality <= 56.25) {
-            sDirection = "NE";
-            
-        } else if (fCardinality > 56.25 && fCardinality <= 78.75) {
-            sDirection = "ENE";
-            
-        } else if (fCardinality > 78.75 && fCardinality <= 101.25) {
-            sDirection = "E";
-            
-        } else if (fCardinality > 101.25 && fCardinality <= 123.75) {
-            sDirection = "ESE";
-            
-        } else if (fCardinality > 123.75 && fCardinality <= 146.25) {
-            sDirection = "SE";
-            
-        } else if (fCardinality > 146.25 && fCardinality <= 168.75) {
-            sDirection = "SSE";
-            
-        } else if (fCardinality > 168.75 && fCardinality <= 191.25) {
-            sDirection = "S";
-            
-        } else if (fCardinality > 191.25 && fCardinality <= 213.75) {
-            sDirection = "SSW";
-            
-        } else if (fCardinality > 213.75 && fCardinality <= 236.25) {
-            sDirection = "SW";
-            
-        } else if (fCardinality > 236.25 && fCardinality <= 258.75) {
-            sDirection = "WSW";
-            
-        } else if (fCardinality > 258.75 && fCardinality <= 281.25) {
-            sDirection = "W";
-            
-        } else if (fCardinality > 281.25 && fCardinality <= 303.75) {
-            sDirection = "WNW";
-            
-        } else if (fCardinality > 303.75 && fCardinality <= 326.25) {
-            sDirection = "NW";
-            
-        } else if (fCardinality > 326.25 && fCardinality <= 348.75) {
-            sDirection = "NNW";
+        try {
+            if( (fCardinality > 348.75 && fCardinality <= 360.0) || (fCardinality >= 0 && fCardinality <= 11.25) ) {
+                sDirection = "N";
+
+            } else if (fCardinality > 11.25 && fCardinality <= 33.75 ) {
+                sDirection = "NNE";
+
+            } else if (fCardinality > 33.75 && fCardinality <= 56.25) {
+                sDirection = "NE";
+
+            } else if (fCardinality > 56.25 && fCardinality <= 78.75) {
+                sDirection = "ENE";
+
+            } else if (fCardinality > 78.75 && fCardinality <= 101.25) {
+                sDirection = "E";
+
+            } else if (fCardinality > 101.25 && fCardinality <= 123.75) {
+                sDirection = "ESE";
+
+            } else if (fCardinality > 123.75 && fCardinality <= 146.25) {
+                sDirection = "SE";
+
+            } else if (fCardinality > 146.25 && fCardinality <= 168.75) {
+                sDirection = "SSE";
+
+            } else if (fCardinality > 168.75 && fCardinality <= 191.25) {
+                sDirection = "S";
+
+            } else if (fCardinality > 191.25 && fCardinality <= 213.75) {
+                sDirection = "SSW";
+
+            } else if (fCardinality > 213.75 && fCardinality <= 236.25) {
+                sDirection = "SW";
+
+            } else if (fCardinality > 236.25 && fCardinality <= 258.75) {
+                sDirection = "WSW";
+
+            } else if (fCardinality > 258.75 && fCardinality <= 281.25) {
+                sDirection = "W";
+
+            } else if (fCardinality > 281.25 && fCardinality <= 303.75) {
+                sDirection = "WNW";
+
+            } else if (fCardinality > 303.75 && fCardinality <= 326.25) {
+                sDirection = "NW";
+
+            } else if (fCardinality > 326.25 && fCardinality <= 348.75) {
+                sDirection = "NNW";
+            }
+
+            return sDirection;
+        } catch (e) {
+            // Something pretty funky happened for an exception to be thrown.
+            e.message = "Error in IomyRe.devices.weatherfeed.getWindDirection ("+e.name+"):\n" + e.message;
+            $.sap.log.error(e.message);
+            throw e;
         }
-        
-        return sDirection;
     },
     
     /**
@@ -145,12 +150,15 @@ $.extend(IomyRe.devices.weatherfeed,{
      * @throws {MissingSettingsMapException} When no parameter object is parsed.
      */
     FetchCurrentWeather : function (mSettings) {
-        var me = this;
+        var oModule = this;
         var iThingId;
         var mThingIdInfo;
         var fnSuccess;
         var fnFail;
         
+        //--------------------------------------------------------------------//
+        // Process the parameters.
+        //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
                 mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
@@ -181,42 +189,55 @@ $.extend(IomyRe.devices.weatherfeed,{
             throw new MissingSettingsMapException("Thing ID must be given.");
         }
         
-        IomyRe.apiphp.AjaxRequest({
-            url : IomyRe.apiphp.APILocation("weather"),
-            data: {
-                "Mode" : "FetchCurrentWeather",
-                "ThingId" : iThingId
-            },
-            
-            onSuccess : function (type, data) {
-                
-                if (data.Error === false) {
-                    var windDirection   = data.Data.WindDirection;
-                    var sunrise         = data.Data.Sunrise;
-                    var sunset          = data.Data.Sunset;
-                    
-                    var dateSunrise     = new Date(sunrise.Value * 1000);
-                    var dateSunset      = new Date(sunset.Value * 1000);
-                    var humanReadable   = {
-                        WindDirection   : me.getWindDirection( parseFloat(windDirection.Value.toString()) ),
-                        SunriseTime     : IomyRe.functions.getTimestampString(dateSunrise, ""),
-                        SunsetTime      : IomyRe.functions.getTimestampString(dateSunset, "")
-                    };
-                    
-                    data.Data.HumanReadable = humanReadable;
-                    
-                    fnSuccess(data.Data);
-                    
-                } else {
-                    fnFail(data.ErrMesg);
+        //--------------------------------------------------------------------//
+        // Attempt to fetch weather data.
+        //--------------------------------------------------------------------//
+        try {
+            IomyRe.apiphp.AjaxRequest({
+                url : IomyRe.apiphp.APILocation("weather"),
+                data: {
+                    "Mode" : "FetchCurrentWeather",
+                    "ThingId" : iThingId
+                },
+
+                onSuccess : function (type, data) {
+
+                    try {
+                        if (data.Error === false) {
+                            var windDirection   = data.Data.WindDirection;
+                            var sunrise         = data.Data.Sunrise;
+                            var sunset          = data.Data.Sunset;
+
+                            var dateSunrise     = new Date(sunrise.Value * 1000);
+                            var dateSunset      = new Date(sunset.Value * 1000);
+                            var humanReadable   = {
+                                WindDirection   : oModule.getWindDirection( parseFloat(windDirection.Value.toString()) ),
+                                SunriseTime     : IomyRe.functions.getTimestampString(dateSunrise, ""),
+                                SunsetTime      : IomyRe.functions.getTimestampString(dateSunset, "")
+                            };
+
+                            data.Data.HumanReadable = humanReadable;
+
+                            fnSuccess(data.Data);
+
+                        } else {
+                            fnFail(data.ErrMesg);
+                        }
+                    } catch (e) {
+                        fnFail("Error processing weather data ("+e.name+"): " + e.message);
+                    }
+                },
+
+                onFail : function (response) {
+                    fnFail(response.responseText);
                 }
-            },
-            
-            onFail : function (response) {
-                fnFail(response.responseText);
-            }
-            
-        });
+
+            });
+        } catch (e) {
+            e.message = "Error in IomyRe.devices.weatherfeed.FetchCurrentWeather ("+e.name+"):\n" + e.message;
+            $.sap.log.error(e.message);
+            throw e;
+        }
     },
     
     GetUITaskList: function( mSettings ) {
@@ -227,18 +248,27 @@ $.extend(IomyRe.devices.weatherfeed,{
         var aTasks          = { "High":[], "Low":[] };                    //-- ARRAY:            --//
         
         
-        aTasks.High.push({
-            "Type":"Function", 
-            "Execute": function () {
-                oModule.FetchCurrentWeather({
-                    thingID     : mSettings.deviceData.DeviceId,
-                    onSuccess   : mSettings.onSuccess,
-                    onFail      : mSettings.onFail
-                });
-            }
-        });
-        
-        return aTasks;
+        try {
+            aTasks.High.push({
+                "Type":"Function", 
+                "Execute": function () {
+                    try {
+                        oModule.FetchCurrentWeather({
+                            thingID     : mSettings.deviceData.DeviceId,
+                            onSuccess   : mSettings.onSuccess,
+                            onFail      : mSettings.onFail
+                        });
+                    } catch (e) {
+                        mSettings.onFail(e.message);
+                    }
+                }
+            });
+        } catch (e) {
+            mSettings.onFail("Failed to add an Open Weather Map task to the list ("+e.name+"): " + e.message);
+            
+        } finally {
+            return aTasks;
+        }
     }
     
 });

@@ -62,22 +62,28 @@ $.extend(IomyRe.validation, {
         
         // Lambda function to run if there are errors.
         var fnAppendError   = function (sErrMesg) {
+            bError = true;
             aErrorMessages.push(sErrMesg);
             jQuery.sap.log.error(sErrMesg);
         };
         
         // Lambda function to check that the year is a number.
         var fnIsYearValid   = function (sYear) {
-            if (sYear.length !== 4) {
-                fnAppendError("Year must have 4 digits!");
+            try {
+                if (sYear.length !== 4) {
+                    fnAppendError("Year must have 4 digits!");
+                    return false;
+                }
+
+                if (isNaN(sYear)) {
+                    fnAppendError("Year is not a valid number!");
+                    return false;
+                } else {
+                    return true;
+                }
+            } catch (e) {
+                fnAppendError("Error checking the year:\n\n" + e.name + ": " + e.message);
                 return false;
-            }
-            
-            if (isNaN(sYear)) {
-                fnAppendError("Year is not a valid number!");
-                return false;
-            } else {
-                return true;
             }
         };
         
@@ -85,23 +91,28 @@ $.extend(IomyRe.validation, {
         var fnIsMonthValid   = function (sMonth) {
             var iMonth;
             
-            if (sMonth.length !== 2) {
-                fnAppendError("Month must have 2 chararcters!");
-                return false;
-            }
-            
-            if (isNaN(sMonth)) {
-                fnAppendError("Month is not a valid number!");
-                return false;
-            } else {
-                iMonth = parseInt(sMonth);
-                
-                if (iMonth < 1 || iMonth > 12) {
-                    fnAppendError("Month must be between 1 and 12!");
+            try {
+                if (sMonth.length !== 2) {
+                    fnAppendError("Month must have 2 chararcters!");
+                    return false;
+                }
+
+                if (isNaN(sMonth)) {
+                    fnAppendError("Month is not a valid number!");
                     return false;
                 } else {
-                    return true;
+                    iMonth = parseInt(sMonth);
+
+                    if (iMonth < 1 || iMonth > 12) {
+                        fnAppendError("Month must be between 1 and 12!");
+                        return false;
+                    } else {
+                        return true;
+                    }
                 }
+            } catch (e) {
+                fnAppendError("Error checking the month" + e.name + ": " + e.message);
+                return false;
             }
         };
         
@@ -110,23 +121,23 @@ $.extend(IomyRe.validation, {
             var iMaxDay;
             var iDate;
             var bLambdaError = false;
-            
-            if (fnIsYearValid(sYear) === false) {
-                bLambdaError = true;
-            }
-            
-            if (sMonth.length !== 2) {
-                fnAppendError("Month must have 2 chararcters!");
-                bLambdaError = true;
-            }
-            
-            if (sDay.length !== 2) {
-                fnAppendError("Day of the month must have 2 chararcters!");
-                bLambdaError = true;
-            }
-            
-            if (bLambdaError === false) {
-                try {
+
+            try {
+                if (fnIsYearValid(sYear) === false) {
+                    bLambdaError = true;
+                }
+
+                if (sMonth.length !== 2) {
+                    fnAppendError("Month must have 2 chararcters!");
+                    bLambdaError = true;
+                }
+
+                if (sDay.length !== 2) {
+                    fnAppendError("Day of the month must have 2 chararcters!");
+                    bLambdaError = true;
+                }
+
+                if (bLambdaError === false) {
                     iMaxDay = IomyRe.functions.getMaximumDateInMonth(sYear, sMonth);
                     iDate = parseInt(sDay);
 
@@ -134,111 +145,112 @@ $.extend(IomyRe.validation, {
                         fnAppendError("Day of the month must be between 1 and "+iMaxDay+"!");
                         bLambdaError = true;
                     }
-                } catch (eMonthError) {
-                    fnAppendError(eMonthError);
-                    bLambdaError = true;
+
                 }
+            } catch (eMonthError) {
+                fnAppendError("Error checking the day:\n\n" + eMonthError.name + ": " + eMonthError.message);
+                bLambdaError = true;
             }
-            
+
             // If there are no errors, return true, otherwise return false.
             return !bLambdaError;
-            
+
         };
         
-        //--------------------------------------------------------------------//
-        // Check that the timestamp is there
-        //--------------------------------------------------------------------//
-        if (vDate === undefined) {
-            //-- It doesn't exist --//
-            bError = true;
-            fnAppendError("Date is not given!");
-        }
-        
-        //--------------------------------------------------------------------//
-        // If the given date is not a unix timestamp and it's a string, there
-        // will need to be checks to make sure it will be valid on multiple
-        // browsers.
-        //--------------------------------------------------------------------//
-        if (bError === false) {
-            if (isNaN(vDate) && typeof vDate === "string") {
+        try {
+            //--------------------------------------------------------------------//
+            // Check that the timestamp is there
+            //--------------------------------------------------------------------//
+            if (vDate === undefined) {
+                //-- It doesn't exist --//
+                fnAppendError("Date is not given!");
+            }
+            
+            //--------------------------------------------------------------------//
+            // If the given date is not a unix timestamp and it's a string, there
+            // will need to be checks to make sure it will be valid on multiple
+            // browsers.
+            //--------------------------------------------------------------------//
+            if (bError === false) {
+                if (isNaN(vDate) && typeof vDate === "string") {
 
-                if (vDate.length === 10 || vDate.length === 7 || vDate.length === 4) {
+                    if (vDate.length === 10 || vDate.length === 7 || vDate.length === 4) {
 
-                    //-- If it has 4 characters, it could be a year. Verify this. --//
-                    if (vDate.length === 4) {
-                        if (fnIsYearValid(vDate)) {
-                            oDate = new Date(vDate);
-                        }
-                    
-                    //-- If it has 7 characters, it could contain the year and month. Verify this. --//
-                    } else if (vDate.length === 7) {
-                        
-                        //-- Can the the string be split into two pieces? --//
-                        
-                        // Try using a hyphen as a delimiter. //
-                        aDatePieces = vDate.split('-');
-                        
-                        if (aDatePieces.length === 1) {
-                            // Try using a forward slash //
-                            aDatePieces = vDate.split('/');
-                        }
-                        
-                        //-- If not, report it as an error. --//
-                        if (aDatePieces.length !== 2) {
-                            bError = true;
-                            fnAppendError("Date format is incorrect. It should be YYYY-MM.");
-                            
-                        //-- Otherwise, verify each element. --//
-                        } else {
-                            bYearValid  = fnIsYearValid( aDatePieces[0] );
-                            bMonthValid = fnIsMonthValid( aDatePieces[1] );
-                            
-                            // If each element is valid, then create the date object.
-                            if (bYearValid && bMonthValid) {
+                        //-- If it has 4 characters, it could be a year. Verify this. --//
+                        if (vDate.length === 4) {
+                            if (fnIsYearValid(vDate)) {
                                 oDate = new Date(vDate);
                             }
-                            
-                        }
-                        
-                    //-- If it has 10 characters, it could contain the year, month, and the day. Verify this. --//
-                    } else if (vDate.length === 10) {
-                        
-                        //-- Can the the string be split into three pieces? --//
-                        
-                        // Try using a hyphen as a delimiter. //
-                        aDatePieces = vDate.split('-');
-                        
-                        if (aDatePieces.length === 1) {
-                            // Try using a forward slash //
-                            aDatePieces = vDate.split('/');
-                        }
-                        
-                        //-- If not, report it as an error. --//
-                        if (aDatePieces.length !== 3) {
-                            bError = true;
-                            fnAppendError("Date format is incorrect. It should be YYYY-MM-DD.");
-                            
-                        //-- Otherwise, verify each element. --//
-                        } else {
-                            //bYearValid  = fnIsYearValid( aDatePieces[0] );
-                            bDayValid   = fnIsDayValid( aDatePieces[0], aDatePieces[1], aDatePieces[2] );
-                            
-                            // If each element is valid, then create the date object.
-                            if (bDayValid) {
-                                oDate = new Date(vDate);
+
+                        //-- If it has 7 characters, it could contain the year and month. Verify this. --//
+                        } else if (vDate.length === 7) {
+
+                            //-- Can the the string be split into two pieces? --//
+
+                            // Try using a hyphen as a delimiter. //
+                            aDatePieces = vDate.split('-');
+
+                            if (aDatePieces.length === 1) {
+                                // Try using a forward slash //
+                                aDatePieces = vDate.split('/');
+                            }
+
+                            //-- If not, report it as an error. --//
+                            if (aDatePieces.length !== 2) {
+                                fnAppendError("Date format is incorrect. It should be YYYY-MM.");
+
+                            //-- Otherwise, verify each element. --//
                             } else {
-                                bError = true;
+                                bYearValid  = fnIsYearValid( aDatePieces[0] );
+                                bMonthValid = fnIsMonthValid( aDatePieces[1] );
+
+                                // If each element is valid, then create the date object.
+                                if (bYearValid && bMonthValid) {
+                                    oDate = new Date(vDate);
+                                }
+
                             }
-                            
+
+                        //-- If it has 10 characters, it could contain the year, month, and the day. Verify this. --//
+                        } else if (vDate.length === 10) {
+
+                            //-- Can the the string be split into three pieces? --//
+
+                            // Try using a hyphen as a delimiter. //
+                            aDatePieces = vDate.split('-');
+
+                            if (aDatePieces.length === 1) {
+                                // Try using a forward slash //
+                                aDatePieces = vDate.split('/');
+                            }
+
+                            //-- If not, report it as an error. --//
+                            if (aDatePieces.length !== 3) {
+                                fnAppendError("Date format is incorrect. It should be YYYY-MM-DD.");
+
+                            //-- Otherwise, verify each element. --//
+                            } else {
+                                //bYearValid  = fnIsYearValid( aDatePieces[0] );
+                                bDayValid   = fnIsDayValid( aDatePieces[0], aDatePieces[1], aDatePieces[2] );
+
+                                // If each element is valid, then create the date object.
+                                if (bDayValid) {
+                                    oDate = new Date(vDate);
+                                } else {
+                                    bError = true;
+                                }
+
+                            }
                         }
+
+
+                    } else {
+                        fnAppendError("Date given is not a valid string!");
                     }
-
-
-                } else {
-                    bError = true;
-                    fnAppendError("Date given is not a valid string!");
                 }
             }
+        } catch (e) {
+            fnAppendError("Error checking the date:\n\n" + e.name + ": " + e.message);
         }
         
         //--------------------------------------------------------------------//
@@ -277,34 +289,36 @@ $.extend(IomyRe.validation, {
         
         // Lambda function to run if there are errors.
         var fnAppendError   = function (sErrMesg) {
+            bError = true;
             aErrorMessages.push(sErrMesg);
             jQuery.sap.log.error(sErrMesg);
         };
         
-        //--------------------------------------------------------------------//
-        // Validate the date
-        //--------------------------------------------------------------------//
-        if (vDate.length === 10) {
-            //-- Date string must be 10 characters long. --//
-            mDateResults = this.isDateValid(vDate);
-            if (mDateResults.bIsValid === false) {
-                bError = true;
-                aErrorMessages = mDateResults.aErrorMessages;
+        try {
+            //--------------------------------------------------------------------//
+            // Validate the date
+            //--------------------------------------------------------------------//
+            if (vDate.length === 10) {
+                //-- Date string must be 10 characters long. --//
+                mDateResults = this.isDateValid(vDate);
+                if (mDateResults.bIsValid === false) {
+                    aErrorMessages = mDateResults.aErrorMessages;
+                }
+            } else {
+                //-- Date size is not the right size. --//
+                fnAppendError("Date of Birth is not in the right format!");
             }
-        } else {
-            //-- Date size is not the right size. --//
-            bError = true;
-            fnAppendError("Date of Birth is not in the right format!");
-        }
-        
-        //--------------------------------------------------------------------//
-        // If all is well, ensure that the date is not in the future
-        //--------------------------------------------------------------------//
-        if (bError === false && mDateResults.date !== null) {
-            if (mDateResults.date.getTime() > oCurrentDate.getTime()) {
-                bError = true;
-                fnAppendError("Date of Birth is set in the future!");
+
+            //--------------------------------------------------------------------//
+            // If all is well, ensure that the date is not in the future
+            //--------------------------------------------------------------------//
+            if (bError === false && mDateResults.date !== null) {
+                if (mDateResults.date.getTime() > oCurrentDate.getTime()) {
+                    fnAppendError("Date of Birth is set in the future!");
+                }
             }
+        } catch (e) {
+            fnAppendError("Error checking the date of birth:\n\n" + e.name + ": " + e.message);
         }
         
         //--------------------------------------------------------------------//
@@ -318,115 +332,24 @@ $.extend(IomyRe.validation, {
     },
     
     // TODO: Finish this off and play around with it.
-    isFormFieldValid : function (mField) {
+    isFormFieldValid : function (vValue) {
         //-------------------------------------------------//
         // Variables
         //-------------------------------------------------//
-        var bError                  = false;
-        var aErrorMessages          = [];
-        var mResults                = {};
-        var bRequired               = false;
-        var bDefaultValue           = null;
-        var sGivenValue             = null;
-        var sType                   = "String";
+        var bError = false;
         
-        // Lambda function to run if there are errors.
-        var fnAppendError   = function (sErrMesg) {
+        //--------------------------------------------------------------------//
+        // Check if the value is given
+        //--------------------------------------------------------------------//
+        if (vValue === undefined || vValue === null) {
             bError = true;
-            aErrorMessages.push(sErrMesg);
-            jQuery.sap.log.error(sErrMesg);
-        };
-        
-        //--------------------------------------------------------------------//
-        // Check if the field is actually specified, and if so, check if it's a
-        // valid JS Object.
-        //--------------------------------------------------------------------//
-        if (mField === undefined || mField === null) {
-            fnAppendError("A field object must be given.");
-        } else if (typeof mField !== "object") {
-            fnAppendError("The field parameter is an invalid type. Expecting object, '"+typeof mField+"' given.");
-        }
-        
-        //--------------------------------------------------------------------//
-        // Error Checking Round 1:
-        // 
-        // If the field parameter is valid, check if the field is required, and
-        // if a value was given.
-        //--------------------------------------------------------------------//
-        if (!bError) {
-            if (mField.required) {
-                bRequired = mField.required;
-            }
-            
-            //----------------------------------------------------------------//
-            // Check if a default value was given then the value itself.
-            //----------------------------------------------------------------//
-            if (mField.default !== undefined && mField.default !== null && mField.default !== "") {
-                bDefaultValue = mField.default;
-            }
-            
-            if (mField.value !== undefined && mField.value !== null && mField.value !== "") {
-                sGivenValue = mField.default;
-            }
-            
-            //----------------------------------------------------------------//
-            // Use the default value if the actual value is not specified.
-            //----------------------------------------------------------------//
-            if (sGivenValue === null && bDefaultValue !== null) {
-                sGivenValue = bDefaultValue;
-            }
-            
-            //----------------------------------------------------------------//
-            // If required check if there is a value, or at least the default
-            // value.
-            //----------------------------------------------------------------//
-            if (bRequired && sGivenValue === null) {
-                fnAppendError("$FIELD is required.");
-            }
-        }
-        
-        //--------------------------------------------------------------------//
-        // Error Checking Round 2:
-        //
-        // If the value exists, then check the expected type and find if the
-        // value is appropriate to the specified type. If 'type' isn't given, a 
-        // 'String' is assumed.
-        //--------------------------------------------------------------------//
-        if (!bError && sGivenValue !== null) {
-            if (mField.type !== undefined && mField.type !== null) {
-                sType = mField.type;
-            }
-            
-            if (sType === "Integer" || sType === "Float" || sType === "Number") {
-                if (isNaN(sGivenValue)) {
-                    fnAppendError("$FIELD is not a valid number");
-                } else {
-                    //--------------------------------------------------------//
-                    // Check that the number is a whole number if we're
-                    // expecting an integer.
-                    //--------------------------------------------------------//
-                    if (sType === "Integer" && (sGivenValue > Math.floor(sGivenValue))) {
-                        fnAppendError("$FIELD is not a whole number. Integers must be whole numbers (4, 33, etc.).");
-                    }
-                }
-            }
-            
-            if (sType === "Boolean") {
-                if (typeof sGivenValue === "boolean") {
-                    
-                } else if (!isNaN(sGivenValue)) {
-                    
-                }
-            }
         }
         
         //--------------------------------------------------------------------//
         // Prepare the results map
         //--------------------------------------------------------------------//
-        mResults.bIsValid       = !bError;
-        mResults.aErrorMessages = aErrorMessages;
         
-        return mResults;
+        return bError;
     },
     
     /**
@@ -444,54 +367,58 @@ $.extend(IomyRe.validation, {
         var bIPAddressFormatError     = false;
         var mResult                   = {};
         
-        //-------------------------------------------------//
-        // Check that the IP address is given.
-        //-------------------------------------------------//
-        if (sIPAddress === null || sIPAddress === undefined || sIPAddress === false || sIPAddress === "") {
-            bError = true;
-            aErrorMessages.push("IP address must be given.");
-        } else {
-
+        try {
             //-------------------------------------------------//
-            // Are there three dots in the IP Address?         //
+            // Check that the IP address is given.
             //-------------------------------------------------//
-            var aThreeDots = sIPAddress.match(/\./g);
+            if (sIPAddress === null || sIPAddress === undefined || sIPAddress === false || sIPAddress === "") {
+                bError = true;
+                aErrorMessages.push("IP address must be given.");
+            } else {
 
-            if (aThreeDots === null || aThreeDots.length !== 3 || sIPAddress.charAt(0) === '.' || sIPAddress.charAt( sIPAddress.length - 1 ) === '.') {
-                bError = true; // No. FAIL!
-                aErrorMessages.push("IP Address: There must be only 4 parts separated by dots ('.') in an IPv4 address.");
-            }
+                //-------------------------------------------------//
+                // Are there three dots in the IP Address?         //
+                //-------------------------------------------------//
+                var aThreeDots = sIPAddress.match(/\./g);
 
-            //---------------------------------------------------------//
-            // There are three dots. Are the four parts valid numbers? //
-            //---------------------------------------------------------//
-            var aIPAddressParts = sIPAddress.split('.');
+                if (aThreeDots === null || aThreeDots.length !== 3 || sIPAddress.charAt(0) === '.' || sIPAddress.charAt( sIPAddress.length - 1 ) === '.') {
+                    bError = true; // No. FAIL!
+                    aErrorMessages.push("IP Address: There must be only 4 parts separated by dots ('.') in an IPv4 address.");
+                }
 
-            // Check each number
-            for (var i = 0; i < aIPAddressParts.length; i++) {
-                for (var j = 0; j < aIPAddressParts[i].length; j++) {
-                    // Spaces and the plus symbol are ignored by isNaN(). isNaN() covers the rest.
-                    if (aIPAddressParts[i].charAt(j) === ' ' || aIPAddressParts[i].charAt(j) === '+' || isNaN(aIPAddressParts[i].charAt(j))) {
-                        bIPAddressFormatError = true; // INVALID CHARACTER
+                //---------------------------------------------------------//
+                // There are three dots. Are the four parts valid numbers? //
+                //---------------------------------------------------------//
+                var aIPAddressParts = sIPAddress.split('.');
+
+                // Check each number
+                for (var i = 0; i < aIPAddressParts.length; i++) {
+                    for (var j = 0; j < aIPAddressParts[i].length; j++) {
+                        // Spaces and the plus symbol are ignored by isNaN(). isNaN() covers the rest.
+                        if (aIPAddressParts[i].charAt(j) === ' ' || aIPAddressParts[i].charAt(j) === '+' || isNaN(aIPAddressParts[i].charAt(j))) {
+                            bIPAddressFormatError = true; // INVALID CHARACTER
+                            break;
+                        }
+                    }
+
+                    if (aIPAddressParts[i].length > 1 && aIPAddressParts[i].charAt(0) === "0") {
+                        bError = true;
+                        aErrorMessages.push("IP Address: One of the numbers start with '0'.");
+                    }
+
+                    if (bIPAddressFormatError === true) {
+                        bError = true;
+                        aErrorMessages.push("IP Address: One of the numbers contains invalid characters.");
+                        break;
+                    } else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
+                        bError = true;
+                        aErrorMessages.push("IP Address: One of the numbers is greater than 255 or a negative number.");
                         break;
                     }
                 }
-
-                if (aIPAddressParts[i].length > 1 && aIPAddressParts[i].charAt(0) === "0") {
-                    bError = true;
-                    aErrorMessages.push("IP Address: One of the numbers start with '0'.");
-                }
-
-                if (bIPAddressFormatError === true) {
-                    bError = true;
-                    aErrorMessages.push("IP Address: One of the numbers contains invalid characters.");
-                    break;
-                } else if (parseInt(aIPAddressParts[i]) < 0 || parseInt(aIPAddressParts[i]) > 255) {
-                    bError = true;
-                    aErrorMessages.push("IP Address: One of the numbers is greater than 255 or a negative number.");
-                    break;
-                }
             }
+        } catch (e) {
+            fnAppendError("Error checking the IPv4 port:\n\n" + e.name + ": " + e.message);
         }
         
         //-------------------------------------------------//
@@ -517,20 +444,24 @@ $.extend(IomyRe.validation, {
         var aErrorMessages            = [];
         var mResult                   = {};
         
-        //-------------------------------------------------//
-        // Check that the IP address is given.
-        //-------------------------------------------------//
-        if (sIPPort === null || sIPPort === undefined || sIPPort === false || sIPPort.length === 0) {
-            bError = true;
-            aErrorMessages.push("IP Port must be given.");
-            
-        } else {
-            var aInvalidChars    = sIPPort.match(/[^0-9]/g);
-
-            if (aInvalidChars !== null) {
+        try {
+            //-------------------------------------------------//
+            // Check that the IP address is given.
+            //-------------------------------------------------//
+            if (sIPPort === null || sIPPort === undefined || sIPPort === false || sIPPort.length === 0) {
                 bError = true;
-                aErrorMessages.push("IP Port: The port contains invalid character(s).");
+                aErrorMessages.push("IP Port must be given.");
+
+            } else {
+                var aInvalidChars    = sIPPort.match(/[^0-9]/g);
+
+                if (aInvalidChars !== null) {
+                    bError = true;
+                    aErrorMessages.push("IP Port: The port contains invalid character(s).");
+                }
             }
+        } catch (e) {
+            fnAppendError("Error checking the IPv4 port:\n\n" + e.name + ": " + e.message);
         }
         
         //-------------------------------------------------//
@@ -566,39 +497,47 @@ $.extend(IomyRe.validation, {
             aErrorMessages.push(sErrMesg);
         };
         
-        //--------------------------------------------------------------------//
-        // Check that it's there and it's a valid number
-        //--------------------------------------------------------------------//
-        
-        //-- Check the Link ID --//
-        if (iLinkId === undefined) {
-            //-- It doesn't exist --//
-            fnAppendError("Link ID is not given!");
-            
-        } else if (isNaN(iLinkId)) {
-            //-- It's not a number --//
-            fnAppendError("Link ID is not a valid number");
-        }
-        
-        //--------------------------------------------------------------------//
-        // If there are no errors, check that it exists in the LinkList
-        // variable.
-        //--------------------------------------------------------------------//
-        if (bError === false) {
-            $.each(IomyRe.common.LinkList, function (sLinkID, oLink) {
+        try {
+            //--------------------------------------------------------------------//
+            // Check that it's there and it's a valid number
+            //--------------------------------------------------------------------//
 
-                if (oLink.LinkId == iLinkId) {
-                    bIsValid = true;
+            //-- Check the Link ID --//
+            if (iLinkId === undefined) {
+                //-- It doesn't exist --//
+                fnAppendError("Link ID is not given!");
+
+            } else if (isNaN(iLinkId)) {
+                //-- It's not a number --//
+                fnAppendError("Link ID is not a valid number");
+            }
+
+            //--------------------------------------------------------------------//
+            // If there are no errors, check that it exists in the LinkList
+            // variable.
+            //--------------------------------------------------------------------//
+            if (bError === false) {
+                try {
+                    $.each(IomyRe.common.LinkList, function (sLinkID, oLink) {
+
+                        if (oLink.LinkId == iLinkId) {
+                            bIsValid = true;
+                        }
+
+                    });
+                } catch (e) {
+                    fnAppendError("Error processing device in iomy.validation.isLinkIDValid():\n\n" + e.name + e.message);
                 }
+            }
 
-            });
-        }
-        
-        //--------------------------------------------------------------------//
-        // If the ID is not in the LinkList variable, flag it as an error.
-        //--------------------------------------------------------------------//
-        if (bIsValid === false) {
-            fnAppendError("Link does not exist!");
+            //--------------------------------------------------------------------//
+            // If the ID is not in the LinkList variable, flag it as an error.
+            //--------------------------------------------------------------------//
+            if (bIsValid === false) {
+                fnAppendError("Link does not exist!");
+            }
+        } catch (e) {
+            fnAppendError("Error checking the Link ID:\n\n" + e.name + ": " + e.message);
         }
         
         //--------------------------------------------------------------------//
@@ -628,7 +567,7 @@ $.extend(IomyRe.validation, {
     isPasswordSecure : function (sPassword) {
         var bValid;
         var aValidationErrorMessages    = [];
-        var sErrorMessage                = "";
+        var sErrorMessage               = "";
         var mInfo                       = {};
         var bContinueCheck              = false;
         var bEightChars                 = false;
@@ -644,98 +583,103 @@ $.extend(IomyRe.validation, {
         var iUpperCaseLetters           = 0;
         var iLowerCaseLetters           = 0;
 
-        //----------------------------------//
-        // How long is the password?
-        //----------------------------------//
-        if (iPasswordLength >= iExpectedPasswordLength) {
-            //---------------------------------------------------------------------------------//
-            // Take any spaces off the end of the password in case someone was cheeky enough to
-            // try to circumvent the 8 character limit by placing spaces on either sides of the
-            // characters. No chance!
-            //---------------------------------------------------------------------------------//
-            sPassword = sPassword.trim();
-            iPasswordLength = sPassword.length;
-
-            // Now see what the true length of the password is.
+        try {
+            //----------------------------------//
+            // How long is the password?
+            //----------------------------------//
             if (iPasswordLength >= iExpectedPasswordLength) {
-                bEightChars = true;
-            }
-        }
-        
-        //---------------------------------------------------------------------------------//
-        // Go through every single character, analyse each one to see if it's a letter,
-        // number, or symbol.
-        //---------------------------------------------------------------------------------//
-        for (var i = 0; i < iPasswordLength; i++) {
-            if (bContinueCheck === true) {
-                break;
-            }
-            // Is it a number?
-            if (!isNaN(sPassword.charAt(i))) {
-                iNumbers++;
+                //---------------------------------------------------------------------------------//
+                // Take any spaces off the end of the password in case someone was cheeky enough to
+                // try to circumvent the 8 character limit by placing spaces on either sides of the
+                // characters. No chance!
+                //---------------------------------------------------------------------------------//
+                sPassword = sPassword.trim();
+                iPasswordLength = sPassword.length;
 
-            // Is it a letter?
-            } else if (sPassword.charAt(i).match(/[A-Z]/i) !== null) { // i for case-Insensitive
-                // Is it upper or lower case.
-                if (sPassword.charAt(i).match(/[A-Z]/g) !== null) {
-                    iUpperCaseLetters++;
-                } else if (sPassword.charAt(i).match(/[a-z]/g) !== null) {
-                    iLowerCaseLetters++;
+                // Now see what the true length of the password is.
+                if (iPasswordLength >= iExpectedPasswordLength) {
+                    bEightChars = true;
                 }
-                iLetters++;
-
-            // So it must be some sort of symbol.
-            } else {
-                iSymbols++;
-            }
-        }
-
-        //----------------------------------------------------------------------------------------//
-        // Check that all the criteria have been met
-        //----------------------------------------------------------------------------------------//
-        // Are there numbers?
-        if (iNumbers > 0) {
-            bHasANumber = true;
-        }
-
-        // Are there letters?
-        if (iLetters > 0) {
-            // Are there upper-case letters?
-            if (iUpperCaseLetters > 0) {
-                bHasAnUpperCaseLetter = true;
             }
 
-            // Are there lower-case letters?
-            if (iLowerCaseLetters > 0) {
-                bHasALowerCaseLetter = true;
+            //---------------------------------------------------------------------------------//
+            // Go through every single character, analyse each one to see if it's a letter,
+            // number, or symbol.
+            //---------------------------------------------------------------------------------//
+            for (var i = 0; i < iPasswordLength; i++) {
+                if (bContinueCheck === true) {
+                    break;
+                }
+                // Is it a number?
+                if (!isNaN(sPassword.charAt(i))) {
+                    iNumbers++;
+
+                // Is it a letter?
+                } else if (sPassword.charAt(i).match(/[A-Z]/i) !== null) { // i for case-Insensitive
+                    // Is it upper or lower case.
+                    if (sPassword.charAt(i).match(/[A-Z]/g) !== null) {
+                        iUpperCaseLetters++;
+                    } else if (sPassword.charAt(i).match(/[a-z]/g) !== null) {
+                        iLowerCaseLetters++;
+                    }
+                    iLetters++;
+
+                // So it must be some sort of symbol.
+                } else {
+                    iSymbols++;
+                }
             }
-        }
 
-        // Are there symbols?
-        if (iSymbols > 0) {
-            bHasASymbol = true;
-        }
+            //----------------------------------------------------------------------------------------//
+            // Check that all the criteria have been met
+            //----------------------------------------------------------------------------------------//
+            // Are there numbers?
+            if (iNumbers > 0) {
+                bHasANumber = true;
+            }
 
-        //----------------------------------------------------------------------------------------//
-        // Verify validity and generate error messages when not all of the conditions are met.
-        //----------------------------------------------------------------------------------------//
-        if (bEightChars === true && bHasAnUpperCaseLetter === true && bHasALowerCaseLetter === true &&
-                bHasANumber === true && bHasASymbol === true)
-        {
+            // Are there letters?
+            if (iLetters > 0) {
+                // Are there upper-case letters?
+                if (iUpperCaseLetters > 0) {
+                    bHasAnUpperCaseLetter = true;
+                }
 
-            bValid = true;
+                // Are there lower-case letters?
+                if (iLowerCaseLetters > 0) {
+                    bHasALowerCaseLetter = true;
+                }
+            }
 
-        } else { // One of the conditions has not been met
+            // Are there symbols?
+            if (iSymbols > 0) {
+                bHasASymbol = true;
+            }
+
+            //----------------------------------------------------------------------------------------//
+            // Verify validity and generate error messages when not all of the conditions are met.
+            //----------------------------------------------------------------------------------------//
+            if (bEightChars === true && bHasAnUpperCaseLetter === true && bHasALowerCaseLetter === true &&
+                    bHasANumber === true && bHasASymbol === true)
+            {
+
+                bValid = true;
+
+            } else { // One of the conditions has not been met
+                bValid = false;
+                // Populate the error log with the relevant messages.
+                sErrorMessage += "Password must:\n";
+                sErrorMessage += "- Be at least 8 characters. No trailing spaces\n";
+                sErrorMessage += "- Have at least one upper-case letter\n";
+                sErrorMessage += "- Have at least one lower-case letter\n";
+                sErrorMessage += "- Have at least one number\n";
+                sErrorMessage += "- Have a symbol (!, @, %, etc)";
+
+                aValidationErrorMessages.push(sErrorMessage);
+            }
+        } catch (e) {
             bValid = false;
-            // Populate the error log with the relevant messages.
-            sErrorMessage += "Password must:\n";
-            sErrorMessage += "- Be at least 8 characters. No trailing spaces\n";
-            sErrorMessage += "- Have at least one upper-case letter\n";
-            sErrorMessage += "- Have at least one lower-case letter\n";
-            sErrorMessage += "- Have at least one number\n";
-            sErrorMessage += "- Have a symbol (!, @, %, etc)";
-            
-            aValidationErrorMessages.push(sErrorMessage);
+            aValidationErrorMessages.push("Error checking the password:\n\n" + e.name + ": " + e.message);
         }
         
         //-------------------------------------------------------------------//
@@ -766,59 +710,61 @@ $.extend(IomyRe.validation, {
         
         // Lambda function to run if there are errors.
         var fnAppendError   = function (sErrMesg) {
+            bError = true;
             aErrorMessages.push(sErrMesg);
             jQuery.sap.log.error(sErrMesg);
         };
         
-        //--------------------------------------------------------------------//
-        // Check that it's there and it's a valid number
-        //--------------------------------------------------------------------//
-        
-        //-- Check the Premise ID --//
-        if (iPremiseId === undefined) {
-            //-- It doesn't exist --//
-            bError = true;
-            fnAppendError("Premise ID is not given!");
-            
-        } else if (isNaN(iPremiseId)) {
-            //-- It's not a number --//
-            bError = true;
-            fnAppendError("Premise ID is not a valid number");
-        }
-        
-        //--------------------------------------------------------------------//
-        // If there are no errors, check that it exists in the PremiseList
-        // variable.
-        //--------------------------------------------------------------------//
-        if (bError === false) {
-            $.each(IomyRe.common.PremiseList, function (sPremiseID, oPremise) {
-                
-                //------------------------------------------------------------//
-                // Capture the room list in the currently held premise.
-                //------------------------------------------------------------//
-                if (sPremiseID !== undefined && sPremiseID !== null &&
-                        oPremise !== undefined && oPremise !== null)
-                {
-                    if (oPremise.Id == iPremiseId) {
-                        bIsValid = true;
-                    }
-                }
+        try {
+            //--------------------------------------------------------------------//
+            // Check that it's there and it's a valid number
+            //--------------------------------------------------------------------//
 
-            });
-        }
-        
-        //--------------------------------------------------------------------//
-        // If the ID is not in the PremiseList variable, flag it as an error.
-        //--------------------------------------------------------------------//
-        if (bIsValid === false) {
-            bError = true;
-            fnAppendError("Premise does not exist!");
+            //-- Check the Premise ID --//
+            if (iPremiseId === undefined) {
+                //-- It doesn't exist --//
+                fnAppendError("Premise ID is not given!");
+
+            } else if (isNaN(iPremiseId)) {
+                //-- It's not a number --//
+                fnAppendError("Premise ID is not a valid number");
+            }
+
+            //--------------------------------------------------------------------//
+            // If there are no errors, check that it exists in the PremiseList
+            // variable.
+            //--------------------------------------------------------------------//
+            if (bError === false) {
+                $.each(IomyRe.common.PremiseList, function (sPremiseID, oPremise) {
+
+                    //------------------------------------------------------------//
+                    // Capture the room list in the currently held premise.
+                    //------------------------------------------------------------//
+                    if (sPremiseID !== undefined && sPremiseID !== null &&
+                            oPremise !== undefined && oPremise !== null)
+                    {
+                        if (oPremise.Id == iPremiseId) {
+                            bIsValid = true;
+                        }
+                    }
+
+                });
+            }
+
+            //--------------------------------------------------------------------//
+            // If the ID is not in the PremiseList variable, flag it as an error.
+            //--------------------------------------------------------------------//
+            if (bIsValid === false) {
+                fnAppendError("Premise does not exist!");
+            }
+        } catch (e) {
+            fnAppendError("Error checking the Premise ID:\n\n" + e.name + ": " + e.message);
         }
         
         //--------------------------------------------------------------------//
         // Prepare the results map
         //--------------------------------------------------------------------//
-        mResults.bIsValid       = bIsValid;
+        mResults.bIsValid       = !bError;
         mResults.aErrorMessages = aErrorMessages;
         
         return mResults;
@@ -843,6 +789,7 @@ $.extend(IomyRe.validation, {
         
         // Lambda function to run if there are errors.
         var fnAppendError   = function (sErrMesg) {
+            bError = true;
             aErrorMessages.push(sErrMesg);
             jQuery.sap.log.error(sErrMesg);
         };
@@ -854,12 +801,10 @@ $.extend(IomyRe.validation, {
         //-- Check the Room ID --//
         if (iRoomId === undefined) {
             //-- It doesn't exist --//
-            bError = true;
             fnAppendError("Room ID is not given!");
             
         } else if (isNaN(iRoomId)) {
             //-- It's not a number --//
-            bError = true;
             fnAppendError("Room ID is not a valid number");
         }
         
@@ -867,46 +812,53 @@ $.extend(IomyRe.validation, {
         // If there are no errors, check that it exists in the RoomList
         // variable.
         //--------------------------------------------------------------------//
-        if (bError === false) {
-            $.each(IomyRe.common.RoomsList, function (sPremiseID, oPremise) {
-                
-                //------------------------------------------------------------//
-                // Capture the room list in the currently held premise.
-                //------------------------------------------------------------//
-                if (sPremiseID !== undefined && sPremiseID !== null &&
-                        oPremise !== undefined && oPremise !== null)
-                {
-                    //--------------------------------------------------------//
-                    // Find the room.
-                    //--------------------------------------------------------//
-                    $.each(oPremise, function(sRoomID, oRoom) {
-                        
-                        if (sRoomID !== undefined && sRoomID !== null &&
-                                oRoom !== undefined && oRoom !== null)
-                        {
-                            if (oRoom.RoomId == iRoomId) {
-                                bIsValid = true;
-                            }
-                        }
-                        
-                    });
-                }
+        try {
+            if (bError === false) {
+                $.each(IomyRe.common.RoomsList, function (sPremiseID, oPremise) {
 
-            });
+                    //------------------------------------------------------------//
+                    // Capture the room list in the currently held premise.
+                    //------------------------------------------------------------//
+                    if (sPremiseID !== undefined && sPremiseID !== null &&
+                            oPremise !== undefined && oPremise !== null)
+                    {
+                        //--------------------------------------------------------//
+                        // Find the room.
+                        //--------------------------------------------------------//
+                        try {
+                            $.each(oPremise, function(sRoomID, oRoom) {
+
+                                if (sRoomID !== undefined && sRoomID !== null &&
+                                        oRoom !== undefined && oRoom !== null)
+                                {
+                                    if (oRoom.RoomId == iRoomId) {
+                                        bIsValid = true;
+                                    }
+                                }
+
+                            });
+                        } catch (e) {
+                            fnAppendError("Error searching the room to validate:\n\n" + e.name + ": " + e.message);
+                        }
+                    }
+
+                });
+            }
+        } catch (e) {
+            fnAppendError("Error checking the Room ID:\n\n" + e.name + e.message);
         }
         
         //--------------------------------------------------------------------//
         // If the ID is not in the RoomList variable, flag it as an error.
         //--------------------------------------------------------------------//
         if (bIsValid === false) {
-            bError = true;
             fnAppendError("Room does not exist!");
         }
         
         //--------------------------------------------------------------------//
         // Prepare the results map
         //--------------------------------------------------------------------//
-        mResults.bIsValid       = bIsValid;
+        mResults.bIsValid       = !bError;
         mResults.aErrorMessages = aErrorMessages;
         
         return mResults;
@@ -931,6 +883,7 @@ $.extend(IomyRe.validation, {
         
         // Lambda function to run if there are errors.
         var fnAppendError   = function (sErrMesg) {
+            bError = true;
             aErrorMessages.push(sErrMesg);
             jQuery.sap.log.error(sErrMesg);
         };
@@ -939,44 +892,49 @@ $.extend(IomyRe.validation, {
         // Check that it's there and it's a valid number
         //--------------------------------------------------------------------//
         
-        //-- Check the Thing ID --//
-        if (iThingId === undefined) {
-            //-- It doesn't exist --//
-            bError = true;
-            fnAppendError("Thing ID is not given!");
-            
-        } else if (isNaN(iThingId)) {
-            //-- It's not a number --//
-            bError = true;
-            fnAppendError("Thing ID is not a valid number");
-        }
-        
-        //--------------------------------------------------------------------//
-        // If there are no errors, check that it exists in the ThingList
-        // variable.
-        //--------------------------------------------------------------------//
-        if (bError === false) {
-            $.each(IomyRe.common.ThingList, function (sThingID, oThing) {
+        try {
+            //-- Check the Thing ID --//
+            if (iThingId === undefined) {
+                //-- It doesn't exist --//
+                fnAppendError("Thing ID is not given!");
 
-                if (oThing.Id == iThingId) {
-                    bIsValid = true;
-                }
+            } else if (isNaN(iThingId)) {
+                //-- It's not a number --//
+                fnAppendError("Thing ID is not a valid number");
+            }
 
-            });
-        }
-        
-        //--------------------------------------------------------------------//
-        // If the ID is not in the ThingList variable, flag it as an error.
-        //--------------------------------------------------------------------//
-        if (bIsValid === false) {
-            bError = true;
-            fnAppendError("Thing not found!");
+            //--------------------------------------------------------------------//
+            // If there are no errors, check that it exists in the ThingList
+            // variable.
+            //--------------------------------------------------------------------//
+            if (bError === false) {
+                $.each(IomyRe.common.ThingList, function (sThingID, oThing) {
+
+                    try {
+                        if (oThing.Id == iThingId) {
+                            bIsValid = true;
+                            return false;
+                        }
+                    } catch (e) {
+                        fnAppendError("Error processing device in iomy.validation.isThingIDValid():\n\n" + e.name + e.message);
+                    }
+                });
+            }
+
+            //--------------------------------------------------------------------//
+            // If the ID is not in the ThingList variable, flag it as an error.
+            //--------------------------------------------------------------------//
+            if (bIsValid === false) {
+                fnAppendError("Thing not found!");
+            }
+        } catch (e) {
+            fnAppendError("Error checking the Thing ID:\n\n" + e.name + ": " + e.message);
         }
         
         //--------------------------------------------------------------------//
         // Prepare the results map
         //--------------------------------------------------------------------//
-        mResults.bIsValid       = bIsValid;
+        mResults.bIsValid       = !bError;
         mResults.aErrorMessages = aErrorMessages;
         
         return mResults;
@@ -992,34 +950,38 @@ $.extend(IomyRe.validation, {
             aErrorMessages.push(sErrorMessages);
         };
         
-        //-- Protocol (e.g. http) --//
-        if (mData.Protocol === undefined || mData.Protocol === null ||
-            mData.Protocol === "")
-        {
-            fnAppendError("URL protocol is required.");
-        }
-        
-        //-- IP Address --//
-        var mInfo = self.isIPv4AddressValid(mData.IPAddress);
+        try {
+            //-- Protocol (e.g. http) --//
+            if (mData.Protocol === undefined || mData.Protocol === null ||
+                mData.Protocol === "")
+            {
+                fnAppendError("URL protocol is required.");
+            }
 
-        if (!mInfo.bValid) {
-            bError = true;
-            aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
-        }
-        
-        //-- IP Port --//
-        mInfo = self.isIPv4PortValid(mData.IPPort);
+            //-- IP Address --//
+            var mInfo = self.isIPv4AddressValid(mData.IPAddress);
 
-        if (!mInfo.bValid) {
-            bError = true;
-            aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
-        }
+            if (!mInfo.bValid) {
+                bError = true;
+                aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+            }
 
-        //-- Stream Path --//
-        if (mData.Path === undefined || mData.Path === null ||
-            mData.Path === "")
-        {
-            fnAppendError("Stream path is required.");
+            //-- IP Port --//
+            mInfo = self.isIPv4PortValid(mData.IPPort);
+
+            if (!mInfo.bValid) {
+                bError = true;
+                aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+            }
+
+            //-- Stream Path --//
+            if (mData.Path === undefined || mData.Path === null ||
+                mData.Path === "")
+            {
+                fnAppendError("Stream path is required.");
+            }
+        } catch (e) {
+            fnAppendError("Error checking the data:\n\n" + e.name + ": " + e.message);
         }
         
         return {
@@ -1042,117 +1004,133 @@ $.extend(IomyRe.validation, {
         
         // An anonymous function to check the Display name.
         var fnCheckDisplayName = function () {
-            if (mData.DisplayName === undefined || mData.DisplayName === null ||
-                mData.DisplayName === "")
-            {
-                fnAppendError(sDisplayNameMissing);
+            try {
+                if (mData.DisplayName === undefined || mData.DisplayName === null ||
+                    mData.DisplayName === "")
+                {
+                    fnAppendError(sDisplayNameMissing);
+                }
+            } catch (e) {
+                fnAppendError("Error checking display name:\n\n" + e.name + ": " + e.message);
             }
         };
         
         // An anonymous function to check the IP Address.
         var fnCheckIPAddress = function () {
-            var mInfo = self.isIPv4AddressValid(mData.IPAddress);
+            try {
+                var mInfo = self.isIPv4AddressValid(mData.IPAddress);
 
-            if (!mInfo.bValid) {
-                bError = true;
-                aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+                if (!mInfo.bValid) {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+                }
+            } catch (e) {
+                fnAppendError("Error checking address:\n\n" + e.name + ": " + e.message);
             }
         };
         
         // An anonymous function to check the IP Port.
         var fnCheckIPPort = function () {
-            var mInfo = self.isIPv4PortValid(mData.IPPort);
+            try {
+                var mInfo = self.isIPv4PortValid(mData.IPPort);
 
-            if (!mInfo.bValid) {
-                bError = true;
-                aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+                if (!mInfo.bValid) {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+                }
+            } catch (e) {
+                fnAppendError("Error checking port:\n\n" + e.name + ": " + e.message);
             }
         };
         
-        switch (sDeviceType) {
-            // Onvif Camera Device
-            case "linkType"+IomyRe.devices.onvif.LinkTypeId :
-                fnCheckDisplayName();
-                fnCheckIPAddress();
-                fnCheckIPPort();
-                
-                break;
-            
-            // Philips Hue Bridge
-            case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
-                fnCheckDisplayName();
-                fnCheckIPAddress();
-                fnCheckIPPort();
-                
-                if (mData.DeviceToken === undefined || mData.DeviceToken === null ||
-                    mData.DeviceToken === "")
-                {
-                    fnAppendError("Device token is required");
-                }
-                
-                break;
-            
-            // Open Weather Map
-            case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
-                fnCheckDisplayName();
-                
-                if (mData.StationCode === undefined || mData.StationCode === null ||
-                    mData.StationCode === "")
-                {
-                    fnAppendError("Station code is required");
-                }
-                
-                if (mData.KeyCode === undefined || mData.KeyCode === null ||
-                    mData.KeyCode === "")
-                {
-                    fnAppendError("Key code is required");
-                }
-                
-                break;
-            
-            // IP Webcam Stream
-            case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
-                fnCheckIPAddress();
-                fnCheckIPPort();
-                
-                if (mData.LinkName === undefined || mData.LinkName === null ||
-                    mData.LinkName === "")
-                {
-                    fnAppendError("Device name is required.");
-                }
-                
-                if (mData.DisplayName === undefined || mData.DisplayName === null ||
-                mData.DisplayName === "")
-                {
-                    fnAppendError("Stream name is required.");
-                }
-                
-                if (mData.Protocol === undefined || mData.Protocol === null ||
-                    mData.Protocol === "")
-                {
-                    fnAppendError("URL protocol is required.");
-                }
-                
-                if (mData.Path === undefined || mData.Path === null ||
-                    mData.Path === "")
-                {
-                    fnAppendError("Stream path is required.");
-                }
-                
-                break;
-                
-            // Onvif Stream
-            case "thingType"+IomyRe.devices.onvif.ThingTypeId :
-                if (mData.CameraName === undefined || mData.CameraName === null ||
-                    mData.CameraName === "")
-                {
-                    fnAppendError("Stream name is required.");
-                }
-                
-                break;
-                
-            default :
-                throw new IllegalArgumentException("Invalid device type");
+        try {
+            switch (sDeviceType) {
+                // Onvif Camera Device
+                case "linkType"+IomyRe.devices.onvif.LinkTypeId :
+                    fnCheckDisplayName();
+                    fnCheckIPAddress();
+                    fnCheckIPPort();
+
+                    break;
+
+                // Philips Hue Bridge
+                case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
+                    fnCheckDisplayName();
+                    fnCheckIPAddress();
+                    fnCheckIPPort();
+
+                    if (mData.DeviceToken === undefined || mData.DeviceToken === null ||
+                        mData.DeviceToken === "")
+                    {
+                        fnAppendError("Device token is required");
+                    }
+
+                    break;
+
+                // Open Weather Map
+                case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
+                    fnCheckDisplayName();
+
+                    if (mData.StationCode === undefined || mData.StationCode === null ||
+                        mData.StationCode === "")
+                    {
+                        fnAppendError("Station code is required");
+                    }
+
+                    if (mData.KeyCode === undefined || mData.KeyCode === null ||
+                        mData.KeyCode === "")
+                    {
+                        fnAppendError("Key code is required");
+                    }
+
+                    break;
+
+                // IP Webcam Stream
+                case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
+                    fnCheckIPAddress();
+                    fnCheckIPPort();
+
+                    if (mData.LinkName === undefined || mData.LinkName === null ||
+                        mData.LinkName === "")
+                    {
+                        fnAppendError("Device name is required.");
+                    }
+
+                    if (mData.DisplayName === undefined || mData.DisplayName === null ||
+                    mData.DisplayName === "")
+                    {
+                        fnAppendError("Stream name is required.");
+                    }
+
+                    if (mData.Protocol === undefined || mData.Protocol === null ||
+                        mData.Protocol === "")
+                    {
+                        fnAppendError("URL protocol is required.");
+                    }
+
+                    if (mData.Path === undefined || mData.Path === null ||
+                        mData.Path === "")
+                    {
+                        fnAppendError("Stream path is required.");
+                    }
+
+                    break;
+
+                // Onvif Stream
+                case "thingType"+IomyRe.devices.onvif.ThingTypeId :
+                    if (mData.CameraName === undefined || mData.CameraName === null ||
+                        mData.CameraName === "")
+                    {
+                        fnAppendError("Stream name is required.");
+                    }
+
+                    break;
+
+                default :
+                    throw new IllegalArgumentException("Invalid device type");
+            }
+        } catch (e) {
+            fnAppendError("Error checking the data:\n\n" + e.name + ": " + e.message);
         }
         
         return {

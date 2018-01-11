@@ -90,79 +90,94 @@ $.extend(IomyRe.devices.csrmesh,{
         // Run the request to "whiten" the light bulb. This is until white light
         // support is fully supported.
         //--------------------------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest({
-            "url"     : IomyRe.apiphp.APILocation("light"),
-            "method"  : "POST",
-            "data"    : {
-                "Mode" : "ChangeColorBrightness",
-                "ThingId" : iThingId,
-                "Data" : JSON.stringify({
-                    "NewValue" : {
-                        //-- HEX: #EFE96B --//
-                        "Hue" : Math.round(0.1591 * 360),
-                        "Saturation" : Math.round(55.23 * 2.55),
-                        "Brightness" : Math.round(93.73 * 2.55)
-//                        "Hue" : 180,
-//                        "Saturation" : 0,
-//                        "Brightness" : 255
+        try {
+            IomyRe.apiphp.AjaxRequest({
+                "url"     : IomyRe.apiphp.APILocation("light"),
+                "method"  : "POST",
+                "data"    : {
+                    "Mode" : "ChangeColorBrightness",
+                    "ThingId" : iThingId,
+                    "Data" : JSON.stringify({
+                        "NewValue" : {
+                            //-- HEX: #EFE96B --//
+                            "Hue" : Math.round(0.1591 * 360),
+                            "Saturation" : Math.round(55.23 * 2.55),
+                            "Brightness" : Math.round(93.73 * 2.55)
+    //                        "Hue" : 180,
+    //                        "Saturation" : 0,
+    //                        "Brightness" : 255
+                        }
+                    })
+                },
+
+                "onSuccess" : function (type, data) {
+                    if (data.Error !== true) {
+                        fnSuccess();
+                    } else {
+                        fnFail(data.ErrMesg);
                     }
-                })
-            },
-            
-            "onSuccess" : function (type, data) {
-                if (data.Error !== true) {
-                    fnSuccess();
-                } else {
-                    fnFail(data.ErrMesg);
+                },
+
+                "onFail" : function (response) {
+                    fnFail(response);
                 }
-            },
-            
-            "onFail" : function (response) {
-                fnFail(response);
-            }
-        });
+            });
         
-//        IomyRe.apiphp.AjaxRequest({
-//            url: IomyRe.apiphp.APILocation("statechange"),
-//            type: "POST",
-//            data: { 
-//                "Mode":"ThingToggleStatus", 
-//                "Id": iThingId
-//            },
-//            onFail : function(response) {
-//                
-//                fnFail(response.responseText);
-//                
-//            },
-//            onSuccess : function( type, data ) {
-//                this.onSuccess = function (type, data) {
-//                    fnSuccess(type, data);
-//                };
-//                
-//                IomyRe.apiphp.AjaxRequest(this);
-//            }
-//        });
+    //        IomyRe.apiphp.AjaxRequest({
+    //            url: IomyRe.apiphp.APILocation("statechange"),
+    //            type: "POST",
+    //            data: { 
+    //                "Mode":"ThingToggleStatus", 
+    //                "Id": iThingId
+    //            },
+    //            onFail : function(response) {
+    //                
+    //                fnFail(response.responseText);
+    //                
+    //            },
+    //            onSuccess : function( type, data ) {
+    //                this.onSuccess = function (type, data) {
+    //                    fnSuccess(type, data);
+    //                };
+    //                
+    //                IomyRe.apiphp.AjaxRequest(this);
+    //            }
+    //        });
+        } catch (e) {
+            e.message = "Error in IomyRe.devices.csrmesh.turnOnWhiteLight ("+e.name+"):\n" + e.message;
+            $.sap.log.error(e.message);
+            throw e;
+        }
     },
     
     GetUITaskList: function( mSettings ) {
         //------------------------------------//
         //-- 1.0 - Initialise Variables        --//
         //------------------------------------//
-        var oModule         = this;
+        //var oModule         = this;
         var aTasks          = { "High":[], "Low":[] };                    //-- ARRAY:            --//
         
         
-        aTasks.High.push({
-            "Type":"Function", 
-            "Execute": function () {
-                IomyRe.devices.getHexOfLightColour({
-                    thingID     : mSettings.deviceData.DeviceId,
-                    onSuccess   : mSettings.onSuccess,
-                    onFail      : mSettings.onFail
-                });
-            }
-        });
-        
-        return aTasks;
+        try {
+            aTasks.High.push({
+                "Type":"Function", 
+                "Execute": function () {
+                    try {
+                        IomyRe.devices.getHexOfLightColour({
+                            thingID     : mSettings.deviceData.DeviceId,
+                            onSuccess   : mSettings.onSuccess,
+                            onFail      : mSettings.onFail
+                        });
+                    } catch (e) {
+                        mSettings.onFail(e.message);
+                    }
+                }
+            });
+        } catch (e) {
+            mSettings.onFail("Failed to add an CSR Mesh Bluetooth Bulb task to the list ("+e.name+"): " + e.message);
+            
+        } finally {
+            return aTasks;
+        }
     }
 });

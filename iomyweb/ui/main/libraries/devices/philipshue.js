@@ -25,7 +25,6 @@ $.sap.declare("IomyRe.devices.philipshue",true);
 IomyRe.devices.philipshue = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.philipshue,{
-    Devices: [],
     
     LinkTypeId        : 7,
     ThingTypeId       : 13,
@@ -38,21 +37,30 @@ $.extend(IomyRe.devices.philipshue,{
         //------------------------------------//
         //-- 1.0 - Initialise Variables        --//
         //------------------------------------//
-        var oModule         = this;
+        //var oModule         = this;
         var aTasks          = { "High":[], "Low":[] };                    //-- ARRAY:            --//
         
         
-        aTasks.High.push({
-            "Type":"Function", 
-            "Execute": function () {
-                IomyRe.devices.getHexOfLightColour({
-                    thingID     : mSettings.deviceData.DeviceId,
-                    onSuccess   : mSettings.onSuccess,
-                    onFail      : mSettings.onFail
-                });
-            }
-        });
-        
-        return aTasks;
+        try {
+            aTasks.High.push({
+                "Type":"Function", 
+                "Execute": function () {
+                    try {
+                        IomyRe.devices.getHexOfLightColour({
+                            thingID     : mSettings.deviceData.DeviceId,
+                            onSuccess   : mSettings.onSuccess,
+                            onFail      : mSettings.onFail
+                        });
+                    } catch (e) {
+                        mSettings.onFail(e.message);
+                    }
+                }
+            });
+        } catch (e) {
+            mSettings.onFail("Failed to add an Philips Hue Light task to the list ("+e.name+"): " + e.message);
+            
+        } finally {
+            return aTasks;
+        }
     }
 });
