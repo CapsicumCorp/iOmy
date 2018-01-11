@@ -398,7 +398,7 @@ if( $bError===false ) {
 								$bError    = true;
 								$iErrCode  = 1500+$aResult['ErrCode'];
 								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-								$sErrMesg .= $aResult['ErrCode'];
+								$sErrMesg .= $aResult['ErrMesg'];
 							}
 							
 						} else {
