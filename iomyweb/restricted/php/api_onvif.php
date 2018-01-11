@@ -136,14 +136,15 @@ if($bError===false) {
 			$sPostMode!=="PTZAbsoluteMove"              && $sPostMode!=="PTZTimedMove"                  && 
 			$sPostMode!=="NetAddressCheckForOnvif"      && $sPostMode!=="NetAddressListCapabilities"    && 
 			$sPostMode!=="NetAddressLookupDeviceTime"   && $sPostMode!=="LookupVideoSources"            && 
-			$sPostMode!=="LookupProfiles"               && $sPostMode!=="ChangeThingProfiles"           
+			$sPostMode!=="LookupProfiles"               && $sPostMode!=="ChangeThingProfiles"           &&
+			$sPostMode!=="LookupCapabilities"           
 			
 		) {
 			$bError    = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"NetAddressCheckForOnvif\", \"NetAddressLookupDeviceTime\", \"LookupVideoSources\" or \"LookupProfiles\" \n\n";
+			$sErrMesg .= "eg. \n \"NetAddressCheckForOnvif\", \"NetAddressLookupDeviceTime\", \"LookupVideoSources\", \"LookupProfiles\" or \"LookupCapabilities\" \n\n";
 		}
 		
 	} catch( Exception $e0011 ) {
@@ -151,7 +152,7 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"NetAddressCheckForOnvif\", \"NetAddressLookupDeviceTime\", \"LookupVideoSources\" or \"LookupProfiles\" \n\n";
+		$sErrMesg .= "eg. \n \"NetAddressCheckForOnvif\", \"NetAddressLookupDeviceTime\", \"LookupVideoSources\", \"LookupProfiles\" or \"LookupCapabilities\" \n\n";
 		//sErrMesg .= e0011.message;
 	}
 	
@@ -256,7 +257,7 @@ if($bError===false) {
 	//-- 2.2.3.A - Retrieve Link Id                     --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="LookupVideoSources" || $sPostMode==="LookupProfiles" || $sPostMode==="ListServerInfo" || $sPostMode==="NewThing" ) {
+		if( $sPostMode==="LookupVideoSources" || $sPostMode==="LookupProfiles" || $sPostMode==="ListServerInfo" || $sPostMode==="LookupCapabilities" || $sPostMode==="NewThing" ) {
 			try {
 				//-- Retrieve the "LinkId" --//
 				$iPostLinkId = $aHTTPData["LinkId"];
@@ -531,7 +532,7 @@ if($bError===false) {
 	//-- 2.2.?.? - Retrieve "CapabilitiesType"          --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="NetAddressListCapabilities" ) {
+		if( $sPostMode==="NetAddressListCapabilities" || $sPostMode==="LookupCapabilities" ) {
 			try {
 				//-- Retrieve the "CapabilitiesType" --//
 				$sPostCapabilitiesType = $aHTTPData["CapabilitiesType"];
@@ -678,7 +679,6 @@ if( $bError===false ) {
 			$iAPICommTypeId = LookupFunctionConstant("APICommTypeId");
 			
 			
-			
 			//----------------------------------------------------------------//
 			//-- STEP 1 - Lookup details for the Hub                        --//
 			//----------------------------------------------------------------//
@@ -818,7 +818,7 @@ if( $bError===false ) {
 			$sPostMode==="LookupVideoSources"   || $sPostMode==="NewThing"             || 
 			$sPostMode==="PTZAbsoluteMove"      || $sPostMode==="PTZTimedMove"         || 
 			$sPostMode==="LookupProfiles"       || $sPostMode==="ListServerInfo"       || 
-			$sPostMode==="ChangeThingProfiles"
+			$sPostMode==="ChangeThingProfiles"  || $sPostMode==="LookupCapabilities"
 		) {
 			//----------------------------------------------------------------------------//
 			//-- STEP 2: Look up the details to the "Link" that belongs to that "Thing" --//
@@ -876,7 +876,8 @@ if( $bError===false ) {
 				$sPostMode==="NetworkAddressServerInfo" || $sPostMode==="ListServerInfo"           || 
 				$sPostMode==="LookupVideoSources"       || $sPostMode==="LookupProfiles"           || 
 				$sPostMode==="PTZAbsoluteMove"          || $sPostMode==="PTZTimedMove"             || 
-				$sPostMode==="PTZTimedMove"             || $sPostMode==="ChangeThingProfiles"      
+				$sPostMode==="PTZTimedMove"             || $sPostMode==="ChangeThingProfiles"      || 
+				$sPostMode==="LookupCapabilities"       
 			) {
 				//--------------------------------------------------------------------//
 				//-- 4.6.1 - Check if a PHPOnvif class can be created for that IP   --//
@@ -936,7 +937,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 5.2 - MODE: Lookup Device Time or Capabilities             ==//
 		//================================================================//
-		} else if( $sPostMode==="NetAddressLookupDeviceTime" || $sPostMode==="NetAddressListCapabilities" ) {
+		} else if( $sPostMode==="NetAddressLookupDeviceTime" || $sPostMode==="NetAddressListCapabilities" || $sPostMode==="LookupCapabilities" ) {
 			try {
 				//--------------------------------------------------------------------//
 				//-- 5.2.1 - INITIALISE THE ONVIF CLIENT                            --//
@@ -956,9 +957,9 @@ if( $bError===false ) {
 						$aResult                = $oPHPOnvifClient->ExtractDeviceDateAndTime( $aTempFunctionResult );
 						
 					//----------------------------------------------------//
-					//-- ELSEIF Mode is NetAddressLookupDeviceTime      --//
+					//-- ELSEIF Mode is a variant of Capabilities       --//
 					//----------------------------------------------------//
-					} else if( $sPostMode==="NetAddressListCapabilities" ) {
+					} else if( $sPostMode==="NetAddressListCapabilities" || $sPostMode==="LookupCapabilities" ) {
 						//-- Fetch Capabilities --//
 						$aTempFunctionResult    = $oPHPOnvifClient->GetAllCapabilities( $sPostCapabilitiesType );
 						
