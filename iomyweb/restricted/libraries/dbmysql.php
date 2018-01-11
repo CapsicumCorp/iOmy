@@ -365,14 +365,15 @@ class DBMySQL {
 					}
 				} else {
 					$bError = true;
-					$sErrMesg .= "Critical Error: UpdateQuery!\n";
+					$sErrMesg .= "Critical Error: SelectQueryBasic!\n";
 					$sErrMesg .= "Failed to prepare the SQL Query!\n";
 				}
 				
 			} catch(PDOException $e2) {
 				//-- TODO: Create an error message --//
 				$bError = true;
-				$sErrMesg .= $e2->getMessage();
+				$sErrMesg .= "Critical Error: SelectQueryBasic! Problem with DBConnection when preparing query!\n";
+				//$sErrMesg .= $e2->getMessage();
 			}
 		}
 		
@@ -387,7 +388,8 @@ class DBMySQL {
 			} catch(PDOException $e3) {
 				//-- TODO: Create an error message --//
 				$bError = true;
-				$sErrMesg .= $e3->getMessage();
+				$sErrMesg .= "Critical Error: SelectQueryBasic! Problem with DBConnection when executing query!\n";
+				//$sErrMesg .= $e3->getMessage();
 			}
 		}
 		
@@ -549,14 +551,15 @@ class DBMySQL {
 					
 				} else {
 					$bError = true;
-					$sErrMesg .= "Critical Error: UpdateQuery!\n";
+					$sErrMesg .= "Critical Error: SelectQueryAdv!\n";
 					$sErrMesg .= "Failed to prepare the SQL Query!\n";
 				}
 				
 			} catch(PDOException $e2) {
 				//-- TODO: Create an error message --//
 				$bError    = true;
-				$sErrMesg .= $e42->getMessage();
+				$sErrMesg .= "Critical Error: SelectQueryAdv! Problem with DBConnection when preparing query!\n";
+				//$sErrMesg .= $e2->getMessage();
 			}
 		}
 		
@@ -576,7 +579,8 @@ class DBMySQL {
 			} catch(PDOException $e3) {
 				//-- TODO: Create an error message --//
 				$bError    = true;
-				$sErrMesg .= $e3->getMessage();
+				$sErrMesg .= "Critical Error: SelectQueryAdv! Problem with DBConnection when executing query!\n";
+				//$sErrMesg .= $e3->getMessage();
 			}
 		}
 		
@@ -715,7 +719,8 @@ class DBMySQL {
 			} catch(PDOException $e4) {
 				//-- TODO: Create an error message --//
 				$bError    = true;
-				$sErrMesg .= $e4->getMessage();
+				$sErrMesg .= "Critical Error: SelectQueryAdv! Problem with DBConnection when parsing output!\n";
+				//$sErrMesg .= $e4->getMessage();
 			}
 		}
 		
@@ -886,7 +891,8 @@ class DBMySQL {
 				}
 				
 				$bError    = true;
-				$sErrMesg .= $e3->getMessage();
+				$sErrMesg .= "Critical Error: UpdateQuery! Problem with Database Connection!\n";
+				//$sErrMesg .= $e3->getMessage();
 			}
 		}
 		
@@ -1080,8 +1086,8 @@ class DBMySQL {
 				}
 				
 				$bError    = true;
-				$sErrMesg .= "";
-				$sErrMesg .= $e3->getMessage();
+				$sErrMesg .= "Critical Error: InsertQuery! Problem with Database Connection!\n";
+				//$sErrMesg .= $e3->getMessage();
 			}
 		}
 		
@@ -1258,8 +1264,8 @@ class DBMySQL {
 				
 			} catch(PDOException $e3) {
 				$bError    = true;
-				$sErrMesg .= "";
-				$sErrMesg .= $e3->getMessage();
+				$sErrMesg .= "Critical Error: NonCommitedInsertQuery! Problem with Database Connection!";
+				//$sErrMesg .= $e3->getMessage();
 			}
 		}
 		//------------------------------------//
@@ -1357,8 +1363,8 @@ class DBMySQL {
 				}
 			} catch(PDOException $e3) {
 				$bError    = true;
-				$sErrMesg .= "";
-				$sErrMesg .= $e3->getMessage();
+				$sErrMesg .= "Critical Error: NonCommitedCreateQuery! Problem with Database Connection!";
+				//$sErrMesg .= $e3->getMessage();
 			}
 		}
 		//------------------------------------//
@@ -1513,8 +1519,8 @@ class DBMySQL {
 				
 			} catch(PDOException $e3) {
 				$bError    = true;
-				$sErrMesg .= "";
-				$sErrMesg .= $e3->getMessage();
+				$sErrMesg .= "Critical Error: InputBindNonCommittedCreateQuery! Problem with Database Connection!";
+				//$sErrMesg .= $e3->getMessage();
 			}
 		}
 		//------------------------------------//
