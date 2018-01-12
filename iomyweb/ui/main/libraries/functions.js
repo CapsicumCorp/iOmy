@@ -1637,13 +1637,40 @@ $.extend(IomyRe.functions, {
         },
         
         isUserRoomAdminForPremise : function (iPremiseId) {
-            var mPremiseValidation = IomyRe.validation.isPremiseIDValid(iPremiseId);
+            var mPremiseValidation;
             var bIsAdmin = false;
             
-            if (mPremiseValidation.bIsValid) {
-                bIsAdmin = IomyRe.common.PremiseList["_"+iPremiseId].PermRoomAdmin === 1;
-            } else {
-                throw new InvalidArgumentException(mPremiseValidation.aErrorMessages.join('\n\n'));
+            try {
+                mPremiseValidation = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                
+                if (mPremiseValidation.bIsValid) {
+                    bIsAdmin = IomyRe.common.PremiseList["_"+iPremiseId].PermRoomAdmin == 1;
+                } else {
+                    throw new InvalidArgumentException(mPremiseValidation.aErrorMessages.join('\n\n'));
+                }
+            } catch (e) {
+                bIsAdmin = false;
+                $.sap.log.error("Error finding if the user is the room admin ("+e.name+"): " + e.message);
+            }
+            
+            return bIsAdmin;
+        },
+        
+        isUserPremiseOwner : function (iPremiseId) {
+            var mPremiseValidation;
+            var bIsAdmin = false;
+            
+            try {
+                mPremiseValidation = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                
+                if (mPremiseValidation.bIsValid) {
+                    bIsAdmin = IomyRe.common.PremiseList["_"+iPremiseId].PermOwner == 1;
+                } else {
+                    throw new InvalidArgumentException(mPremiseValidation.aErrorMessages.join('\n\n'));
+                }
+            } catch (e) {
+                bIsAdmin = false;
+                $.sap.log.error("Error finding if the user is the room admin ("+e.name+"): " + e.message);
             }
             
             return bIsAdmin;

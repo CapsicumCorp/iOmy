@@ -990,7 +990,7 @@ $.extend(IomyRe.common,{
                 "USERSINFO_PK",             "USERSINFO_TITLE",          "USERSINFO_DISPLAYNAME",    
                 "USERS_USERNAME",           "USERSINFO_GIVENNAMES",      "USERSINFO_SURNAMES",
                 "USERSINFO_EMAIL",          "USERSINFO_PHONENUMBER",    "USERSGENDER_PK",
-                "USERS_PK",                 "USERS_USERNAME"
+                "USERS_PK",                 "USERS_USERNAME",           "PERMSERVER_ADDUSER"
             ],
             WhereClause: [],
             OrderByClause: [],
@@ -1017,7 +1017,8 @@ $.extend(IomyRe.common,{
                     "Phone":              aData[0].USERSINFO_PHONENUMBER,
                     "Gender":             aData[0].USERSGENDER_PK,
                     "UserId":             aData[0].USERS_PK,
-                    "Username":           aData[0].USERS_USERNAME
+                    "Username":           aData[0].USERS_USERNAME,
+                    "PermUserAdmin":      aData[0].PERMSERVER_ADDUSER
                 };
                 
                 //-- Update the Timestamp on when the UserInfo was last updated --//
@@ -2708,11 +2709,15 @@ $.extend(IomyRe.common,{
         //------------------------------------------------------------------------//
         try {
             //-- User List --//
-            if (sPageName === "pUserList" || sPageName === "pUserForm") {
-                //-- Waiting for Andrew to upgrade the user information OData service. --//
+            if (sPageName === "pUserList" || sPageName === "pUserForm" || sPageName === "pNewUser") {
+                if (IomyRe.common.UserInfo.PermUserAdmin != 1) {
+                    aErrorMessages.push("You don't have sufficient privileges to manage users.");
+                }
+                
+            //-- Rules List --//
             } else if (sPageName === "pRulesList" || sPageName === "pRulesForm") {
                 //-- TODO: Work out a better way to get Premise ID. Perhaps go through the list and find out which premise is the user the owner of. --//
-                if (!IomyRe.functions.permissions.isUserRoomAdminForPremise(1)) {
+                if (!IomyRe.functions.permissions.isUserPremiseOwner(1)) {
                     aErrorMessages.push("Only the owner of a premise can manage rules.");
                 }
             }

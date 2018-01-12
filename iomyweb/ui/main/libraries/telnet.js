@@ -191,7 +191,7 @@ $.extend(IomyRe.telnet,{
     },
 	
 	compileLog : function () {
-		var me				= this;
+		var oModule     	= this;
 		var aLog			= [];
 		var mEntry;
 		

@@ -294,10 +294,13 @@ $.extend(IomyRe.rules, {
         var aErrorMessages  = [];
         var sURL            = IomyRe.apiphp.APILocation("devicerules");
         var aTimeRules      = [];
+        //var bReloadRules    = true;
         var mRulesConfig;
         var iHub;
         var fnSuccess;
         var fnFail;
+        
+        var sHubMissing = "A Hub must be specified.";
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -312,7 +315,7 @@ $.extend(IomyRe.rules, {
             // REQUIRED: Find the hub ID
             //----------------------------------------------------------------//
             if (mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError("A Hub must be specified.");
+                fnAppendError(sHubMissing);
             } else {
                 iHub = mSettings.hubID;
             }
@@ -349,14 +352,15 @@ $.extend(IomyRe.rules, {
                 fnFail = mSettings.onFail;
             }
 		
-            //----------------------------------------------------------------//
-            // OPTIONAL: Are we reloading rules or not?
-            //----------------------------------------------------------------//
-            if (mSettings.reloadRules !== undefined && mSettings.reloadRules !== null) {
-                bReloadRules = mSettings.reloadRules;
-            }
+//            //----------------------------------------------------------------//
+//            // OPTIONAL: Are we reloading rules or not?
+//            //----------------------------------------------------------------//
+//            if (mSettings.reloadRules !== undefined && mSettings.reloadRules !== null) {
+//                bReloadRules = mSettings.reloadRules;
+//            }
             
         } else {
+            fnAppendError(sHubMissing);
             throw new MissingSettingsMapException();
         }
         
@@ -557,6 +561,9 @@ $.extend(IomyRe.rules, {
         var oModule         = this;
         var aSerialCode		= [];
         
+        var sHubMissing         = "A Hub must be specified.";
+        var sSerialCodeMissing  = "The serial number for the device must be specified.";
+        
         var fnAppendError = function (sErrMesg) {
             bError = true;
             aErrorMessages.push(sErrMesg);
@@ -570,14 +577,14 @@ $.extend(IomyRe.rules, {
             // REQUIRED: Find the hub ID
             //----------------------------------------------------------------//
             if (mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError("A Hub must be specified.");
+                fnAppendError(sHubMissing);
             }
             
             //----------------------------------------------------------------//
             // REQUIRED: Find the serial code
             //----------------------------------------------------------------//
             if (mSettings.Serial === undefined || mSettings.Serial === null) {
-                fnAppendError("The serial number for the device must be specified.");
+                fnAppendError(sSerialCodeMissing);
                 
             } else {
                 if (typeof mSettings.Serial === "string") {
@@ -595,7 +602,10 @@ $.extend(IomyRe.rules, {
             }
             
         } else {
-            throw new MissingSettingsMapException();
+            fnAppendError(sHubMissing);
+            fnAppendError(sSerialCodeMissing);
+            
+            throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
         
         //--------------------------------------------------------------------//
