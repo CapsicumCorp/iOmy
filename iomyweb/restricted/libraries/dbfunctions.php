@@ -187,6 +187,9 @@ function NonDataViewName($sViewType) {
 	} else if( $sViewType==="PremiseLogs" ) {
 		$aResult = array( "Error"=>false, "View"=>"VR_USERSPREMISELOG" );
 		
+	} else if( $sViewType==="PremiseRooms" ) {
+		$aResult = array( "Error"=>false, "View"=>"VR_USERSPREMISEROOMS" );
+		
 	} else if( $sViewType==="Hub" ) {
 		$aResult = array( "Error"=>false, "View"=>"VR_USERSHUB" );
 		
@@ -4026,6 +4029,103 @@ function dbSpecialGetAllRooms() {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>"SpecialGetAllRooms: ".$sErrMesg );
+	}
+}
+
+
+function dbSpecialGetAllRoomsFromPremiseId( $iPremiseId ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//--  --//
+			$aTemporaryView = NonDataViewName("PremiseRooms");
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+				$bError = true;
+				$sErrMesg = $aTemporaryView["ErrMesg"];
+				
+			} else {
+				//-- View  --//
+				$sView = $aTemporaryView["View"];
+				
+				//-- SQL --//
+				$sSQL .= "SELECT ";
+				$sSQL .= "    `ROOMS_PK`, ";
+				$sSQL .= "    `ROOMS_NAME`, ";
+				$sSQL .= "    `ROOMS_FLOOR`, ";
+				$sSQL .= "    `ROOMS_PREMISE_FK`, ";
+				$sSQL .= "    `ROOMS_DESC`, ";
+				$sSQL .= "    `ROOMTYPE_PK`, ";
+				$sSQL .= "    `ROOMTYPE_NAME`, ";
+				$sSQL .= "    `ROOMTYPE_OUTDOORS` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array(
+					array( "Name"=>"PremiseId",       "type"=>"INT",     "value"=>$iPremiseId      )
+				);
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputCols = array(
+					array( "Name"=>"Id",               "type"=>"INT" ),
+					array( "Name"=>"Name",             "type"=>"STR" ),
+					array( "Name"=>"Floor",            "type"=>"INT" ),
+					array( "Name"=>"PremiseId",        "type"=>"INT" ),
+					array( "Name"=>"Desc",             "type"=>"STR" ),
+					array( "Name"=>"RoomTypeId",       "type"=>"INT" ),
+					array( "Name"=>"RoomTypeName",     "type"=>"STR" ),
+					array( "Name"=>"RoomTypeOutdoors", "type"=>"INT" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			}
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"SpecialGetAllRoomsFromPremiseId: ".$sErrMesg );
 	}
 }
 

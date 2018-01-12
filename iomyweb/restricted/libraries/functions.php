@@ -2643,10 +2643,83 @@ function SpecialGetAllRooms() {
 	}
 }
 
+
+
+function SpecialGetAllRoomsFromPremiseId( $iPremiseId ) {
+	//------------------------------------------------//
+	//-- 1.0 - Initialise                           --//
+	//------------------------------------------------//
+	$bError           = false;            //-- BOOLEAN:       Used to indicate if at least one error has been caught.     --//
+	$sErrMesg         = "";               //-- STRING:        Stores the error message when an error is caught.           --//
+	$aResult          = array();          //-- ARRAY:         Stores the result of this function if no errors occur.      --//
+	$aPremiseInfo     = array();          //-- ARRAY:         --//
+	
+	
+	//------------------------------------------------//
+	//-- 2.0 - Main                                 --//
+	//------------------------------------------------//
+	try {
+		//-- Check if the User has RoomAdmin Permission for the Premise --//
+		$aPremiseInfo = GetPremisesInfoFromPremiseId( $iPremiseId );
+		
+		
+		if( $aPremiseInfo['Error']===false ) {
+			//-- Check if the variable is set --//
+			if( isset($aPremiseInfo['Data']['PermRoomAdmin']) ) {
+				if( $aPremiseInfo['Data']['PermRoomAdmin']===1 ) {
+					
+					//-- Update the User State --//
+					$aResult = dbSpecialGetAllRoomsFromPremiseId( $iPremiseId );
+					
+					if( $aResult["Error"]===true ) {
+						$bError = true;
+						$sErrMesg .= "Error occurred when attempting to lookup the room list! \n";
+						$sErrMesg .= $aResult["ErrMesg"];
+					}
+					
+				} else {
+					//-- ERROR: User doesn't have permission --//
+					$bError    = true;
+					$sErrMesg .= "The user doesn't seem to have permission to lookup the room list.\n";
+				}
+				
+			} else {
+				//-- ERROR: Can not see the correct permission --//
+				$bError    = true;
+				$sErrMesg .= "Unexpected error when looking up the current user's permissions to lookup the room list.\n";
+			}
+		} else {
+			//-- ERROR:  --//
+			$bError    = true;
+			$sErrMesg .= "Problem looking up the current user's premise permissions.\n";
+			$sErrMesg .= $aPremiseInfo['ErrMesg'];
+		}
+		
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to lookup the room list! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	
+	//------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message  --//
+	//------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+		
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		
+	}
+}
+
+
 //========================================================================================================================//
 //== #7.0# - Hub Functions                                                                                              ==//
 //========================================================================================================================//
-
 function HubRetrieveInfoAndPermission($iHubId) {
 	//-- Retrieve the Hub Info --//
 	$aResult = dbHubRetrieveInfoAndPermission($iHubId);
@@ -2668,6 +2741,7 @@ function ChangeHubName( $iHubId, $sHubName ) {
 	$bError         = false;
 	$sErrMesg       = "";
 	$aResult        = array();
+	
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//

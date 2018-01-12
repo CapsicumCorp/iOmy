@@ -93,8 +93,13 @@ if($bError===false) {
 		$sPostMode = $aHTTPData["Mode"];
 		//-- NOTE: Valid modes are going to be "EditInfo", "AddRoom", "DeleteRoom", "" --//
 		
+		
 		//-- Verify that the mode is supported --//
-		if( $sPostMode!=="AddRoom" && $sPostMode!=="EditInfo" && $sPostMode!=="DeleteRoom" && $sPostMode!=="AdminRoomList" ) {
+		if( 
+			$sPostMode!=="AddRoom"             && $sPostMode!=="EditInfo"            && 
+			$sPostMode!=="DeleteRoom"          && $sPostMode!=="AdminRoomList"       && 
+			$sPostMode!=="RoomAdminRoomList"   
+		) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
@@ -239,7 +244,7 @@ if($bError===false) {
 	//-- 2.2.8.B - Retrieve Room "PremiseId"            --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="AddRoom" ) {
+		if( $sPostMode==="AddRoom" || $sPostMode==="RoomAdminRoomList" ) {
 			try {
 				//-- Retrieve the "PremiseId" --//
 				$iPostPremiseId = $aHTTPData["PremiseId"];
@@ -501,13 +506,37 @@ if( $bError===false ) {
 					$sErrMesg .= $aResult["ErrMesg"];
 				}
 				
-			} catch( Exception $e3400 ) {
+			} catch( Exception $e5400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
-				$sErrMesg .= "Error Code:'3400' \n";
-				$sErrMesg .= $e3400->getMessage();
+				$sErrMesg .= "Error Code:'5400' \n";
+				$sErrMesg .= $e5400->getMessage();
 			}
+			
+		//================================================================//
+		//== 5.6 - MODE: Room Admin Room List                           ==//
+		//================================================================//
+		} else if( $sPostMode==="RoomAdminRoomList" ) {
+			try {
+				$aResult = SpecialGetAllRoomsFromPremiseId( $iPostPremiseId );
 				
+				if( $aResult["Error"]===true ) {
+					//-- Display an Error Message --//
+					$bError = true;
+					$sErrMesg .= "Error Code:'6401' \n";
+					$sErrMesg .= "Internal API Error! \n";
+					$sErrMesg .= $aResult["ErrMesg"];
+					
+				}
+				
+				
+			} catch( Exception $e6400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$sErrMesg .= "Error Code:'6400' \n";
+				$sErrMesg .= $e6400->getMessage();
+			}
+			
 		//================================================================//
 		//== Unsupported Mode                                           ==//
 		//================================================================//
