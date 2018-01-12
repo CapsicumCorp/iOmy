@@ -65,7 +65,7 @@ $.extend(IomyRe.common,{
     UserAppVariables: {
         "PagePerms": {
             "SettingsThingList":    false,        //-- BOOLEAN:    Flags if the User is allowed to access the "SettingsThingList" Page.        --//
-            "SettingsPremiseList":    false,        //-- BOOLEAN:    Flags if the User is allowed to access the "SettingsPremiseList" Page.        --//
+            "SettingsPremiseList":  false        //-- BOOLEAN:    Flags if the User is allowed to access the "SettingsPremiseList" Page.        --//
         }
     },
     
@@ -2630,6 +2630,8 @@ $.extend(IomyRe.common,{
      * @param {boolean} bResetNavArray      (optional) Boolean flag declaring that a reset is required (default = false)
      */
     NavigationChangePage: function( sPageName, aPageData, bResetNavArray ) {
+        var bCreatingPage   = true;
+        var aErrorMessages  = [];
 
         //-- Declare aPageData as an associative array if undefined --//
         aPageData = aPageData || {};
@@ -2700,38 +2702,75 @@ $.extend(IomyRe.common,{
         //$.sap.log.debug( "ChangePage NavArray="+JSON.stringify(this.NavPagesNavigationArray) );
         //$.sap.log.debug( "ChangePage NavIndex="+JSON.stringify(this.NavPagesCurrentIndex ) );
         
-        if (oApp.getPage(sPageName) === null) {
-            IomyRe.pages.createPage(sPageName);
-        } else {
-            if (oApp.getPage(sPageName).byId("openMenu") !== undefined) {
-                var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
-                oApp.getPage(sPageName).byId("openMenu").setText("Hi, "+sDisplayName);
+        //------------------------------------------------------------------------//
+        // We need to check that the permissons are correct for a user to access
+        // certain pages.
+        //------------------------------------------------------------------------//
+        try {
+            //-- User List --//
+            if (sPageName === "pUserList" || sPageName === "pUserForm") {
+                //-- Waiting for Andrew to upgrade the user information OData service. --//
+            } else if (sPageName === "pRulesList" || sPageName === "pRulesForm") {
+                //-- TODO: Work out a better way to get Premise ID. Perhaps go through the list and find out which premise is the user the owner of. --//
+                if (!IomyRe.functions.permissions.isUserRoomAdminForPremise(1)) {
+                    aErrorMessages.push("Only the owner of a premise can manage rules.");
+                }
             }
             
-            IomyRe.help.addHelpMessage(sPageName);
-        }
-        
-        //--------------------------------------------------------------------//
-        // If the side menu was open when this function is called, close it.
-        //--------------------------------------------------------------------//
-//        console.log(sap.ui.Device.system.desktop);
-//        console.log(sap.ui.Device.system.phone);
-//        console.log(sap.ui.Device.system.tablet);
-        if (oApp.getCurrentPage().byId("toolPage") !== undefined) {
-            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true &&
-                sap.ui.Device.system.phone) 
-            {
-                IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
-                
-            } else if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === false &&
-                sap.ui.Device.system.desktop && oApp.getCurrentPage().getId() !== sPageName )
-            {
-                IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+            if (aErrorMessages.length > 0) {
+                bCreatingPage = false;
             }
+        } catch (e) {
+            $.sap.log.error("There was an error checking the page permissions ("+e.name+"): " + e.message);
         }
         
-        //-- Navigate to the new Page --//
-        oApp.to( sPageName, aPageData );
+        //------------------------------------------------------------------------//
+        // Attempt to create (if it hasn't been so already) and switch to the page.
+        //------------------------------------------------------------------------//
+        try {
+            if (bCreatingPage) {
+                if (oApp.getPage(sPageName) === null) {
+                    IomyRe.pages.createPage(sPageName);
+                } else {
+                    if (oApp.getPage(sPageName).byId("openMenu") !== undefined) {
+                        var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+                        oApp.getPage(sPageName).byId("openMenu").setText("Hi, "+sDisplayName);
+                    }
+
+                    IomyRe.help.addHelpMessage(sPageName);
+                }
+
+                //--------------------------------------------------------------------//
+                // If the side menu was open when this function is called, close it.
+                //--------------------------------------------------------------------//
+        //        console.log(sap.ui.Device.system.desktop);
+        //        console.log(sap.ui.Device.system.phone);
+        //        console.log(sap.ui.Device.system.tablet);
+                if (oApp.getCurrentPage().byId("toolPage") !== undefined) {
+                    if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true &&
+                        sap.ui.Device.system.phone) 
+                    {
+                        IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+
+                    } else if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === false &&
+                        sap.ui.Device.system.desktop && oApp.getCurrentPage().getId() !== sPageName )
+                    {
+                        IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+                    }
+                }
+
+                //-- Navigate to the new Page --//
+                oApp.to( sPageName, aPageData );
+            } else {
+                //----------------------------------------------------------------//
+                // There were conditions that were not met for a particular page.
+                // Show an error popup.
+                //----------------------------------------------------------------//
+                IomyRe.common.showError(aErrorMessages.join("\n\n"), "Cannot access page");
+            }
+        } catch (e) {
+            $.sap.log.error("There was an error creating and switching the page ("+e.name+"): " + e.message);
+        }
         
     },
     
