@@ -1236,7 +1236,7 @@ $.extend(IomyRe.devices,{
                         fnResult("Offline");
 
                         if (err.status == '500') {
-                            //-- BUGGER, BUGGER, BUGGER IT! --//
+                            //-- Bugger! --//
                             $.sap.log.error("A HTTP 500 error occurred! Check the web server logs.");
                         }
                     }

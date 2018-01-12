@@ -55,9 +55,7 @@ $.extend(IomyRe.devices.motionsensor,{
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
-        var oModule = this;
-        var php = IomyRe.apiphp;
-        var sUrl = php.APILocation("motionsensor");
+        var sUrl = IomyRe.apiphp.APILocation("motionsensor");
         var mThingIdInfo;
         var iThingId;
         var fnSuccess;
@@ -100,7 +98,7 @@ $.extend(IomyRe.devices.motionsensor,{
     //        oModule.bWaitingToLoadAPI        = false;
     //        oModule.bLoadingFieldsFromAPI    = true;
 
-            php.AjaxRequest({
+            IomyRe.apiphp.AjaxRequest({
                 "url" : sUrl,
                 "data" : {
                     "Mode" : "GetMotionData",

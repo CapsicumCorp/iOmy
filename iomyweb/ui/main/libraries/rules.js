@@ -139,7 +139,6 @@ $.extend(IomyRe.rules, {
         //--------------------------------------------------------------------//
         // Declare and initialise variables
         //--------------------------------------------------------------------//
-		var me				= this;
         var bError          = false;
         var aErrorMessages  = [];
         var sURL            = IomyRe.apiphp.APILocation("devicerules");
@@ -295,7 +294,6 @@ $.extend(IomyRe.rules, {
         var aErrorMessages  = [];
         var sURL            = IomyRe.apiphp.APILocation("devicerules");
         var aTimeRules      = [];
-        var bReloadRules    = true;
         var mRulesConfig;
         var iHub;
         var fnSuccess;
@@ -454,7 +452,7 @@ $.extend(IomyRe.rules, {
         //--------------------------------------------------------------------//
         var bError          = false;
         var aErrorMessages  = [];
-        var me              = this;
+        var oModule         = this;
         var mRule           = {"Type" : "DeviceTimeRule"};
         var sSerialCode;
         
@@ -525,9 +523,9 @@ $.extend(IomyRe.rules, {
         // Apply the rule to memory and save the changes.
         //--------------------------------------------------------------------//
         try {
-            me.RulesList[ sSerialCode ] = mRule;
+            oModule.RulesList[ sSerialCode ] = mRule;
 
-            me.saveRules(mSettings);
+            oModule.saveRules(mSettings);
         } catch (error) {
             //----------------------------------------------------------------//
             // Rethrow the exception because the required parameters have
@@ -556,7 +554,7 @@ $.extend(IomyRe.rules, {
         
         var bError          = false;
         var aErrorMessages  = [];
-        var me              = this;
+        var oModule         = this;
         var aSerialCode		= [];
         
         var fnAppendError = function (sErrMesg) {
@@ -580,11 +578,11 @@ $.extend(IomyRe.rules, {
             //----------------------------------------------------------------//
             if (mSettings.Serial === undefined || mSettings.Serial === null) {
                 fnAppendError("The serial number for the device must be specified.");
+                
             } else {
-            	console.log(typeof mSettings.Serial);
                 if (typeof mSettings.Serial === "string") {
                     aSerialCode.push(mSettings.Serial);
-                } else /*if (typeof mSettings.Serial === "array")*/ {
+                } else if (typeof mSettings.Serial === "Array") {
                     aSerialCode = mSettings.Serial;
                 }
             }
@@ -605,12 +603,12 @@ $.extend(IomyRe.rules, {
         //--------------------------------------------------------------------//
         try {
             for (var i = 0; i < aSerialCode.length; i++) {
-                if (me.RulesList[ aSerialCode[i] ] !== undefined) {
-                    delete me.RulesList[ aSerialCode[i] ];
+                if (oModule.RulesList[ aSerialCode[i] ] !== undefined) {
+                    delete oModule.RulesList[ aSerialCode[i] ];
                 }
             }
 
-            me.saveRules(mSettings);
+            oModule.saveRules(mSettings);
         } catch (error) {
             //----------------------------------------------------------------//
             // Rethrow the exception because the required parameters have

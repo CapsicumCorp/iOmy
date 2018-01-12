@@ -111,10 +111,14 @@ $.extend(IomyRe.devices.csrmesh,{
                 },
 
                 "onSuccess" : function (type, data) {
-                    if (data.Error !== true) {
-                        fnSuccess();
-                    } else {
-                        fnFail(data.ErrMesg);
+                    try {
+                        if (data.Error !== true) {
+                            fnSuccess();
+                        } else {
+                            fnFail(data.ErrMesg);
+                        }
+                    } catch (e) {
+                        fnFail("Error in the success callback of changing the light colour ("+e.name+"): " + e.message);
                     }
                 },
 
@@ -144,9 +148,11 @@ $.extend(IomyRe.devices.csrmesh,{
     //            }
     //        });
         } catch (e) {
-            e.message = "Error in IomyRe.devices.csrmesh.turnOnWhiteLight ("+e.name+"):\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
+//            e.message = "Error in IomyRe.devices.csrmesh.turnOnWhiteLight ("+e.name+"):\n" + e.message;
+//            $.sap.log.error(e.message);
+//            throw e;
+
+            fnFail("Error in IomyRe.devices.csrmesh.turnOnWhiteLight ("+e.name+"):\n" + e.message);
         }
     },
     

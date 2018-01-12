@@ -26,7 +26,6 @@ $.sap.declare("IomyRe.devices.onvif",true);
 IomyRe.devices.onvif = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.onvif,{
-    Devices                 : [],
     
     aProfiles               : [],
     sProfileLookupErrors    : [],
@@ -382,19 +381,30 @@ $.extend(IomyRe.devices.onvif,{
         //------------------------------------//
         //-- 1.0 - Initialise Variables        --//
         //------------------------------------//
-        var oModule         = this;
+        //var oModule         = this;
         var aTasks          = { "High":[], "Low":[] };
         
-        aTasks.High.push({
-            "Type":"Function", 
-            "Execute": function () {
-                IomyRe.devices.pingDevice({
-                    thingID     : mSettings.deviceData.DeviceId,
-                    onComplete  : mSettings.onComplete
-                });
-            }
-        });
-        
-        return aTasks;
+        try {
+            aTasks.High.push({
+                "Type":"Function", 
+                "Execute": function () {
+                    try {
+                        IomyRe.devices.pingDevice({
+                            thingID     : mSettings.deviceData.DeviceId,
+                            onComplete  : mSettings.onComplete
+                        });
+                    } catch (e) {
+                        $.sap.log.error("Failed to run IomyRe.devices.pingDevice() ("+e.name+"): " + e.message);
+                        mSettings.onComplete("N/A");
+                    }
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to add an Onvif stream task ("+e.name+"): " + e.message);
+            mSettings.onComplete("N/A");
+            
+        } finally {
+            return aTasks;
+        }
     }
 });

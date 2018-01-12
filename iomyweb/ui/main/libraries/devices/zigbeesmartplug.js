@@ -25,7 +25,6 @@ $.sap.declare("IomyRe.devices.zigbeesmartplug",true);
 IomyRe.devices.zigbeesmartplug = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.zigbeesmartplug,{
-    Devices: [],
     
     CommTypeId : 3,                         // This SHOULD NOT change!
     LinkTypeId : 2,

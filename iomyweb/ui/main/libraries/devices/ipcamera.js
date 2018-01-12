@@ -48,7 +48,7 @@ $.extend(IomyRe.devices.ipcamera,{
     ThingTypeId         : 18,
     
     loadCameraInformation : function(mSettings) {
-        var me                = this;
+        var oModule           = this;
         var bError            = false;
         var aErrorMessages    = [];
         var iNetAddrIO        = 0;
@@ -168,17 +168,17 @@ $.extend(IomyRe.devices.ipcamera,{
             // Get the correct IOs
             //----------------------------------------------------------------//
             if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
-                if (mIO.RSTypeId === me.RSNetworkAddress) {
+                if (mIO.RSTypeId === oModule.RSNetworkAddress) {
                     iNetAddrIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSNetworkPort) {
+                } else if (mIO.RSTypeId === oModule.RSNetworkPort) {
                     iNetPortIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSUsername) {
+                } else if (mIO.RSTypeId === oModule.RSUsername) {
                     iUsernameIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSPassword) {
+                } else if (mIO.RSTypeId === oModule.RSPassword) {
                     iPasswordIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSPath) {
+                } else if (mIO.RSTypeId === oModule.RSPath) {
                     iPathIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSProtocol) {
+                } else if (mIO.RSTypeId === oModule.RSProtocol) {
                     iProtocolIO = mIO.Id;
                 }
             }
@@ -278,6 +278,8 @@ $.extend(IomyRe.devices.ipcamera,{
         var fnSuccess;
         var fnFail;
         
+        var sThingIDMissing = "Thing ID (thingID) must be specified!";
+        
         // Lambda function to run if there are errors.
         var fnAppendError   = function (sErrMesg) {
             bError = true;
@@ -301,7 +303,7 @@ $.extend(IomyRe.devices.ipcamera,{
                     iThingId = mSettings.thingID;
                 }
             } else {
-                fnAppendError("Thing ID (thingID) must be specified!");
+                fnAppendError(sThingIDMissing);
             }
             
             //----------------------------------------------------------------//
@@ -322,8 +324,13 @@ $.extend(IomyRe.devices.ipcamera,{
                 fnFail = mSettings.onFail;
             }
             
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join('\n\n'));
+            }
+            
         } else {
-            throw new MissingSettingsMapException();
+            fnAppendError(sThingIDMissing);
+            throw new MissingSettingsMapException(aErrorMessages.join('\n\n'));
         }
         
         //--------------------------------------------------------------------//
@@ -370,7 +377,7 @@ $.extend(IomyRe.devices.ipcamera,{
         //--------------------------------------------------------------------//
         // Variables
         //--------------------------------------------------------------------//
-        var me                           = this;
+        //var oModule                      = this;
         var bError                       = false;
         var aErrorMessages               = [];
         var sMode                        = "";
@@ -392,6 +399,11 @@ $.extend(IomyRe.devices.ipcamera,{
         var fnSuccess;
         var fnFail;
         
+        var sFileTypeMissing            = "File type must be specified.";
+        var sHubIDMissing               = "Hub ID must be specified.";
+        var sIPAddressMissing           = "IP Address must be specified!";
+        var sPathMissing                = "Path to the stream must be specified.";
+        
         var fnAppendError = function (sMessage) {
             bError = true;
             aErrorMessages.push(sMessage);
@@ -409,21 +421,21 @@ $.extend(IomyRe.devices.ipcamera,{
             
             //-- File Type --//
             if (mSettings.fileType === "" || mSettings.fileType === undefined || mSettings.fileType === null) {
-                fnAppendError("File type must be specified.");
+                fnAppendError(sFileTypeMissing);
             } else {
                 sFileType = mSettings.fileType;
             }
             
             //-- Hub ID --//
             if (mSettings.hubID === "" || mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError("Hub ID must be specified.");
+                fnAppendError(sHubIDMissing);
             } else {
                 iHubId = mSettings.hubID;
             }
 
             //-- Check IP Address --//
             if (mSettings.ipAddress === "" || mSettings.ipAddress === null || mSettings.ipAddress === undefined) {
-                fnAppendError("IP Address must be specified!");
+                fnAppendError(sIPAddressMissing);
             } else {
                 //-- Verify that the IP address format is correct. --//
                 try {
@@ -444,7 +456,7 @@ $.extend(IomyRe.devices.ipcamera,{
 
             //-- Stream Path --//
             if (mSettings.streamPath === "" || mSettings.streamPath === undefined || mSettings.streamPath === null) {
-                fnAppendError("Path to the stream must be specified.");
+                fnAppendError(sPathMissing);
             } else {
                 sStreamPath = mSettings.streamPath;
             }
@@ -463,7 +475,7 @@ $.extend(IomyRe.devices.ipcamera,{
     //                fnAppendError("Password must be given.");
     //            }
     //            
-    //            if (me.CheckAuthenticationFieldsForSpaces() === true) {
+    //            if (oModule.CheckAuthenticationFieldsForSpaces() === true) {
     //                fnAppendError("Neither the username nor the password can contain spaces.");
     //            }
     //        }
@@ -526,10 +538,10 @@ $.extend(IomyRe.devices.ipcamera,{
                 throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
             }
         } else {
-            fnAppendError("File type must be specified.");
-            fnAppendError("Hub ID must be specified.");
-            fnAppendError("IP Address must be specified!");
-            fnAppendError("Path to the stream must be specified.");
+            fnAppendError(sFileTypeMissing);
+            fnAppendError(sHubIDMissing);
+            fnAppendError(sIPAddressMissing);
+            fnAppendError(sPathMissing);
             
             throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
@@ -602,7 +614,7 @@ $.extend(IomyRe.devices.ipcamera,{
     },
     
     showSnapshot : function (iThingId, oCallingButton) {
-        var me = this;
+        var oModule = this;
         var oRPopover = new sap.m.ResponsivePopover({
             title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
         });
@@ -620,7 +632,7 @@ $.extend(IomyRe.devices.ipcamera,{
             );
         };
         
-        me.loadStreamUrl({
+        oModule.loadStreamUrl({
             thingID : iThingId,
             onSuccess : function (sUrl) {
                 oRPopover.addContent(
@@ -652,20 +664,31 @@ $.extend(IomyRe.devices.ipcamera,{
         //------------------------------------//
         //-- 1.0 - Initialise Variables        --//
         //------------------------------------//
-        var oModule         = this;
+        //var oModule         = this;
         var aTasks          = { "High":[], "Low":[] };
         
-        aTasks.High.push({
-            "Type":"Function", 
-            "Execute": function () {
-                IomyRe.devices.pingDevice({
-                    thingID     : mSettings.deviceData.DeviceId,
-                    onComplete  : mSettings.onComplete
-                });
-            }
-        });
-        
-        return aTasks;
+        try {
+            aTasks.High.push({
+                "Type":"Function", 
+                "Execute": function () {
+                    try {
+                        IomyRe.devices.pingDevice({
+                            thingID     : mSettings.deviceData.DeviceId,
+                            onComplete  : mSettings.onComplete
+                        });
+                    } catch (e) {
+                        $.sap.log.error("Failed to run IomyRe.devices.pingDevice() ("+e.name+"): " + e.message);
+                        mSettings.onComplete("N/A");
+                    }
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to add an IP Webcam task ("+e.name+"): " + e.message);
+            mSettings.onComplete("N/A");
+            
+        } finally {
+            return aTasks;
+        }
     }
     
 });
