@@ -133,6 +133,7 @@ class VR_USERSINFO{
 	public $USERS_PK;
 	public $USERS_STATE;
 	public $USERS_USERNAME;
+	public $PERMSERVER_ADDUSER;
 	public $USERADDRESS_PK;
 	public $USERADDRESS_LINE3;
 	public $USERADDRESS_LINE2;
@@ -1283,6 +1284,7 @@ class CreateMainMetadata
 		$metadata->addKeyProperty(          $VR_USERSINFOEntityType,        'USERS_PK',                 EdmPrimitiveType::INT64         );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERS_STATE',              EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERS_USERNAME',           EdmPrimitiveType::CHARARRAY     );
+		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'PERMSERVER_ADDUSER',       EdmPrimitiveType::INT16         );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_PK',           EdmPrimitiveType::INT64         );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_LINE3',        EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VR_USERSINFOEntityType,        'USERADDRESS_LINE2',        EdmPrimitiveType::CHARARRAY     );

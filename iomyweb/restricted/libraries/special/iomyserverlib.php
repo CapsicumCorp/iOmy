@@ -1629,6 +1629,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`USERS_STATE`, \n";
 			$sSQL .= "	`USERS_USERNAME`, \n";
+			$sSQL .= "	`PERMSERVER_ADDUSER`, \n";
 			$sSQL .= "	`USERADDRESS_PK`, \n";
 			$sSQL .= "	`USERADDRESS_LINE3`, \n";
 			$sSQL .= "	`USERADDRESS_LINE2`, \n";
@@ -1657,6 +1658,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`USERSGENDER_PK`, \n";
 			$sSQL .= "	`USERSGENDER_NAME` \n";
 			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`USERADDRESS` ON `USERS_PK`=`USERADDRESS_USERS_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LANGUAGE` ON `USERADDRESS_LANGUAGE_FK`=`LANGUAGE_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`REGION` ON `USERADDRESS_REGION_FK`=`REGION_PK` \n";
