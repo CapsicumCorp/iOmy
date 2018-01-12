@@ -1140,6 +1140,7 @@ $.extend(IomyRe.common,{
                         "PermRead":                    aData[i].PERMPREMISE_READ,
                         "PermWrite":                aData[i].PERMPREMISE_WRITE,
                         "PermOwner":                aData[i].PERMPREMISE_OWNER,
+                        "PermTelnet":               0,
                         "PremiseId":                aData[i].PREMISE_PK,
                         "PremiseName":                aData[i].PREMISE_NAME,
                         "HubId":                    aData[i].HUB_PK,
@@ -1149,6 +1150,12 @@ $.extend(IomyRe.common,{
                         "HubTypeId":                aData[i].HUBTYPE_PK,
                         "HubTypeName":              aData[i].HUBTYPE_NAME
                     };
+                    
+                    if (me.HubList["_"+aData[i].HUB_PK].HubTypeId == 2 &&
+                        me.HubList["_"+aData[i].HUB_PK].PermOwner == 1)
+                    {
+                        me.HubList["_"+aData[i].HUB_PK].PermTelnet = 1;
+                    }
                 }
                 
                 //-- Update the Timestamp on when the HubList was last updated --//
@@ -2608,6 +2615,34 @@ $.extend(IomyRe.common,{
 			return 0;
 		}
 	},
+    
+    /**
+     * Returns the ID of the first premise found to be able to communicate
+     * using telnet. If 0 is return, either no such premise was found, or an
+     * error occurred, in which case, an error message will appear in the log.
+     * 
+     * @returns {Number}    
+     */
+    LookupFirstHubToUseWithTelnet : function () {
+        var iPremiseId = 0;
+        
+        try {
+            $.each(IomyRe.common.HubList, function (sI, mHub) {
+                
+                if (mHub.PermTelnet === 1) {
+                    iPremiseId = mHub.PremiseId;
+                    return false;
+                }
+                
+            });
+        } catch (e) {
+            iPremiseId = 0;
+            $.sap.log.error("Error searching for the first hub for telnet communication ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iPremiseId;
+        }
+    },
 	
     //============================================//
     //== NAVIGATION FUNCTIONS                    ==//
@@ -2716,9 +2751,14 @@ $.extend(IomyRe.common,{
                 
             //-- Rules List --//
             } else if (sPageName === "pRulesList" || sPageName === "pRulesForm") {
-                //-- TODO: Work out a better way to get Premise ID. Perhaps go through the list and find out which premise is the user the owner of. --//
-                if (!IomyRe.functions.permissions.isUserPremiseOwner(1)) {
+                if (IomyRe.common.LookupFirstHubToUseWithTelnet() == 0) {
                     aErrorMessages.push("Only the owner of a premise can manage rules.");
+                }
+                
+            //-- Telnet Console --//
+            } else if (sPageName === "pTelnet") {
+                if (IomyRe.common.LookupFirstHubToUseWithTelnet() == 0) {
+                    aErrorMessages.push("Only the owner of a premise can use the telnet console.");
                 }
             }
             

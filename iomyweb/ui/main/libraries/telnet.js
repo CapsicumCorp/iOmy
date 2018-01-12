@@ -38,7 +38,7 @@ $.extend(IomyRe.telnet,{
      * 
      * @param {object}      mSettings			Parameters
      * @param {string}      mSettings.command	Telnet Command
-     * @param {number}      mSettings.command	Telnet Command
+     * @param {number}      mSettings.hubID 	ID of the Hub to interact with
      * @param {function}    mSettings.onSuccess	(Optional) Function to run if execution is successful
      * @param {function}    mSettings.onFail	(Optional) Function to run upon failure
      */
