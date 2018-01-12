@@ -55,7 +55,7 @@ $.extend(IomyRe.pages,{
 		}
 		
 		if (mPageData === null) {
-			throw new iOmyException("Data could not be found for page '"+sID+"'.")
+			throw new iOmyException("Data could not be found for page '"+sID+"'.");
 		}
 		
 		return mPageData;
@@ -74,6 +74,9 @@ $.extend(IomyRe.pages,{
 		//--------------------------------------------------------------------//
 		if (oApp.getPage(sID) === null) {
 			try {
+                if (sID === undefined || sID === null || sID === "") {
+                    throw new MissingArgumentException("Page ID is required.");
+                }
 				//--------------------------------//
 				// Declare variables
 				//--------------------------------//
