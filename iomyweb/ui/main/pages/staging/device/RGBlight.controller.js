@@ -385,30 +385,40 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         
         oSwitch.setEnabled(false);
         
-        IomyRe.devices.RunSwitch({
-            thingID : oController.iThingId,
+        try {
+            IomyRe.devices.RunSwitch({
+                thingID : oController.iThingId,
 
-            onSuccess : function (iNewState) {
-                
-                if (iNewState === 1) {
-                    oSwitch.setState(true);
-                    oController.ChangeLightColour();
-                } else {
-                    oSwitch.setState(false);
-                }
-                
-                oSwitch.setEnabled(true);
-            },
+                onSuccess : function (iNewState) {
 
-            onFail : function (sErrorMessage) {
-                IomyRe.common.showError(sErrorMessage, "Failed to run the switch",
-                    function () {
-                        oSwitch.setState( !oSwitch.getState() );
-                        oSwitch.setEnabled(true);
+                    if (iNewState === 1) {
+                        oSwitch.setState(true);
+                        oController.ChangeLightColour();
+                    } else {
+                        oSwitch.setState(false);
                     }
-                );
-            }
-        });
+
+                    oSwitch.setEnabled(true);
+                },
+
+                onFail : function (sErrorMessage) {
+                    IomyRe.common.showError(sErrorMessage, "Failed to run the switch",
+                        function () {
+                            oSwitch.setState( !oSwitch.getState() );
+                            oSwitch.setEnabled(true);
+                        }
+                    );
+                }
+            });
+            
+        } catch (e) {
+            IomyRe.common.showError(e.name + ": " + e.message + "\n\n" + IomyRe.common.getContactSupportMessage(), "Failed to run the switch",
+                function () {
+                    oSwitch.setState( !oSwitch.getState() );
+                    oSwitch.setEnabled(true);
+                }
+            );
+        }
     },
     
     
@@ -419,6 +429,8 @@ sap.ui.controller("pages.staging.device.RGBlight", {
      * @param {object} oEvent       UI5 Control Event of the calling widget.
      */
     ChangeLightColour : function (oEvent) {
+        var bError          = false;
+        var aErrorMessages  = [];
         var oController     = this;
         var oView           = this.getView();
         var mParameters;
@@ -429,36 +441,47 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var iNewLig         = 0;
         
         
-        if (oEvent === undefined) {
-            //mParameters = {
-            //    h : oView.byId("hueSlider").getValue(),// / oController.fHueConversionRate,
-            //    s : oView.byId("satSlider").getValue(),// / oController.fSaturationConversionRate,
-            //    v : oView.byId("briSlider").getValue(),// / oController.fLightConversionRate
-            //};
-            
-            mNewHSL = IomyRe.functions.convertHSL( "SimpleSlider", "DB", oController.iThingTypeId, oView.byId("hueSlider").getValue(), oView.byId("satSlider").getValue(), oView.byId("briSlider").getValue() );
-            if( mNewHSL.Error===false ) {
-                iNewHue = mNewHSL.Hue;
-                iNewSat = mNewHSL.Sat;
-                iNewLig = mNewHSL.Lig;
+        try {
+            if (oEvent === undefined) {
+                //mParameters = {
+                //    h : oView.byId("hueSlider").getValue(),// / oController.fHueConversionRate,
+                //    s : oView.byId("satSlider").getValue(),// / oController.fSaturationConversionRate,
+                //    v : oView.byId("briSlider").getValue(),// / oController.fLightConversionRate
+                //};
+
+                mNewHSL = IomyRe.functions.convertHSL( "SimpleSlider", "DB", oController.iThingTypeId, oView.byId("hueSlider").getValue(), oView.byId("satSlider").getValue(), oView.byId("briSlider").getValue() );
+                if( mNewHSL.Error===false ) {
+                    iNewHue = mNewHSL.Hue;
+                    iNewSat = mNewHSL.Sat;
+                    iNewLig = mNewHSL.Lig;
+                } else {
+                    bError = true;
+                    aErrorMessages.push(mNewHSL.ErrMesg);
+                }
+
+            } else {
+                //----------------------------------------------------------------------------------------//
+                //-- TODO: This seems to be triggered when the User goes from "Simple" to "Advanced"    --//
+                //--     This will need to be looked at down the track                                  --//
+                //----------------------------------------------------------------------------------------//
+
+                mParameters = oEvent.getParameters();
+
+                var mNewHSLTemp = IomyRe.functions.convertRGBToHSL255( mParameters.r, mParameters.g, mParameters.b );
+
+                mNewHSL = IomyRe.functions.convertHSL( "Normal", "DB", oController.iThingTypeId, mNewHSLTemp.hue, mNewHSLTemp.saturation, mNewHSLTemp.light );
+                if( mNewHSL.Error===false ) {
+                    iNewHue = mNewHSL.Hue;
+                    iNewSat = mNewHSL.Sat;
+                    iNewLig = mNewHSL.Lig;
+                } else {
+                    bError = true;
+                    aErrorMessages.push(mNewHSL.ErrMesg);
+                }
             }
-            
-        } else {
-            //----------------------------------------------------------------------------------------//
-            //-- TODO: This seems to be triggered when the User goes from "Simple" to "Advanced"    --//
-            //--     This will need to be looked at down the track                                  --//
-            //----------------------------------------------------------------------------------------//
-            
-            mParameters = oEvent.getParameters();
-            
-            var mNewHSLTemp = IomyRe.functions.convertRGBToHSL255( mParameters.r, mParameters.g, mParameters.b );
-            
-            mNewHSL = IomyRe.functions.convertHSL( "Normal", "DB", oController.iThingTypeId, mNewHSLTemp.hue, mNewHSLTemp.saturation, mNewHSLTemp.light );
-            if( mNewHSL.Error===false ) {
-                iNewHue = mNewHSL.Hue;
-                iNewSat = mNewHSL.Sat;
-                iNewLig = mNewHSL.Lig;
-            }
+        } catch (e) {
+            bError = true;
+            aErrorMessages.push("Failed to convert HSL figures (ID: "+oController.iThingId+") ("+e.name+"): " + e.message);
         }
         
         /*
@@ -471,56 +494,65 @@ sap.ui.controller("pages.staging.device.RGBlight", {
         var iDeviceType     = IomyRe.common.ThingList["_"+this.iThingId].TypeId;
         */
         
-        var mRequestData    = {
-            "method" : "POST",
-            "onFail" : function (response) {
-                jQuery.sap.log.error("There was a fatal error changing light bulb properties: "+JSON.stringify(response));
-            }
-        };
-        
-
-        if (!oController.bAdvancedFirstRun) {
-            
-            //if (iDeviceType == IomyRe.devices.philipshue.ThingTypeId) {
-            if (oController.iThingTypeId == IomyRe.devices.philipshue.ThingTypeId) {
-                mRequestData.url    = IomyRe.apiphp.APILocation("philipshue");
-                mRequestData.data   = {
-                    "Mode" : "ChangeHueSatLig",
-                    "ThingId" : oController.iThingId,
-                    //"Hue" : iHue,
-                    //"Saturation" : iSat,
-                    //"Brightness" : iLight
-                    "Hue":        iNewHue,
-                    "Saturation": iNewSat,
-                    "Brightness": iNewLig
+        if (!bError) {
+            try {
+                var mRequestData    = {
+                    "method" : "POST",
+                    "onFail" : function (response) {
+                        jQuery.sap.log.error("There was a fatal error changing light bulb properties: "+JSON.stringify(response));
+                    }
                 };
-                
-                IomyRe.apiphp.AjaxRequest(mRequestData);
-                
-            //} else if (iDeviceType == IomyRe.devices.csrmesh.ThingTypeId) {
-            } else if(oController.iThingTypeId == IomyRe.devices.csrmesh.ThingTypeId) {
-                mRequestData.url    = IomyRe.apiphp.APILocation("light");
-                mRequestData.data   = {
-                    "Mode" : "ChangeColorBrightness",
-                    "ThingId" : oController.iThingId,
-                    "Data" : JSON.stringify({
-                        "NewValue" : {
+
+
+                if (!oController.bAdvancedFirstRun) {
+
+                    //if (iDeviceType == IomyRe.devices.philipshue.ThingTypeId) {
+                    if (oController.iThingTypeId == IomyRe.devices.philipshue.ThingTypeId) {
+                        mRequestData.url    = IomyRe.apiphp.APILocation("philipshue");
+                        mRequestData.data   = {
+                            "Mode" : "ChangeHueSatLig",
+                            "ThingId" : oController.iThingId,
                             //"Hue" : iHue,
                             //"Saturation" : iSat,
                             //"Brightness" : iLight
                             "Hue":        iNewHue,
                             "Saturation": iNewSat,
                             "Brightness": iNewLig
-                        }
-                    })
-                };
+                        };
+
+                        IomyRe.apiphp.AjaxRequest(mRequestData);
+
+                    //} else if (iDeviceType == IomyRe.devices.csrmesh.ThingTypeId) {
+                    } else if(oController.iThingTypeId == IomyRe.devices.csrmesh.ThingTypeId) {
+                        mRequestData.url    = IomyRe.apiphp.APILocation("light");
+                        mRequestData.data   = {
+                            "Mode" : "ChangeColorBrightness",
+                            "ThingId" : oController.iThingId,
+                            "Data" : JSON.stringify({
+                                "NewValue" : {
+                                    //"Hue" : iHue,
+                                    //"Saturation" : iSat,
+                                    //"Brightness" : iLight
+                                    "Hue":        iNewHue,
+                                    "Saturation": iNewSat,
+                                    "Brightness": iNewLig
+                                }
+                            })
+                        };
+
+                        IomyRe.apiphp.AjaxRequest(mRequestData);
+
+                    }
+
+                } else {
+                    oController.bAdvancedFirstRun = false;
+                }
                 
-                IomyRe.apiphp.AjaxRequest(mRequestData);
-                
+            } catch (e) {
+                $.sap.log.error("Cannot change the light properties (ID: "+oController.iThingId+") ("+e.name+"): " + e.message);
             }
-            
         } else {
-            oController.bAdvancedFirstRun = false;
+            $.sap.log.error(aErrorMessages.join("\n"));
         }
     }
 		

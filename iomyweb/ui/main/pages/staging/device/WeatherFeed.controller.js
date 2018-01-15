@@ -51,22 +51,43 @@ sap.ui.controller("pages.staging.device.WeatherFeed", {
 	LoadData : function (iThingId) {
         var oController = this;
         var oView       = this.getView();
+        var sNAMessage  = "N/A";
         
-        IomyRe.devices.weatherfeed.FetchCurrentWeather({
-            thingID : iThingId,
+        var fnFail = function (sError) {
+            $.sap.log.error(sError);
             
-            onSuccess : function (mData) {
-                oView.byId("WeatherOutside").setText(mData.Condition.Value);
-                oView.byId("Temperature").setText(mData.Temperature.Value.toFixed(1) + mData.Temperature.UomName);
-                oView.byId("Sunrise").setText(mData.HumanReadable.SunriseTime);
-                oView.byId("Sunset").setText(mData.HumanReadable.SunsetTime);
-                oView.byId("Humidity").setText(mData.Humidity.Value + mData.Humidity.UomName);
-                oView.byId("WindDirection").setText(mData.HumanReadable.WindDirection);
-                oView.byId("WindSpeed").setText(mData.WindSpeed.Value + mData.WindSpeed.UomName);
-                oView.byId("AirPressure").setText(mData.Pressure.Value + mData.Pressure.UomName);
-                
-            }
-        });
+            oView.byId("WeatherOutside").setText(sNAMessage);
+            oView.byId("Temperature").setText(sNAMessage);
+            oView.byId("Sunrise").setText(sNAMessage);
+            oView.byId("Sunset").setText(sNAMessage);
+            oView.byId("Humidity").setText(sNAMessage);
+            oView.byId("WindDirection").setText(sNAMessage);
+            oView.byId("WindSpeed").setText(sNAMessage);
+            oView.byId("AirPressure").setText(sNAMessage);
+        };
+        
+        try {
+            IomyRe.devices.weatherfeed.FetchCurrentWeather({
+                thingID : iThingId,
+
+                onSuccess : function (mData) {
+                    oView.byId("WeatherOutside").setText(mData.Condition.Value);
+                    oView.byId("Temperature").setText(mData.Temperature.Value.toFixed(1) + mData.Temperature.UomName);
+                    oView.byId("Sunrise").setText(mData.HumanReadable.SunriseTime);
+                    oView.byId("Sunset").setText(mData.HumanReadable.SunsetTime);
+                    oView.byId("Humidity").setText(mData.Humidity.Value + mData.Humidity.UomName);
+                    oView.byId("WindDirection").setText(mData.HumanReadable.WindDirection);
+                    oView.byId("WindSpeed").setText(mData.WindSpeed.Value + mData.WindSpeed.UomName);
+                    oView.byId("AirPressure").setText(mData.Pressure.Value + mData.Pressure.UomName);
+
+                },
+
+                onFail : fnFail
+            });
+            
+        } catch (e) {
+            fnFail("Cannot load weather data: " + e.message);
+        }
     }
 		
 });

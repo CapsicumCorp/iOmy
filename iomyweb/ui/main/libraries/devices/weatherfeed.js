@@ -128,12 +128,12 @@ $.extend(IomyRe.devices.weatherfeed,{
                 sDirection = "NNW";
             }
 
-            return sDirection;
         } catch (e) {
             // Something pretty funky happened for an exception to be thrown.
-            e.message = "Error in IomyRe.devices.weatherfeed.getWindDirection ("+e.name+"):\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
+            sDirection = null;
+            $.sap.log.error("Error in IomyRe.devices.weatherfeed.getWindDirection ("+e.name+"):\n" + e.message);
+        } finally {
+            return sDirection;
         }
     },
     
@@ -234,9 +234,12 @@ $.extend(IomyRe.devices.weatherfeed,{
 
             });
         } catch (e) {
-            e.message = "Error in IomyRe.devices.weatherfeed.FetchCurrentWeather ("+e.name+"):\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
+            var sExMesg = "Error in IomyRe.devices.weatherfeed.FetchCurrentWeather ("+e.name+"):\n" + e.message;
+            $.sap.log.error(sExMesg);
+            fnFail(sExMesg);
+//            e.message = "Error in IomyRe.devices.weatherfeed.FetchCurrentWeather ("+e.name+"):\n" + e.message;
+//            $.sap.log.error(e.message);
+//            throw e;
         }
     },
     

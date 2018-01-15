@@ -89,15 +89,16 @@ $.extend(IomyRe.time,{
                 "second":	iSecond
             };
 
+            
+        } catch (e) {
+            aResult = null;
+            $.sap.log.error("Error in IomyRe.time.ExtractTimeDataFromJSDate ("+e.name+"): " + e.message);
+            
+        } finally {
             //----------------------------------------------------//
             //-- 9.0 - Return Results                           --//
             //----------------------------------------------------//
             return aResult;
-            
-        } catch (e) {
-            e.message = "Error in IomyRe.time.ExtractTimeDataFromJSDate:\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
         }
 		
 	},
@@ -139,16 +140,16 @@ $.extend(IomyRe.time,{
             } else {
                 iCurrentTimestamp = Math.floor( iUTS / 1000 );
             }
-
+            
+        } catch (e) {
+            iCurrentTimestamp = -1;
+            $.sap.log.error("Error in IomyRe.time.GetCurrentUTS:\n" + e.message);
+            
+        } finally {
             //----------------------------------------------------//
             //-- 9.0 - Return Results                           --//
             //----------------------------------------------------//
             return iCurrentTimestamp;
-            
-        } catch (e) {
-            e.message = "Error in IomyRe.time.GetCurrentUTS:\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
         }
 		
 	},
@@ -317,7 +318,7 @@ $.extend(IomyRe.time,{
         var fnAppendError = function (sErrMesg) {
             bError = true;
             aErrorMessages.push(sErrMesg);
-            $.sap.error.log(sErrMesg);
+            $.sap.log.error(sErrMesg);
         };
         
         try {

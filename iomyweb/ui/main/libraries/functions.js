@@ -29,98 +29,115 @@ $.extend(IomyRe.functions, {
     
     
     createDeviceListData : function (mSettings) {
+        var bError                      = false;
         var aaDeviceList                = {};
         var iPremiseId                  = 0;
         var iRoomId                     = 0;
         var aDevicesInAlphabeticalOrder = [];
         
-        //--------------------------------------------------------------------//
-        // Look for any specified filters and apply them.
-        //--------------------------------------------------------------------//
-        if (mSettings !== undefined && mSettings !== null) {
-            
-            if (mSettings.filter !== undefined || mSettings.filter !== null) {
-                
-                if (mSettings.filter.premiseID) {
-                    iPremiseId = mSettings.filter.premiseID;
-                }
-                
-                if (mSettings.filter.roomID) {
-                    iRoomId = mSettings.filter.roomID;
-                }
-                
-            }
-            
-        }
-        
-        $.each( IomyRe.common.ThingList, function( sIndex, mThing ) {
+        try {
+            //--------------------------------------------------------------------//
+            // Look for any specified filters and apply them.
+            //--------------------------------------------------------------------//
+            if (mSettings !== undefined && mSettings !== null) {
 
-            //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
-            if ( mThing!==undefined ) {
+                if (mSettings.filter !== undefined || mSettings.filter !== null) {
 
-                if ((iPremiseId === 0 || iPremiseId == mThing.PremiseId) && (iRoomId === 0 || iRoomId == mThing.RoomId)) {
-                    //--------------------------------------------//
-                    //-- If Grouping isn't setup yet            --//
-                    //--------------------------------------------//
-                    if( aaDeviceList["thingType"+mThing.TypeId] === undefined ) {
-                        //-- Define the Grouping --//
-                        aaDeviceList["thingType"+mThing.TypeId] = {
-                            "Name": mThing.TypeName,        //-- Display the name of the Grouping --//
-                            "Prefix":"Dev",                 //-- Prefix to make object have a unique Id --//
-                            "Devices":[]                    //-- Array to store the devices in the Grouping --//
-                        };
+                    if (mSettings.filter.premiseID) {
+                        iPremiseId = mSettings.filter.premiseID;
                     }
 
-                    aDevicesInAlphabeticalOrder.push(mThing);
-                }
-            }
-        });
-        
-        aDevicesInAlphabeticalOrder.sort(
-            function (a, b) {
-                var sA = a.DisplayName.toLowerCase();
-                var sB = b.DisplayName.toLowerCase();
-                
-                if (sA === sB) {
-                    return 0;
-                } else if (sA > sB) {
-                    return 1;
-                } else if (sA < sB) {
-                    return -1;
-                }
-            }
-        );
-        
-        //--------------------------------------------------------------------//
-        // Construct the Device List using any filters specified.
-        //--------------------------------------------------------------------//
-        $.each( aDevicesInAlphabeticalOrder, function( sIndex, mThing ) {
+                    if (mSettings.filter.roomID) {
+                        iRoomId = mSettings.filter.roomID;
+                    }
 
-            //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
-            if ( mThing!==undefined ) {
+                }
 
-                if ((iPremiseId === 0 || iPremiseId == mThing.PremiseId) && (iRoomId === 0 || iRoomId == mThing.RoomId)) {
-                    //--------------------------------------------//
-                    //-- Add the Devices into the Grouping        --//
-                    //--------------------------------------------//
-                    aaDeviceList["thingType"+mThing.TypeId].Devices.push({
-                        "DeviceId":          mThing.Id,
-                        "DeviceName":        mThing.DisplayName,
-                        "DeviceTypeId":      mThing.TypeId,
-                        "DeviceTypeName":    mThing.TypeName,
-                        "DeviceStatus":      mThing.Status,
-                        "LinkId":            mThing.LinkId,
-                        "PermToggle":        mThing.PermToggle,
-                        "IOs":               mThing.IO,
-                        "RoomId":            mThing.RoomId,
-                        "PremiseId":         mThing.PremiseId,
-                        "UILastUpdate":      mThing.UILastUpdate
+            }
+
+            $.each( IomyRe.common.ThingList, function( sIndex, mThing ) {
+
+                //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
+                if ( mThing!==undefined ) {
+
+                    if ((iPremiseId === 0 || iPremiseId == mThing.PremiseId) && (iRoomId === 0 || iRoomId == mThing.RoomId)) {
+                        //--------------------------------------------//
+                        //-- If Grouping isn't setup yet            --//
+                        //--------------------------------------------//
+                        if( aaDeviceList["thingType"+mThing.TypeId] === undefined ) {
+                            //-- Define the Grouping --//
+                            aaDeviceList["thingType"+mThing.TypeId] = {
+                                "Name": mThing.TypeName,        //-- Display the name of the Grouping --//
+                                "Prefix":"Dev",                 //-- Prefix to make object have a unique Id --//
+                                "Devices":[]                    //-- Array to store the devices in the Grouping --//
+                            };
+                        }
+
+                        aDevicesInAlphabeticalOrder.push(mThing);
+                    }
+                }
+            });
+
+            aDevicesInAlphabeticalOrder.sort(
+                function (a, b) {
+                    var sA = a.DisplayName.toLowerCase();
+                    var sB = b.DisplayName.toLowerCase();
+
+                    if (sA === sB) {
+                        return 0;
+                    } else if (sA > sB) {
+                        return 1;
+                    } else if (sA < sB) {
+                        return -1;
+                    }
+                }
+            );
+        
+        } catch (e) {
+            bError = true;
+            $.sap.log.error("Failed to prepare the device list data ("+e.name+"): " + e.message);
+            
+        } finally {
+            try {
+                if (!bError) {
+                    //--------------------------------------------------------------------//
+                    // Construct the Device List using any filters specified.
+                    //--------------------------------------------------------------------//
+                    $.each( aDevicesInAlphabeticalOrder, function( sIndex, mThing ) {
+
+                        //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
+                        if ( mThing!==undefined ) {
+
+                            if ((iPremiseId === 0 || iPremiseId == mThing.PremiseId) && (iRoomId === 0 || iRoomId == mThing.RoomId)) {
+                                //--------------------------------------------//
+                                //-- Add the Devices into the Grouping        --//
+                                //--------------------------------------------//
+                                aaDeviceList["thingType"+mThing.TypeId].Devices.push({
+                                    "DeviceId":          mThing.Id,
+                                    "DeviceName":        mThing.DisplayName,
+                                    "DeviceTypeId":      mThing.TypeId,
+                                    "DeviceTypeName":    mThing.TypeName,
+                                    "DeviceStatus":      mThing.Status,
+                                    "LinkId":            mThing.LinkId,
+                                    "PermToggle":        mThing.PermToggle,
+                                    "IOs":               mThing.IO,
+                                    "RoomId":            mThing.RoomId,
+                                    "PremiseId":         mThing.PremiseId,
+                                    "UILastUpdate":      mThing.UILastUpdate
+                                });
+                            }
+                        }
                     });
                 }
+            } catch (e) {
+                aaDeviceList = {};
+                $.sap.log.error("Failed to construct the device list data ("+e.name+"): " + e.message);
+
+            } finally {
+                return aaDeviceList;
             }
-        });
+        }
         
-        return aaDeviceList;
     },
     
     extractRGBValuesFromString : function (sColourString) {
@@ -157,8 +174,11 @@ $.extend(IomyRe.functions, {
      * 
      * Based on this code: http://rgb2hsl.nichabi.com/javascript-function.php
      * 
-     * @param {type} sColorString       RGB colour string (e.g. 'rgb(120,33,10)')
-     * @returns {object}                Map containing the HSL values.
+     * @param {type} iRed       Red value
+     * @param {type} iGreen     Green value
+     * @param {type} iBlue      Blue value
+     * 
+     * @returns {object}        Map containing the HSL values.
      */
     convertRGBToHSL : function (iRed, iGreen, iBlue) {
         var fRed;

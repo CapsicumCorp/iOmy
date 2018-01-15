@@ -314,7 +314,7 @@ $.extend(IomyRe.common,{
                 }
             );
         } catch (e1) {
-            $.sap.error.log("Error with displaying the MessageBox:"+e1.message);
+            $.sap.log.error("Error with displaying the MessageBox:"+e1.message);
         }
     },
     
@@ -539,6 +539,9 @@ $.extend(IomyRe.common,{
         };
     },
     
+    showContactSupportMessage : function () {
+        return "Please contact iOmy support to report this error.";
+    },
     
     //============================================//
     // Core Variables
