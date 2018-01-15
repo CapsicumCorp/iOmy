@@ -858,7 +858,7 @@ if( $bError===false ) {
 								//-- Verify that the UserId is not the current User             --//
 								//----------------------------------------------------------------//
 								if( $bError===false ) {
-									if( $sPostMode==="ChangeUserState" || $sPostMode==="EditOtherUserInfo" || $sPostMode==="EditOtherUserAddress" ) {
+									if( $sPostMode==="ChangeUserState"  ) {
 										$aCurrentUserInfo = GetCurrentUserInfo();
 										
 										if( $aCurrentUserInfo['Error']===false ) {

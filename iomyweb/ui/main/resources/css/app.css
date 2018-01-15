@@ -18,6 +18,14 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 /* == #1.0# Base Classes                                                           == */
 /* ================================================================================== */
 
+.ChildFlexGrow > * {
+	flex-grow: 1 !important;
+}
+
+.ChildTextCenter > * {
+	text-align: center;
+}
+
 /* ================================================================================== */
 /* == #2.0# - Andrew Common Classes                                                == */
 /* ================================================================================== */
@@ -175,13 +183,63 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 	
 }
 
+/*=======================================================*/
+/* Onvif thumbnail page.
+/*=======================================================*/
 .CameraThumbnail {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
 }
 
+.CameraPTZButton > .sapMBtnInner {
+    background: none;
+    border: none;
+    color: white;
+    text-shadow: 0 0 0.355rem black;
+}
+
+.CameraPTZButton > .sapMBtnInner > .sapMBtnIcon {
+    color: white;
+}
+
 /* Telnet Output Textarea Height */
 .TelnetOutput.sapMInputBase.sapMTextArea {
-	height: 300px;
+	min-height: 300px;
+	height: 65vh;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+/*=======================================================*/
+/* Light bulb Colour Slider
+/*=======================================================*/
+.LightColourSlider > .sapMSliderInner {
+	background: url(../../resources/images/smartbulb/ColorBar.png);
+	background-size: 100%;
+	height: 0.5875rem;
+}
+
+.LightColourSlider > .sapMSliderInner > .sapMSliderProgress {
+	background: none;
+}
+
+.LightColourSlider > .sapMSliderInner > .sapMSliderHandle {
+	top: -0.71rem;
+}
+
+/*=======================================================*/
+/* Light bulb Colour Picker (Hiding the Opacity Slider)
+/*=======================================================*/
+.LightBulbColourPicker > .sapUnifiedColorPicker > div > .sapUiColorPicker-ColorPickerAlphaSlider {
+    display: none;
+}
+
+.hideForHSV.sapUiColorPicker-RBRow {
+    display: none;
+}
+
+/* To hide the Alpha Channel in the colour picker */
+.sapUiColorPicker-ColorPickerLastColumn> div:nth-child(4) {
+    display: none;
 }

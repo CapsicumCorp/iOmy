@@ -55,7 +55,7 @@ sap.ui.jsview("pages.staging.Premise", {
                     height: "100%",
                     vertical : true,
                     content : [
-                         IomyRe.widgets.DeviceToolbar(oController, "Premise List"),
+                        IomyRe.widgets.DeviceToolbar(oController, "Premise List"),
                         new sap.m.List (oView.createId("PremiseList"), {
                             mode: sap.m.ListMode.None,
                             items: []

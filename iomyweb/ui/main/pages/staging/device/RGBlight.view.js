@@ -50,12 +50,48 @@ sap.ui.jsview("pages.staging.device.RGBlight", {
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
-				IomyRe.widgets.DeviceToolbar(oController, "Main Office Light"),
-				IomyRe.widgets.RGBContainer(oController, {
-                    change : function (oControlEvent) {
-                        oController.ChangeLightColour(oControlEvent);
-                    }
-                })
+				new sap.m.ScrollContainer ({
+                    width: "100%",
+                    height: "100%",
+                    vertical : true,
+                    content : [
+                        IomyRe.widgets.DeviceToolbar(oController, ""),
+                        
+                        new sap.m.ScrollContainer(oView.createId("RGB_Cont"), {
+                            width: "100%",
+                            height: "100%",
+                            vertical : true,
+                            content : [
+                                IomyRe.widgets.LightBulbControlsContainer(oController, {
+                                    hue             : 180,
+                                    saturation      : 100,
+                                    brightness      : 100,
+
+                                    advancedViewPress : function () {
+                                        oController.SwitchToAdvancedView();
+                                    },
+                                    
+                                    switchChange : function () {
+                                        oController.RunLightSwitch();
+                                    },
+
+                                    change : function () {
+                                        oController.ChangeLightColour();
+                                    },
+
+                                    liveChange : function () {
+                                        var iHue = oView.byId("hueSlider").getValue();
+                                        var iSat = oView.byId("satSlider").getValue();
+                                        var iBright = oView.byId("briSlider").getValue();
+
+                                        oController.ChangeColourInBox(iHue, iSat, iBright);
+                                    }
+                                })
+                            ]
+                        })
+                    ]
+                }),
+                
 			]
 		}).addStyleClass("MainBackground");
 	}

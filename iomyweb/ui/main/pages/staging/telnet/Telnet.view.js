@@ -49,7 +49,7 @@ sap.ui.jsview("pages.staging.telnet.Telnet", {
 		var oView = this;
 		
 		oView.wTextAreaOutput = new sap.m.TextArea(oView.createId("telnetOutput"), {
-			editable : false
+			editable : false,
 		}).addStyleClass("width100Percent TelnetOutput");
 		
 		oView.wInputTelnetCommand = new sap.m.Input ({
@@ -74,87 +74,135 @@ sap.ui.jsview("pages.staging.telnet.Telnet", {
 			}
 		});
 		
-		oView.wToggleShowDebug = new sap.m.Button({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-			type:"Default",
-			text: "Show Debug",
-			
-			press : function () {
-				oController.ExecuteCommand("debug output show");
-			}
-		}).addStyleClass("cTelnetButton");
-		
-		oView.wBtnCheckLink = new sap.m.Button({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-			type:"Default",
-			text: "Show Version",
-			
-			press : function () {
-				oController.ExecuteCommand("versioninfo");
-			}
-		}).addStyleClass("cTelnetButton");
-		
-		oView.wBtnListDevices = new sap.m.Button({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
-			}),
-			type:"Default",
-			text: "Show Modules",
-			
-			press : function () {
-				oController.ExecuteCommand("modulesinfo");
-			}
-		}).addStyleClass("cTelnetButton");
-		
 		return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "MJPEG",
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
-				IomyRe.widgets.DeviceToolbar(oController, "Telnet Console"),
-                
-				//-- Main Panel --//
-                new sap.m.Panel ({
-                    backgroundDesign: "Transparent",
-                    content : [
-                        new sap.m.VBox({
-                            layoutData : new sap.m.FlexItemData({
-                                growFactor : 1
-                            }),
-                            items : [
-                                // Put the telnet output area
-                                oView.wTextAreaOutput,
+				
+				new sap.m.ScrollContainer({
+					vertical: true,
+					height: "100%",
+					content : [
+						IomyRe.widgets.DeviceToolbar(oController, "Telnet Console"),
+						// Put the telnet output area
+						new sap.m.VBox ({
+							layoutData : new sap.m.FlexItemData({
+								growFactor : 1
+							}),
+							items : [
+								oView.wTextAreaOutput
+							]
+						}),				
+						new sap.m.VBox ({
+							items: [
+								new sap.m.Label ({
+									text : "Enter command:"
+								}),
+								new sap.m.HBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+										oView.wInputTelnetCommand,
+										oView.wBtnExecuteCommand
+									]
+								}).addStyleClass(""),
+								new sap.m.HBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+										oView.wToggleShowDebug,
+										oView.wBtnCheckLink,
+										oView.wBtnListDevices
+									]
+								}).addStyleClass("TextCenter"),
+                                
+                                //-- Row 1 --//
+                                new sap.m.HBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+                                        //-- Debug Output --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Show Debug",
 
-                                new sap.m.Label ({
-                                    text : "Enter command:"
-                                }),
+                                            press : function () {
+                                                oController.ExecuteCommand("debug output show");
+                                            }
+                                        }),
+                                        
+                                        //-- Version Info --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Show Version",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("versioninfo");
+                                            }
+                                        }),
+                                        
+                                        //-- Modules Info --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Show Modules",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("modulesinfo");
+                                            }
+                                        })
+									]
+								}).addStyleClass("TextCenter"),
+                                
+                                //-- Row 2 --//
                                 new sap.m.HBox({
-                                    layoutData : new sap.m.FlexItemData({
-                                        growFactor : 1
-                                    }),
-                                    items : [
-                                        oView.wInputTelnetCommand,
-                                        oView.wBtnExecuteCommand
-                                    ]
-                                }).addStyleClass(""),
-                                new sap.m.HBox({
-                                    layoutData : new sap.m.FlexItemData({
-                                        growFactor : 1
-                                    }),
-                                    items : [
-                                        oView.wToggleShowDebug,
-                                        oView.wBtnCheckLink,
-                                        oView.wBtnListDevices
-                                    ]
-                                }).addStyleClass("TextCenter")
-                            ]
-                        }).addStyleClass("PadLeft7px PadRight7px")
-                    ]
-                }).addStyleClass("PadBottom10px PanelNoPadding UserInputForm")
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+                                        //-- Get RapidHA Information --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Get RapidHA Info",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("get_rapidha_info");
+                                            }
+                                        }),
+                                        
+                                        //-- Get Zigbee Information --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Get Zigbee Info",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("get_zigbee_info");
+                                            }
+                                        })
+									]
+								}).addStyleClass("TextCenter")
+							]
+						})					
+					]
+				}).addStyleClass("")
 			]
 		}).addStyleClass("MainBackground");
 	}

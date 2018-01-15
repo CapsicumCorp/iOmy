@@ -23,42 +23,42 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 $.sap.require("sap.ui.table.Table");
 sap.ui.controller("pages.staging.user.UserList", {
-	sMode:              "Show",
-	aFormFragments: 	{},
-	
-	
-	
+    sMode:              "Show",
+    aFormFragments:     {},
+    
+    
+    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
 * @memberOf pages.template.Template
 */
 
-	onInit: function() {
-		var oController = this;			//-- SCOPE: Allows subfunctions to access the current scope --//
-		var oView = this.getView();
-		
-		oView.addEventDelegate({
+    onInit: function() {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
+        
+        oView.addEventDelegate({
 
-			onBeforeShow: function ( oEvent ) {
-				//-- Store the Current Id --//
-				//oController.iCurrentId = oEvent.data.Id;
-				
-				//-- Refresh Nav Buttons --//
-				//MyApp.common.NavigationRefreshButtons( oController );
-				
-				//-- Update the Model --//
-				//oController.RefreshModel( oController, {} );
-				
-				//-- Check the parameters --//
-				oController.GetListOfUsers();
-				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
-			}
-			
-		});
-		
-	},
+            onBeforeShow: function ( oEvent ) {
+                //-- Store the Current Id --//
+                //oController.iCurrentId = oEvent.data.Id;
+                
+                //-- Refresh Nav Buttons --//
+                //MyApp.common.NavigationRefreshButtons( oController );
+                
+                //-- Update the Model --//
+                //oController.RefreshModel( oController, {} );
+                
+                //-- Check the parameters --//
+                oController.GetListOfUsers();
+                //-- Defines the Device Type --//
+                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+            }
+            
+        });
+        
+    },
     
     GetListOfUsers : function() {
         var oController = this;
@@ -113,6 +113,7 @@ sap.ui.controller("pages.staging.user.UserList", {
                     },
                     onFail: function (response) {
                         jQuery.sap.log.error("Error with the 'AdminUserList' API Request! "+response.responseText);
+                        oController.RefreshModel(oController, {})
                     }
                 });
             } else {
@@ -124,29 +125,30 @@ sap.ui.controller("pages.staging.user.UserList", {
         
     },
     
-	RefreshModel: function( oController, oConfig ) {
-		//------------------------------------------------//
-		//-- Declare Variables                          --//
-		//------------------------------------------------//
-		var oView           = oController.getView();
+    RefreshModel: function( oController, oConfig ) {
+        //------------------------------------------------//
+        //-- Declare Variables                          --//
+        //------------------------------------------------//
+        var oView           = oController.getView();
         var aUsers          = [];
         var sUserState      = "";
-		
+        var oModel;
+        
         if (oConfig.data) {
             
             //------------------------------------------------//
             //-- Create the user list for the model         --//
             //------------------------------------------------//
             for (var i = 0; i < oConfig.data.length; i++) {
-				
-				if (oConfig.data[i].UserState === 0 || oConfig.data[i].UserState === '0' ) {
-					sUserState = "Disabled";
-				} else {
-					sUserState = "Enabled";
-				}
-				
+                
+                if (oConfig.data[i].State === 0 || oConfig.data[i].State === '0' ) {
+                    sUserState = "Disabled";
+                } else {
+                    sUserState = "Enabled";
+                }
+                
                 aUsers.push({
-                    "UserId" : oConfig.data[i].UserId,
+                    "UserId" : oConfig.data[i].Id,
                     "Username": oConfig.data[i].Username,
                     "FirstName": oConfig.data[i].Givennames,
                     "LastName" : oConfig.data[i].Surnames,
@@ -158,11 +160,11 @@ sap.ui.controller("pages.staging.user.UserList", {
             //------------------------------------------------//
             //-- Build and Bind Model to the View           --//
             //------------------------------------------------//
-            oView.setModel( 
-                new sap.ui.model.json.JSONModel({
-                    "UserList": aUsers
-                })
-            );
+            oModel = new sap.ui.model.json.JSONModel({
+                "UserList": aUsers
+            });
+            
+            oView.setModel(oModel);
 
             //------------------------------------------------//
             //-- Trigger the onSuccess Event                --//
@@ -171,8 +173,162 @@ sap.ui.controller("pages.staging.user.UserList", {
                 oConfig.onSuccess();
             }
         } else {
-            throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
+            oModel = new sap.ui.model.json.JSONModel({
+                "UserList": []
+            });
+            
+            oView.setModel(oModel);
+            //throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
         }
-	}
+    },
+    
+    GetSelectedUsers : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var oTable              = oView.byId("UsersTable");
+        var aRows               = oTable.getRows();
+        var aSelectedIndices    = oTable.getSelectedIndices();
+        var aSelectedRows       = [];
+        var aUserList           = oView.getModel().getProperty("/UserList");
+        
+        for (var i = 0; i < aSelectedIndices.length; i++) {
+            aSelectedRows.push(aUserList[aSelectedIndices[i]]);
+        }
+        
+        return aSelectedRows;
+    },
+    
+    EnableSelectedUsers : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var aSelectedUsers      = oController.GetSelectedUsers();
+        var aRequests           = [];
+        var oAjaxQueue;
+        
+        //--------------------------------------------------------------------//
+        // Prepare the request for each selected user if they're not already
+        // enabled.
+        //--------------------------------------------------------------------//
+        for (var i = 0; i < aSelectedUsers.length; i++) {
+            if (aSelectedUsers[i].Status === "Disabled") {
+                aRequests.push({
+                    "library" : "PHP",
+                    "url" : IomyRe.apiphp.APILocation("users"),
+                    "data" : {
+                        "Mode" : "ChangeUserState",
+                        "Data" : JSON.stringify({
+                            "UserId" : aSelectedUsers[i].UserId,
+                            "NewState" : 1
+                        })
+                    }
+                });
+            }
+        }
+        
+        oAjaxQueue = new AjaxRequestQueue({
+            requests                : aRequests,
+            concurrentRequests      : 1,
+            
+            onSuccess : function () {
+                var sMessage    = "";
+                
+                if (aRequests.length === 1) {
+                    sMessage = "1 user enabled.";
+                } else {
+                    sMessage = aRequests.length + " users enabled.";
+                }
+                
+                IomyRe.common.showMessage({
+                    text : sMessage
+                });
+                
+                oController.GetListOfUsers();
+            },
+            
+            onWarning : function () {
+                IomyRe.common.showWarning("Could not enable all users.", "");
+            },
+            
+            onFail : function () {
+                IomyRe.common.showError("Failed to enable any users.", "");
+            }
+            
+        });
+        
+    },
+    
+    DisableSelectedUsers : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var aSelectedUsers      = oController.GetSelectedUsers();
+        var aRequests           = [];
+        var oAjaxQueue;
+        
+        //--------------------------------------------------------------------//
+        // Prepare the request for each selected user. Three conditions must be
+        // met: 1. The user must NOT be the owner (first user), 2. The user
+        // cannot be currently logged in, and 3. The user should be enabled.
+        //--------------------------------------------------------------------//
+        for (var i = 0; i < aSelectedUsers.length; i++) {
+            if (aSelectedUsers[i].UserId !== 1 && aSelectedUsers[i].UserId !== 2) {
+                
+                if (aSelectedUsers[i].UserId == IomyRe.common.UserInfo.UserId) {
+                    IomyRe.common.showWarning("Unable to disable yourself while logged in.", "Still logged in");
+                    
+                } else {
+                    if (aSelectedUsers[i].Status === "Enabled") {
+                        aRequests.push({
+                            "library" : "PHP",
+                            "url" : IomyRe.apiphp.APILocation("users"),
+                            "data" : {
+                                "Mode" : "ChangeUserState",
+                                "Data" : JSON.stringify({
+                                    "UserId" : aSelectedUsers[i].UserId,
+                                    "NewState" : 0
+                                })
+                            }
+                        });
+                    }
+                }
+            } else {
+                IomyRe.common.showWarning("Cannot disable the owner.", "iOmy Owner");
+            }
+        }
+        
+        //--------------------------------------------------------------------//
+        // Put the requests in a queue. Run two at a time. Report the findings.
+        // TODO: Use more informative error messages.
+        //--------------------------------------------------------------------//
+        oAjaxQueue = new AjaxRequestQueue({
+            requests                : aRequests,
+            concurrentRequests      : 2,
+            
+            onSuccess : function () {
+                var sMessage    = "";
+                
+                if (aRequests.length === 1) {
+                    sMessage = "1 user disabled.";
+                } else {
+                    sMessage = aRequests.length + " users disabled.";
+                }
+                
+                IomyRe.common.showMessage({
+                    text : sMessage
+                });
+                
+                oController.GetListOfUsers();
+            },
+            
+            onWarning : function () {
+                IomyRe.common.showWarning("Could not disable all users.", "");
+            },
+            
+            onFail : function () {
+                IomyRe.common.showError("Failed to disable any users.", "");
+            }
+            
+        });
+        
+    }
 
 });

@@ -2,6 +2,7 @@
 Title: Common functions and variables Module
 Authors: 
     Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
     Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: 
 Copyright: Capsicum Corporation 2015, 2016, 2017
@@ -64,7 +65,7 @@ $.extend(IomyRe.common,{
     UserAppVariables: {
         "PagePerms": {
             "SettingsThingList":    false,        //-- BOOLEAN:    Flags if the User is allowed to access the "SettingsThingList" Page.        --//
-            "SettingsPremiseList":    false,        //-- BOOLEAN:    Flags if the User is allowed to access the "SettingsPremiseList" Page.        --//
+            "SettingsPremiseList":  false        //-- BOOLEAN:    Flags if the User is allowed to access the "SettingsPremiseList" Page.        --//
         }
     },
     
@@ -119,10 +120,62 @@ $.extend(IomyRe.common,{
     ThingListLastUpdate:            new Date(),
 
     //============================================//
+    //== OTHER USERS AND PERMISSIONS            ==//
+    //============================================//
+    PermLevelsPremise:              {
+        "_0": {
+            "Id":   0,
+            "Name": "No Access"
+        },
+        "_1": {
+            "Id":   1,
+            "Name": "Read Only"
+        },
+        "_2": {
+            "Id":   2,
+            "Name": "Read and Write"
+        },
+        "_3": {
+            "Id":   3,
+            "Name": "Premise Management"
+        },
+        "_4": {
+            "Id":   4,
+            "Name": "Premise Administrator (Hidden Premise)"
+        },
+        "_5": {
+            "Id":   5,
+            //"Name": "Premise Administrator (Visible Premise)"
+            "Name": "Premise Administrator"
+        }
+    },
+    PermLevelsRoom:              {
+        "_0": {
+            "Id":   0,
+            "Name": "No Access"
+        },
+        "_1": {
+            "Id":   1,
+            "Name": "Read Only"
+        },
+        "_2": {
+            "Id":   2,
+            "Name": "Read & Device Toggle"
+        },
+        "_3": {
+            "Id":   3,
+            "Name": "Full Access"
+        }
+    },
+    
+    
+    
+    //============================================//
     //== Navigational Variables                    ==//
     //============================================//
     NavPagesNavigationArray         : [],            //-- ARRAY:            This array holds the list of Pages (and Parameters).    --//
     NavPagesCurrentIndex            : -1,            //-- INTEGER:        This is the index of what page the User is on. NOTE: 0 indicates that the user is on the "Navigation Main" Page (or "Login" Page)    --//
+    mHelpData                       : {},            //-- Map:         This is where the help information will be stored before the user can login --//
     
     //============================================//
     //== Boolean flags                          ==//
@@ -175,12 +228,11 @@ $.extend(IomyRe.common,{
             //================================================//
             success: function(response) {
                 //================================================//
-                //== Initialise variables                        ==//
+                //== Initialise variables                       ==//
                 //================================================//
-                var sErrMesg = "";        //-- STRING: Used to store an error message should an error occur --//
                 
                 //================================================//
-                //== 2.A - User is currently logged in            ==//
+                //== 2.A - User is currently logged in          ==//
                 //================================================//
                 if (response.login===true) {
                     aConfig.OnUserSessionActive(response);
@@ -249,24 +301,26 @@ $.extend(IomyRe.common,{
         var callbackFn = fnCallback || function(){};
         var cssClass = sCssClass || "";
         
-        // open a fully configured message box
-        sap.m.MessageBox.show(
-            sMessage,
-            {
-                icon: sap.m.MessageBox.Icon.ERROR,
-                title: sTitle,
-                actions: sap.m.MessageBox.Action.CLOSE,
-                onClose: callbackFn,
-                styleClass : cssClass
-            }
-        );
+        try {
+            // open a fully configured message box
+            sap.m.MessageBox.show(
+                sMessage,
+                {
+                    icon: sap.m.MessageBox.Icon.ERROR,
+                    title: sTitle,
+                    actions: sap.m.MessageBox.Action.CLOSE,
+                    onClose: callbackFn,
+                    styleClass : cssClass
+                }
+            );
+        } catch (e1) {
+            $.sap.error.log("Error with displaying the MessageBox:"+e1.message);
+        }
     },
     
     /**
      * Displays an information popup with a message. It can call a function once
-     * the user closes the dialog.
-     * 
-     * 
+     * the toast disappears
      * 
      * @param {type} mSettings          Map containing parameters.
      */
@@ -375,6 +429,24 @@ $.extend(IomyRe.common,{
 
     },
     
+    showInformation : function( sMessage, sTitle, fnCallback, sCssClass ){
+        //-- --//
+        var callbackFn = fnCallback || function(){};
+        var cssClass   = sCssClass || "";
+        
+        // open a fully configured message box
+        sap.m.MessageBox.show(
+            sMessage,
+            {
+                icon: sap.m.MessageBox.Icon.INFORMATION,
+                title: sTitle,
+                actions: sap.m.MessageBox.Action.CLOSE,
+                onClose: fnCallback,
+                styleClass: cssClass
+            }
+        );
+    },
+    
     showWarning : function( sMessage, sTitle, fnCallback, sCssClass ){
         //-- --//
         var callbackFn = fnCallback || function(){};
@@ -406,6 +478,23 @@ $.extend(IomyRe.common,{
                 onClose: callbackFn,
                 styleClass : cssClass,
                 actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO]
+            }
+        );
+    },
+    
+    // Confirm Question for Sign Out
+    showConfirmQuestion : function( sMessage, sTitle, fnCallback, sCssClass ){
+        //-- Defaults --//
+        var callbackFn = fnCallback || function(){};
+        var cssClass = sCssClass || "";
+        
+        // open a fully configured message box
+        sap.m.MessageBox.confirm(
+            sMessage,
+            {
+                title: sTitle,
+                onClose: callbackFn,
+                styleClass : cssClass
             }
         );
     },
@@ -901,7 +990,7 @@ $.extend(IomyRe.common,{
                 "USERSINFO_PK",             "USERSINFO_TITLE",          "USERSINFO_DISPLAYNAME",    
                 "USERS_USERNAME",           "USERSINFO_GIVENNAMES",      "USERSINFO_SURNAMES",
                 "USERSINFO_EMAIL",          "USERSINFO_PHONENUMBER",    "USERSGENDER_PK",
-                "USERS_PK"
+                "USERS_PK",                 "USERS_USERNAME",           "PERMSERVER_ADDUSER"
             ],
             WhereClause: [],
             OrderByClause: [],
@@ -927,7 +1016,9 @@ $.extend(IomyRe.common,{
                     "Email":              aData[0].USERSINFO_EMAIL,
                     "Phone":              aData[0].USERSINFO_PHONENUMBER,
                     "Gender":             aData[0].USERSGENDER_PK,
-                    "UserId":             aData[0].USERS_PK
+                    "UserId":             aData[0].USERS_PK,
+                    "Username":           aData[0].USERS_USERNAME,
+                    "PermUserAdmin":      aData[0].PERMSERVER_ADDUSER
                 };
                 
                 //-- Update the Timestamp on when the UserInfo was last updated --//
@@ -1049,6 +1140,7 @@ $.extend(IomyRe.common,{
                         "PermRead":                    aData[i].PERMPREMISE_READ,
                         "PermWrite":                aData[i].PERMPREMISE_WRITE,
                         "PermOwner":                aData[i].PERMPREMISE_OWNER,
+                        "PermTelnet":               0,
                         "PremiseId":                aData[i].PREMISE_PK,
                         "PremiseName":                aData[i].PREMISE_NAME,
                         "HubId":                    aData[i].HUB_PK,
@@ -1058,6 +1150,12 @@ $.extend(IomyRe.common,{
                         "HubTypeId":                aData[i].HUBTYPE_PK,
                         "HubTypeName":              aData[i].HUBTYPE_NAME
                     };
+                    
+                    if (me.HubList["_"+aData[i].HUB_PK].HubTypeId == 2 &&
+                        me.HubList["_"+aData[i].HUB_PK].PermOwner == 1)
+                    {
+                        me.HubList["_"+aData[i].HUB_PK].PermTelnet = 1;
+                    }
                 }
                 
                 //-- Update the Timestamp on when the HubList was last updated --//
@@ -1094,6 +1192,8 @@ $.extend(IomyRe.common,{
         var aOrderBy        = [ "ROOMS_PREMISE_FK", "ROOMTYPE_OUTDOORS", "ROOMS_PK" ];
         
         me.RoomsList = {};
+        me.AllRoomsList = {};
+        
         //------------------------//
         //-- ODATA REQUEST        --//
         //------------------------//
@@ -2348,6 +2448,7 @@ $.extend(IomyRe.common,{
 			var iRoomRead              = aRoom.PermDeviceRead;             
             var iRoomWrite             = aRoom.PermWrite;            
             var iRoomStateToggle       = aRoom.PermStateToggle;
+            var sPermissionText        = "";
             
             if (iRoomRead === 0) {          
                 sPermissionText = "No Access";            
@@ -2402,7 +2503,147 @@ $.extend(IomyRe.common,{
 			return false;
 		}
 	},
+	
+	
+	//================================================================//
+	//== Lookup and Format Permissions functions                    ==//
+	//================================================================//
+	LookupPremPermLevelName: function ( iPermLevel ) {
+		var sKey = "_"+iPermLevel;
+		
+		if( typeof IomyRe.common.PermLevelsPremise[sKey]!=="undefined" ) {
+			return IomyRe.common.PermLevelsPremise[sKey].Name;
+		} else {
+			return "Error has occurred!";
+		}
+	},
+	
+	LookupPremPermLevelEditable: function ( iPermLevel ) {
+		if( iPermLevel>=4 ) {
+			return false;
+		} else {
+			return true;
+		}
+	},
+	
+	LookupPremisePermLevelFromPermissions: function ( mPremise ) {
+		if( mPremise.PremiseId>=1 ) {
+			var iPremPermLevel = 0;
+			
+			var iPremiseRead          = mPremise.PermRead;
+			var iPremiseWrite         = mPremise.PermWrite;
+			var iPremiseOwner         = mPremise.PermOwner;
+			var iPremiseRoomAdmin     = mPremise.PermRoomAdmin;
+			
+			//------------------------------------//
+			//-- Premise Adminstrator Access    --//
+			//------------------------------------//
+			if ( iPremiseOwner===1 ) {
+				if( iPremiseRead===1 ) {
+					//-- Premise Administrator with Premise Visible --//
+					iPremPermLevel = 5;
+				} else {
+					//-- Premise Administrator with Premise Hidden --//
+					iPremPermLevel = 4;
+				}
+				
+			//------------------------------------//
+			//-- Regular User Access            --//
+			//------------------------------------//
+			} else  {
+				if ( iPremiseRoomAdmin===1 ) {
+					//-- Premise Room Manager --//
+					iPremPermLevel = 3;
+				} else if ( iPremiseWrite===1 ) {
+					//-- Premise Read and Write access --//
+					iPremPermLevel = 2;
+				} else if ( iPremiseRead===1 ) {
+					//-- Premise Read access --//
+					iPremPermLevel = 1;
+				} else {
+					//-- No Access --//
+					iPremPermLevel = 0;
+				}
+			}
+			
+			return iPremPermLevel;
+			
+		} else {
+			return 0;
+		}
+		
+	},
+	
+	LookupRoomPermLevelName: function ( iPermLevel ) {
+		var sKey = "_"+iPermLevel;
+		
+		if( typeof IomyRe.common.PermLevelsRoom[sKey]!=="undefined" ) {
+			return IomyRe.common.PermLevelsRoom[sKey].Name;
+		} else {
+			return "Error has occurred!";
+		}
+	},
+	
+	LookupRoomPermLevelFromPermissions: function ( mRoom ) {
+		if( mRoom.RoomId>=1 ) {
+			var iRoomPermLevel = 0;
+			
+			var iRoomRead             = mRoom.PermRead;
+			var iRoomWrite            = mRoom.PermWrite;
+			var iRoomStateToggle      = mRoom.PermStateToggle;
+			
+			//------------------------------------//
+			//-- Premise Adminstrator Access    --//
+			//------------------------------------//
+			if ( iRoomWrite===1 ) {
+				//-- Premise Room Manager --//
+				iRoomPermLevel = 3;
+			} else if ( iRoomStateToggle===1 ) {
+				//-- Premise Read and Write access --//
+				iRoomPermLevel = 2;
+			} else if ( iRoomRead===1 ) {
+				//-- Premise Read access --//
+				iRoomPermLevel = 1;
+			} else {
+				//-- No Access --//
+				iRoomPermLevel = 0;
+			}
+			
+			return iRoomPermLevel;
+			
+		} else {
+			return 0;
+		}
+	},
     
+    /**
+     * Returns the ID of the first premise found to be able to communicate
+     * using telnet. If 0 is return, either no such premise was found, or an
+     * error occurred, in which case, an error message will appear in the log.
+     * 
+     * @returns {Number}    
+     */
+    LookupFirstHubToUseWithTelnet : function () {
+        var iPremiseId = 0;
+        
+        try {
+            $.each(IomyRe.common.HubList, function (sI, mHub) {
+                
+                if (mHub.PermTelnet === 1) {
+                    iPremiseId = mHub.PremiseId;
+                    return false;
+                }
+                
+            });
+        } catch (e) {
+            iPremiseId = 0;
+            $.sap.log.error("Error searching for the first hub for telnet communication ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iPremiseId;
+        }
+    },
+	
     //============================================//
     //== NAVIGATION FUNCTIONS                    ==//
     //============================================//
@@ -2425,6 +2666,8 @@ $.extend(IomyRe.common,{
      * @param {boolean} bResetNavArray      (optional) Boolean flag declaring that a reset is required (default = false)
      */
     NavigationChangePage: function( sPageName, aPageData, bResetNavArray ) {
+        var bCreatingPage   = true;
+        var aErrorMessages  = [];
 
         //-- Declare aPageData as an associative array if undefined --//
         aPageData = aPageData || {};
@@ -2495,24 +2738,84 @@ $.extend(IomyRe.common,{
         //$.sap.log.debug( "ChangePage NavArray="+JSON.stringify(this.NavPagesNavigationArray) );
         //$.sap.log.debug( "ChangePage NavIndex="+JSON.stringify(this.NavPagesCurrentIndex ) );
         
-        if (oApp.getPage(sPageName) === null) {
-            IomyRe.pages.createPage(sPageName);
-        }
-        
-        //--------------------------------------------------------------------//
-        // If the side menu was open when this function is called, close it.
-        //--------------------------------------------------------------------//
-//        console.log(sap.ui.Device.system.desktop);
-//        console.log(sap.ui.Device.system.phone);
-//        console.log(sap.ui.Device.system.tablet);
-        if (oApp.getCurrentPage().byId("toolPage") !== undefined) {
-            if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true && !sap.ui.Device.system.desktop) {
-                IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+        //------------------------------------------------------------------------//
+        // We need to check that the permissons are correct for a user to access
+        // certain pages.
+        //------------------------------------------------------------------------//
+        try {
+            //-- User List --//
+            if (sPageName === "pUserList" || sPageName === "pUserForm" || sPageName === "pNewUser") {
+                if (IomyRe.common.UserInfo.PermUserAdmin != 1) {
+                    aErrorMessages.push("You don't have sufficient privileges to manage users.");
+                }
+                
+            //-- Rules List --//
+            } else if (sPageName === "pRulesList" || sPageName === "pRulesForm") {
+                if (IomyRe.common.LookupFirstHubToUseWithTelnet() == 0) {
+                    aErrorMessages.push("Only the owner of a premise can manage rules.");
+                }
+                
+            //-- Telnet Console --//
+            } else if (sPageName === "pTelnet") {
+                if (IomyRe.common.LookupFirstHubToUseWithTelnet() == 0) {
+                    aErrorMessages.push("Only the owner of a premise can use the telnet console.");
+                }
             }
+            
+            if (aErrorMessages.length > 0) {
+                bCreatingPage = false;
+            }
+        } catch (e) {
+            $.sap.log.error("There was an error checking the page permissions ("+e.name+"): " + e.message);
         }
         
-        //-- Navigate to the new Page --//
-        oApp.to( sPageName, aPageData );
+        //------------------------------------------------------------------------//
+        // Attempt to create (if it hasn't been so already) and switch to the page.
+        //------------------------------------------------------------------------//
+        try {
+            if (bCreatingPage) {
+                if (oApp.getPage(sPageName) === null) {
+                    IomyRe.pages.createPage(sPageName);
+                } else {
+                    if (oApp.getPage(sPageName).byId("openMenu") !== undefined) {
+                        var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+                        oApp.getPage(sPageName).byId("openMenu").setText("Hi, "+sDisplayName);
+                    }
+
+                    IomyRe.help.addHelpMessage(sPageName);
+                }
+
+                //--------------------------------------------------------------------//
+                // If the side menu was open when this function is called, close it.
+                //--------------------------------------------------------------------//
+        //        console.log(sap.ui.Device.system.desktop);
+        //        console.log(sap.ui.Device.system.phone);
+        //        console.log(sap.ui.Device.system.tablet);
+                if (oApp.getCurrentPage().byId("toolPage") !== undefined) {
+                    if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true &&
+                        sap.ui.Device.system.phone) 
+                    {
+                        IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+
+                    } else if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === false &&
+                        sap.ui.Device.system.desktop && oApp.getCurrentPage().getId() !== sPageName )
+                    {
+                        IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+                    }
+                }
+
+                //-- Navigate to the new Page --//
+                oApp.to( sPageName, aPageData );
+            } else {
+                //----------------------------------------------------------------//
+                // There were conditions that were not met for a particular page.
+                // Show an error popup.
+                //----------------------------------------------------------------//
+                IomyRe.common.showError(aErrorMessages.join("\n\n"), "Cannot access page");
+            }
+        } catch (e) {
+            $.sap.log.error("There was an error creating and switching the page ("+e.name+"): " + e.message);
+        }
         
     },
     
@@ -2593,6 +2896,7 @@ $.extend(IomyRe.common,{
         
         return true;
     },
+    
     
     //============================================================================//
     //== FORM FRAGMENT FUNCTIONS                                                ==//

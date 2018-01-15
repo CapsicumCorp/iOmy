@@ -38,7 +38,7 @@ $.extend(IomyRe.telnet,{
      * 
      * @param {object}      mSettings			Parameters
      * @param {string}      mSettings.command	Telnet Command
-     * @param {number}      mSettings.command	Telnet Command
+     * @param {number}      mSettings.hubID 	ID of the Hub to interact with
      * @param {function}    mSettings.onSuccess	(Optional) Function to run if execution is successful
      * @param {function}    mSettings.onFail	(Optional) Function to run upon failure
      */
@@ -46,11 +46,11 @@ $.extend(IomyRe.telnet,{
         //--------------------------------------------------------------------//
         // Import modules and widgets.
         //--------------------------------------------------------------------//
-        var me              = this;
+        var oModule         = this;
         var php             = IomyRe.apiphp;
         var bError          = false;
         var aErrorMessages  = [];
-		var iLogIndex		= me.iLogIndex++;
+		var iLogIndex		= oModule.iLogIndex++;
         var fnSuccess;
         var fnFail;
         
@@ -121,9 +121,9 @@ $.extend(IomyRe.telnet,{
         }
         
         // Indicating that a telnet command is running
-        me.bRunningCommand = true;
+        oModule.bRunningCommand = true;
 		
-		me.TelnetLog["_"+iLogIndex] = {
+		oModule.TelnetLog["_"+iLogIndex] = {
 			"level" : !bError ? "I" : "E",
 			"content" : "Running " + sCommand + "..."
 		};
@@ -135,7 +135,7 @@ $.extend(IomyRe.telnet,{
             onSuccess : function (dataType, data) {
 				var req = this;
 				
-				me.mxExecutionCallbacks.synchronize({
+				oModule.mxExecutionCallbacks.synchronize({
 					
 					task : function () {
 						try {
@@ -164,7 +164,7 @@ $.extend(IomyRe.telnet,{
             onFail : function (response) {
 				var req = this;
 				
-				me.mxExecutionCallbacks.synchronize({
+				oModule.mxExecutionCallbacks.synchronize({
 					
 					task : function () {
 						var sOutput = response.responseText;
@@ -179,23 +179,23 @@ $.extend(IomyRe.telnet,{
             logOutput : function (sOutput, bError) {
 				
 				if (bError) {
-					me.TelnetLog["_"+iLogIndex].level = "E";
+					oModule.TelnetLog["_"+iLogIndex].level = "E";
 				}
                 
 				// Insert the output into the Telnet log
-				me.TelnetLog["_"+iLogIndex].content = sCommand + ": " + sOutput;
+				oModule.TelnetLog["_"+iLogIndex].content = sCommand + ": " + sOutput;
                 
-                me.bRunningCommand = false;
+                oModule.bRunningCommand = false;
             }
         });
     },
 	
 	compileLog : function () {
-		var me				= this;
+		var oModule     	= this;
 		var aLog			= [];
 		var mEntry;
 		
-		$.each(me.TelnetLog, function (sI, mEntry) {
+		$.each(oModule.TelnetLog, function (sI, mEntry) {
 			aLog.push( mEntry.level + ": " + mEntry.content );
 			
 		});

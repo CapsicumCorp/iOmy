@@ -759,7 +759,7 @@ void loadCSRMeshInfoFromDatabase(void ) {
     lockbluetoothhwandroid();
     numThings=dblibifaceptr->getThingInfo(linkpk, &thingHwid, &thingOutputHwid, &thingSerialCode, &thingType, &thingName);
     if (numThings>0) {
-      for (int i; i<numThings; i++) {
+      for (int i=0; i<numThings; i++) {
         int32_t hash;
 
         debuglibifaceptr->debuglib_printf(1, "%s: Importing device from database with LinkPK=%" PRId64 ", index=%d, Hwid=%" PRId32", outputhwid=%" PRId32 ", type=%" PRId32 " serialcode=%s, name=%s\n", __func__, linkpk, i, thingHwid[i], thingOutputHwid[i], thingType[i], thingSerialCode[i], thingName[i]);
@@ -1230,6 +1230,11 @@ static void csrmeshSyncDevicesWithDatabase(void) {
                 onoffattr->val=onoffattr->dbval;
                 debuglibifaceptr->debuglib_printf(1, "%s: Changing value for device: %08" PRIX32 " Attribute: %s from %d to %d\n", __func__, gcsrmeshdeviceit.second.deviceId, attrit.first.c_str(), onoffattr->prevval, onoffattr->val);
                 csrmeshSetDeviceOnOff(gcsrmeshdeviceit.second.deviceId, onoffattr->val);
+
+                //When turning on the light bulb the color also needs to be resent to the light bulb
+                if (onoffattr->val==1) {
+                  updateColor=true;
+                }
               }
             }
           } else if (typeid(*attrit.second)==typeid(dataintattr)) {

@@ -1,7 +1,7 @@
 <?php
 	//========================================================================================================//
 	//== @Author: Andrew Somerville <support@capsicumcorp.com>
-	//== @Description: A simple php to redirect users to the mobile interface.
+	//== @Description: A simple php file to redirect users to the main interface.
 	//== @Copyright: Capsicum Corporation 2016
 	//== 
 	//== This file is part of Backend of the iOmy project.
@@ -17,5 +17,5 @@
 	//== You should have received a copy of the GNU General Public License along with iOmy.
 	//== If not, see <http://www.gnu.org/licenses/>.
 	//========================================================================================================//
-	header('Location: /ui/mobile/');
+	header('Location: /ui/main/');
 ?>

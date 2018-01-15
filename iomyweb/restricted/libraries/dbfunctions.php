@@ -187,6 +187,9 @@ function NonDataViewName($sViewType) {
 	} else if( $sViewType==="PremiseLogs" ) {
 		$aResult = array( "Error"=>false, "View"=>"VR_USERSPREMISELOG" );
 		
+	} else if( $sViewType==="PremiseRooms" ) {
+		$aResult = array( "Error"=>false, "View"=>"VR_USERSPREMISEROOMS" );
+		
 	} else if( $sViewType==="Hub" ) {
 		$aResult = array( "Error"=>false, "View"=>"VR_USERSHUB" );
 		
@@ -511,7 +514,7 @@ function dbGetCurrentUserDetails() {
 	if($bError===false) {
 		$aReturn = array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
-		$aReturn = array( "Error"=>true, "ErrMesg"=>"UserAddressInfo: ".$sErrMesg );
+		$aReturn = array( "Error"=>true, "ErrMesg"=>"UserDetails: ".$sErrMesg );
 	}
 	return $aReturn;
 }
@@ -1009,7 +1012,7 @@ function dbGetAllUsers() {
 			array( "Name"=>"Username",                  "type"=>"STR" ),
 			array( "Name"=>"State",                     "type"=>"INT" ),
 			array( "Name"=>"InfoId",                    "type"=>"INT" ),
-			array( "Name"=>"Title",                     "type"=>"INT" ),
+			array( "Name"=>"Title",                     "type"=>"STR" ),
 			array( "Name"=>"GenderId",                  "type"=>"INT" ),
 			array( "Name"=>"Givennames",                "type"=>"STR" ),
 			array( "Name"=>"Surnames",                  "type"=>"STR" ),
@@ -1708,9 +1711,13 @@ function dbSpecialOtherUsersPremisePermissions( $iUserId, $iPremiseId ) {
 			$sSQL .= "    `PERMPREMISE_READ`, ";
 			$sSQL .= "    `PREMISE_PK`, ";
 			$sSQL .= "    `PREMISE_NAME` ";
-			$sSQL .= "FROM `".$sSchema."`.`USERS` ";
-			$sSQL .= "INNER JOIN `".$sSchema."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
-			$sSQL .= "INNER JOIN `".$sSchema."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
+			$sSQL .= "FROM `".$sSchema."`.`PREMISE` \n";
+			$sSQL .= "LEFT JOIN `".$sSchema."`.`PERMPREMISE` ON `PERMPREMISE_PREMISE_FK`=`PREMISE_PK`\n";
+			$sSQL .= "LEFT JOIN `".$sSchema."`.`USERS` ON `USERS_PK`=`PERMPREMISE_USERS_FK`\n";
+			
+			//$sSQL .= "FROM `".$sSchema."`.`USERS` ";
+			//$sSQL .= "INNER JOIN `".$sSchema."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
+			//$sSQL .= "INNER JOIN `".$sSchema."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
 			$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
 			$sSQL .= "AND `USERS_PK` = :UserId ";
 			$sSQL .= "LIMIT 1 ";
@@ -1766,6 +1773,99 @@ function dbSpecialOtherUsersPremisePermissions( $iUserId, $iPremiseId ) {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>"GetOtherUsersPremisePerms: ".$sErrMesg );
+	}
+}
+
+function dbSpecialOtherUsersAllPremisePermissions( $iUserId ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `USERS_PK`, ";
+			$sSQL .= "    `PERMPREMISE_PK`, ";
+			$sSQL .= "    `PERMPREMISE_OWNER`, ";
+			$sSQL .= "    `PERMPREMISE_ROOMADMIN`, ";
+			$sSQL .= "    `PERMPREMISE_WRITE`, ";
+			$sSQL .= "    `PERMPREMISE_STATETOGGLE`, ";
+			$sSQL .= "    `PERMPREMISE_READ`, ";
+			$sSQL .= "    `PREMISE_PK`, ";
+			$sSQL .= "    `PREMISE_NAME` ";
+			$sSQL .= "FROM `".$sSchema."`.`USERS` ";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
+			$sSQL .= "WHERE `USERS_PK` = :UserId ";
+			
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array(
+				array( "Name"=>"UserId",        "type"=>"INT",      "value"=>$iUserId    )
+			);
+			
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"UsersId",               "type"=>"INT" ),
+				array( "Name"=>"PermId",                "type"=>"INT" ),
+				array( "Name"=>"PermOwner",             "type"=>"INT" ),
+				array( "Name"=>"PermRoomAdmin",         "type"=>"INT" ),
+				array( "Name"=>"PermWrite",             "type"=>"INT" ),
+				array( "Name"=>"PermStateToggle",       "type"=>"INT" ),
+				array( "Name"=>"PermRead",              "type"=>"INT" ),
+				array( "Name"=>"PremiseId",             "type"=>"INT" ),
+				array( "Name"=>"PremiseName",           "type"=>"STR" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0);
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetOtherUsersAllPremisePerms: ".$sErrMesg );
 	}
 }
 
@@ -1945,7 +2045,114 @@ function dbUpdateUserPremisePermissions( $iPremisePermId, $iPermRoomAdmin , $iPe
 
 
 
+function dbSpecialOtherUsersAllRoomPermissions( $iUserId ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `USERS_PK`, ";
+			$sSQL .= "    `PERMROOMS_PK`, ";
+			$sSQL .= "    `PERMROOMS_WRITE`, ";
+			$sSQL .= "    `PERMROOMS_READ`, ";
+			$sSQL .= "    `PERMROOMS_STATETOGGLE`, ";
+			$sSQL .= "    `PERMROOMS_DATAREAD`, ";
+			$sSQL .= "    `ROOMS_PK`, ";
+			$sSQL .= "    `ROOMS_PREMISE_FK`, ";
+			$sSQL .= "    `ROOMS_NAME`, ";
+			$sSQL .= "    `ROOMS_FLOOR`, ";
+			$sSQL .= "    `ROOMS_DESC`, ";
+			$sSQL .= "    `ROOMTYPE_PK`, ";
+			$sSQL .= "    `ROOMTYPE_NAME`, ";
+			$sSQL .= "    `ROOMTYPE_OUTDOORS` ";
+			//$sSQL .= "FROM `".$sSchema."`.`ROOMS` ";
+			//$sSQL .= "INNER JOIN `".$sSchema."`.`ROOMTYPE` ON `ROOMS_ROOMTYPE_FK`=`ROOMTYPE_PK` ";
+			//$sSQL .= "LEFT JOIN `".$sSchema."`.`PERMROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` ";
+			//$sSQL .= "LEFT JOIN `".$sSchema."`.`USERS` ON `PERMROOMS_USERS_FK`=`USERS_PK` ";
+			
+			$sSQL .= "FROM `".$sSchema."`.`USERS` ";
+			$sSQL .= "LEFT JOIN `".$sSchema."`.`PERMROOMS` ON `USERS_PK`=`PERMROOMS_USERS_FK` ";
+			$sSQL .= "LEFT JOIN `".$sSchema."`.`ROOMS` ON `ROOMS_PK`=`PERMROOMS_ROOMS_FK` ";
+			$sSQL .= "LEFT JOIN `".$sSchema."`.`ROOMTYPE` ON `ROOMS_ROOMTYPE_FK`=`ROOMTYPE_PK` ";
+			$sSQL .= "WHERE `USERS_PK` = :UserId ";
+			
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array(
+				array( "Name"=>"UserId",        "type"=>"INT",      "value"=>$iUserId    )
+			);
+			
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"UsersId",               "type"=>"INT" ),
+				array( "Name"=>"PermId",                "type"=>"INT" ),
+				array( "Name"=>"PermWrite",             "type"=>"INT" ),
+				array( "Name"=>"PermRead",              "type"=>"INT" ),
+				array( "Name"=>"PermStateToggle",       "type"=>"INT" ),
+				array( "Name"=>"PermDataRead",          "type"=>"INT" ),
+				array( "Name"=>"RoomId",                "type"=>"INT" ),
+				array( "Name"=>"RoomPremiseId",         "type"=>"INT" ),
+				array( "Name"=>"RoomName",              "type"=>"STR" ),
+				array( "Name"=>"RoomFloor",             "type"=>"INT" ),
+				array( "Name"=>"RoomDesc",              "type"=>"STR" ),
+				array( "Name"=>"RoomTypeId",            "type"=>"INT" ),
+				array( "Name"=>"RoomTypeName",          "type"=>"STR" ),
+				array( "Name"=>"RoomTypeOutdoors",      "type"=>"INT" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0);
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
 
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetOtherUsersAllRoomPerms: ".$sErrMesg );
+	}
+}
 
 function dbSpecialOtherUsersRoomPermissions( $iUserId, $iRoomId ) {
 	//----------------------------------------------------//
@@ -2227,6 +2434,8 @@ function dbUpdateUserRoomPermissions( $iRoomPermId, $iPermRead, $iPermWriter, $i
 //========================================================================================================================//
 //== #5.0# - Premise Functions                                                                                          ==//
 //========================================================================================================================//
+
+
 function dbGetAllPremiseInfo() {
 	//----------------------------------------//
 	//-- 1.0 - Declare Variables            --//
@@ -2875,6 +3084,82 @@ function dbChangePremiseInfo( $iPremiseInfoId, $sPostInfoOccupants, $sPostInfoBe
 	}
 }
 
+function dbSpecialGetAllPremises() {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `PREMISE_PK`, ";
+			$sSQL .= "    `PREMISE_NAME`, ";
+			$sSQL .= "    `PREMISE_DESCRIPTION` ";
+			$sSQL .= "FROM `".$sSchema."`.`PREMISE` ";
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array( );
+			
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"Id",             "type"=>"INT" ),
+				array( "Name"=>"Name",           "type"=>"STR" ),
+				array( "Name"=>"Desc",           "type"=>"STR" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"SpecialGetAllPremises: ".$sErrMesg );
+	}
+}
+
+
 //========================================================================================================================//
 //== #6.0# - Rooms Functions                                                                                            ==//
 //========================================================================================================================//
@@ -2919,12 +3204,6 @@ function dbGetRoomInfoFromRoomId( $iRoomId ) {
 				$sView = $aTemporaryView["View"];
 
 				$sSQL .= "SELECT ";
-				//$sSQL .= "	`PERMISSIONS_OWNER`, ";
-				//$sSQL .= "	`PERMISSIONS_WRITE`, ";
-				//$sSQL .= "	`PERMISSIONS_STATETOGGLE`, ";
-				//$sSQL .= "	`PERMISSIONS_READ`, ";
-				//$sSQL .= "	`PREMISE_PK`, ";
-				//$sSQL .= "	`PREMISE_NAME`, ";
 				$sSQL .= "	`PERMROOMS_READ`, ";
 				$sSQL .= "	`PERMROOMS_WRITE`, ";
 				$sSQL .= "	`PERMROOMS_STATETOGGLE`, ";
@@ -2948,12 +3227,6 @@ function dbGetRoomInfoFromRoomId( $iRoomId ) {
 				
 				//-- Set the SQL Output Columns --//
 				$aOutputColsId = array(
-					//array( "Name"=>"PermOwner",					"type"=>"INT" ),
-					//array( "Name"=>"PermWrite",					"type"=>"INT" ),
-					//array( "Name"=>"PermStateToggle",			"type"=>"INT" ),
-					//array( "Name"=>"PermRead",					"type"=>"INT" ),
-					//array( "Name"=>"PremiseId",					"type"=>"INT" ),
-					//array( "Name"=>"PremiseName",				"type"=>"STR" ),
 					array( "Name"=>"PermRead",					"type"=>"INT" ),
 					array( "Name"=>"PermWrite",					"type"=>"INT" ),
 					array( "Name"=>"PermStateToggle",			"type"=>"INT" ),
@@ -3672,6 +3945,187 @@ function dbWatchInputsGetFirstRoomIdFromPremiseId( $iPremiseId ) {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>"WatchInputsGetFirstRoomIdFromPremiseId: ".$sErrMesg );
+	}
+}
+
+
+function dbSpecialGetAllRooms() {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the Schema name --//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `PREMISE_PK`, ";
+			$sSQL .= "    `PREMISE_NAME`, ";
+			$sSQL .= "    `ROOMS_PK`, ";
+			$sSQL .= "    `ROOMS_NAME`, ";
+			$sSQL .= "    `ROOMS_FLOOR`, ";
+			$sSQL .= "    `ROOMS_DESC` ";
+			$sSQL .= "FROM `PREMISE` ";
+			$sSQL .= "INNER JOIN `ROOMS` ON `PREMISE_PK`=`ROOMS_PREMISE_FK` ";
+			$sSQL .= "ORDER BY `PREMISE_PK` ASC, `ROOMS_PK` ASC ";
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array( );
+			
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"PremiseId",      "type"=>"INT" ),
+				array( "Name"=>"PremiseName",    "type"=>"STR" ),
+				array( "Name"=>"Id",             "type"=>"INT" ),
+				array( "Name"=>"Name",           "type"=>"STR" ),
+				array( "Name"=>"Floor",          "type"=>"INT" ),
+				array( "Name"=>"Desc",           "type"=>"STR" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"SpecialGetAllRooms: ".$sErrMesg );
+	}
+}
+
+
+function dbSpecialGetAllRoomsFromPremiseId( $iPremiseId ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+		
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;
+	$sErrMesg           = "";
+	$sSchema            = "";           //-- STRING:    --//
+	$sSQL               = "";           //-- STRING:    --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//--  --//
+			$aTemporaryView = NonDataViewName("PremiseRooms");
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+				$bError = true;
+				$sErrMesg = $aTemporaryView["ErrMesg"];
+				
+			} else {
+				//-- View  --//
+				$sView = $aTemporaryView["View"];
+				
+				//-- SQL --//
+				$sSQL .= "SELECT ";
+				$sSQL .= "    `ROOMS_PK`, ";
+				$sSQL .= "    `ROOMS_NAME`, ";
+				$sSQL .= "    `ROOMS_FLOOR`, ";
+				$sSQL .= "    `ROOMS_PREMISE_FK`, ";
+				$sSQL .= "    `ROOMS_DESC`, ";
+				$sSQL .= "    `ROOMTYPE_PK`, ";
+				$sSQL .= "    `ROOMTYPE_NAME`, ";
+				$sSQL .= "    `ROOMTYPE_OUTDOORS` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array(
+					array( "Name"=>"PremiseId",       "type"=>"INT",     "value"=>$iPremiseId      )
+				);
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputCols = array(
+					array( "Name"=>"Id",               "type"=>"INT" ),
+					array( "Name"=>"Name",             "type"=>"STR" ),
+					array( "Name"=>"Floor",            "type"=>"INT" ),
+					array( "Name"=>"PremiseId",        "type"=>"INT" ),
+					array( "Name"=>"Desc",             "type"=>"STR" ),
+					array( "Name"=>"RoomTypeId",       "type"=>"INT" ),
+					array( "Name"=>"RoomTypeName",     "type"=>"STR" ),
+					array( "Name"=>"RoomTypeOutdoors", "type"=>"INT" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			}
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"SpecialGetAllRoomsFromPremiseId: ".$sErrMesg );
 	}
 }
 

@@ -57,6 +57,13 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		});
 		
 	},
+    
+    ToggleSubmitCancelButtons : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("SubmitButton").setEnabled(bEnabled);
+        oView.byId("CancelButton").setEnabled(bEnabled);
+    },
 	
 	
 	RefreshModel: function( oController, oConfig ) {
@@ -154,8 +161,13 @@ sap.ui.controller("pages.staging.user.NewUser", {
 	},
 	
 	InsertNewUserInfo: function (oController) {
-		var bError   = false;
-		var sErrMesg = "";
+		var bError          = false;
+		var aErrorMessages  = [];
+        
+        var fnAppendError   = function (sErrorMessage) {
+            bError = true;
+            aErrorMessages.push(sErrorMessage);
+        };
 		
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
@@ -166,6 +178,90 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		//-- STEP 2 - Check for Errors                  --//
 		//------------------------------------------------//
 		var sDate = oCurrentFormData.DOB.getFullYear()+'-'+(oCurrentFormData.DOB.getMonth()+1)+'-'+oCurrentFormData.DOB.getDate();
+        
+        var sUsername               = oCurrentFormData.Username;
+        var sPassword               = oCurrentFormData.Password;
+        var sConfirmPassword        = oCurrentFormData.ConfirmPassword;
+        var dDOB                    = oCurrentFormData.DOB;
+        var sDBUser                 = oCurrentFormData.DBUser;
+        var sDBPassword             = oCurrentFormData.DBPassword;
+        
+        oController.ToggleSubmitCancelButtons(false);
+        
+        //--------------------------------------------------------------------//
+        // Check the username (required)
+        //--------------------------------------------------------------------//
+        if (sUsername !== "") {
+            //-- Found the username, make sure it's not one of the blacklisted ones. --//
+            var sLowerCaseUsername = sUsername.toLowerCase();
+
+            if (sLowerCaseUsername === "admin" || sLowerCaseUsername === "root" ||
+                    sLowerCaseUsername === "administrator" || sLowerCaseUsername === "sys" ||
+                    sLowerCaseUsername === "manager")
+            {
+                fnAppendError("Username must not be any variation of 'admin', 'administrator', 'manager', 'sys', or 'root.");
+            }
+        } else {
+            fnAppendError("Username is required.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Find the password
+        //--------------------------------------------------------------------//
+        if (sPassword !== "") {
+            //----------------------------------------------------------------//
+            // Make sure it's a secure password.
+            //----------------------------------------------------------------//
+            var mPasswordInfo = IomyRe.validation.isPasswordSecure(sPassword);
+            
+            if (!mPasswordInfo.bIsValid) {
+                aErrorMessages = aErrorMessages.concat(mPasswordInfo.aErrorMessages);
+            }
+            
+        } else {
+            fnAppendError("Password is required");
+        }
+		
+        //--------------------------------------------------------------------//
+        // Confirm the password
+        //--------------------------------------------------------------------//
+        if (sConfirmPassword !== "") {
+            if (sPassword === "") {
+                fnAppendError("Password is required");
+                
+            } else if (sPassword !== sConfirmPassword) {
+                fnAppendError("Passwords don't match.");
+            }
+            
+        } else {
+            fnAppendError("Please confirm your password.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Make sure both the database username and password are there.
+        //--------------------------------------------------------------------//
+        if (sDBUser === "") {
+            fnAppendError("Database Username is required.");
+        }
+        
+        if (sDBPassword === "") {
+            fnAppendError("Database Password is required. Find this by opening the iOmy app on the device it is running on, swipe from the left side of the screen, and select 'Settings'. It will be located in under 'MySQL Root Password' entry in the settings page.");
+        }
+        
+        //--------------------------------------------------------------------//
+        // Validate the date of birth
+        //--------------------------------------------------------------------//
+//        if (dDOB !== "") {
+//            var mDOBValidationInfo = IOMy.validation.isDOBValid(dDOB);
+//            
+//            if (mDOBValidationInfo.bIsValid === false) {
+//                aLogErrors.push(mDOBValidationInfo.aErrorMessages.join("\n"));
+//            }
+//            
+//            if (mDOBValidationInfo.date !== null) {
+//                dDOB = IOMy.functions.getTimestampString(mDOBValidationInfo.date, "yyyy-mm-dd", false);
+//            }
+//        }
 		
 		//------------------------------------------------//
 		//-- STEP 3 - Update Database                   --//
@@ -195,7 +291,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
                         "AddressLanguage" :      oCurrentFormData.LanguageId,
                         "Username" :             oCurrentFormData.Username,
                         "NewPassword" :          oCurrentFormData.Password,
-                        "Data" :                 "{\"Username\":\""+oCurrentFormData.DBUser+"\",\"Password\":\""+oCurrentFormData.DBPassword+"\",\"URI\":\"localhost\"}",
+                        "Data" :                 "{\"Username\":\""+oCurrentFormData.DBUser+"\",\"Password\":\""+oCurrentFormData.DBPassword+"\",\"URI\":\"localhost\"}"
                     },
 					onSuccess: function ( sType, mData ) {
 						//-- Premise Permissions Section --//
@@ -211,18 +307,18 @@ sap.ui.controller("pages.staging.user.NewUser", {
 										var iRoomAdmin = 0;
 										
 										//-- If check to see what permissions need to be passed --//
-										if (oCurrentFormData.PremPermId === 2 ) {
+										if (oCurrentFormData.PremPermId == 2 ) {
 											//-- Read Access--//
 											iPremiseRead = 1;
 											iPremiseWrite = 0;
 											iRoomAdmin = 0; 
-										} else if (oCurrentFormData.PremPermId === 3) {
+										} else if (oCurrentFormData.PremPermId == 3) {
 											//-- Read/Write Access--//
 											iPremiseRead = 1;
 											iPremiseWrite = 1;
 											iRoomAdmin = 0;
 											
-										} else if (oCurrentFormData.PremPermId === 4) {
+										} else if (oCurrentFormData.PremPermId == 4) {
 											//-- Room Admin Access--//
 											iPremiseRead = 1;
 											iPremiseWrite = 1;
@@ -288,37 +384,57 @@ sap.ui.controller("pages.staging.user.NewUser", {
 													if (data.Error === false) {
 														oController.InsertNewRoomPermissions(oController, sType, mData);
 													} else {
-														jQuery.sap.log.error("There was an error updating the premise permissions: "+data.ErrMesg);
+														jQuery.sap.log.error("There was an error updating the premise permissions: "+mData.ErrMesg);
+                                                        oController.ToggleSubmitCancelButtons(true);
 													}
 												},
 												onFail : function (response) {
 													jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
+                                                    
+                                                    IomyRe.common.showError( response.responseText, "Error",
+                                                        function () {
+                                                            oController.ToggleSubmitCancelButtons(true);
+                                                        }
+                                                    );
 												}
 											});
 										}
 									} else {
 										jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller!");
+                                        oController.ToggleSubmitCancelButtons(true);
 									}
 									
 								} catch( e3 ) {
 									jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success event that was passed as a parameter in the 'RoomForm' controller! "+e3.message);
+                                    oController.ToggleSubmitCancelButtons(true);
 								}
 							} else {
 								jQuery.sap.log.error("Error with the 'UpdateRoomPerms' successful API result in the 'RoomForm' controller!");
+                                oController.ToggleSubmitCancelButtons(true);
 							}
 						} catch( e2 ) {
 							jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'RoomForm' controller! "+e2.message);
+                            oController.ToggleSubmitCancelButtons(true);
 						}
 					},
-					onFail: function () {
+					onFail: function (response) {
 						//if( aConfig.onFail ) {
 						//	aConfig.onFail();
 						//}
-						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' API Request when inserting Room Permissions in the 'RoomForm' controller!");
+						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' API Request when inserting Room Permissions in the 'RoomForm' controller!\n\n" + response.responseText);
+                        IomyRe.common.showError( response.responseText, "Error",
+                            function () {
+                                oController.ToggleSubmitCancelButtons(true);
+                            }
+                        );
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error" );
+				IomyRe.common.showError( aErrorMessages.join("\n\n"), "Error",
+                    function () {
+                        oController.ToggleSubmitCancelButtons(true);
+                    }
+                );
 			}
 		} catch( e1 ) {
 			jQuery.sap.log.error("Error with 'AddRoom' in the 'RoomForm' controller! "+e1.message);
@@ -341,21 +457,21 @@ sap.ui.controller("pages.staging.user.NewUser", {
 						var iRoomStateToggle = 0;
 						
 						//-- If check to see what permissions need to be passed --//
-						if (oCurrentFormData.PremPermId === 2 ) {
+						if (oCurrentFormData.RoomPermId == 2 ) {
 							//-- Read Access--//
 							iRoomRead = 1;
 							iRoomDataRead = 1;
 							iRoomWrite = 0;
 							iRoomStateToggle = 0;
 							
-						} else if (oCurrentFormData.RoomPremId === 3) {
+						} else if (oCurrentFormData.RoomPermId == 3) {
 							//-- Read / Device Toggle Access--//
 							iRoomRead = 1;
 							iRoomDataRead = 1;
 							iRoomWrite = 0;
 							iRoomStateToggle = 1;
 							
-						} else if (oCurrentFormData.RoomPremId === 4) {
+						} else if (oCurrentFormData.RoomPermId == 4) {
 							//-- Read/Write Access--//
 							iRoomRead = 1;
 							iRoomDataRead = 1;
@@ -391,6 +507,11 @@ sap.ui.controller("pages.staging.user.NewUser", {
 												if (!oController.mxUpdateRequests.busy) {
 													IomyRe.common.RefreshCoreVariables({
 														onSuccess : function () {
+                                                            IomyRe.common.showMessage({
+                                                                text : "New iOmy user \""+oCurrentFormData.Username+"\" created."
+                                                            });
+                                                            
+                                                            oController.ToggleSubmitCancelButtons(true);
 															IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
 														}
 													});
@@ -404,7 +525,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 														}
 														
 														if (!oController.mxUpdateRequests.busy) {
-															
+															oController.ToggleSubmitCancelButtons(true);
 														}
 													}
 												);
@@ -424,10 +545,21 @@ sap.ui.controller("pages.staging.user.NewUser", {
 									"Data" : "{\"Read\":"+iRoomRead+",\"DataRead\":"+iRoomDataRead+",\"Write\":"+iRoomWrite+",\"StateToggle\":"+iRoomStateToggle+"}"
 								},
 								onSuccess : function (responseType, mData) {
+                                    IomyRe.common.showMessage({
+                                        text : "New iOmy user \""+oCurrentFormData.Username+"\" created."
+                                    });
+
+                                    oController.ToggleSubmitCancelButtons(true);
 									IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
 								},
 								onFail : function (response) {
-									jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
+									jQuery.sap.log.error("There was an error updating the room permissions: "+JSON.stringify(response));
+                                    
+                                    IomyRe.common.showError( response.responseText, "Error",
+                                        function () {
+                                            oController.ToggleSubmitCancelButtons(true);
+                                        }
+                                    );
 								}
 							});
 						}
@@ -449,7 +581,6 @@ sap.ui.controller("pages.staging.user.NewUser", {
 	getObjectPageTitle : function (oController) {
 		var sObjectTitle = "";
 		var oPageHeader = "";
-		console.log(oController.bEditable);
 		
 		sObjectTitle = "Add User";
 
@@ -495,6 +626,6 @@ sap.ui.controller("pages.staging.user.NewUser", {
 			$.sap.log.error("ToggleButtonsAndView: Critcal Error:"+e1.message);
 			return false;
 		}
-	},
+	}
 
 });

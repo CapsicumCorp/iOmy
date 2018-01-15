@@ -1,6 +1,7 @@
 /*
-Title: Template UI5 Controller
-Author: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+Title: Form for either adding or editing devices
+Author: Brent Jarmaine (Capsicum Corporation <brenton@capsicumcorp.com>
+    Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: Draws either a username and password prompt, or a loading app
     notice for the user to log into iOmy.
 Copyright: Capsicum Corporation 2015, 2016
@@ -30,6 +31,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     bZigbeeCommandMenuOpen  : false,
     DeviceOptions           : null,
     iThingId                : null,
+    iThingTypeId            : null,
     bNoRooms                : false,
     
     //bDeviceOptionSelectorDrawn  : false,
@@ -80,55 +82,95 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     oController.iThingId        = null;
                 }
                 
-                if (oView.byId("ButtonSubmit") !== undefined) {
-                    oView.byId("ButtonSubmit").destroy();
-                }
-                
-                if (oView.byId("ButtonCancel") !== undefined) {
-                    oView.byId("ButtonCancel").destroy();
-                }
-                
-                //oController.bDeviceOptionSelectorDrawn = true;
-                
-                oController.RefreshModel();
-                
-                oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
-                
-                if (oController.bEditExisting) {
-                    IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
-                    
-                    if (oController.bNoRooms) {
-                        oView.byId("EditThingRoomSelector").setVisible(false);
-                    }
-                    //oController.bDeviceOptionSelectorDrawn = false;
-                } else {
-                    IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
-                    
-                    //if (!oController.bDeviceOptionSelectorDrawn) {
-                        var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
-                            selectedKey : "start",
-                            change : function () {
-                                var DevTypeSelect = this;
-                                var sDevType = DevTypeSelect.getSelectedKey();
-                                oController.DevTypeToggle(oController, sDevType);
-                            }
-                        });
-
-                        oView.byId("DeviceTypeFormElement").addField(oSBox);
-                        
-                        oView.byId("DevTypeSelect").setSelectedKey("start");
-                
-                    //}
-                }
-                
+                oController.loadDeviceForm();
             }
             
         });
         
     },
     
-    onBeforeRendering : function () {
+    loadDeviceForm : function () {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
         
+        if (oView.byId("DeviceName") !== undefined) {
+            oView.byId("DeviceName").destroy();
+        }
+
+        if (oView.byId("EditThingRoomSelector") !== undefined) {
+            oView.byId("EditThingRoomSelector").destroy();
+        }
+
+        if (oView.byId("ButtonSubmit") !== undefined) {
+            oView.byId("ButtonSubmit").destroy();
+        }
+
+        if (oView.byId("ButtonCancel") !== undefined) {
+            oView.byId("ButtonCancel").destroy();
+        }
+
+        //oController.bDeviceOptionSelectorDrawn = true;
+
+        oController.RefreshModel();
+
+        oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
+
+        if (oController.bEditExisting) {
+            oController.iThingTypeId = IomyRe.common.ThingList["_"+oController.iThingId].TypeId;
+
+            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                oView.byId("DevType").setVisible( false );
+                oView.byId("DevSettings").setVisible( true );
+                IomyRe.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "DevSettingsBlock", "Block" );
+            } else {
+                oView.byId("DevType").setVisible( true );
+                oView.byId("DevSettings").setVisible( false );
+                IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
+            }
+
+            if (oController.bNoRooms) {
+                oView.byId("EditThingRoomSelector").setVisible(false);
+            }
+
+            //oController.bDeviceOptionSelectorDrawn = false;
+        } else {
+            oView.byId("DevType").setVisible( true );
+            oView.byId("DevSettings").setVisible( false );
+            oController.iThingTypeId = null;
+
+            IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
+
+            //if (!oController.bDeviceOptionSelectorDrawn) {
+                var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
+                    selectedKey : "start",
+                    change : function () {
+                        var DevTypeSelect = this;
+                        var sDevType = DevTypeSelect.getSelectedKey();
+                        oController.DevTypeToggle(oController, sDevType);
+                    }
+                });
+
+                oView.byId("DeviceTypeFormElement").addField(oSBox);
+
+                oView.byId("DevTypeSelect").setSelectedKey("start");
+
+            //}
+        }
+    },
+    
+    ToggleZigbeeControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("CustomTelnetInput").setEnabled(bEnabled);
+        oView.byId("CustomTelnetButton").setEnabled(bEnabled);
+        oView.byId("JoinDevicesButton").setEnabled(bEnabled);
+    },
+    
+    ToggleSubmitCancelButtons : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("ButtonSubmit").setEnabled(bEnabled);
+        oView.byId("ButtonCancel").setEnabled(bEnabled);
     },
     
     ToggleOnvifStreamControls : function (bEnabled) {
@@ -139,6 +181,22 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         oView.byId("SelectStreamProfile").setEnabled(bEnabled);
         oView.byId("SelectThumbnailProfile").setEnabled(bEnabled);
         oView.byId("ButtonSubmit").setEnabled(bEnabled);
+    },
+    
+    ToggleEditIPWebcamControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("DeviceName").setEnabled(bEnabled);
+        oView.byId("SelectRoom").setEnabled(bEnabled);
+        oView.byId("InputCamType").setEnabled(bEnabled);
+        oView.byId("InputIPProtocol").setEnabled(bEnabled);
+        oView.byId("InputIPAddress").setEnabled(bEnabled);
+        oView.byId("InputIPPort").setEnabled(bEnabled);
+        oView.byId("InputPath").setEnabled(bEnabled);
+        oView.byId("InputUsername").setEnabled(bEnabled);
+        oView.byId("InputPassword").setEnabled(bEnabled);
+        
+        this.ToggleSubmitCancelButtons(bEnabled);
     },
     
     DevTypeToggle : function ( oController, sDevType) {
@@ -261,6 +319,19 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             }
         };
         
+        var fnComplete = function () {
+            oView.setModel( 
+                new sap.ui.model.json.JSONModel(oJSON)
+            );
+
+            //------------------------------------------------//
+            //-- Trigger the onSuccess Event                --//
+            //------------------------------------------------//
+            if( oConfig.onSuccess ) {
+                oConfig.onSuccess();
+            }
+        };
+        
         if (oController.bEditExisting) {
             var oCurrentDevice = JSON.parse( JSON.stringify( IomyRe.common.ThingList["_"+oController.iThingId] ) );
             
@@ -268,17 +339,64 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 "ThingName" : oCurrentDevice.DisplayName,
                 "RoomId"    : oCurrentDevice.RoomId
             };
-        }
-        
-        oView.setModel( 
-            new sap.ui.model.json.JSONModel(oJSON)
-        );
-        
-        //------------------------------------------------//
-        //-- Trigger the onSuccess Event                --//
-        //------------------------------------------------//
-        if( oConfig.onSuccess ) {
-            oConfig.onSuccess();
+            
+            //----------------------------------------------------------------//
+            // If editing an IP Webcam, load the connection information as 
+            // well.
+            //----------------------------------------------------------------//
+            if (oCurrentDevice.TypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                
+                var fnSetData = function (mData) {
+                    oJSON.CurrentDevice.HubId       = mData.hubID;
+                    
+                    oJSON.CurrentDevice.Protocol    = mData.protocol;
+                    oJSON.CurrentDevice.IPAddress   = mData.address;
+                    oJSON.CurrentDevice.IPPort      = mData.port;
+
+                    oJSON.CurrentDevice.Path        = mData.path;
+                    oJSON.CurrentDevice.Username    = mData.username;
+                    oJSON.CurrentDevice.Password    = mData.password;
+                };
+                
+                fnComplete(); // Just to wipe the old data.
+                
+                IomyRe.devices.ipcamera.loadCameraInformation({
+                    thingID : oController.iThingId,
+                    
+                    onSuccess : function (mData) {
+                        fnSetData(mData);
+                        
+                        fnComplete();
+                        oController.ToggleEditIPWebcamControls(true);
+                    },
+                    
+                    onWarning : function (mData, sErrorMessage) {
+                        fnSetData(mData);
+                        
+                        IomyRe.common.showWarning(sErrorMessage, "Failed to load some data",
+                            function () {
+                                fnComplete();
+                                oController.ToggleEditIPWebcamControls(true);
+                            }
+                        );
+                    },
+                    
+                    onFail : function (sErrorMessage) {
+                        IomyRe.common.showError(sErrorMessage, "Failed to load data",
+                            function () {
+                                fnComplete();
+                                oController.ToggleEditIPWebcamControls(true);
+                            }
+                        );
+                    }
+                });
+                
+            } else {
+                fnComplete();
+            }
+            
+        } else {
+            fnComplete();
         }
         
     },
@@ -331,6 +449,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             oController.bNoRooms = true;
             
         } else {
+            oController.bNoRooms = false;
+            
             if (bHasUnassigned) {
                 delete aRoomList["_"+iUnassignedRoomId];
             }
@@ -450,176 +570,196 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             oCurrentFormData.Room = 1;
         }
         
-        oView.byId("ButtonSubmit").setEnabled(false);
+        oController.ToggleSubmitCancelButtons(false);
         
         //--------------------------------------------------------------------//
-        // Prepare the URL and parameters for the call to create a device.
+        // Validate input first. If everything checks out, then create the
+        // device. Otherwise, show an error popup and stop.
         //--------------------------------------------------------------------//
-        switch (sDevTypeKey) {
-            // Onvif Camera Device
-            case "linkType"+IomyRe.devices.onvif.LinkTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("onvif"),
-                    data : {
-                        "Mode" : "AddNewOnvifServer",
-                        "HubId" : oCurrentFormData.Hub,
-                        "RoomId" : oCurrentFormData.Room,
-                        "DisplayName" : oCurrentFormData.DisplayName,
-                        "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
-                        "DeviceOnvifPort" : oCurrentFormData.IPPort,
-                        "OnvifUsername" : oCurrentFormData.Username,
-                        "OnvifPassword" : oCurrentFormData.Password
-                    }
-                };
-                break;
-            
-            // Philips Hue Bridge
-            case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("philipshue"),
-                    data : {
-                        "Mode" : "AddNewBridge",
-                        "HubId" : oCurrentFormData.Hub,
-                        "RoomId" : oCurrentFormData.Room,
-                        "DisplayName" : oCurrentFormData.DisplayName,
-                        "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
-                        "DevicePort" : oCurrentFormData.IPPort,
-                        "DeviceUserToken" : oCurrentFormData.DeviceToken
-                    }
-                };
-                break;
-            
-            // Open Weather Map
-            case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("weather"),
-                    data : {
-                        "Mode" : "AddWeatherStation",
-                        "HubId" : oCurrentFormData.Hub,
-                        "DisplayName" : oCurrentFormData.DisplayName,
-                        "WeatherType" : "OpenWeatherMap",
-                        "Username" : oCurrentFormData.KeyCode,
-                        "StationCode" : oCurrentFormData.StationCode,
-                        "RoomId" : oCurrentFormData.Room,
-                        "Data" : "{\"Name\" : \""+oCurrentFormData.DisplayName+"\"}"
-                    }
-                };
-                break;
-            
-            // IP Webcam Stream
-            case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("ipcamera"),
-                    data : {
-                        "Mode" : "AddNewIPCamera",
-                        "HubId" : oCurrentFormData.Hub,
-                        "RoomId" : oCurrentFormData.Room,
-                        "IPCamType" : oCurrentFormData.IPCamType,
-                        "Data" : JSON.stringify({
-                            "NetworkAddress"    : oCurrentFormData.IPAddress,
-                            "NetworkPort"       : oCurrentFormData.IPPort,
-                            "Protocol"          : oCurrentFormData.Protocol,
-                            "Path"              : oCurrentFormData.Path,
-                            "DisplayName"       : oCurrentFormData.DisplayName,
-                            "LinkName"          : oCurrentFormData.LinkName,
-                            "Username"          : oCurrentFormData.Username,
-                            "Password"          : oCurrentFormData.Password
-                        })
-                    }
-                };
-                break;
-                
-            // Onvif Stream
-            case "thingType"+IomyRe.devices.onvif.ThingTypeId :
-                mData = {
-                    url : IomyRe.apiphp.APILocation("onvif"),
-                    data : {
-                        "Mode" : "NewThing",
-                        "LinkId" : oCurrentFormData.OnvifServer,
-                        "StreamProfile" : oCurrentFormData.StreamProfile,
-                        "ThumbnailProfile" : oCurrentFormData.ThumbnailProfile,
-                        "CameraName" : oCurrentFormData.CameraName
-                    }
-                };
-                break;
-                
-            default :
-                throw new IllegalArgumentException("Invalid device type");
-            
-        }
+        var mInputInfo = IomyRe.validation.validateNewDeviceData(sDevTypeKey, oCurrentFormData);
         
-        mData.onSuccess = function (response, data) {
-            if (data.Error !== true) {
-                jQuery.sap.log.debug("Success: "+JSON.stringify(response));
-                jQuery.sap.log.debug("Success: "+JSON.stringify(data));
-
-                //--------------------------------------------------------------//
-                // Find the new Link ID                                         //
-                //--------------------------------------------------------------//
-                var iLinkId = 0;
-
-                // Should be in this variable
-                if (data.Data !== undefined) {
-                    if (data.Data.LinkId !== undefined) {
-                        iLinkId = data.Data.LinkId;
-                    }
-                // I found the Open Weather Map feed link ID in this variable!
-                } else if (data.WeatherStation !== undefined) {
-                    if (data.WeatherStation.LinkId !== undefined) {
-                        iLinkId = data.WeatherStation.LinkId;
-                    }
+        if (!mInputInfo.bIsValid) {
+            IomyRe.common.showError(mInputInfo.aErrorMessages.join("\n\n"), "Error",
+                function () {
+                    oController.ToggleSubmitCancelButtons(true);
                 }
-                
-                IomyRe.common.RefreshCoreVariables({
-                    onSuccess : function () {
-                        oController.RefreshModel({
-                            onSuccess : function () {
-                                IomyRe.common.showMessage({
-                                    text : "Device successfully created",
-                                    view : oView
-                                });
+            )
+        } else {
+        
+            //--------------------------------------------------------------------//
+            // Prepare the URL and parameters for the call to create a device.
+            //--------------------------------------------------------------------//
+            switch (sDevTypeKey) {
+                // Onvif Camera Device
+                case "linkType"+IomyRe.devices.onvif.LinkTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("onvif"),
+                        data : {
+                            "Mode" : "AddNewOnvifServer",
+                            "HubId" : oCurrentFormData.Hub,
+                            "RoomId" : oCurrentFormData.Room,
+                            "DisplayName" : oCurrentFormData.DisplayName,
+                            "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
+                            "DeviceOnvifPort" : oCurrentFormData.IPPort,
+                            "OnvifUsername" : oCurrentFormData.Username,
+                            "OnvifPassword" : oCurrentFormData.Password
+                        }
+                    };
+                    break;
 
-                                if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                    oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
-                                    
-                                    //oCurrentFormData.OnvifServer = iLinkId;
-                                    oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
+                // Philips Hue Bridge
+                case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("philipshue"),
+                        data : {
+                            "Mode" : "AddNewBridge",
+                            "HubId" : oCurrentFormData.Hub,
+                            "RoomId" : oCurrentFormData.Room,
+                            "DisplayName" : oCurrentFormData.DisplayName,
+                            "DeviceNetworkAddress" : oCurrentFormData.IPAddress,
+                            "DevicePort" : oCurrentFormData.IPPort,
+                            "DeviceUserToken" : oCurrentFormData.DeviceToken
+                        }
+                    };
+                    break;
 
-                                } else {
-                                    oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
-                                    //IomyRe.common.NavigationChangePage("pBlock", {}, true);
-                                }
-                                
-                                if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+IomyRe.devices.onvif.ThingTypeId) {
-                                    oController.ToggleOnvifStreamControls(false);
-                                    oView.byId("SelectOnvifServer").setEnabled(true);
-                                }
-                                
-                                oView.byId("ButtonSubmit").setEnabled(true);
-                            }
-                        });
-                    }
-                });
-            } else {
-                jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
-                IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
-                    oView.byId("ButtonSubmit").setEnabled(false);
-                });
+                // Open Weather Map
+                case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("weather"),
+                        data : {
+                            "Mode" : "AddWeatherStation",
+                            "HubId" : oCurrentFormData.Hub,
+                            "DisplayName" : oCurrentFormData.DisplayName,
+                            "WeatherType" : "OpenWeatherMap",
+                            "Username" : oCurrentFormData.KeyCode,
+                            "StationCode" : oCurrentFormData.StationCode,
+                            "RoomId" : oCurrentFormData.Room,
+                            "Data" : JSON.stringify({
+                                "LinkName" : oCurrentFormData.DisplayName,
+                                "ThingName" : oCurrentFormData.DisplayName
+                            })
+                        }
+                    };
+                    break;
+
+                // IP Webcam Stream
+                case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("ipcamera"),
+                        data : {
+                            "Mode" : "AddNewIPCamera",
+                            "HubId" : oCurrentFormData.Hub,
+                            "RoomId" : oCurrentFormData.Room,
+                            "IPCamType" : oCurrentFormData.IPCamType,
+                            "Data" : JSON.stringify({
+                                "NetworkAddress"    : oCurrentFormData.IPAddress,
+                                "NetworkPort"       : oCurrentFormData.IPPort,
+                                "Protocol"          : oCurrentFormData.Protocol,
+                                "Path"              : oCurrentFormData.Path,
+                                "DisplayName"       : oCurrentFormData.DisplayName,
+                                "LinkName"          : oCurrentFormData.LinkName,
+                                "Username"          : oCurrentFormData.Username,
+                                "Password"          : oCurrentFormData.Password
+                            })
+                        }
+                    };
+                    break;
+
+                // Onvif Stream
+                case "thingType"+IomyRe.devices.onvif.ThingTypeId :
+                    mData = {
+                        url : IomyRe.apiphp.APILocation("onvif"),
+                        data : {
+                            "Mode" : "NewThing",
+                            "LinkId" : oCurrentFormData.OnvifServer,
+                            "StreamProfile" : oCurrentFormData.StreamProfile,
+                            "ThumbnailProfile" : oCurrentFormData.ThumbnailProfile,
+                            "CameraName" : oCurrentFormData.CameraName
+                        }
+                    };
+                    break;
+
+                default :
+                    throw new IllegalArgumentException("Invalid device type");
+
             }
-            
-        };
-        
-        mData.onFail = function (error) {
-            jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-            IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "", function () {
-                oView.byId("ButtonSubmit").setEnabled(true);
-            });
-        };
-        
-        //--------------------------------------------------------------------//
-        // Run the request to create a device.
-        //--------------------------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest(mData);
+
+            mData.onSuccess = function (response, data) {
+                if (data.Error !== true) {
+                    jQuery.sap.log.debug("Success: "+JSON.stringify(response));
+                    jQuery.sap.log.debug("Success: "+JSON.stringify(data));
+
+                    //--------------------------------------------------------------//
+                    // Find the new Link ID                                         //
+                    //--------------------------------------------------------------//
+                    var iLinkId = 0;
+
+                    // Should be in this variable
+                    if (data.Data !== undefined) {
+                        if (data.Data.LinkId !== undefined) {
+                            iLinkId = data.Data.LinkId;
+                        }
+                    // I found the Open Weather Map feed link ID in this variable!
+                    } else if (data.WeatherStation !== undefined) {
+                        if (data.WeatherStation.LinkId !== undefined) {
+                            iLinkId = data.WeatherStation.LinkId;
+                        }
+                    }
+
+                    IomyRe.common.RefreshCoreVariables({
+                        onSuccess : function () {
+                            oController.RefreshModel({
+                                onSuccess : function () {
+                                    IomyRe.common.showMessage({
+                                        text : "Device successfully created",
+                                        view : oView
+                                    });
+
+                                    if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                        oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
+
+                                        //oCurrentFormData.OnvifServer = iLinkId;
+                                        oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
+
+                                    } else {
+                                        oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
+                                        //IomyRe.common.NavigationChangePage("pBlock", {}, true);
+                                    }
+
+                                    if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+IomyRe.devices.onvif.ThingTypeId) {
+                                        oController.ToggleOnvifStreamControls(false);
+                                        oView.byId("SelectOnvifServer").setEnabled(true);
+                                        oView.byId("ButtonCancel").setEnabled(true);
+                                    } else {
+                                        oController.ToggleSubmitCancelButtons(true);
+                                    }
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
+                    IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
+                        oView.byId("ButtonSubmit").setEnabled(false);
+                    });
+                }
+
+            };
+
+            mData.onFail = function (error) {
+                jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
+                IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "", function () {
+                    oController.ToggleSubmitCancelButtons(true);
+                });
+            };
+
+            //--------------------------------------------------------------------//
+            // Run the request to create a device.
+            //--------------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest(mData);
+        }
     },
     
     EditDevice : function () {
@@ -627,37 +767,161 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var oView               = oController.getView();
         var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
         
-        oView.byId("ButtonSubmit").setEnabled(false);
-        
-        //--------------------------------------------------------------------//
-        // Run the request to edit an existing device.
-        //--------------------------------------------------------------------//
-        IomyRe.devices.editThing({
-            thingID     : oController.iThingId,
-            thingName   : oCurrentFormData.ThingName,
-            roomID      : oCurrentFormData.RoomId,
+        if (oController.areThereChanges()) {
+            oController.ToggleSubmitCancelButtons(false);
             
-            onSuccess : function () {
-                oView.byId("ButtonSubmit").setEnabled(true);
-                oController.CancelInput();
-            },
-            
-            onWarning : function () {
-                oView.byId("ButtonSubmit").setEnabled(true);
-            },
-            
-            onFail : function () {
-                oView.byId("ButtonSubmit").setEnabled(true);
+            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                oController.ToggleEditIPWebcamControls(false);
             }
-        });
+
+            //--------------------------------------------------------------------//
+            // Run the request to edit an existing device.
+            //--------------------------------------------------------------------//
+            try {
+                IomyRe.devices.editThing({
+                    thingID     : oController.iThingId,
+                    thingName   : oCurrentFormData.ThingName,
+                    roomID      : oCurrentFormData.RoomId,
+
+                    onSuccess : function () {
+                        if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                            oController.SubmitIPWebcamData();
+                        } else {
+                            oController.ToggleSubmitCancelButtons(true);
+                            oController.CancelInput();
+                        }
+                    },
+
+                    onWarning : function () {
+                        oController.ToggleEditIPWebcamControls(true);
+                    },
+
+                    onFail : function () {
+                        oController.ToggleEditIPWebcamControls(true);
+                    }
+                });
+            } catch (e) {
+                IomyRe.common.showError(e.message, "Invalid Input",
+                    function () {
+                        oController.ToggleSubmitCancelButtons(true);
+                        
+                        if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                            oController.ToggleEditIPWebcamControls(true);
+                        }
+                    }
+                );
+            }
+        } else {
+            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                oController.ToggleEditIPWebcamControls(false);
+                oController.SubmitIPWebcamData();
+            } else {
+                oController.ToggleSubmitCancelButtons(true);
+            }
+        }
+    },
+    
+    areThereChanges : function () {
+        var oController             = this;
+        var oView                   = oController.getView();
+        var iThingID				= oController.iThingId;
+		var sOldThingText           = IomyRe.common.ThingList["_"+iThingID].DisplayName;
+        var iOldRoomID              = IomyRe.common.ThingList["_"+iThingID].RoomId;
+        var oCurrentFormData        = oView.getModel().getProperty( "/CurrentDevice/" );
+        var iRoomId                 = oCurrentFormData.RoomId;
+        var sThingText;
+        
+		var bDifferentThingName     = sOldThingText !== sThingText;
+        var bDifferentRoom;
+            
+        if (iOldRoomID == 1) {
+            bDifferentRoom = true;
+        } else {
+            bDifferentRoom = iOldRoomID != iRoomId;
+        }
+        
+        return (bDifferentThingName || bDifferentRoom);
+    },
+    
+    SubmitIPWebcamData : function () {
+        var oController         = this;
+        var oView               = this.getView();
+        var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
+        
+        try {
+            var mInputInfo = IomyRe.validation.validateEditIPWebCamForm(oCurrentFormData);
+            
+            if (!mInputInfo.bIsValid) {
+                throw new IllegalArgumentException(mInputInfo.aErrorMessages.join("\n\n"));
+            }
+            
+            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                IomyRe.devices.ipcamera.submitWebcamInformation({
+                    thingID             : oController.iThingId,
+                    
+                    hubID               : oCurrentFormData.HubId,
+                    ipAddress           : oCurrentFormData.IPAddress,
+                    ipPort              : oCurrentFormData.IPPort,
+                    streamPath          : oCurrentFormData.Path,
+                    protocol            : oCurrentFormData.Protocol,
+                    fileType            : "MJPEG",
+                    
+                    editing : true,
+
+                    onSuccess : function () {
+                        IomyRe.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                oController.RefreshModel();
+                                
+                                IomyRe.common.showMessage({
+                                    text : "IP Webcam updated."
+                                });
+
+                                oController.ToggleEditIPWebcamControls(true);
+                                oController.CancelInput();
+                            }
+                        })
+                    },
+
+                    onFail : function (sErrorMessage) {
+                        IomyRe.common.showError(sErrorMessage, "Failed to update settings",
+                            function () {
+                                oController.ToggleEditIPWebcamControls(true);
+                            }
+                        );
+                    }
+                });
+
+            }
+
+        } catch (e) {
+            IomyRe.common.showError(e.message, "Failed to update settings",
+                function () {
+                    oController.ToggleEditIPWebcamControls(true);
+                }
+            );
+        }
+    },
+    
+    isOldRoomTheUnassigned : function () {
+        var iOldRoomID              = IomyRe.common.ThingList["_"+this.iThingId].RoomId;
+            
+        return iOldRoomID == 1;
+    },
+    
+    ToggleSubmitButton : function () {
+        this.getView().byId("ButtonSubmit").setEnabled( this.areThereChanges() );
     },
     
     RunZigbeeCommand : function () {
+        var oController         = this;
         var oView               = this.getView();
         var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
         var iHubId              = oView.getModel().getProperty( "/"+sDevTypeKey+"/" ).Hub;
         var sCommand            = oView.byId("CustomTelnetInput").getValue();
         var oLogContents        = oView.byId("TelnetOutput").getValue();
+        
+        oController.ToggleZigbeeControls(false);
         
         oLogContents += "Running "+sCommand+"...\n";
         oView.byId("TelnetOutput").setValue(oLogContents);
@@ -679,6 +943,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 
                 IomyRe.common.RefreshCoreVariables({
                     onSuccess : function () {
+                        oController.ToggleZigbeeControls(true);
+                        
                         IomyRe.common.showMessage({
                             text : sCommand+" executed successfully",
                             view : oView
@@ -692,6 +958,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 
                 oLogContents += sError+"\n-------------------------------------\n";
                 oView.byId("TelnetOutput").setValue(oLogContents);
+                
+                oController.ToggleZigbeeControls(true);
             }
         });
     },
@@ -755,15 +1023,18 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     },
     
     StartZigbeeJoin : function () {
+        var oController         = this;
         var oView               = this.getView();
         var iCommId             = oView.byId("ZigModemSelect").getSelectedKey();
+        
+        oController.ToggleZigbeeControls(false);
         
         IomyRe.devices.zigbeesmartplug.TurnOnZigbeeJoinMode({
             modemID : iCommId,
             
             onSuccess : function (result) {
                 
-                console.log(JSON.stringify(result));
+                //console.log(JSON.stringify(result));
                 
                 var oLogContents = oView.byId("TelnetOutput").getValue();
                 
@@ -782,20 +1053,33 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         
                         var oLogContents = oView.byId("TelnetOutput").getValue();
                 
-                        oLogContents += JSON.stringify(result)+"\n-------------------------------------\n";
+                        oLogContents += JSON.stringify(result)+"\n-------------------------------------\n\nWaiting 30 seconds for devices to join.";
                         oView.byId("TelnetOutput").setValue(oLogContents);
                 
                         // Force it to scroll down to the bottom.
                         document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
                         
-                        IomyRe.common.RefreshCoreVariables({
-                            onSuccess : function () {
-                                IomyRe.common.showMessage({
-                                    text : "Join completed. Your devices should appear within 5 minutes.",
-                                    view : oView
+                        setTimeout(
+                            function () {
+                                IomyRe.common.RefreshCoreVariables({
+                                    onSuccess : function () {
+                                        oController.ToggleZigbeeControls(true);
+                                        
+                                        IomyRe.common.showMessage({
+                                            text : "Join completed."
+                                        });
+                                    },
+                                    
+                                    onFail : function () {
+                                        oController.ToggleZigbeeControls(true);
+                                        
+                                        IomyRe.common.showMessage({
+                                            text : "Join completed. But unable to refresh the device list."
+                                        });
+                                    }
                                 });
-                            }
-                        });
+                            },
+                        30000);
                     },
                     
                     onFail : function (sError) {
@@ -803,6 +1087,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 
                         oLogContents += result+"\n-------------------------------------\n";
                         oView.byId("TelnetOutput").setValue(oLogContents);
+                        
+                        IomyRe.common.showError(sError, "Failed to load RapidHA Information.", function () {
+                            oController.ToggleZigbeeControls(true);
+                        });
                     }
                 });
                 
@@ -817,6 +1105,12 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 
                 // Force it to scroll down to the bottom.
                 document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+                
+                oController.ToggleZigbeeControls(true);
+                
+                IomyRe.common.showError(sError, "Failed to join devices.", function () {
+                    oController.ToggleZigbeeControls(true);
+                });
             }
         });
     }

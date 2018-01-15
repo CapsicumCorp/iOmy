@@ -103,83 +103,164 @@ sap.ui.jsview("pages.staging.device.OnvifCamera", {
                 oController.PTZMoveDown();
             }
         }).addStyleClass("width100Percent height30px IOMYButton ButtonIconWhite CameraPTZButton")
-        //==============================================//
-        // DRAW CAMERA FEED                             //
-        //==============================================//
         
-        oView.wCameraFeed = new sap.m.VBox(oView.createId("CameraThumbnail"), {
-            items : [
-                // UP BUTTON
-                oView.wBtnMoveUp,
-
-                // MIDDLE SECTION
-                new sap.m.HBox({
-                    items : [
-                        // LEFT BUTTON
-                        oView.wBtnMoveLeft,
-
-                        // CENTER AREA
-                        new sap.m.VBox({}).addStyleClass("width100Percent heightAuto"),
-
-                        // RIGHT BUTTON
-                        oView.wBtnMoveRight
-                    ]
-                }).addStyleClass("width100Percent"),
-
-                // DOWN ARROW
-                oView.wBtnMoveDown
-            ]
-        }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail");
-
-        //==============================================//
-        // DRAW DATE, TIME, AND ROOM                    //
-        //==============================================//
         oView.wLocationField = new sap.m.Label({}).addStyleClass("NormalWS");
         
         oView.wSnapshotTimeField = new sap.m.Label({});
-        
-//        oView.aElementsToDestroy.push("CameraInfoBox");
-//        oView.aElementsToDestroy.push("SnapshotField");
-        var oInfoBox = new sap.m.VBox({
-            items : [
-                //------------------------------------------------------------------//
-                // Camera Location
-                //------------------------------------------------------------------//
-                new sap.m.HBox({
-                    items :[
-                        new sap.m.Label({
-                            text : "Location:"
-                        }).addStyleClass("width120px"),
-
-                        oView.wLocationField
-                    ]
-                }),
-                //------------------------------------------------------------------//
-                // Time and Date
-                //------------------------------------------------------------------//
-                new sap.m.HBox({
-                    items :[
-                        new sap.m.Label({
-                            text : "Snapshot Taken:"
-                        }).addStyleClass("width120px"),
-
-                        oView.wSnapshotTimeField
-                    ]
-                })
-            ]
-        }).addStyleClass("PadAll3px PadTop15px");
-
-        var oVertBox = new sap.m.VBox({
-            items : [ oView.wCameraFeed, oInfoBox ]
-        }).addStyleClass("maxwidth550px HorizontalCenter");
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "OnvifStream",
 			header : IomyRe.widgets.getToolPageHeader( oController ),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
 			mainContents : [
-				IomyRe.widgets.DeviceToolbar(oController, "Onvif Camera Screenshot"),
-				oVertBox
+
+				new sap.m.ScrollContainer ({
+                    //width: "100%",
+                    height: "100%",
+                    vertical : true,
+                    content : [
+                        IomyRe.widgets.DeviceToolbar(oController, "Onvif Stream"),
+                        
+                        new sap.m.VBox( oView.createId("PageContainer_Thumbnail"), {
+                            items : [
+                                //------------------------------------------------------------------//
+                                // Screenshot
+                                //------------------------------------------------------------------//
+                                new sap.m.VBox(oView.createId("CameraThumbnail"), {
+                                    items : [
+                                        // UP BUTTON
+                                        oView.wBtnMoveUp,
+
+                                        // MIDDLE SECTION
+                                        new sap.m.HBox({
+                                            items : [
+                                                // LEFT BUTTON
+                                                oView.wBtnMoveLeft,
+
+                                                // CENTER AREA
+                                                new sap.m.VBox({}).addStyleClass("width100Percent heightAuto"),
+
+                                                // RIGHT BUTTON
+                                                oView.wBtnMoveRight
+                                            ]
+                                        }).addStyleClass("width100Percent"),
+
+                                        // DOWN ARROW
+                                        oView.wBtnMoveDown
+                                    ]
+                                }).addStyleClass("width100Percent height300px BG_grey_10 CameraThumbnail"),
+                                
+                                //------------------------------------------------------------------//
+                                // Camera Information
+                                //------------------------------------------------------------------//
+                                new sap.m.VBox({
+                                    items : [
+                                        //------------------------------------------------------------------//
+                                        // Camera Location
+                                        //------------------------------------------------------------------//
+                                        new sap.m.HBox({
+                                            items :[
+                                                new sap.m.Label({
+                                                    text : "Location:"
+                                                }).addStyleClass("width120px"),
+
+                                                oView.wLocationField
+                                            ]
+                                        }),
+                                        //------------------------------------------------------------------//
+                                        // Time and Date
+                                        //------------------------------------------------------------------//
+                                        new sap.m.HBox({
+                                            items :[
+                                                new sap.m.Label({
+                                                    text : "Snapshot Taken:"
+                                                }).addStyleClass("width120px"),
+
+                                                oView.wSnapshotTimeField
+                                            ]
+                                        })
+                                    ]
+                                }).addStyleClass("PadAll3px PadTop15px")
+                            ]
+                        }).addStyleClass("maxwidth550px HorizontalCenter"),
+
+
+
+						new sap.m.VBox( oView.createId("PageContainer_Player"), {
+							items : [
+								new sap.m.ScrollContainer(  {
+									vertical: true,
+									width: "100%",
+									content: [
+										new sap.m.VBox ({
+											items : [
+												new sap.ui.core.HTML( oView.createId("PlayerFrame"), {
+													preferDOM: true,
+													content: ""
+												})
+											]
+										}).addStyleClass("ChildFlexGrow ChildTextCenter"),
+									]
+								}),
+								new sap.m.FlexBox ({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items: [
+										new sap.m.VBox ({
+											width: "200px",
+											items: [
+												//-- TODO: The UI team needs to replace these characters with Icons so that they have the same look. --//
+												new sap.m.Button ({
+													height: "50px",
+													width: "200px",
+													text: "^",
+													press : function () {
+														oController.PTZMoveUp();
+													}
+												}),
+												new sap.m.HBox ({
+													items : [
+														new sap.m.Button ({
+															height: "50px",
+															width: "50px",
+															text: "<",
+															press : function () {
+																oController.PTZMoveLeft();
+															}
+														}),
+														new sap.m.Button ({
+															height: "50px",
+															width: "90px",
+															text:"Center"
+														}).addStyleClass("MarLeft5px MarRight5px"),
+														new sap.m.Button ({
+															height: "50px",
+															width: "50px",
+															text: ">",
+															press : function () {
+																oController.PTZMoveRight();
+															}
+														}),
+													]
+												}),
+												new sap.m.Button ({
+													height: "50px",
+													width: "200px",
+													text: "v",
+													press : function () {
+														oController.PTZMoveDown();
+													}
+												}),
+											]
+										}).addStyleClass("ElementCenter"),
+									]
+								})
+							]
+						}) //-- END VBOX PageContainer_Player --//
+					]
+				})
+
 			]
 		}).addStyleClass("MainBackground");
 	}

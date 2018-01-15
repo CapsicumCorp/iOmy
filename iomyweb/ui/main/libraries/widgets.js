@@ -1,6 +1,8 @@
 /*
-Title: IOMy Page Widgets
-Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+Title: IomyRe Page Widgets
+Author: 
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
+    Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
 Description: A function to create a complete sap.m.Page for all activities
     (pages).
 Copyright: Capsicum Corporation 2016, 2017
@@ -44,11 +46,11 @@ $.extend( IomyRe.widgets, {
 		var oSwitchView;				//-- OBJECT:	Stores the UI5 Button that holds the SwitchView Button / Menu	--//
 		var oSettings;					//-- OBJECT:	Stores the UI5 Button that holds the Settings Button / Menu		--//
 		var oToolHeader;				//-- OBJECT:	This variable stores the ToolPage header and is returned.		--//	
-		var sDisplayName;                  //-- String:	This variable stores the Users Displayname.		--//
+		var sDisplayName;               //-- STRING:	This variable stores the Users Displayname.		--//
 		
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
 
-		sDisplayName = IomyRe.common.UserInfo.Displayname;
+		sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
 		
 		//----------------------------------------------------//
 		//-- 2.0 - Create ToolHeader Content                --//
@@ -103,23 +105,23 @@ $.extend( IomyRe.widgets, {
 			}	
 		});
 		
-		oSwitchView = new sap.m.OverflowToolbarButton ({
-			layoutData : new sap.m.OverflowToolbarLayoutData({
-				priority : sap.m.OverflowToolbarPriority.High
-			}),
-			icon: "sap-icon://switch-views",
-			type: "Transparent",
-			text: "View By",
-			press: function(oControlEvent) {
-				IomyRe.navigation.GroupMenu(oControlEvent, oView);
-			}	
-		});
+//		oSwitchView = new sap.m.OverflowToolbarButton ({
+//			layoutData : new sap.m.OverflowToolbarLayoutData({
+//				priority : sap.m.OverflowToolbarPriority.High
+//			}),
+//			icon: "sap-icon://switch-views",
+//			type: "Transparent",
+//			text: "View By",
+//			press: function(oControlEvent) {
+//				IomyRe.navigation.GroupMenu(oControlEvent, oView);
+//			}	
+//		});
 		
 		oSettings = new sap.m.Button (oView.createId("openMenu"), {
 			layoutData : new sap.m.OverflowToolbarLayoutData({
 				priority : sap.m.OverflowToolbarPriority.High
 			}),
-			text: "Hi,"+sDisplayName,
+			text: "Hi, "+sDisplayName,
 			type: "Transparent",
 			press: function(oControlEvent) {
 				IomyRe.navigation.UserMenu(oControlEvent, oView);
@@ -158,6 +160,8 @@ $.extend( IomyRe.widgets, {
 		var oNavUsers;			//-- OBJECT:	Stores the UI5 List Item that holds the Users Select			--//
 		var oNavLinks;			//-- OBJECT:	Stores the UI5 List Item that holds the Important Links Select  --//
 		var oNavLegal;			//-- OBJECT:	Stores the UI5 List Item that holds the Legal Select			--//
+		var oNavAdvanced;		//-- OBJECT:	Stores the UI5 List Item that holds the Advanced Telnet Select	--//
+		var oNavCapsicum;		//-- OBJECT:	Stores the UI5 List Item that holds Powered by Capsicum      	--//
 	
 		//----------------------------------------------------//
 		//-- 2.0 - Create ToolHeader Side Content           --//
@@ -167,7 +171,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://home",
 			text: "Home",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pBlock" , {} , false);
+				IomyRe.common.NavigationChangePage( "pBlock" , {} , true);
 			}
 		});
 		
@@ -175,7 +179,13 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://it-system",
 			text: "Devices",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
+                if (oApp.getCurrentPage().getId() === "pDevice") {
+                    var oController = oApp.getCurrentPage().getController();
+                    
+                    oController.RefreshPage({});
+                }
+                
+                IomyRe.common.NavigationChangePage( "pDevice" , {} , true);
 			}
 		});
 		
@@ -183,15 +193,24 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://building",
 			text: "Premise",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pPremise" , {} , false);
+				IomyRe.common.NavigationChangePage( "pPremise" , {} , true);
 			}
 		});
 		
 		oNavRoom = new sap.tnt.NavigationListItem ({
 			icon: "sap-icon://idea-wall",
-			text: "Room",
+			text: "Rooms",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , false);
+				if (oApp.getCurrentPage().getId() === "pRoomList") {
+                    var oController = oApp.getCurrentPage().getController();
+                    
+                    oController.bEditing = false;
+                    oController.IndicateWhetherInEditModeOrNot();
+                    oController.RefreshModel()
+
+                }
+                
+                IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
 			}
 		});
 		
@@ -199,7 +218,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://add-activity",
 			text: "Rules",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pRulesList" , {} , false);
+				IomyRe.common.NavigationChangePage( "pRulesList" , {} , true);
 			}
 		});
 		
@@ -207,7 +226,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://family-protection",
 			text: "Users",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+				IomyRe.common.NavigationChangePage( "pUserList" , {} , true);
 			}
 		});
 		
@@ -215,7 +234,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://chain-link",
 			text: "Important Links",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserForm" , {} , false);
+				IomyRe.common.NavigationChangePage( "pUserForm" , {} , true);
 			}
 		});
 		
@@ -223,8 +242,21 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://compare",
 			text: "Legal Information",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "" , {} , false);
+				IomyRe.common.NavigationChangePage( "" , {} , true);
 			}
+		});
+		
+		oNavAdvanced = new sap.tnt.NavigationListItem ({
+			icon: "sap-icon://settings",
+			text: "Advanced",
+			select : function () {
+				IomyRe.common.NavigationChangePage( "pTelnet" , {} , true);
+			}
+		});
+		
+		oNavCapsicum = new sap.tnt.NavigationListItem ({
+			icon: "",
+			text: "Powered by Capsicum"
 		});
 		
 		
@@ -235,19 +267,20 @@ $.extend( IomyRe.widgets, {
 			expanded : true,
 			item : new sap.tnt.NavigationList ({
 				items : [
-					oNavHome, oNavDevices, oNavPremise, oNavRoom, oNavRules, oNavUsers
+					oNavHome, oNavDevices, oNavPremise, oNavRoom, oNavRules, oNavUsers, oNavAdvanced
 				]
 			}),
 			fixedItem : new sap.tnt.NavigationList ({
 				items : [
-					oNavLinks, oNavLegal
+					oNavCapsicum
 				]
-			}),
+			}), /*
 			footer : new sap.tnt.NavigationList ({
 				items : [
 					
 				]
-			})
+			}) */
+
 		});
 		
 		//----------------------------------------------------//
@@ -257,36 +290,31 @@ $.extend( IomyRe.widgets, {
 	},
 	
 	//-- CSR Button for the "Day Light Mode" button --//
-	CSRbutton : function (oCurrentController) {
+	CSRbutton : function (oCurrentController, fnPress) {
 		//----------------------------------------------------//
 		//-- 1.0 - Initialise                               --//
 		//----------------------------------------------------//		
 		
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
-		var oDescLabel;
 		var oWhiteLight;
 		var oCSRHBox;
 		
 		//----------------------------------------------------//
 		//-- 2.0 - Create the Hbox Content                  --//
 		//----------------------------------------------------//
-		oWhiteLight = new sap.m.Switch ({
-			
-		});
-		
-		oDescLabel = new sap.m.Label ({
-			text: "Day Light Mode",
-			
+		oWhiteLight = new sap.m.Button (oView.createId("ButtonWhiteLight"),{
+			text: "White Light",
+            press : fnPress
 		});
 		
 		//----------------------------------------------------//
 		//-- 3.0 - Fill the CSR HBox                        --//
 		//----------------------------------------------------//
 		oCSRHBox = new sap.m.VBox (oView.createId("WhiteLight_Cont"),{
-			width: "71px",
+			width: "85px",
 			height: "100%",
 			items : [
-				oDescLabel, oWhiteLight
+				oWhiteLight
 			]
 		}).addStyleClass("ElementCenter");
 		
@@ -300,29 +328,364 @@ $.extend( IomyRe.widgets, {
 	
 	
 	//-- Scroll Container for the "RGB" colorpicker --//
-	RGBContainer : function (oCurrentController, mSettings) {
-		var oScrollContainer;
+	LightBulbColorPicker : function (oCurrentController, mSettings) {
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
+        var oForm;
+        
+        var fnSimplePress = function () {};
         
         //--------------------------------------------------------------------//
         // Find the parameters map for the widget
         //--------------------------------------------------------------------//
-        if (mSettings === undefined || mSettings === null) {
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.simpleViewPress) {
+                fnSimplePress = mSettings.simpleViewPress;
+
+            }
+            
+        } else {
             mSettings = {};
         }
         
-        mSettings.mode = sap.ui.unified.ColorPickerMode.HSV;
+        mSettings.mode = sap.ui.unified.ColorPickerMode.HSL;
+        
+        oForm = new sap.ui.layout.form.Form( oView.createId("DevTypeBlock_Form"),{
+            editable: true,
+            layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+                labelSpanXL: 3,
+                labelSpanL: 3,
+                labelSpanM: 3,
+                labelSpanS: 12,
+                adjustLabelSpan: false,
+                emptySpanXL: 3,
+                emptySpanL: 2,
+                emptySpanM: 0,
+                emptySpanS: 0,
+                columnsXL: 1,
+                columnsL: 1,
+                columnsM: 1,
+                columnsS: 1,
+                singleContainerFullSize: false
+            }),
+            toolbar : new sap.m.Toolbar({
+                content : [
+                    new sap.m.Button (oView.createId("ViewSwitchButton"), {
+                        text: "Simple",
+                        press: fnSimplePress
+                    })
+                ]
+            }).addStyleClass("MarBottom1d0Rem"),
+            formContainers : [
+                new sap.ui.layout.form.FormContainer({
+                    formElements : [
+                        new sap.ui.layout.form.FormElement(oView.createId("ColourBoxCont"), {
+                            label : "",
+                            fields: [
+                                new sap.ui.unified.ColorPicker (oView.createId("CPicker"), mSettings).addStyleClass("LightBulbColourPicker ElementChildCenter PadTop2d0Rem")
+                            ]
+                        })
+                    ]
+                })                
+            ]
+        });
 		
-		oScrollContainer = new sap.m.ScrollContainer (oView.createId("RGB_Cont"), {
-			width: "100%",
-			height: "100%",
-			vertical : true,
-			content : [
-				new sap.ui.unified.ColorPicker (oView.createId("CPicker"), mSettings).addStyleClass("ElementChildCenter PadTop2d0Rem")
-			]
-		});
+		return oForm
+	},
+    
+    LightBulbControlsContainer : function (oCurrentController, mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+		var oView               = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
+        
+        var iCurrentHue,
+            iCurrentSaturation,
+            iCurrentBrightness;
+        
+		var oForm;
+        
+        var fnAdvancedPress;
+        
+        var fnHueChange,
+            fnSaturationChange,
+            fnBrightnessChange;
+        
+        var fnHueLiveChange,
+            fnSaturationLiveChange,
+            fnBrightnessLiveChange;
+        
+        var fnSwitchChange;
+        
+        var bEnabled;
+        
+        var fnAppendError = function (sErrMessage) {
+            bError = true;
+            aErrorMessages.push(sErrMessage);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Find the parameters map for the widget
+        //--------------------------------------------------------------------//
+        try {
+            // NOTE: Separated this and the widget code into try, catch blocks
+            // to help pinpoint possible origins of any strange issues that may
+            // arise.
+            if (mSettings !== undefined && mSettings !== null) {
+                if (mSettings.enabled !== undefined) {
+                    bEnabled = mSettings.enabled;
+                } else {
+                    bEnabled = true;
+                }
+                
+                //------------------------------------------------------------//
+                // Switch button event
+                //------------------------------------------------------------//
+                if (mSettings.switchChange !== undefined && mSettings.switchChange !== null) {
+                    fnSwitchChange = mSettings.switchChange;
+                    
+                } else {
+                    fnSwitchChange = function () {};
+                }
+                
+                //------------------------------------------------------------//
+                // Initial Hue figure
+                //------------------------------------------------------------//
+                if (mSettings.hue !== undefined && mSettings.hue !== null) {
+                    iCurrentHue = mSettings.hue;
+                } else {
+                    fnAppendError("Current hue must be specified.");
+                }
+
+                //------------------------------------------------------------//
+                // Initial Saturation figure
+                //------------------------------------------------------------//
+                if (mSettings.saturation !== undefined && mSettings.saturation !== null) {
+                    iCurrentSaturation = mSettings.saturation;
+                } else {
+                    fnAppendError("Current saturation must be specified.");
+                }
+
+                //------------------------------------------------------------//
+                // Initial Luminance figure
+                //------------------------------------------------------------//
+                if (mSettings.brightness !== undefined && mSettings.brightness !== null) {
+                    iCurrentBrightness = mSettings.brightness;
+                } else {
+                    fnAppendError("Current brightness must be specified.");
+                }
+                
+                //------------------------------------------------------------//
+                // Function to run for advanced view switch.
+                //------------------------------------------------------------//
+                if (mSettings.advancedViewPress !== undefined && mSettings.advancedViewPress !== null) {
+                    fnAdvancedPress = mSettings.advancedViewPress;
+                    
+                } else {
+                    fnAdvancedPress = function () {};
+                }
+
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Hue slider is specified.
+                // If not find a generic 'change' event for all sliders.
+                // Otherwise, do nothing.
+                //------------------------------------------------------------//
+                if (mSettings.hueChange !== undefined && mSettings.hueChange !== null) {
+                    fnHueChange = mSettings.hueChange;
+                    
+                } else if (mSettings.change !== undefined && mSettings.change !== null) {
+                    fnHueChange = mSettings.change;
+                
+                } else {
+                    fnHueChange = function () {};
+                }
+
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Saturation slider is
+                // specified. If not find a generic 'change' event for all
+                // sliders. Otherwise, do nothing.
+                //------------------------------------------------------------//
+                if (mSettings.saturationChange !== undefined && mSettings.saturationChange !== null) {
+                    fnSaturationChange = mSettings.saturationChange;
+                    
+                } else if (mSettings.change !== undefined && mSettings.change !== null) {
+                    fnSaturationChange = mSettings.change;
+                
+                } else {
+                    fnSaturationChange = function () {};
+                }
+
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Brightness slider is
+                // specified. If not find a generic 'change' event for all
+                // sliders. Otherwise, do nothing.
+                //------------------------------------------------------------//
+                if (mSettings.brightnessChange !== undefined && mSettings.brightnessChange !== null) {
+                    fnBrightnessChange = mSettings.brightnessChange;
+                    
+                } else if (mSettings.change !== undefined && mSettings.change !== null) {
+                    fnBrightnessChange = mSettings.change;
+                
+                } else {
+                    fnBrightnessChange = function () {};
+                }
+
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Hue slider is specified.
+                // If not find a generic 'liveChange' event for all sliders.
+                // Otherwise, do nothing.
+                //------------------------------------------------------------//
+                if (mSettings.hueLiveChange !== undefined && mSettings.hueLiveChange !== null) {
+                    fnHueLiveChange = mSettings.hueLiveChange;
+                    
+                } else if (mSettings.liveChange !== undefined && mSettings.liveChange !== null) {
+                    fnHueLiveChange = mSettings.liveChange;
+                    
+                } else {
+                    fnHueLiveChange = function () {};
+                }
+
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Saturation slider is
+                // specified. If not find a generic 'liveChange' event for all
+                // sliders. Otherwise, do nothing.
+                //------------------------------------------------------------//
+                if (mSettings.saturationLiveChange !== undefined && mSettings.saturationLiveChange !== null) {
+                    fnSaturationLiveChange = mSettings.saturationLiveChange;
+                    
+                } else if (mSettings.liveChange !== undefined && mSettings.liveChange !== null) {
+                    fnSaturationLiveChange = mSettings.liveChange;
+                    
+                } else {
+                    fnSaturationLiveChange = function () {};
+                }
+
+                //------------------------------------------------------------//
+                // Find out if a function unique to the Brightness slider is
+                // specified. If not find a generic 'liveChange' event for all
+                // sliders. Otherwise, do nothing.
+                //------------------------------------------------------------//
+                if (mSettings.brightnessLiveChange !== undefined && mSettings.brightnessLiveChange !== null) {
+                    fnBrightnessLiveChange = mSettings.brightnessLiveChange;
+                    
+                } else if (mSettings.liveChange !== undefined && mSettings.liveChange !== null) {
+                    fnBrightnessLiveChange = mSettings.liveChange;
+                    
+                } else {
+                    fnBrightnessLiveChange = function () {};
+                }
+                
+                if (bError) {
+                    throw new MissingArgumentException(aErrorMessages.join('\n'));
+                }
+
+            } else {
+                fnAppendError("ID of the light bulb.should be given for the switch functionality.");
+                fnAppendError("Current hue must be specified.");
+                fnAppendError("Current saturation must be specified.");
+                fnAppendError("Current brightness must be specified.");
+                
+                throw new MissingSettingsMapException(aErrorMessages.join('\n'));
+            }
+        } catch (e) {
+            $.sap.log.error("Error processing settings: "+e.name+": "+e.message);
+            throw e;
+        }
 		
-		return oScrollContainer;
+        try {
+            oForm = new sap.ui.layout.form.Form( oView.createId("DevTypeBlock_Form"),{
+                editable: true,
+                layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+                    labelSpanXL: 3,
+                    labelSpanL: 3,
+                    labelSpanM: 3,
+                    labelSpanS: 12,
+                    adjustLabelSpan: false,
+                    emptySpanXL: 3,
+                    emptySpanL: 2,
+                    emptySpanM: 0,
+                    emptySpanS: 0,
+                    columnsXL: 1,
+                    columnsL: 1,
+                    columnsM: 1,
+                    columnsS: 1,
+                    singleContainerFullSize: false
+                }),
+                toolbar : new sap.m.Toolbar({
+                    content : [
+                        new sap.m.Button (oView.createId("ViewSwitchButton"), {
+                            text: "Advanced",
+                            press: fnAdvancedPress
+                        })
+                    ]
+                }).addStyleClass("MarBottom1d0Rem"),
+                formContainers : [
+                    new sap.ui.layout.form.FormContainer({
+                        formElements : [
+                            new sap.ui.layout.form.FormElement(oView.createId("ColourBoxCont"), {
+                                label : "",
+                                fields: [
+                                    new sap.m.HBox({
+                                        width : "",
+                                        items : [
+                                            new sap.m.Image(oView.createId("ColourBox"), {
+                                                densityAware : false,
+                                                src : IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iCurrentHue+"&S="+iCurrentSaturation+"&L="+Math.floor(iCurrentBrightness / 2)
+                                            }).addStyleClass("width80px height80px"),
+
+                                            new sap.m.Switch (oView.createId("LightSwitch"), {
+                                                text: "",
+                                                change: fnSwitchChange
+                                            }).addStyleClass("MarLeft15px MarTop14px")
+                                        ]
+                                    }).addStyleClass("MarLeft17px")
+                                ]
+                            }),
+                            new sap.ui.layout.form.FormElement({
+                                label : "Hue",
+                                fields: [
+                                    new sap.m.Slider(oView.createId("hueSlider"), {
+                                        max         : 360,
+                                        value       : iCurrentHue,
+                                        enabled     : bEnabled,
+                                        change      : fnHueChange,
+                                        liveChange  : fnHueLiveChange
+                                    }).addStyleClass("width100Percent PhilipsHueSlider LightColourSlider")
+                                ]
+                            }),
+                            new sap.ui.layout.form.FormElement({
+                                label : "Saturation",
+                                fields: [
+                                    new sap.m.Slider(oView.createId("satSlider"), {
+                                        max         : 100,
+                                        value       : iCurrentSaturation,
+                                        enabled     : bEnabled,
+                                        change      : fnSaturationChange,
+                                        liveChange  : fnSaturationLiveChange
+                                    }).addStyleClass("width100Percent PhilipsHueSlider")
+                                ]
+                            }),
+                            new sap.ui.layout.form.FormElement({
+                                label : "Brightness",
+                                fields: [ 
+                                    new sap.m.Slider(oView.createId("briSlider"), {
+                                        max         : 100,
+                                        value       : iCurrentBrightness,
+                                        enabled     : bEnabled,
+                                        change      : fnBrightnessChange,
+                                        liveChange  : fnBrightnessLiveChange
+                                    }).addStyleClass("width100Percent PhilipsHueSlider")
+                                ]
+                            })
+                        ]
+                    })
+                ]
+            });
+            
+        } catch (e) {
+            $.sap.log.error("Error drawing widget: "+e.name+": "+e.message);
+            throw e;
+        }
+        
+		return oForm;
 	},
 	
 	//-- Scroll Container for the "Mjpeg" image --//
@@ -451,6 +814,98 @@ $.extend( IomyRe.widgets, {
 		return oPageSection;
 	},
     
+    //------------------------------------------------------------------------//
+    // Onvif Stream Dialog
+    //------------------------------------------------------------------------//
+    showOnvifStreamPopup : function (mSettings) {
+        var bError          = false;
+        var aErrorMessages  = [];
+        var iThingId;
+        var sUrl;
+        
+        //-- Error Messages --//
+        var sURLMissingError        = "URL must be given.";
+        var sThingIDMissingError    = "Thing ID must be given (thingID).";
+        
+        var fnAppendError = function (sErrorMessage) {
+            bError = true;
+            aErrorMessages.push(sErrorMessage);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Find the URL and the device ID.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            
+            //----------------------------------------------------------------//
+            // Check that the ID is there and is a valid device.
+            //----------------------------------------------------------------//
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (!mInfo.bIsValid) {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages.join("\n\n"));
+                }
+            } else {
+                fnAppendError(sThingIDMissingError)
+            }
+            
+            //----------------------------------------------------------------//
+            // Check that the URL is there.
+            //----------------------------------------------------------------//
+            if (mSettings.url !== undefined && mSettings.url !== null) {
+                sUrl = mSettings.url;
+                
+            } else {
+                fnAppendError(sURLMissingError)
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
+            }
+            
+        } else {
+            fnAppendError(sURLMissingError);
+            fnAppendError(sThingIDMissingError);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
+        }
+        
+        //--------------------------------------------------------------------//
+        // Draw the popup.
+        //--------------------------------------------------------------------//
+        var oDialog = new sap.m.Dialog({
+            title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
+            content : [
+                new sap.m.Label({
+                    text : "URL (copy if unable to play stream)"
+                }),
+                new sap.m.Input({
+                    value : sUrl
+                }),
+                
+                new sap.m.Button ({
+                    type: sap.m.ButtonType.Accept,
+                    text: "Play Stream",
+                    press : function () {
+                        window.open(sUrl);
+                    }
+                }).addStyleClass("width50Percent"),
+                new sap.m.Button ({
+                    type: sap.m.ButtonType.Reject,
+                    text: "Cancel",
+                    press : function () {
+                        oDialog.close();
+                    }
+                }).addStyleClass("width50Percent")
+            ]
+        });
+        
+        oDialog.open();
+    },
     
     //------------------------------------------------------------------------//
     // The select boxes

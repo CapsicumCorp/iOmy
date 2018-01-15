@@ -78,77 +78,85 @@ sap.ui.jsview("pages.staging.RulesList", {
 			title: "Rules List",
 			header : IomyRe.widgets.getToolPageHeader(oController),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
-				new sap.ui.table.Table ({
-					rows: "{/RulesList}",
-					extension : [
-						new sap.m.Toolbar ({
-							selectionMode:"MultiToggle",
-							content : [
-								new sap.m.Button ({
-									text: "Add",
-									type: sap.m.ButtonType.Accept,
-									press : function () {
-										IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
-									}
-								}),
-								new sap.m.Button({
-									text: "Discard",
-									type: sap.m.ButtonType.Reject,
-									//press : function () {
-									//	IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
-									//}
-								}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.Title ({
-									id: "RulesList" ,
-									text: "Rules"
-								}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({})
-							]
-						})
-					],
-					columns : [
-						new sap.ui.table.Column ({
-							label : new sap.m.Label({ 
-								text:"Device Name" 
-							}),
-							template : oColDName
-						}),
-						new sap.ui.table.Column ({
-							label : new sap.m.Label({ 
-								text:"Device Type" 
-							}),
-							template : oColDType
-						}),
-						new sap.ui.table.Column ({
-							label : new sap.m.Label({ 
-								text:"Event Type" 
-							}),
-							template : oColEType
-						}),
-						new sap.ui.table.Column ({
-							label : new sap.m.Label({ 
-								text:"Event Time" 
-							}),
-							template : oColETime
-						}),
-						new sap.ui.table.Column ({
-							width: "11rem",
-							label : new sap.m.Label({ 
-								text:"Edit" 
-							}),
-							template : oColEdit
-						})
+			mainContents: [
+                new sap.m.ScrollContainer ({
+					width: "100%",
+					height: "100%",
+					vertical : true,
+					content : [
+                        new sap.ui.table.Table (oView.createId("RulesTable"), {
+                            rows: "{/RulesList}",
+                            extension : [
+                                new sap.m.Toolbar ({
+                                    selectionMode:"MultiToggle",
+                                    content : [
+                                        new sap.m.Button (oView.createId("ButtonAdd"), {
+                                            text: "Add",
+                                            type: sap.m.ButtonType.Accept,
+                                            press : function () {
+                                                IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
+                                            }
+                                        }),
+                                        new sap.m.Button(oView.createId("ButtonDiscard"), {
+                                            text: "Discard",
+                                            type: sap.m.ButtonType.Reject,
+                                            press : function () {
+                                            	oController.DiscardRule();
+                                            }
+                                        }),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.Title ({
+                                            id: "RulesList" ,
+                                            text: "Rules"
+                                        }),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({})
+                                    ]
+                                })
+                            ],
+                            columns : [
+                                new sap.ui.table.Column ({
+                                    label : new sap.m.Label({ 
+                                        text:"Device Name" 
+                                    }),
+                                    template : oColDName
+                                }),
+                                new sap.ui.table.Column ({
+                                    label : new sap.m.Label({ 
+                                        text:"Device Type" 
+                                    }),
+                                    template : oColDType
+                                }),
+                                new sap.ui.table.Column ({
+                                    label : new sap.m.Label({ 
+                                        text:"Event Type" 
+                                    }),
+                                    template : oColEType
+                                }),
+                                new sap.ui.table.Column ({
+                                    label : new sap.m.Label({ 
+                                        text:"Event Time" 
+                                    }),
+                                    template : oColETime
+                                }),
+                                new sap.ui.table.Column ({
+                                    width: "11rem",
+                                    label : new sap.m.Label({ 
+                                        text:"Edit" 
+                                    }),
+                                    template : oColEdit
+                                })
+                            ]
+                        })
 					]
 				})
+                        
 			]
 		}).addStyleClass("MainBackground");
 	}

@@ -43,9 +43,13 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
                         new sap.ui.layout.form.FormElement({
                             label : "Device Name",
                             fields: [
-                                new sap.m.Input ({
+                                new sap.m.Input (oView.createId("DeviceName"), {
 									placeholder : "Display Name",
-                                    value : "{/CurrentDevice/ThingName}"
+                                    value : "{/CurrentDevice/ThingName}",
+                                    
+                                    liveChange : function () {
+                                        oController.ToggleSubmitButton();
+                                    }
 								})
                             ]
                         }),
@@ -57,6 +61,10 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
                                     items: {
                                         path: "/Rooms",
                                         template: oRoomItemTemplate
+                                    },
+                                    
+                                    change : function () {
+                                        oController.ToggleSubmitButton();
                                     }
                                 })
                             ]
@@ -67,6 +75,7 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
+                                    enabled: oController.isOldRoomTheUnassigned(),
                                     press : function () {
                                         oController.EditDevice();
                                     }

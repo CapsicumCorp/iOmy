@@ -62,48 +62,145 @@ sap.ui.controller("pages.staging.Device", {
         
         oView.addEventDelegate({
             onBeforeShow : function (evt) {
-                //----------------------------------------------------//
-                // Find the room ID, if specified, and store it.
-                //----------------------------------------------------//
-                if (evt.data.RoomId !== undefined && evt.data.RoomId !== null) {
-                    oController.iLastRoomId = evt.data.RoomId;
-                } else {
-                    oController.iLastRoomId = null;
-                }
-                
-                if (evt.data.PremiseId !== undefined && evt.data.PremiseId !== null) {
-                    oController.iLastPremiseId = evt.data.PremiseId;
-                } else {
-                    oController.iLastPremiseId = null;
-                }
-                
-                if (evt.data.bEditing !== undefined && evt.data.bEditing !== null) {
-                    oController.bEditing = evt.data.bEditing;
-                } else {
-                    oController.bEditing = false;
-                }
-                
-                //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
-                
-                oController.aAjaxTasks = { 
-                    "Low": [],
-                    "Mid": [],
-                    "High": []
-                };
-                
-                IomyRe.common.RefreshCoreVariables({
-                    onSuccess : function () {
-                        oController.BuildDeviceListUI();
-                        oController.RefreshAjaxDataForUI();
-                    }
-                })
+                oController.RefreshPage(evt.data);
             }
         });
             
         
     },
     
+    RefreshPage : function (mData) {
+        var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
+        var oView = this.getView();
+        
+        //----------------------------------------------------//
+        // Find the premise ID, if specified, and store it.
+        //----------------------------------------------------//
+        if (mData.PremiseId !== undefined && mData.PremiseId !== null) {
+            oController.iLastPremiseId = mData.PremiseId;
+
+        } else {
+            oController.iLastPremiseId = null;
+        }
+
+        //----------------------------------------------------//
+        // Find the room ID, if specified, and store it.
+        //----------------------------------------------------//
+        if (mData.RoomId !== undefined && mData.RoomId !== null) {
+            oController.iLastRoomId = mData.RoomId;
+            
+        } else {
+            oController.iLastRoomId = null;
+        }
+
+        if (oController.iLastPremiseId === null && oController.iLastRoomId === null) {
+            oView.byId("ToolbarTitle").setText("Devices");
+
+        } else if (oController.iLastPremiseId !== null && oController.iLastRoomId !== null) {
+            // If both the Premise ID and Room ID are given, use the room ID.
+            oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.functions.getRoom( oController.iLastRoomId ).RoomName);
+
+        } else {
+            if (oController.iLastPremiseId !== null) {
+                oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.common.PremiseList["_"+oController.iLastPremiseId].Name);
+
+            } else if (oController.iLastRoomId !== null) {
+                oView.byId("ToolbarTitle").setText("Devices in " + IomyRe.functions.getRoom( oController.iLastRoomId ).RoomName);
+
+            }
+        }
+
+        if (mData.bEditing !== undefined && mData.bEditing !== null) {
+            oController.bEditing = mData.bEditing;
+        } else {
+            oController.bEditing = false;
+        }
+
+        oController.IndicateWhetherInEditModeOrNot();
+
+        //-- Defines the Device Type --//
+        IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+
+        oController.aAjaxTasks = { 
+            "Low": [],
+            "Mid": [],
+            "High": []
+        };
+        
+        oController.RefreshModel();
+
+        oController.InitialiseDeviceList();
+    },
+    
+    /**
+     * Changes the title of the page to indicate whether the list is to be used
+     * for accessing or editing devices.
+     */
+    IndicateWhetherInEditModeOrNot : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var sTitle      = oView.byId("ToolbarTitle").getText();
+        
+        //-- Remove the "Edit " prefix --//
+        if (sTitle.indexOf("Edit ") === 0) {
+            sTitle = sTitle.replace("Edit ", "");
+            
+            if (oController.iLastPremiseId === null && oController.iLastRoomId === null) {
+                oView.byId("ToolbarTitle").setText("Devices");
+            } else {
+                oView.byId("ToolbarTitle").setText(sTitle);
+            }
+        }
+        
+        //-- If we're editing add the prefix "Edit ". --//
+        if (oController.bEditing) {
+            oView.byId("ToolbarTitle").setText( "Edit " + sTitle );
+        }
+    },
+    
+    ClearFilters : function () {
+        this.iLastRoomId    = null;
+        this.iLastPremiseId = null;
+    },
+    
+    RefreshModel : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oJSON       = {};
+        
+        if (oController.bEditing) {
+            oJSON.CameraTapInstructions = "Tap to edit details";
+            oJSON.MotionSensorInstructions = "Tap to edit details";
+        } else {
+            oJSON.CameraTapInstructions = "Tap to view stream";
+            oJSON.MotionSensorInstructions = "Tap to view more information";
+        }
+        
+        oView.setModel( 
+            new sap.ui.model.json.JSONModel(oJSON)
+        );
+    },
+    
+    InitialiseDeviceList : function () {
+        var oController = this;
+        var oView       = this.getView();
+        
+        oView.byId("DeviceList").destroyItems();
+        oView.byId("DeviceList").addItem(
+            new sap.m.ObjectListItem (oView.createId("loading"), {        
+                title: "Loading Devices...",
+                type: "Active",
+                attributes : [],
+            })
+        );
+        
+        IomyRe.common.RefreshCoreVariables({
+            onSuccess : function () {
+                oController.BuildDeviceListUI();
+                oController.RefreshAjaxDataForUI();
+            }
+        });
+    },
     
     BuildDeviceListUI : function () {
         var oController     = this;
@@ -113,7 +210,7 @@ sap.ui.controller("pages.staging.Device", {
 //        var bEditing        = oController.bEditing;
         var sPageId         = "";
         
-        // Wipe the old list.
+        // Wipe the loading entry.
         wList.destroyItems();
         
         // Fetch the list from the core variables.
@@ -144,6 +241,8 @@ sap.ui.controller("pages.staging.Device", {
             // Create the items under that grouping
             //----------------------------------------------------------------//
             $.each(mTypeBlock.Devices, function (sJ, mDevice) {
+                var iState = IomyRe.common.ThingList["_"+mDevice.DeviceId];
+                
                 switch (mDevice.DeviceTypeId) {
                     //--------------------------------------------------------//
                     // Zigbee Smart Plug UI Entry
@@ -188,7 +287,6 @@ sap.ui.controller("pages.staging.Device", {
                                 }
                             })
                         );
-
                         break;
 
                     //--------------------------------------------------------//
@@ -200,8 +298,8 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Blue",
-                                numberUnit: "hue",
+                                number: "Loading...",
+                                numberUnit: "Current Colour",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
@@ -246,8 +344,8 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Blue",
-                                numberUnit: "hue",
+                                number: "Loading...",
+                                numberUnit: "Current Colour",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
@@ -289,28 +387,29 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Monitoring",
-                                numberUnit: "activity",
+                                number: "",
+                                numberUnit: "",//IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "link",
                                         customContent : new sap.m.Link ({
                                             text: "Take Screenshot",
                                             press : function () {
-                                                IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId } , false);
+                                                IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Thumbnail" } , false);
                                                 
                                             }
                                         })
                                     }),
                                     new sap.m.ObjectAttribute ({
-                                        text: "Tap to view stream"
+                                        text: "{/CameraTapInstructions}"
                                     })
                                 ],
                                 
                                 press : function () {
+                                    
                                     //----------------------------------------------------------//
                                     // If were looking to edit a device, open the form,
-                                    // otherwise, open the stream in another app.
+                                    // otherwise, open the stream popup
                                     //----------------------------------------------------------//
                                     if (oController.bEditing) {
                                         IomyRe.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId } , false);
@@ -321,13 +420,20 @@ sap.ui.controller("pages.staging.Device", {
                                                 ThingId : mDevice.DeviceId,
 
                                                 onSuccess : function(sUrl) {
-                                                    window.open(sUrl);
+                                                    IomyRe.widgets.showOnvifStreamPopup({
+                                                        thingID         : mDevice.DeviceId,
+                                                        url             : sUrl
+                                                    });
                                                 },
 
                                                 onFail : function (response) {
                                                     IomyRe.common.showError(response.responseText, "Couldn't load the stream");
                                                 }
                                             });
+                                            
+                                            //IomyRe.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Player" } , false);
+                                            
+                                            
                                         } catch (ex) {
                                             IomyRe.common.showError(ex.message, "Couldn't load the stream");
                                         }
@@ -347,21 +453,24 @@ sap.ui.controller("pages.staging.Device", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
                                 title: mDevice.DeviceName,
                                 type: "Active",
-                                number: "Monitoring",
-                                numberUnit: "activity",
+                                number: "",
+                                numberUnit: "",//IomyRe.devices.getDeviceAddress(mDevice.DeviceId),
                                 attributes : [
+                                    new sap.m.ObjectAttribute ({
+                                        text: "{/CameraTapInstructions}"
+                                    })
 //                                    new sap.m.ObjectAttribute ({
 //                                        text: "link",
 //                                        customContent : new sap.m.Link ({
 //                                            text: "Take Screenshot"
 //                                        })
 //                                    }),
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Record"
-                                        })
-                                    })
+//                                    new sap.m.ObjectAttribute ({
+//                                        text: "link",
+//                                        customContent : new sap.m.Link ({
+//                                            text: "Record"
+//                                        })
+//                                    })
                                 ],
                                 press : function () {
                                     if (oController.bEditing) {
@@ -423,17 +532,20 @@ sap.ui.controller("pages.staging.Device", {
                                 numberUnit: "Loading...",
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Enable Alarm"
-                                        })
-                                    }),
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Disable Alarm"
-                                        })
+                                        text: "{/MotionSensorInstructions}"
                                     })
+//                                    new sap.m.ObjectAttribute ({
+//                                        text: "link",
+//                                        customContent : new sap.m.Link ({
+//                                            text: "Enable Alarm"
+//                                        })
+//                                    }),
+//                                    new sap.m.ObjectAttribute ({
+//                                        text: "link",
+//                                        customContent : new sap.m.Link ({
+//                                            text: "Disable Alarm"
+//                                        })
+//                                    })
                                 ],
                                 press : function () {
                                     if (oController.bEditing) {
@@ -478,7 +590,7 @@ sap.ui.controller("pages.staging.Device", {
         var oCallingWidget;
         var oStatusAttribute;
         var iThingId;
-        
+    
         //--------------------------------------------------------------------//
         // Fetch the Thing ID, switch button, and the status attribute widget.
         //--------------------------------------------------------------------//
@@ -512,34 +624,41 @@ sap.ui.controller("pages.staging.Device", {
             throw new MissingSettingsMapException("Thing ID must be given.\nSwitch status attribute must be given.");
         }
         
-        
-        //--------------------------------------------------------------------//
-        // Disable the calling widget and toggle the on/off status.
-        //--------------------------------------------------------------------//
-        oCallingWidget.setEnabled(false);
-        
-        IomyRe.devices.RunSwitch({
-            thingID : iThingId,
-            
-            onSuccess : function (iStatus) {
-                if (iStatus === 0) {
-                    oStatusAttribute.setText("Status: Off");
-                } else if (iStatus === 1) {
-                    oStatusAttribute.setText("Status: On");
-                }
-                
-                oCallingWidget.setEnabled(true);
-            },
-            
-            onFail : function (sErrMessage) {
-                IomyRe.common.showError(sErrMessage, "Error",
-                    function () {
-                        oStatusAttribute.setText( "Status: "+(IomyRe.common.ThingList["_"+iThingId].Status === 1 ? "On" : "Off") );
-                        oCallingWidget.setEnabled(true);
+        try {
+            //--------------------------------------------------------------------//
+            // Disable the calling widget and toggle the on/off status.
+            //--------------------------------------------------------------------//
+            oCallingWidget.setEnabled(false);
+
+            IomyRe.devices.RunSwitch({
+                thingID : iThingId,
+
+                onSuccess : function (iStatus) {
+                    try {
+                        if (iStatus === 0) {
+                            oStatusAttribute.setText("Status: Off");
+                        } else if (iStatus === 1) {
+                            oStatusAttribute.setText("Status: On");
+                        }
+                    } catch (e1) {
+                        jQuery.sap.log.error("Error in the Run Switch onSuccess:"+e1.message); 
                     }
-                );
-            }
-        });
+                    oCallingWidget.setEnabled(true);
+                },
+
+                onFail : function (sErrMessage) {
+                    IomyRe.common.showError(sErrMessage, "Error",
+                        function () {
+                            oStatusAttribute.setText( "Status: "+(IomyRe.common.ThingList["_"+iThingId].Status === 1 ? "On" : "Off") );
+                            oCallingWidget.setEnabled(true);
+                        }
+                    );
+                }
+            });
+        } catch (e) {
+            jQuery.sap.log.error("Error attempting to run a switch (Device ID "+iThingId+") ("+e.name+"): "+e1.message);
+            oCallingWidget.setEnabled(true);
+        }
     },
     
     RefreshAjaxDataForUI: function() {
@@ -552,98 +671,169 @@ sap.ui.controller("pages.staging.Device", {
         //----------------------------------------------------//
         //-- 2.0 - Fetch a list of Ajax tasks                --//
         //----------------------------------------------------//
-        $.each( oController.aaDeviceList, function( sIndex, aGrouping ) {
-            //-- 3.1.3 - Draw the UI for each Device --//
-            $.each( aGrouping.Devices, function( sIndex, aDevice ) {
-                //-- Create the Prefix --//
-                var sPrefix     = "entry"+aDevice.DeviceId;
-                var aNewTasks   = [];
-                
-                var mTaskListSettings = {
-                    deviceData : aDevice,
-                    labelWidgetID : sPrefix
-                };
-                
-                //------------------------------------------------------------//
-                // For certain devices extra information should be parsed to it.
-                //------------------------------------------------------------//
-                if (IomyRe.devices.weatherfeed !== undefined) {
+        try {
+            $.each( oController.aaDeviceList, function( sIndex, aGrouping ) {
+                //-- 3.1.3 - Draw the UI for each Device --//
+                $.each( aGrouping.Devices, function( sIndex, aDevice ) {
+                    //-- Create the Prefix --//
+                    var sPrefix     = "entry"+aDevice.DeviceId;
+                    var aNewTasks   = [];
+                    
+                    var mTaskListSettings = {
+                        deviceData : aDevice,
+                        labelWidgetID : sPrefix
+                    };
+                    
+                    if (aDevice.DeviceTypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+                        mTaskListSettings.onFail = function (sErrMessage) {
+                            $.sap.log.error(sErrMessage);
+
+                            if (oView.byId(sPrefix) !== undefined) {
+                                oView.byId(sPrefix).setNumber("N/A");
+
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
+                        };
+                    }
+                    
+                    //------------------------------------------------------------//
+                    // For certain devices extra information should be parsed to it.
+                    //------------------------------------------------------------//
+                    if (IomyRe.devices.weatherfeed !== undefined) {
+                        
+                        //--------------------------------------------------------//
+                        // For Open Weather Map feeds, create functions to display
+                        // information on the device entry.
+                        //--------------------------------------------------------//
+                        if (aDevice.DeviceTypeId == IomyRe.devices.weatherfeed.ThingTypeId) {
+                            mTaskListSettings.onSuccess = function (data) {
+                                if (oView.byId(sPrefix) !== undefined) {
+                                    oView.byId(sPrefix).setNumber(data.Temperature.Value.toFixed(1) + data.Temperature.UomName);
+    
+                                    oView.byId("humidity"+aDevice.DeviceId).setText("Humidity: " + data.Humidity.Value + data.Humidity.UomName);
+                                    oView.byId("outside"+aDevice.DeviceId).setText("Outside: " + data.Condition.Value);
+    
+                                    //-- Update the Last Ajax Request Date --//
+                                    oController.dLastAjaxUpdate    = new Date();
+                                    //-- Recursively check for more Tasks --//
+                                    oController.RecursiveLoadAjaxData();
+                                }
+                            };
+                            
+                            mTaskListSettings.onFail = function (sErrMessage) {
+                                $.sap.log.error(sErrMessage);
+                                
+                                if (oView.byId(sPrefix) !== undefined) {
+                                    oView.byId(sPrefix).setNumber("N/A");
+    
+                                    oView.byId("humidity"+aDevice.DeviceId).setText("Failed to load data");
+    
+                                    //-- Recursively check for more Tasks --//
+                                    oController.RecursiveLoadAjaxData();
+                                }
+                            };
+                        }
+                    }
+                    
+                    if (IomyRe.devices.motionsensor !== undefined) {
+                        //--------------------------------------------------------//
+                        // For motion sensors, create functions to display
+                        // information on the device entry.
+                        //--------------------------------------------------------//
+                        if (aDevice.DeviceTypeId == IomyRe.devices.motionsensor.ThingTypeId) {
+                            mTaskListSettings.onSuccess = function (data) {
+                                if (oView.byId(sPrefix) !== undefined) {
+                                    oView.byId(sPrefix).setNumberUnit(data.HumanReadable.UTS);
+    
+                                    //-- Update the Last Ajax Request Date --//
+                                    oController.dLastAjaxUpdate    = new Date();
+                                    //-- Recursively check for more Tasks --//
+                                    oController.RecursiveLoadAjaxData();
+                                }
+                            };
+                            
+                            mTaskListSettings.onFail = function (sErrMessage) {
+                                $.sap.log.error(sErrMessage);
+                                
+                                if (oView.byId(sPrefix) !== undefined) {
+                                    oView.byId(sPrefix).setNumberUnit("N/A");
+    
+                                    //-- Recursively check for more Tasks --//
+                                    oController.RecursiveLoadAjaxData();
+                                }
+                            };
+                        }
+                    }
                     
                     //--------------------------------------------------------//
-                    // For Open Weather Map feeds, create functions to display
-                    // information on the device entry.
+                    // For light bulbs show the hex code of the bulb's colour.
                     //--------------------------------------------------------//
-                    if (aDevice.DeviceTypeId == IomyRe.devices.weatherfeed.ThingTypeId) {
-                        mTaskListSettings.onSuccess = function (data) {
-                            oView.byId(sPrefix).setNumber(data.Temperature.Value.toFixed(1) + data.Temperature.UomName);
-                            
-                            oView.byId("humidity"+aDevice.DeviceId).setText("Humidity: " + data.Humidity.Value + data.Humidity.UomName);
-                            oView.byId("outside"+aDevice.DeviceId).setText("Outside: " + data.Condition.Value);
-                            
-                            //-- Update the Last Ajax Request Date --//
-                            oController.dLastAjaxUpdate    = new Date();
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
+                    if (aDevice.DeviceTypeId == IomyRe.devices.philipshue.ThingTypeId ||
+                        aDevice.DeviceTypeId == IomyRe.devices.csrmesh.ThingTypeId)
+                    {
+                        mTaskListSettings.onSuccess = function (sHexString) {
+                            if (oView.byId(sPrefix) !== undefined) {
+                                oView.byId(sPrefix).setNumber("#"+sHexString);
+    
+                                //-- Update the Last Ajax Request Date --//
+                                oController.dLastAjaxUpdate    = new Date();
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
                         };
-                        
+    
                         mTaskListSettings.onFail = function (sErrMessage) {
                             $.sap.log.error(sErrMessage);
-                            
-                            oView.byId(sPrefix).setNumber("N/A");
-                            
-                            oView.byId("humidity"+aDevice.DeviceId).setText("Failed to load data");
-                            
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
+    
+                            if (oView.byId(sPrefix) !== undefined) {
+                                oView.byId(sPrefix).setNumber("N/A");
+    
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
                         };
                     }
-                }
-                
-                if (IomyRe.devices.motionsensor !== undefined) {
+                    
                     //--------------------------------------------------------//
-                    // For motion sensors, create functions to display
-                    // information on the device entry.
+                    // For cameras show the IP address and whether it's online
+                    // or not.
                     //--------------------------------------------------------//
-                    if (aDevice.DeviceTypeId == IomyRe.devices.motionsensor.ThingTypeId) {
-                        mTaskListSettings.onSuccess = function (data) {
-                            oView.byId(sPrefix).setNumberUnit(data.HumanReadable.UTS);
-                            
-                            //-- Update the Last Ajax Request Date --//
-                            oController.dLastAjaxUpdate    = new Date();
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
-                        };
-                        
-                        mTaskListSettings.onFail = function (sErrMessage) {
-                            $.sap.log.error(sErrMessage);
-                            
-                            oView.byId(sPrefix).setNumberUnit("N/A");
-                            
-                            //-- Recursively check for more Tasks --//
-                            oController.RecursiveLoadAjaxData();
-                        };
+        //                if (aDevice.DeviceTypeId == IomyRe.devices.ipcamera.ThingTypeId ||
+        //                    aDevice.DeviceTypeId == IomyRe.devices.onvif.ThingTypeId)
+        //                {
+        //                    mTaskListSettings.onComplete = function (sResult) {
+        //                        oView.byId(sPrefix).setNumber(sResult);
+        //
+        //                        //-- Update the Last Ajax Request Date --//
+        //                        oController.dLastAjaxUpdate    = new Date();
+        //                        //-- Recursively check for more Tasks --//
+        //                        oController.RecursiveLoadAjaxData();
+        //                    };
+        //                }
+                    
+                    //-- Add the Tasks to populate the UI --//
+                    //console.log(JSON.stringify(aDevice));
+                    aNewTasks = IomyRe.devices.GetUITaskList(mTaskListSettings);
+                    //jQuery.sap.log.debug( JSON.stringify(aNewTasks) );
+                    
+                    //-- High Priority --//
+                    if( aNewTasks.High!==undefined && aNewTasks.High!==null ) {
+                        if( aNewTasks.High.length > 0 ) {
+                            oController.aAjaxTasks.High.push.apply( oController.aAjaxTasks.High, aNewTasks.High );
+                        }
                     }
-                }
-                
-                //-- Add the Tasks to populate the UI --//
-                //console.log(JSON.stringify(aDevice));
-                aNewTasks = IomyRe.devices.GetUITaskList(mTaskListSettings);
-                //jQuery.sap.log.debug( JSON.stringify(aNewTasks) );
-                
-                //-- High Priority --//
-                if( aNewTasks.High!==undefined && aNewTasks.High!==null ) {
-                    if( aNewTasks.High.length > 0 ) {
-                        oController.aAjaxTasks.High.push.apply( oController.aAjaxTasks.High, aNewTasks.High );
+                    //-- Low Priority --//
+                    if( aNewTasks.Low!==undefined && aNewTasks.Low!==null ) {
+                        if( aNewTasks.Low.length > 0 ) {
+                            oController.aAjaxTasks.Low.push.apply( oController.aAjaxTasks.Low, aNewTasks.Low );
+                        }
                     }
-                }
-                //-- Low Priority --//
-                if( aNewTasks.Low!==undefined && aNewTasks.Low!==null ) {
-                    if( aNewTasks.Low.length > 0 ) {
-                        oController.aAjaxTasks.Low.push.apply( oController.aAjaxTasks.Low, aNewTasks.Low );
-                    }
-                }
+                });
             });
-        });
+        } catch (e1) {
+            jQuery.sap.log.error("An error has occured within RefreshAjaxDataForUI: "+e1.message);
+        }
         
         //----------------------------------------------------//
         //-- 3.0 - Execute the Ajax Tasks                    --//
@@ -665,29 +855,41 @@ sap.ui.controller("pages.staging.Device", {
     //== RECURSIVE AJAX LOADER                            ==//
     //====================================================//
     RecursiveLoadAjaxData: function() {
-        var oController        = this;            //-- SCOPE:        Binds the current controller scope for subfunctions                    --//
-        var aTask            = {};            //-- ARRAY:        This will hold a task that has being pulled from the task list --//
-
-        if (IomyRe.common.bSessionTerminated === false) {
-            //-- Check the Length of the array to see if there is any jobs to do --//
-            if( oController.aAjaxTasks.High.length > 0 ) {
-                //-- Pull a task from the array --//
-                aTask = oController.aAjaxTasks.High.pop();
-                oController.RunAjaxTask(aTask);
-
-            } else if( oController.aAjaxTasks.Mid.length > 0 ) {
-                //-- Pull a task from the array --//
-                aTask = oController.aAjaxTasks.Mid.pop();
-                oController.RunAjaxTask(aTask);
-
-            } else {
-                if( oController.aAjaxTasks.Low.length > 0 ) {
-                    //-- Pull a task from the array --//
-                    aTask = oController.aAjaxTasks.Low.pop();
-                    oController.RunAjaxTask(aTask);
-
+        var oController     = this;          //-- SCOPE:        Binds the current controller scope for subfunctions                    --//
+        var aTask           = {};            //-- ARRAY:        This will hold a task that has being pulled from the task list --//
+        try {
+            if (oApp.getCurrentPage().getId() === "pDevice") {
+                if (IomyRe.common.bSessionTerminated === false) {
+                    //-- Check the Length of the array to see if there is any jobs to do --//
+                    if( oController.aAjaxTasks.High.length > 0 ) {
+                        //-- Pull a task from the array --//
+                        aTask = oController.aAjaxTasks.High.pop();
+                        oController.RunAjaxTask(aTask);
+    
+                    } else if( oController.aAjaxTasks.Mid.length > 0 ) {
+                        //-- Pull a task from the array --//
+                        aTask = oController.aAjaxTasks.Mid.pop();
+                        oController.RunAjaxTask(aTask);
+    
+                    } else {
+                        if( oController.aAjaxTasks.Low.length > 0 ) {
+                            //-- Pull a task from the array --//
+                            aTask = oController.aAjaxTasks.Low.pop();
+                            oController.RunAjaxTask(aTask);
+    
+                        }
+                    }
                 }
+            } else {
+                //-- The user is no longer on the device page so no need to load anymore information --//
+                oController.aAjaxTasks = { 
+                    "Low": [],
+                    "Mid": [],
+                    "High": []
+                };
             }
+        } catch (e1) {
+            jQuery.sap.log.error("An error has occured within RecursiveLoadAjaxData: "+e1.message);
         }
     },
     
@@ -728,17 +930,10 @@ sap.ui.controller("pages.staging.Device", {
         //--------------------------------------------------------//
         //-- 1.0 - Initialise                                    --//
         //--------------------------------------------------------//
-        var oController            = this;            //-- OBJECT:        Binds the current Controller's scope to a variable for sub-functions to access    --//
-        var iIOId               = 0;            //-- INTEGER:        The IO Id to poll the Data for                                                --//
-        var sIODataType         = "";            //-- STRING:        The IO's Datatype is stored so that we know what Odata URL to poll            --//
-        var sIOLabel            = "";            //-- STRING:        This will hold the nickname of which odata url to poll for data                   --//
-        var iSampleRateLimit    = null;         //-- INTEGER:        Sample rate limit in seconds                                                --//
-        var iUTS_Start            = 0;            //-- INTEGER:        Used to hold the current period's starting Unix Timestamp                         --//
-        var iUTS_End            = 0;            //-- INTEGER:        Used to hold the current period's ending Unix Timestamp                           --//
-        var sAjaxUrl            = "";            //-- STRING:        --//
-        var aAjaxColumns        = [];            //-- ARRAY:            --//
-        var aAjaxWhereClause    = [];            //-- ARRAY:            --//
-        var aAjaxOrderByClause    = [];            //-- ARRAY:            --//
+        var oController           = this;         //-- OBJECT:        Binds the current Controller's scope to a variable for sub-functions to access    --//
+        var iIOId                 = 0;            //-- INTEGER:        The IO Id to poll the Data for                                                   --//
+        var sIODataType           = "";           //-- STRING:        The IO's Datatype is stored so that we know what Odata URL to poll                --//
+        var sIOLabel              = "";           //-- STRING:        This will hold the nickname of which odata url to poll for data                   --//
         
         //--------------------------------------------------------//
         //-- 2.0 - Check if Ajax Request should be run            --//
@@ -747,7 +942,6 @@ sap.ui.controller("pages.staging.Device", {
             iIOId               = aTask.Data.IOId;
             sIODataType         = aTask.Data.IODataType;
             sIOLabel            = aTask.Data.LabelId;
-            iSampleRateLimit    = aTask.Data.SamplerateLimit;
             // Add to the IO count
             oController.iIOCount++;
             
@@ -758,11 +952,7 @@ sap.ui.controller("pages.staging.Device", {
         //--------------------------------------------------------//
         //-- 3.0 - Prepare for Ajax Request                        --//
         //--------------------------------------------------------//
-        //iUTS_Start                = IomyRe.common.GetStartOfCurrentPeriod();
-        iUTS_End                = IomyRe.time.GetCurrentUTS();
         
-        
-
         //--------------------------------------------------------//
         //-- 4.0 - Check if Ajax Request should be run            --//
         //--------------------------------------------------------//
@@ -842,8 +1032,6 @@ sap.ui.controller("pages.staging.Device", {
     
     },
     
-    
-    
     GetDeviceIOTotaledValue: function ( aTask ) {
         //------------------------------------------------------------------------------------//
         //-- NOTE:    This is a special workaround for when the Device doesn't have the        --//
@@ -853,20 +1041,20 @@ sap.ui.controller("pages.staging.Device", {
         //--------------------------------------------------------//
         //-- 1.0 - Initialise                                    --//
         //--------------------------------------------------------//
-        var oController            = this;
+        var oController      = this;
         var iIOId            = 0;            //-- INTEGER:        The IO Id to poll the Data for                                         --//
-        var sIOLabel        = "";            //-- STRING:        This will hold the nickname of which odata url to poll for data            --//
-        var sIOUoMName        = "";
-        var iUTS_Start            = 0;            //-- INTEGER:        Used to hold the current period's starting Unix Timestamp                --//
-        var iUTS_End            = 0;            //-- INTEGER:        Used to hold the current period's ending Unix Timestamp                    --//
+        var sIOLabel         = "";           //-- STRING:        This will hold the nickname of which odata url to poll for data         --//
+        var sIOUoMName       = "";           //-- STRING:                                                                                --//
+        var iUTS_Start       = 0;            //-- INTEGER:        Used to hold the current period's starting Unix Timestamp              --//
+        var iUTS_End         = 0;            //-- INTEGER:        Used to hold the current period's ending Unix Timestamp                --//
         
         //--------------------------------------------------------//
         //-- 2.0 - Check if Ajax Request should be run            --//
         //--------------------------------------------------------//
         try {
             iIOId            = aTask.Data.IOId;
-            sIOLabel        = aTask.Data.LabelId;
-            sIOUoMName        = aTask.Data.IOUoMName;
+            sIOLabel         = aTask.Data.LabelId;
+            sIOUoMName       = aTask.Data.IOUoMName;
         } catch( e1000 ) {
             jQuery.sap.log.error("Error: Extracting Task data!"); 
         }
@@ -874,7 +1062,7 @@ sap.ui.controller("pages.staging.Device", {
         //--------------------------------------------------------//
         //-- 3.0 - Prepare for Ajax Request                        --//
         //--------------------------------------------------------//
-        iUTS_Start                = IomyRe.common.GetStartOfCurrentPeriod();
+        iUTS_Start              = IomyRe.common.GetStartOfCurrentPeriod();
         iUTS_End                = IomyRe.common.GetEndOfCurrentPeriod();
         
         //--------------------------------------------------------//
@@ -927,7 +1115,7 @@ sap.ui.controller("pages.staging.Device", {
                                         oUI5Object.setNumberUnit( sIOUoMName );
                                     }
                                 } else {
-                                    console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel)
+                                    console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel);
                                 }
                                 
                                 

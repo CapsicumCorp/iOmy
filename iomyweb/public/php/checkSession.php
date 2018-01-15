@@ -47,111 +47,122 @@ $aReturn        = array();      //-- ARRAY:     Used to return the results to th
 $bFailedLogin   = false;        //-- BOOLEAN:   Used to indicate if a login attempt failed --//
 
 
-
-if( isset( $Config ) ) {
-	//----------------------------------------------------------------//
-	//-- Create the Object                                          --//
-	//----------------------------------------------------------------//
-	$oRestrictedApiCore = new RestrictedAPICore( $Config );
-	
-	//----------------------------------------------------------------//
-	//-- 
-	//----------------------------------------------------------------//
-	
-	//-- Check if the User attempted to login to the database --// 
-	if( isset($_POST['AttemptLogin']) && $_POST['AttemptLogin']==true ) {
-		if( $oRestrictedApiCore->bLoginResult===false ) {
-			//-- Flag that the Login failed --//
-			$bFailedLogin = true;
-			
-			if( $oRestrictedApiCore->bDebugging===true ) {
-				//-- Prepare the array with the data to be returned --//
-				$aReturn = array( 
-					"login"=>false,
-					"ErrCode"=>"0001",
-					"ErrMesg"=>$oRestrictedApiCore->sDebugMessage
-				);
-			} else {
-				//-- Prepare the array with the data to be returned --//
-				$aReturn = array( 
-					"login"=>false,
-					"ErrCode"=>"0001",
-					"ErrMesg"=>"Login attempt was unsuccessful!"
-				);
+try {
+	if( isset( $Config ) ) {
+		//----------------------------------------------------------------//
+		//-- Create the Object                                          --//
+		//----------------------------------------------------------------//
+		$oRestrictedApiCore = new RestrictedAPICore( $Config );
+		
+		//----------------------------------------------------------------//
+		//-- 
+		//----------------------------------------------------------------//
+		
+		//-- Check if the User attempted to login to the database --// 
+		if( isset($_POST['AttemptLogin']) && $_POST['AttemptLogin']==true ) {
+			if( $oRestrictedApiCore->bLoginResult===false ) {
+				//-- Flag that the Login failed --//
+				$bFailedLogin = true;
+				
+				if( $oRestrictedApiCore->bDebugging===true ) {
+					//-- Prepare the array with the data to be returned --//
+					$aReturn = array( 
+						"login"=>false,
+						"ErrCode"=>"0001",
+						"ErrMesg"=>$oRestrictedApiCore->sDebugMessage
+					);
+				} else {
+					//-- Prepare the array with the data to be returned --//
+					$aReturn = array( 
+						"login"=>false,
+						"ErrCode"=>"0001",
+						"ErrMesg"=>"Login attempt was unsuccessful!"
+					);
+				}
 			}
 		}
-	}
-	
-	//----------------------------------------------------------------//
-	//-- IF The user hasn't attempted to login                      --//
-	//----------------------------------------------------------------//
-	
-	//-- IF	a failed login attempt hasn't occurred --//
-	if( $bFailedLogin===false ) {
-		//-- IF	the user has access to the restricted database --//
-		if( $oRestrictedApiCore->bRestrictedDB===true ) {
 		
-			$aResult = GetCurrentUserDetails();
+		//----------------------------------------------------------------//
+		//-- IF The user hasn't attempted to login                      --//
+		//----------------------------------------------------------------//
+		
+		//-- IF a failed login attempt hasn't occurred --//
+		if( $bFailedLogin===false ) {
+			//-- IF	the user has access to the restricted database --//
+			if( $oRestrictedApiCore->bRestrictedDB===true ) {
 			
-			if( $aResult['Error']===false ) {
+				$aResult = GetCurrentUserDetails();
+				
 				//-- Debugging --//
-				//var_dump($oRestrictedDB->QueryLogs);
+				//var_dump( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 				//echo "\n";
 				//var_dump($aResult);
 				//echo "\n";
+					
+				//----------------------------//
+				//-- Check for errors       --//
+				//----------------------------//
+				if( $aResult['Error']===false ) {
+					
+					$aReturn = array( 
+						"login"             => true, 
+						"Username"          => $aResult['Data']['Username'], 
+						"UserId"            => $aResult['Data']['UserId'],
+						"ServerDBVer"       => $oRestrictedApiCore->CheckDBVersion(),
+						"ServerDemoMode"    => $oRestrictedApiCore->CheckIfDemoMode()
+					);
+					
+				} else {
+					//-- An Error occurred so return false --//
+					$aReturn = array( 
+						"login"=>false,
+						"ErrCode"=>"0002",
+						"ErrMesg"=>"Cannot access the User's Data!\nPlease check with the database administrator(s) to see if they have setup your account properly."
+					);
+				}
 				
-				$aReturn = array( 
-					"login"             => true, 
-					"Username"          => $aResult['Data']['Username'], 
-					"UserId"            => $aResult['Data']['UserId'],
-					"ServerDBVer"       => $oRestrictedApiCore->CheckDBVersion(),
-					"ServerDemoMode"    => $oRestrictedApiCore->CheckIfDemoMode()
-				);
-				
+			//-- ELSE	The user doesn't have access to the restricted database --//
 			} else {
-				//-- An Error occurred so return false --//
-				$aReturn = array( 
-					"login"=>false,
-					"ErrCode"=>"0002",
-					"ErrMesg"=>"Cannot access the User's Data!\nPlease check with the database administrator(s) to see if they have setup your account properly."
-				);
-			}
-			
-		//-- ELSE	The user doesn't have access to the restricted database --//
-		} else {
-			//-- No connection to the Restricted Database --//
-			if( $oRestrictedApiCore->bDebugging===true ) {
-				//-- Prepare the array with the data to be returned --//
-				$aReturn = array( 
-					"login"=>false,
-					"ErrCode"=>"0000",
-					"ErrMesg"=>$oRestrictedApiCore->sDebugMessage
-				);
-			} else {
-				//-- Prepare the array with the data to be returned --//
-				$aReturn = array( 
-					"login"=>false, 
-					"ErrCode"=>"0000",
-					"ErrMesg"=>"User is not logged in!"
-				);
+				//-- No connection to the Restricted Database --//
+				if( $oRestrictedApiCore->bDebugging===true ) {
+					//-- Prepare the array with the data to be returned --//
+					$aReturn = array( 
+						"login"=>false,
+						"ErrCode"=>"0000",
+						"ErrMesg"=>$oRestrictedApiCore->sDebugMessage
+					);
+				} else {
+					//-- Prepare the array with the data to be returned --//
+					$aReturn = array( 
+						"login"=>false, 
+						"ErrCode"=>"0000",
+						"ErrMesg"=>"User is not logged in!"
+					);
+				}
 			}
 		}
+		
+	} else {
+		//----------------------------------------------------------------//
+		//-- THE SYSTEM IS NOT SETUP                                    --//
+		//----------------------------------------------------------------//
+		$aReturn = array( 
+			"login"=>false, 
+			"ErrCode"=>"0003",
+			"ErrMesg"=>"Server is not deployed!"
+		);
+		
+		
+		
 	}
-	
-} else {
-	
-	//----------------------------------------------------------------//
-	//-- THE SYSTEM IS NOT SETUP                                    --//
-	//----------------------------------------------------------------//
-	$aReturn = array( 
-		"login"=>false, 
-		"ErrCode"=>"0003",
-		"ErrMesg"=>"Server is not deployed!"
+} catch( Exception $e01 ) {
+	$aReturn = array (
+		"login"   =>false, 
+		"ErrCode" =>"0004",
+		"ErrMesg" =>"Critical System Error: "+$e01->getMessage()
 	);
-	
-	
-	
 }
+
 
 //========================================================================================================//
 //== #2.0# - Check if the User is logged in                                                             ==//

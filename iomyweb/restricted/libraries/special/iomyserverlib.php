@@ -1629,6 +1629,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`USERS_PK`, \n";
 			$sSQL .= "	`USERS_STATE`, \n";
 			$sSQL .= "	`USERS_USERNAME`, \n";
+			$sSQL .= "	`PERMSERVER_ADDUSER`, \n";
 			$sSQL .= "	`USERADDRESS_PK`, \n";
 			$sSQL .= "	`USERADDRESS_LINE3`, \n";
 			$sSQL .= "	`USERADDRESS_LINE2`, \n";
@@ -1657,6 +1658,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`USERSGENDER_PK`, \n";
 			$sSQL .= "	`USERSGENDER_NAME` \n";
 			$sSQL .= "FROM `".$sDBName."`.`USERS` \n";
+			$sSQL .= "LEFT JOIN `".$sDBName."`.`PERMSERVER` ON `USERS_PK` = `PERMSERVER_USERS_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`USERADDRESS` ON `USERS_PK`=`USERADDRESS_USERS_FK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`LANGUAGE` ON `USERADDRESS_LANGUAGE_FK`=`LANGUAGE_PK` \n";
 			$sSQL .= "LEFT JOIN `".$sDBName."`.`REGION` ON `USERADDRESS_REGION_FK`=`REGION_PK` \n";
@@ -6676,7 +6678,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 3.1 - Perform the insert                       --//
 		//----------------------------------------------------//
-		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 9, $iCurrentUTS );
+		$aCoreResult = DB_InsertCore( $sDBName, "iOmy (Vanilla)", 0, 4, 11, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 3.2 - Check for errors                         --//
@@ -6701,7 +6703,7 @@ function InsertTheDatabaseCoreValues( $sDBName ) {
 		//----------------------------------------------------//
 		//-- 4.1 - Insert the Schema Name into the database --//
 		//----------------------------------------------------//
-		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 9, $iCurrentUTS );
+		$aCoreAddonResult = DB_InsertCoreAddon( $sDBName, $iCoreId, "iOmy Schema", 0, 4, 11, $iCurrentUTS );
 		
 		//----------------------------------------------------//
 		//-- 4.2 - Check for errors                         --//

@@ -115,7 +115,7 @@ sap.ui.controller("pages.staging.graphs.LineGraph", {
 			url:       IomyRe.apiphp.APILocation("graph"),
 			data:      {
 				"Mode": "GraphLine",
-				"Data": "{\"Type\":\"NormalAvg\",\"IOId\":"+oController.iIOId+"}",
+				"Data": "{\"Type\":\"Normal\",\"IOId\":"+oController.iIOId+"}",
 				"StartUTS": iStartUTS,
 				"EndUTS":   iEndUTS,
 				"Points":   100
@@ -126,7 +126,7 @@ sap.ui.controller("pages.staging.graphs.LineGraph", {
 					oController.Graph_Data = [];
 					
 					$.each( aData.Data,function(index, aLineData) {
-						oController.Graph_Data.push( [aLineData.LastTimestamp, aLineData.Value]);
+						oController.Graph_Data.push( [aLineData.Timestamp, aLineData.Value]);
 					});
 					
 					//----------------------------//

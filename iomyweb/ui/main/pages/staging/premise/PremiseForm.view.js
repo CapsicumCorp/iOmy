@@ -95,15 +95,14 @@ sap.ui.jsview("pages.staging.premise.PremiseForm", {
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowInfo" );
+                                                            oController.SubmitPremiseInformation();
 														}
 													}),
 													new sap.m.Button( oView.createId("InfoBlock_BtnCancel"), {
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
+															oController.RefreshModel();
 															oController.ToggleButtonsAndView( oController, "ShowInfo" );
 														}
 													})
@@ -158,16 +157,20 @@ sap.ui.jsview("pages.staging.premise.PremiseForm", {
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.UpdateValues( oController );
-															oController.ToggleButtonsAndView( oController, "ShowAddress" );
+															oController.SubmitPremiseAddress();
 														}
 													}),
 													new sap.m.Button( oView.createId("AddrBlock_BtnCancel"), {
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
-															//oController.RefreshModel( oController, {} );
-															oController.ToggleButtonsAndView( oController, "ShowAddress" );
+                                                            oController.TogglePremiseAddressControls(false);
+                                                            
+															oController.loadLocaleInfo({
+                                                                onComplete : function () {
+                                                                    oController.ToggleButtonsAndView( oController, "ShowAddress" );
+                                                                }
+                                                            });
 														}
 													})
 												]
@@ -177,12 +180,12 @@ sap.ui.jsview("pages.staging.premise.PremiseForm", {
 											]
 										})
 									]									
-								}),
+								})
 							]
 						})
 					]
 				}).addStyleClass("")
 			]
-		}).addStyleClass("MainBackground")
+		}).addStyleClass("MainBackground");
 	}
 });

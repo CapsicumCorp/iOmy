@@ -658,6 +658,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 			$VR_USERSINFO->USERS_PK                         = $record['USERS_PK'];
 			$VR_USERSINFO->USERS_STATE                      = $record['USERS_STATE'];
 			$VR_USERSINFO->USERS_USERNAME                   = $record['USERS_USERNAME'];
+			$VR_USERSINFO->PERMSERVER_ADDUSER               = $record['PERMSERVER_ADDUSER'];
 			$VR_USERSINFO->USERADDRESS_PK                   = $record['USERADDRESS_PK'];
 			$VR_USERSINFO->USERADDRESS_LINE3                = $record['USERADDRESS_LINE3'];
 			$VR_USERSINFO->USERADDRESS_LINE2                = $record['USERADDRESS_LINE2'];

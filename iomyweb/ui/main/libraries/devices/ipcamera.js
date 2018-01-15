@@ -47,10 +47,8 @@ $.extend(IomyRe.devices.ipcamera,{
     LinkTypeId          : 14,
     ThingTypeId         : 18,
     
-    DevicePageID : "pDeviceMPEGStream",
-    
     loadCameraInformation : function(mSettings) {
-        var me                = this;
+        var oModule           = this;
         var bError            = false;
         var aErrorMessages    = [];
         var iNetAddrIO        = 0;
@@ -59,48 +57,24 @@ $.extend(IomyRe.devices.ipcamera,{
         var iPasswordIO       = 0;
         var iPathIO           = 0;
         var iProtocolIO       = 0;
+        var mData             = {
+            address     : "",
+            port        : "",
+            protocol    : "",
+            username    : "",
+            password    : "",
+            path        : ""
+        };
         var iThingId;
         var sUrl;
         var mThingIdInfo;
         var mThing;
         var fnSuccess;
+        var fnWarning;
         var fnFail;
         
         //-- Variables to handle the concurrent calls to the OData service. --//
         var aConfigs        = [];
-        var fnUpdateCounter = function () {
-            me.ODataCallsToMake--;
-            if (me.ODataCallsToMake === 0) {
-                var mThing                    = IomyRe.common.ThingList["_"+iThingId];
-                var bAuthenticationRequired   = false;
-                var mData        = {
-                    Hub        : IomyRe.functions.getHubConnectedToThing(mThing.Id).HubId
-                };
-                
-                //------------------------------------------------------------//
-                // Begin gathering connection data.
-                //------------------------------------------------------------//
-                if ( (me.urlUsername !== undefined && me.urlUsername !== null) &&
-                     (me.urlPassword !== undefined && me.urlPassword !== null) )
-                {
-                    bAuthenticationRequired = true;
-                }
-                
-                me.runningODataCalls = false;
-                me.ODataCallsToMake = 6;
-                
-                mData.Protocol                    = me.urlProtocol;
-                mData.Address                     = me.urlAddress;
-                mData.Port                        = me.urlPort;
-                mData.Path                        = me.urlPath;
-                mData.Username                    = me.urlUsername;
-                mData.Password                    = me.urlPassword;
-                mData.AuthenticationRequired      = bAuthenticationRequired;
-                
-                //-- Run the success callback with the connection settings. --//
-                fnSuccess(mData);
-            }
-        };
         
         //--------------------------------------------------------------------//
         // Check that all the parameters are there
@@ -110,8 +84,8 @@ $.extend(IomyRe.devices.ipcamera,{
             // REQUIRED: Find the hub ID
             //----------------------------------------------------------------//
             mThingIdInfo    = IomyRe.validation.isThingIDValid(mSettings.thingID);
-            bError            = !mThingIdInfo.bIsValid;
-            aErrorMessages    = mThingIdInfo.aErrorMessages;
+            bError          = !mThingIdInfo.bIsValid;
+            aErrorMessages  = mThingIdInfo.aErrorMessages;
             
             //----------------------------------------------------------------//
             // Check for errors and throw an exception if there are errors.
@@ -132,6 +106,15 @@ $.extend(IomyRe.devices.ipcamera,{
             }
             
             //----------------------------------------------------------------//
+            // OPTIONAL: Find the onWarning callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onWarning === undefined) {
+                fnWarning = function () {};
+            } else {
+                fnWarning = mSettings.onWarning;
+            }
+            
+            //----------------------------------------------------------------//
             // OPTIONAL: Find the onFail callback function
             //----------------------------------------------------------------//
             if (mSettings.onFail === undefined) {
@@ -141,7 +124,7 @@ $.extend(IomyRe.devices.ipcamera,{
             }
             
         } else {
-            throw new MissingSettingsMapException();
+            throw new MissingSettingsMapException("Thing ID is required.");
         }
         
         //--------------------------------------------------------------------//
@@ -151,32 +134,62 @@ $.extend(IomyRe.devices.ipcamera,{
             throw new ThingIDNotValidException(aErrorMessages.join("\n"));
         }
         
-        //--------------------------------------------------------------------//
-        // Fetch the IO for the stream URL
-        //--------------------------------------------------------------------//
-        mThing = IomyRe.common.ThingList["_"+iThingId];
-        
-        $.each(mThing.IO, function (sIndex, mIO) {
-            //----------------------------------------------------------------//
-            // Get the correct IOs
-            //----------------------------------------------------------------//
-            if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
-                if (mIO.RSTypeId === me.RSNetworkAddress) {
-                    iNetAddrIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSNetworkPort) {
-                    iNetPortIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSUsername) {
-                    iUsernameIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSPassword) {
-                    iPasswordIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSPath) {
-                    iPathIO = mIO.Id;
-                } else if (mIO.RSTypeId === me.RSProtocol) {
-                    iProtocolIO = mIO.Id;
+        try {
+            //-- Put the hub ID into the data. --//
+            mData.hubID = IomyRe.functions.getHubConnectedToThing(iThingId).HubId;
+
+            var oAjaxRequestQueue = new AjaxRequestQueue({
+                executeNow              : false,
+                concurrentRequests      : 4,
+
+                onSuccess : function () {
+                    if (aErrorMessages.length > 0) {
+                        fnWarning(mData, aErrorMessages.join("\n\n"));
+                    } else {
+                        fnSuccess(mData);
+                    }
+                },
+
+                onWarning : function () {
+                    fnWarning(mData, aErrorMessages.join("\n\n"));
+                },
+
+                onFail : function () {
+                    fnFail(aErrorMessages.join("\n\n"));
                 }
-            }
-            
-        });
+            });
+
+            //--------------------------------------------------------------------//
+            // Fetch the IO for the stream URL
+            //--------------------------------------------------------------------//
+            mThing = IomyRe.common.ThingList["_"+iThingId];
+
+            $.each(mThing.IO, function (sIndex, mIO) {
+                //----------------------------------------------------------------//
+                // Get the correct IOs
+                //----------------------------------------------------------------//
+                if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
+                    if (mIO.RSTypeId === oModule.RSNetworkAddress) {
+                        iNetAddrIO = mIO.Id;
+                    } else if (mIO.RSTypeId === oModule.RSNetworkPort) {
+                        iNetPortIO = mIO.Id;
+                    } else if (mIO.RSTypeId === oModule.RSUsername) {
+                        iUsernameIO = mIO.Id;
+                    } else if (mIO.RSTypeId === oModule.RSPassword) {
+                        iPasswordIO = mIO.Id;
+                    } else if (mIO.RSTypeId === oModule.RSPath) {
+                        iPathIO = mIO.Id;
+                    } else if (mIO.RSTypeId === oModule.RSProtocol) {
+                        iProtocolIO = mIO.Id;
+                    }
+                }
+
+            });
+        } catch (e) {
+            var sExMesg = "Failed to fetch the IOs required to load data ("+e.name+"): " + e.message;
+            $.sap.log.error(sExMesg);
+            fnFail(sExMesg);
+        }
         
         //--------------------------------------------------------------------//
         // If any of the IOs are missing, then this is not a valid IP camera.
@@ -184,96 +197,88 @@ $.extend(IomyRe.devices.ipcamera,{
         if (iNetAddrIO === 0 || iNetPortIO === 0 || iUsernameIO === 0 ||
             iPasswordIO === 0 || iPathIO === 0 || iProtocolIO === 0)
         {
-            throw new StreamURLNotFoundException();
+            throw new iOmyException("This device (ID: "+iThingId+") is not a valid IP Webcam stream.");
         }
         
-        //--------------------------------------------------------------------//
-        // Run a request to fetch the URL
-        //--------------------------------------------------------------------//
-        sUrl = IomyRe.apiodata.ODataLocation("datashortstring");
-        
-        aConfigs = [
-            
-            {
-                "ID" : iNetAddrIO,
-                "onSuccess" : function (response, data) {
-                    me.urlAddress = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
+        try {
+            //--------------------------------------------------------------------//
+            // Prepare the requests.
+            //--------------------------------------------------------------------//
+            sUrl = IomyRe.apiodata.ODataLocation("datashortstring");
+
+            aConfigs = [
+                {
+                    "ID" : iNetAddrIO,
+                    "onSuccess" : function (response, data) {
+                        mData.address = data[0].CALCEDVALUE;
+                    }
+                },
+                {
+                    "ID" : iNetPortIO,
+                    "onSuccess" : function (response, data) {
+                        mData.port = data[0].CALCEDVALUE;
+                    }
+                },
+                {
+                    "ID" : iProtocolIO,
+                    "onSuccess" : function (response, data) {
+                        mData.protocol = data[0].CALCEDVALUE;
+                    }
+                },
+                {
+                    "ID" : iPathIO,
+                    "onSuccess" : function (response, data) {
+                        mData.path = data[0].CALCEDVALUE;
+                    }
+                },
+                {
+                    "ID" : iUsernameIO,
+                    "onSuccess" : function (response, data) {
+                        mData.username = data[0].CALCEDVALUE;
+                    }
+                },
+                {
+                    "ID" : iPasswordIO,
+                    "onSuccess" : function (response, data) {
+                        mData.password = data[0].CALCEDVALUE;
+                    }
                 }
-            },
-            {
-                "ID" : iNetPortIO,
-                "onSuccess" : function (response, data) {
-                    me.urlPort = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
-                }
-            },
-            {
-                "ID" : iProtocolIO,
-                "onSuccess" : function (response, data) {
-                    me.urlProtocol = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
-                }
-            },
-            {
-                "ID" : iPathIO,
-                "onSuccess" : function (response, data) {
-                    me.urlPath = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
-                }
-            },
-            {
-                "ID" : iUsernameIO,
-                "onSuccess" : function (response, data) {
-                    me.urlUsername = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
-                }
-            },
-            {
-                "ID" : iPasswordIO,
-                "onSuccess" : function (response, data) {
-                    me.urlPassword = data[0].CALCEDVALUE;
-                    
-                    //-- Update the remaining call count --//
-                    fnUpdateCounter();
-                }
+
+            ];
+
+            //--------------------------------------------------------------------//
+            // Compile the list of requests
+            //--------------------------------------------------------------------//
+            for (var i = 0; i < aConfigs.length; i++) {
+                oAjaxRequestQueue.addRequest({
+                    library          : "odata",
+                    Url              : sUrl,
+                    Columns          : ["CALCEDVALUE"],
+                    WhereClause      : ["IO_PK eq " + aConfigs[i].ID],
+                    OrderByClause    : ["UTS desc"],
+                    Limit            : 1,
+
+                    onSuccess : aConfigs[i].onSuccess,
+
+                    onFail : function (response) {
+                        fnFail(response);
+                    }
+                });
             }
-            
-        ];
-        
-        me.runningODataCalls = true;
-        
-        for (var i = 0; i < aConfigs.length; i++) {
-            IomyRe.apiodata.AjaxRequest({
-                Url              : sUrl,
-                Columns          : ["CALCEDVALUE"],
-                WhereClause      : ["IO_PK eq " + aConfigs[i].ID],
-                OrderByClause    : ["UTS desc"],
-                Limit            : 1,
 
-                onSuccess : aConfigs[i].onSuccess,
-
-                onFail : function (response) {
-                    fnFail(response);
-                }
-            });
+            //--------------------------------------------------------------------//
+            // Run them
+            //--------------------------------------------------------------------//
+            oAjaxRequestQueue.execute();
+        } catch (e) {
+            $.sap.log.error("Error attempting to load camera information ("+e.name+"): " + e.message);
         }
     },
     
     /**
      * Loads the URL of the stream and parses it to the motion JPEG page.
      * 
-     * @param {type} iThingId            ID of the camera to load the stream for.
+     * @param {type} mSettings           Parameters (one of which should be thingID).
      */
     loadStreamUrl : function (mSettings) {
         var bError                    = false;
@@ -282,6 +287,8 @@ $.extend(IomyRe.devices.ipcamera,{
         var mThingIDInfo;
         var fnSuccess;
         var fnFail;
+        
+        var sThingIDMissing = "Thing ID (thingID) must be specified!";
         
         // Lambda function to run if there are errors.
         var fnAppendError   = function (sErrMesg) {
@@ -306,7 +313,7 @@ $.extend(IomyRe.devices.ipcamera,{
                     iThingId = mSettings.thingID;
                 }
             } else {
-                fnAppendError("Thing ID (thingID) must be specified!");
+                fnAppendError(sThingIDMissing);
             }
             
             //----------------------------------------------------------------//
@@ -327,36 +334,47 @@ $.extend(IomyRe.devices.ipcamera,{
                 fnFail = mSettings.onFail;
             }
             
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join('\n\n'));
+            }
+            
         } else {
-            throw new MissingSettingsMapException();
+            fnAppendError(sThingIDMissing);
+            throw new MissingSettingsMapException(aErrorMessages.join('\n\n'));
         }
         
-        //--------------------------------------------------------------------//
-        // Attempt to load the URL and parse it to the MJPEG page and report
-        // any errors.
-        //--------------------------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest({
-            url         : IomyRe.apiphp.APILocation("ipcamera"),
-            type        : "POST",
-            data        : "Mode=FetchStreamUrl&ThingId="+iThingId,
+        try {
+            //--------------------------------------------------------------------//
+            // Attempt to load the URL and parse it to the MJPEG page and report
+            // any errors.
+            //--------------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest({
+                url         : IomyRe.apiphp.APILocation("ipcamera"),
+                type        : "POST",
+                data        : "Mode=FetchStreamUrl&ThingId="+iThingId,
 
-            onSuccess : function(responseType, data) {
-                try {
-                    if (data.Error === false) {
-                        fnSuccess(data.Data.sUrl);
-                    } else {
-                        fnFail(data.ErrMesg);
+                onSuccess : function(responseType, data) {
+                    try {
+                        if (data.Error === false) {
+                            fnSuccess(data.Data.sUrl);
+                        } else {
+                            fnFail(data.ErrMesg);
+                        }
+                    } catch (ex) {
+                        fnFail(ex.message);
                     }
-                } catch (ex) {
-                    fnFail(ex.message);
-                }
-                
-            },
 
-            onFail : function (response) {
-                fnFail(response.responseText);
-            }
-        });
+                },
+
+                onFail : function (response) {
+                    fnFail(response.responseText);
+                }
+            });
+        } catch (e) {
+            var sExMesg = "Error fetching stream URL ("+e.name+"): " + e.message;
+            $.sap.log.error(sExMesg);
+            fnFail(sExMesg);
+        }
     },
     
     /**
@@ -375,12 +393,13 @@ $.extend(IomyRe.devices.ipcamera,{
         //--------------------------------------------------------------------//
         // Variables
         //--------------------------------------------------------------------//
-        var me                           = this;
+        //var oModule                      = this;
         var bError                       = false;
         var aErrorMessages               = [];
         var sMode                        = "";
-        var sAPIDataString               = "";
+        var mAPIDataString               = {};
         var iThingId;
+        var iLinkName;
         var bEditing;
         var sFileType;
         var iHubId;
@@ -395,6 +414,11 @@ $.extend(IomyRe.devices.ipcamera,{
         var mThingIdResult;
         var fnSuccess;
         var fnFail;
+        
+        var sFileTypeMissing            = "File type must be specified.";
+        var sHubIDMissing               = "Hub ID must be specified.";
+        var sIPAddressMissing           = "IP Address must be specified!";
+        var sPathMissing                = "Path to the stream must be specified.";
         
         var fnAppendError = function (sMessage) {
             bError = true;
@@ -413,21 +437,21 @@ $.extend(IomyRe.devices.ipcamera,{
             
             //-- File Type --//
             if (mSettings.fileType === "" || mSettings.fileType === undefined || mSettings.fileType === null) {
-                fnAppendError("File type must be specified.");
+                fnAppendError(sFileTypeMissing);
             } else {
                 sFileType = mSettings.fileType;
             }
             
             //-- Hub ID --//
             if (mSettings.hubID === "" || mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError("Hub ID must be specified.");
+                fnAppendError(sHubIDMissing);
             } else {
                 iHubId = mSettings.hubID;
             }
 
             //-- Check IP Address --//
             if (mSettings.ipAddress === "" || mSettings.ipAddress === null || mSettings.ipAddress === undefined) {
-                fnAppendError("IP Address must be specified!");
+                fnAppendError(sIPAddressMissing);
             } else {
                 //-- Verify that the IP address format is correct. --//
                 try {
@@ -448,7 +472,7 @@ $.extend(IomyRe.devices.ipcamera,{
 
             //-- Stream Path --//
             if (mSettings.streamPath === "" || mSettings.streamPath === undefined || mSettings.streamPath === null) {
-                fnAppendError("Path to the stream must be specified.");
+                fnAppendError(sPathMissing);
             } else {
                 sStreamPath = mSettings.streamPath;
             }
@@ -467,7 +491,7 @@ $.extend(IomyRe.devices.ipcamera,{
     //                fnAppendError("Password must be given.");
     //            }
     //            
-    //            if (me.CheckAuthenticationFieldsForSpaces() === true) {
+    //            if (oModule.CheckAuthenticationFieldsForSpaces() === true) {
     //                fnAppendError("Neither the username nor the password can contain spaces.");
     //            }
     //        }
@@ -530,99 +554,174 @@ $.extend(IomyRe.devices.ipcamera,{
                 throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
             }
         } else {
-            throw new MissingSettingsMapException("No settings were provided. The file type, hub ID, IP address, port and video path are required. Device ID is also required if editing. (BUG IF YOU SEE THIS!)");
+            fnAppendError(sFileTypeMissing);
+            fnAppendError(sHubIDMissing);
+            fnAppendError(sIPAddressMissing);
+            fnAppendError(sPathMissing);
+            
+            throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
+        
+        var mThing  = IomyRe.common.ThingList["_"+iThingId];
+        iLinkName   = IomyRe.common.LinkList["_"+mThing.LinkId].LinkName;
         
         //----------------------------------------------------------------//
         // Prepare the 'Data' parameter string.
         //----------------------------------------------------------------//
         if (bEditing) {
-            sMode = "Mode=EditIPCamera&ThingId="+iThingId;
+            mAPIDataString.Mode = "EditIPCamera";
+            mAPIDataString.ThingId = iThingId;
+            //sMode = "Mode=EditIPCamera&ThingId="+iThingId;
         } else {
-            sMode = "Mode=AddNewIPCamera";
+            mAPIDataString.Mode = "AddNewIPCamera";
+            //sMode = "Mode=AddNewIPCamera";
         }
 
-        sAPIDataString += sMode+"&IPCamType="+sFileType+"&HubId="+iHubId;
-        sAPIDataString += "&Data={\"NetworkAddress\":\""+sIPAddress+"\",\"NetworkPort\":\""+sIPPort+"\",\"Protocol\":\""+sProtocol+"\",\"Path\":\""+sStreamPath+"\"";
+//        mAPIDataString += sMode+"&IPCamType="+sFileType+"&HubId="+iHubId;
+//        mAPIDataString += "&Data={\"NetworkAddress\":\""+sIPAddress+"\",\"NetworkPort\":\""+sIPPort+"\",\"Protocol\":\""+sProtocol+"\",\"Path\":\""+sStreamPath+"\"";
 
 //            if (bAuthenticationRequired) {
-//                sAPIDataString += ",\"Username\":\""+sUsername+"\",\"Password\":\""+sPassword+"\"";
+//                mAPIDataString += ",\"Username\":\""+sUsername+"\",\"Password\":\""+sPassword+"\"";
 //            }
-        sAPIDataString += "}";
-
-        //----------------------------------------------------------------//
-        // Run the request
-        //----------------------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest({
-            "url"        : IomyRe.apiphp.APILocation("ipcamera"),
-            "type"        : "POST",
-            "data"        : sAPIDataString,
-
-            "onSuccess"    : function (responseType, data) {
-                try {
-                    if (data.Error === true) {
-                        fnFail(data.ErrMesg);
-
-                    } else {
-                        fnSuccess(data);
-
-                    }
-                } catch (ex) {
-                    fnFail(ex.message);
-                }
-            },
-
-            "onFail"    : function (error) {
-                fnFail(error.responseText);
-            }
+//        mAPIDataString += "}";
+        
+        mAPIDataString.IPCamType = sFileType;
+        mAPIDataString.HubId = iHubId;
+        mAPIDataString.Data = JSON.stringify({
+            NetworkAddress  : sIPAddress,
+            NetworkPort     : sIPPort,
+            Protocol        : sProtocol,
+            Path            : sStreamPath,
+            LinkName        : iLinkName,
+            DisplayName     : mThing.DisplayName
         });
+        
+//            if (bAuthenticationRequired) {
+//                mAPIDataString.Username = sUsername;
+//                mAPIDataString.Password = sPassword;
+//            }
+
+        try {
+            //----------------------------------------------------------------//
+            // Run the request
+            //----------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest({
+                "url"        : IomyRe.apiphp.APILocation("ipcamera"),
+                "type"        : "POST",
+                "data"        : mAPIDataString,
+
+                "onSuccess"    : function (responseType, data) {
+                    try {
+                        if (data.Error === true) {
+                            fnFail(data.ErrMesg);
+
+                        } else {
+                            fnSuccess(data);
+
+                        }
+                    } catch (ex) {
+                        fnFail(ex.message);
+                    }
+                },
+
+                "onFail"    : function (error) {
+                    fnFail(error.responseText);
+                }
+            });
+            
+        } catch (e) {
+            var sExMesg = "Error attempting to submit IP Webcam information ("+e.name+"): " + e.message;
+            $.sap.log.error(sExMesg);
+            fnFail(sExMesg);
+        }
     },
     
     showSnapshot : function (iThingId, oCallingButton) {
-        var me = this;
-        var oRPopover = new sap.m.ResponsivePopover({
-            title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
-        });
-        
-        var fnShowUnavailable = function () {
-            oRPopover.addContent(
-                new sap.m.VBox({
-                    items : [
-                        new sap.m.Text({
-                            text : "Snapshot not available",
-                            textAlign : sap.ui.core.TextAlign.Center
-                        }).addStyleClass("width100Percent TextBold MarTop20px")
-                    ]
-                })
-            );
-        };
-        
-        me.loadStreamUrl({
-            thingID : iThingId,
-            onSuccess : function (sUrl) {
+        try {
+            var oModule = this;
+            var oRPopover = new sap.m.ResponsivePopover({
+                title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
+            });
+
+            var fnShowUnavailable = function () {
                 oRPopover.addContent(
-                    new sap.m.Image({
-                        densityAware : false,
-                        alt : "Failed to acquire snapshot",
-                        src : sUrl,
-                        width: "100%",
-
-                        error : function () {
-                            this.destroy();
-
-                            fnShowUnavailable();
-                        }
+                    new sap.m.VBox({
+                        items : [
+                            new sap.m.Text({
+                                text : "Snapshot not available",
+                                textAlign : sap.ui.core.TextAlign.Center
+                            }).addStyleClass("width100Percent TextBold MarTop20px")
+                        ]
                     })
                 );
+            };
 
-            },
+            oModule.loadStreamUrl({
+                thingID : iThingId,
+                onSuccess : function (sUrl) {
+                    oRPopover.addContent(
+                        new sap.m.Image({
+                            densityAware : false,
+                            alt : "Failed to acquire snapshot",
+                            src : sUrl,
+                            width: "100%",
+
+                            error : function () {
+                                this.destroy();
+
+                                fnShowUnavailable();
+                            }
+                        })
+                    );
+
+                },
+
+                onFail : function () {
+                    fnShowUnavailable();
+                }
+            });
+
+            oRPopover.openBy(oCallingButton);
             
-            onFail : function () {
-                fnShowUnavailable();
-            }
-        });
+        } catch (e) {
+            var sExMesg = "Error attempting to submit IP Webcam information ("+e.name+"): " + e.message;
+            $.sap.log.error(sExMesg);
+        }
+    },
+    
+    GetUITaskList : function (mSettings) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        //var oModule         = this;
+        var aTasks          = { "High":[], "Low":[] };
         
-        oRPopover.openBy(oCallingButton);
+        try {
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingSettingsMapException("Task data was not given (mSettings).");
+            }
+            
+            aTasks.High.push({
+                "Type":"Function", 
+                "Execute": function () {
+                    try {
+                        IomyRe.devices.pingDevice({
+                            thingID     : mSettings.deviceData.DeviceId,
+                            onComplete  : mSettings.onComplete
+                        });
+                    } catch (e) {
+                        $.sap.log.error("Failed to run IomyRe.devices.pingDevice() ("+e.name+"): " + e.message);
+                        mSettings.onComplete("N/A");
+                    }
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to add an IP Webcam task ("+e.name+"): " + e.message);
+            mSettings.onComplete("N/A");
+            
+        } finally {
+            return aTasks;
+        }
     }
     
 });

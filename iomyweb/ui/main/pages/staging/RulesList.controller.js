@@ -60,9 +60,15 @@ sap.ui.controller("pages.staging.RulesList", {
 		
 	},
     
+    ToggleControls : function (bEnabled) {
+        var oView = this.getView();
+        
+        oView.byId("ButtonAdd").setEnabled(bEnabled);
+        oView.byId("ButtonDiscard").setEnabled(bEnabled);
+    },
+    
     LoadList : function () {
         var oController = this;
-        var oView       = oController.getView();
         
         IomyRe.rules.loadRules({
             hubID : 1,
@@ -72,7 +78,13 @@ sap.ui.controller("pages.staging.RulesList", {
             },
             
             onFail : function (sErrMessage) {
-                
+                jQuery.sap.log.error("Unable to Load the rules list:"+e1.message);
+				 IomyRe.common.showError(sErrMessage, "Error",
+                    function () {
+                        oStatusAttribute.setText( "Unable to load rules" );
+                        oCallingWidget.setEnabled(true);
+                    }
+                );
             }
         });
     },
@@ -82,7 +94,8 @@ sap.ui.controller("pages.staging.RulesList", {
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
 		var oView           = oController.getView();
-        var aaRulesList     = IomyRe.rules.RulesList;
+        var aaRulesList     = JSON.parse(JSON.stringify(IomyRe.rules.RulesList));
+        var aaThingList     = JSON.parse(JSON.stringify(IomyRe.common.ThingList));
         var aRules          = [];
         var mRule;
         var sSerialCode;
@@ -90,31 +103,35 @@ sap.ui.controller("pages.staging.RulesList", {
         //--------------------------------------------------------------------//
 		//-- Create the model-friendly data from the rules list             --//
 		//--------------------------------------------------------------------//
-        $.each(IomyRe.common.ThingList, function (sI, mThing) {
-            
-            if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
-                sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
-                mRule = aaRulesList[sSerialCode];
-                
-                if (mRule !== undefined && mRule !== null) {
-                    aRules.push({
-                        "DeviceId"  : mThing.Id,
-                        "DeviceName": mThing.DisplayName,
-                        "DeviceType": mThing.TypeName,
-                        "EventType" : "On",
-                        "EventTime" : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
-                    });
-
-                    aRules.push({
-                        "DeviceId"  : mThing.Id,
-                        "DeviceName": mThing.DisplayName,
-                        "DeviceType": mThing.TypeName,
-                        "EventType" : "Off",
-                        "EventTime" : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Offtime ), "", true, false)
-                    });
-                }
-            }
-            
+        $.each(aaThingList, function (sI, mThing) {
+			try { 
+				if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+					sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+					mRule = aaRulesList[sSerialCode];
+					
+					if (mRule !== undefined && mRule !== null) {
+						aRules.push({
+							"DeviceId"      : mThing.Id,
+							"DeviceName"    : mThing.DisplayName,
+							"DeviceType"    : mThing.TypeName,
+							"DeviceSerial"  : sSerialCode,
+							"EventType"     : "On",
+							"EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
+						});
+	
+						aRules.push({
+							"DeviceId"      : mThing.Id,
+							"DeviceName"    : mThing.DisplayName,
+							"DeviceType"    : mThing.TypeName,
+							"DeviceSerial"  : sSerialCode,
+							"EventType"     : "Off",
+							"EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Offtime ), "", true, false)
+						});
+					}
+				}
+			} catch (e1) {
+				jQuery.sap.log.error("Error with RefreshModel:"+e1.message); 
+			}
         });
         
 		//------------------------------------------------//
@@ -133,6 +150,172 @@ sap.ui.controller("pages.staging.RulesList", {
 			oConfig.onSuccess();
 		}
 		
-	}
+	},
+    
+    /**
+     * Generates an array of rules that are selected in the table.
+     * 
+     * @returns array           Rules selected in the table
+     */
+    GetSelectedRules : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var oTable              = oView.byId("RulesTable");
+        var aSelectedIndices    = oTable.getSelectedIndices();
+        var aSelectedRules      = [];
+        var aRuleList           = oView.getModel().getProperty("/RulesList");
+        
+        for (var i = 0; i < aSelectedIndices.length; i++) {
+            aSelectedRules.push(aRuleList[aSelectedIndices[i]]);
+        }
+        
+        return aSelectedRules;
+    },
+    
+    DiscardRule : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var aSelectedRules      = oController.GetSelectedRules();
+        
+        var sWarningMessage = "Deleting a rule will remove both the \"On\" and \"Off\" events " +
+            "associated with this device from the table.\n\n" +
+            "Are you sure you wish to discard the selected rule(s)?";
+        
+        // Only run if there are things selected and that the user pressed OK.
+        try {
+            if (aSelectedRules.length > 0) {
+                oController.ToggleControls(false);
+                
+                IomyRe.common.showConfirmQuestion(sWarningMessage, "Discard Rule",
+                    function (oAction) {
+                        if (oAction === sap.m.MessageBox.Action.OK) {
+                            try {
+                                oController.deleteRulesFromList(aSelectedRules);
+                            } catch (error) {
+                                $.sap.log.error(error.name + ": " + error.message);
+                                oController.ToggleControls(true);
+                            }
+                        } else {
+                            oController.ToggleControls(true);
+                        }
+                    }
+                );
+            }
+        } catch (e) {
+            $.sap.log.error(e.name + ": " + e.message);
+        }
+    },
+    
+    /**
+     * Recursive function that deletes a list of selected rules.
+     * 
+     * NOTE: This is a quick and dirty function that will provide functionality
+     * for a release. This will need to be reworked later on to make it neater.
+     * 
+     * @param {type} aList              Selected rules.
+     * @param {type} iSuccesses         Rules successfully deleted (optional)
+     * @param {type} iErrors            Rules that couldn't be removed (optional)
+     * @param {type} aErrors            Error messages.
+     */
+    deleteRulesFromList : function (aList) {
+        var oController     = this;
+        var mRule           = aList[0];
+        var aSerialCodes    = [];
+        var iHubId;
+        
+        for (var i = 0; i < aList.length; i++) {
+            aSerialCodes.push(aList[i].DeviceSerial);
+        }
+        
+        //--------------------------------------------------------------//
+        // Only begin to delete the rule if it exists in the rules list.
+        //--------------------------------------------------------------//
+//         if (IomyRe.rules.RulesList[mRule.DeviceSerial] !== undefined) {
+            //-- Get the hub ID. --//
+            iHubId = IomyRe.functions.getHubConnectedToThing(mRule.DeviceId).HubId;
+            
+            //--------------------------------------------------------------//
+            // Define the function that runs when all of the rules have been
+            // removed.
+            //--------------------------------------------------------------//
+//             var fnComplete = function () {
+//                 if (iSuccesses > 0 && iErrors === 0) {
+//                     IomyRe.common.showMessage({
+//                         text : "Rules successfully removed."
+//                     });
+
+//                     oController.RefreshModel(oController, {});
+//                     oController.ToggleControls(true);
+//                 } else if (iSuccesses > 0 && iErrors > 0) {
+//                     IomyRe.common.showWarning("Some rules could not be removed:\n\n"+aErrors.join("\n\n"), "Warning",
+//                         function () {
+//                             oController.RefreshModel(oController, {});
+//                             oController.ToggleControls(true);
+//                         }
+//                     );
+//                 } else if (iSuccesses === 0 && iErrors > 0) {
+//                     IomyRe.common.showError("Failed to delete the rules:\n\n"+aErrors.join("\n\n"), "Error",
+//                         function () {
+//                             oController.ToggleControls(true);
+//                         }
+//                     );
+//                 }
+//             };
+
+            try {
+                //--------------------------------------------------------------//
+                // Begin deleting the rule(s).
+                //--------------------------------------------------------------//
+                IomyRe.rules.discardRule({
+                    hubID : iHubId,
+                    Serial : aSerialCodes,
+
+                    onSuccess : function () {
+                        //if (aList.length === 0) {
+                            //iSuccesses++;
+//                             fnComplete();
+                        //} else {
+                        //    oController.deleteRulesFromList(aList, ++iSuccesses, iErrors, aErrors);
+                        //}
+                        IomyRe.common.showMessage({
+                            text : "Rules successfully removed."
+                        });
+
+                        oController.RefreshModel(oController, {});
+                        oController.ToggleControls(true);
+                    },
+
+                    onFail : function (sError) {
+                        //aErrors.push(sError);
+
+                        //if (aList.length === 0) {
+                            //iErrors++;
+//                             fnComplete();
+                       // } else {
+                         //   oController.deleteRulesFromList(aList, iSuccesses, ++iErrors, aErrors);
+                        //}
+                        IomyRe.common.showError("An error occurred while deleting the rules:\n\n"+sError, "Error",
+                            function () {
+                                oController.RefreshModel(oController, {});
+                                oController.ToggleControls(true);
+                            }
+                        );
+                    }
+                });
+            } catch (e) {
+                $.sap.log.error("Error removing rule!");
+                $.sap.log.error(e.name + ": " + e.message);
+
+                oController.RefreshModel(oController, {});
+                oController.ToggleControls(true);
+            }
+//         } else {
+//             if (aList.length === 0) {
+//                 fnComplete();
+//             } else {
+//                 oController.deleteRulesFromList(aList, iSuccesses, iErrors, aErrors);
+//             }
+//         }
+    }
 
 });

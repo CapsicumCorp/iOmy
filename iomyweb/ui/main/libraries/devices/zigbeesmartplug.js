@@ -25,7 +25,6 @@ $.sap.declare("IomyRe.devices.zigbeesmartplug",true);
 IomyRe.devices.zigbeesmartplug = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.zigbeesmartplug,{
-    Devices: [],
     
     CommTypeId : 3,                         // This SHOULD NOT change!
     LinkTypeId : 2,
@@ -35,7 +34,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
     
     ConnectedZigbeeModems : {},             // Associative Array of all the Connected dongles
     bJoinModeToggleCoolingDown : false,
-    bJoinModeToggleCoolDownPeriod : 5000, // 3 minute cooldown (in milliseconds)
+    bJoinModeToggleCoolDownPeriod : 5000, // 5 second cooldown (in milliseconds)
     intervalCooldown : null,
     wTelnetLogArea : null,
     bRunningCommand : false,
@@ -55,14 +54,15 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         //---------------------------------------------------------//
         // Import modules, widgets and scope                       //
         //---------------------------------------------------------//
-        var me              = this;
-        var php             = IomyRe.apiphp;
+        var oModule         = this;
         var bError          = false;
         var aErrorMessages  = [];
-        var sUrl            = php.APILocation("hubtelnet");
+        var sUrl            = IomyRe.apiphp.APILocation("hubtelnet");
         var iCommId;
         var fnSuccess;
         var fnFail;
+        
+        var sModemIDMissing = "Modem ID/Comm ID (modemID) not given.";
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -77,7 +77,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
             // REQUIRED: Find the modem (comm) ID
             //----------------------------------------------------------------//
             if (mSettings.modemID === undefined || mSettings.modemID === null) {
-                fnAppendError("'modemID' not given");
+                fnAppendError(sModemIDMissing);
             } else {
                 iCommId = mSettings.modemID;
             }
@@ -108,47 +108,50 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
             }
             
         } else {
-            fnAppendError("'modemID' not given");
+            fnAppendError(sModemIDMissing);
             
             throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
         
         // Indicating that a telnet command is running
-        me.bRunningCommand = true;
+        oModule.bRunningCommand = true;
         
         // Force it to scroll down to the bottom.
-        //document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
+        //document.getElementById(oScope.createId(oModule.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(oModule.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
         
-        php.AjaxRequest({
-            url : sUrl,
-            data : {"Mode" : "TurnOnZigbeeJoinMode", "CommId" : iCommId},
-        
-            onSuccess : function (dataType, data) {
-                if (data.Error === false || data.Error === undefined) {
-                    fnSuccess(data.Data.JoinMode.join("\n"));
-                } else {
-                    fnFail(data.ErrMesg);
+        try {
+            IomyRe.apiphp.AjaxRequest({
+                url : sUrl,
+                data : {"Mode" : "TurnOnZigbeeJoinMode", "CommId" : iCommId},
+
+                onSuccess : function (dataType, data) {
+                    if (data.Error === false || data.Error === undefined) {
+                        fnSuccess(data.Data.JoinMode.join("\n"));
+                    } else {
+                        fnFail(data.ErrMesg);
+                    }
+
+                    oModule.bRunningCommand = false;
+                },
+
+                onFail : function (response) {
+                    fnFail(response.responseText);
+                    oModule.bRunningCommand = false;
                 }
-                
-                me.bRunningCommand = false;
-            },
-            
-            onFail : function (response) {
-                fnFail(response.responseText);
-                me.bRunningCommand = false;
-            }
-        });
+            });
+        } catch (e) {
+            fnFail("Error turning on Zigbee Join Mode ("+e.name+"): " + e.message);
+        }
     },
     
     GetRapidHAInfo : function (mSettings) {
         //---------------------------------------------------------//
         // Import modules, widgets and scope                       //
         //---------------------------------------------------------//
-        var me              = this;
-        var php             = IomyRe.apiphp;
+        var oModule         = this;
         var bError          = false;
         var aErrorMessages  = [];
-        var sUrl            = php.APILocation("hubtelnet");
+        var sUrl            = IomyRe.apiphp.APILocation("hubtelnet");
         var iCommId;
         var fnSuccess;
         var fnFail;
@@ -202,38 +205,42 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
             throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
         
-        me.bRunningCommand = true;
+        oModule.bRunningCommand = true;
         
-        php.AjaxRequest({
-            url : sUrl,
-            data : {"Mode" : "GetRapidHAInfo", "CommId" : iCommId},
-            
-            onSuccess : function (dataType, data) {
-                if (data.Error === false || data.Error === undefined) {
-                    
-                    fnSuccess(data);
-                    
-//                    IomyRe.common.RefreshCoreVariables({
-//                        onSuccess : function () {
-//                            IomyRe.common.showMessage({
-//                                text : "Join completed. Your devices should appear in 5 minutes.",
-//                                view : oScope.getView()
-//                            });
-//                        }
-//                    });
-                } else {
-                    fnFail(data.ErrMesg);
+        try {
+            IomyRe.apiphp.AjaxRequest({
+                url : sUrl,
+                data : {"Mode" : "GetRapidHAInfo", "CommId" : iCommId},
+
+                onSuccess : function (dataType, data) {
+                    if (data.Error === false || data.Error === undefined) {
+
+                        fnSuccess(data);
+
+    //                    IomyRe.common.RefreshCoreVariables({
+    //                        onSuccess : function () {
+    //                            IomyRe.common.showMessage({
+    //                                text : "Join completed. Your devices should appear in 5 minutes.",
+    //                                view : oScope.getView()
+    //                            });
+    //                        }
+    //                    });
+                    } else {
+                        fnFail(data.ErrMesg);
+                    }
+
+                    oModule.bRunningCommand = false;
+                },
+
+                onFail : function (response) {
+
+                    oModule.bRunningCommand = false;
+                    fnFail(response.responseText);
                 }
-                
-                me.bRunningCommand = false;
-            },
-            
-            onFail : function (response) {
-                
-                me.bRunningCommand = false;
-                fnFail(response.responseText);
-            }
-        });
+            });
+        } catch (e) {
+            fnFail("Error fetching RapidHA information ("+e.name+"): " + e.message);
+        }
     },
     
     FetchConnectedZigbeeModems : function (oScope, fnCallback) {
@@ -247,8 +254,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         //---------------------------------------------------------//
         // Modules and scope                                       //
         //---------------------------------------------------------//
-        var me                  = this;             // Capture the scope of the zigbee device module
-        var odata               = IomyRe.apiodata;    // Import the OData API module
+        var oModule             = this;             // Capture the scope of the zigbee device module
         
         //---------------------------------------------------------//
         // Error Handling                                          //
@@ -261,136 +267,152 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         //---------------------------------------------------------//
         // OData Parameters                                        //
         //---------------------------------------------------------//
-        var sUrl                = odata.ODataLocation("comms");
+        var sUrl                = IomyRe.apiodata.ODataLocation("comms");
         var aColumns            = [
             // Comm Information
             "COMM_PK","COMM_NAME","COMM_JOINMODE","COMM_ADDRESS",
             // Hub Information
             "HUB_PK","HUB_NAME","HUB_SERIALNUMBER","HUB_IPADDRESS"
         ];
-        var aFilter             = ["COMMTYPE_PK eq "+me.CommTypeId];
+        var aFilter             = ["COMMTYPE_PK eq "+oModule.CommTypeId];
         var aOrderBy            = [];
         
         //---------------------------------------------------------//
         // Start the Request                                       //
         //---------------------------------------------------------//
-        odata.AjaxRequest({
-            Url             : sUrl,
-            Columns         : aColumns,
-            WhereClause     : aFilter,
-            OrderByClause   : aOrderBy,
-            
-            onSuccess : function (dataType, data) {
-                var mCurrentRecord = {};
-                var bHasModems = false;
-                
-                try {
-                    //----------------------------------------------------------------//
-                    // If there are no Zigbee modems, there is no reason to continue. //
-                    // Throw an exception.                                            //
-                    //----------------------------------------------------------------//
-                    if (data.length === 0) {
-                        throw new NoZigbeeModemsException();
-                    }
-                    //---------------------------------------------------------//
-                    // Start going through each one                            //
-                    //---------------------------------------------------------//
-                    for (var i = 0; i < data.length; i++) {
-                        bHasModems = true;
-                        
-                        try {
-                            //----------------------------------------------------------//
-                            // Make a whole-hearted attempt to collect information from //
-                            // each Zigbee modem.                                       //
-                            //----------------------------------------------------------//
-                            mCurrentRecord = data[i];
-                            me.ConnectedZigbeeModems["_"+mCurrentRecord.COMM_PK] = {
-                                // Comm Information
-                                "CommId"        : mCurrentRecord.COMM_PK,
-                                "CommName"      : mCurrentRecord.COMM_NAME,
-                                "CommJoinMode"  : mCurrentRecord.COMM_JOINMODE,
-                                "CommAddress"   : mCurrentRecord.COMM_ADDRESS,
+        try {
+            IomyRe.apiodata.AjaxRequest({
+                Url             : sUrl,
+                Columns         : aColumns,
+                WhereClause     : aFilter,
+                OrderByClause   : aOrderBy,
 
-                                // Hub Information
-                                "HubId"             : mCurrentRecord.HUB_PK,
-                                "HubName"           : mCurrentRecord.HUB_NAME,
-                                "HubSerialNumber"   : mCurrentRecord.HUB_SERIALNUMBER,
-                                "HubIPAddress"      : mCurrentRecord.HUB_IPADDRESS,
-                                "HubTypeId"         : mCurrentRecord.HUBTYPE_PK,
-                                "HubTypeName"       : mCurrentRecord.HUBTYPE_NAME
-                            };
-                        } catch (e) {
-                            //---------------------------------------------------------//
-                            // Something went wrong with this particular record.       //
-                            //---------------------------------------------------------//
-                            iRecordErrorCount++;
-                            aErrorMessages.push(mCurrentRecord.HUB_NAME+" ("+mCurrentRecord.HUB_PK+"): Failed to load information: "+e.message);
+                onSuccess : function (dataType, data) {
+                    var mCurrentRecord = {};
+                    var bHasModems = false;
+
+                    try {
+                        //----------------------------------------------------------------//
+                        // If there are no Zigbee modems, there is no reason to continue. //
+                        // Throw an exception.                                            //
+                        //----------------------------------------------------------------//
+                        if (data.length === 0) {
+                            throw new NoZigbeeModemsException();
+                        }
+                        //---------------------------------------------------------//
+                        // Start going through each one                            //
+                        //---------------------------------------------------------//
+                        for (var i = 0; i < data.length; i++) {
+                            bHasModems = true;
+
+                            try {
+                                //----------------------------------------------------------//
+                                // Make a whole-hearted attempt to collect information from //
+                                // each Zigbee modem.                                       //
+                                //----------------------------------------------------------//
+                                mCurrentRecord = data[i];
+                                oModule.ConnectedZigbeeModems["_"+mCurrentRecord.COMM_PK] = {
+                                    // Comm Information
+                                    "CommId"        : mCurrentRecord.COMM_PK,
+                                    "CommName"      : mCurrentRecord.COMM_NAME,
+                                    "CommJoinMode"  : mCurrentRecord.COMM_JOINMODE,
+                                    "CommAddress"   : mCurrentRecord.COMM_ADDRESS,
+
+                                    // Hub Information
+                                    "HubId"             : mCurrentRecord.HUB_PK,
+                                    "HubName"           : mCurrentRecord.HUB_NAME,
+                                    "HubSerialNumber"   : mCurrentRecord.HUB_SERIALNUMBER,
+                                    "HubIPAddress"      : mCurrentRecord.HUB_IPADDRESS,
+                                    "HubTypeId"         : mCurrentRecord.HUBTYPE_PK,
+                                    "HubTypeName"       : mCurrentRecord.HUBTYPE_NAME
+                                };
+                            } catch (e) {
+                                //---------------------------------------------------------//
+                                // Something went wrong with this particular record.       //
+                                //---------------------------------------------------------//
+                                iRecordErrorCount++;
+                                aErrorMessages.push(mCurrentRecord.HUB_NAME+" ("+mCurrentRecord.HUB_PK+"): Failed to load information: "+e.message);
+                            }
+                        }
+
+                        if (bHasModems === false) {
+                            // Disable the command widgets because no modems were detected.
+                            oModule.ToggleZigbeeCommands(oScope, false);
+                        } else {
+                            // Otherwise, enable them if they're not already
+                            oModule.ToggleZigbeeCommands(oScope, true);
+                        }
+
+                    } catch (e) {
+                        //--------------------------------------------------------//
+                        // We're looking for an exception thrown because there were
+                        // no zigbee modems detected. If a different exception is
+                        // thrown, that's a problem!
+                        //--------------------------------------------------------//
+                        if (e.name !== "NoZigbeeModemsException") {
+                            bError = true;
+                            aErrorMessages.push(e.message);
+                            // Disable the command widgets because no modems were detected.
+                            oModule.ToggleZigbeeCommands(oScope, false);
+                        } else {
+                            throw e;
                         }
                     }
-                    
-                    if (bHasModems === false) {
-                        // Disable the command widgets because no modems were detected.
-                        me.ToggleZigbeeCommands(oScope, false);
-                    } else {
-                        // Otherwise, enable them if they're not already
-                        me.ToggleZigbeeCommands(oScope, true);
-                    }
-                    
-                } catch (e) {
-                    //--------------------------------------------------------//
-                    // We're looking for an exception thrown because there were
-                    // no zigbee modems detected. If a different exception is
-                    // thrown, that's a problem!
-                    //--------------------------------------------------------//
-                    if (e.name !== "NoZigbeeModemsException") {
-                        bError = true;
-                        aErrorMessages.push(e.message);
-                        // Disable the command widgets because no modems were detected.
-                        me.ToggleZigbeeCommands(oScope, false);
-                    } else {
-                        throw e;
-                    }
+
+                    //------------------------------------------------------------------//
+                    // Compile the error info map and run the callback function with it //
+                    //------------------------------------------------------------------//
+                    mErrorInfo.bError = bError;
+                    mErrorInfo.aErrorMessages = aErrorMessages;
+                    mErrorInfo.iRecordErrorCount = iRecordErrorCount;
+
+                    fnCallback(mErrorInfo);
+                },
+
+                onFail : function (response) {
+                    bError = true;
+                    fnCallback(mErrorInfo);
                 }
-                
-                //------------------------------------------------------------------//
-                // Compile the error info map and run the callback function with it //
-                //------------------------------------------------------------------//
-                mErrorInfo.bError = bError;
-                mErrorInfo.aErrorMessages = aErrorMessages;
-                mErrorInfo.iRecordErrorCount = iRecordErrorCount;
-                
-                fnCallback(mErrorInfo);
-            },
+            });
+        } catch (e) {
+            aErrorMessages.push("Error trying to load the modems ("+e.name+"): " + e.message);
             
-            onFail : function (response) {
-                bError = true;
-                fnCallback(mErrorInfo);
-            }
-        });
+            mErrorInfo = {
+                bError              : true,
+                aErrorMessages      : aErrorMessages,
+                iRecordErrorCount   : ++iRecordErrorCount
+            };
+            
+            fnCallback(mErrorInfo);
+        }
     },
     
     PopulateTelnetLogArea : function (oScope) {
-        var me            = this;
-        var sTextAreaId = oScope.createId(me.uiIDs.sTelnetOutputTextAreaID+"-inner");
-        var oFormItem    = oScope.byId(me.uiIDs.sTelnetOutputTextAreaID);
-        
-        // Populate it with any prior output.
-        if (me.ZigbeeTelnetLog.length > 0) {
-            var output = "";
-            for (var i = 0; i < me.ZigbeeTelnetLog.length; i++) {
-                output += me.ZigbeeTelnetLog[i].content;
+        try {
+            var oModule         = this;
+            var sTextAreaId     = oScope.createId(oModule.uiIDs.sTelnetOutputTextAreaID+"-inner");
+            var oFormItem       = oScope.byId(oModule.uiIDs.sTelnetOutputTextAreaID);
+
+            // Populate it with any prior output.
+            if (oModule.ZigbeeTelnetLog.length > 0) {
+                var output = "";
+                for (var i = 0; i < oModule.ZigbeeTelnetLog.length; i++) {
+                    output += oModule.ZigbeeTelnetLog[i].content;
+                }
+
+                oFormItem.setValue(output);
+                oFormItem.selectText(output.length, output.length);
+
+                // Force the text area to scroll down to the bottom if it's still on
+                // the page.
+                try {
+                    document.getElementById(sTextAreaId).scrollTop = document.getElementById(sTextAreaId).scrollHeight;
+                } catch (e) {
+                    $.sap.log.error("Error populating the telnet log area ("+e.name+"): " + e.message);
+                }
             }
-            
-            oFormItem.setValue(output);
-            oFormItem.selectText(output.length, output.length);
-            
-            // Force the text area to scroll down to the bottom if it's still on
-            // the page.
-            try {
-                document.getElementById(sTextAreaId).scrollTop = document.getElementById(sTextAreaId).scrollHeight;
-            } catch (e) {
-                // Do nothing.
-            }
+        } catch (e) {
+            $.sap.log.error("Error in IomyRe.devices.zigbeesmartplug.PopulateTelnetLogArea() ("+e.name+"): " + e.message);
         }
     },
     
@@ -404,24 +426,33 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
 		//------------------------------------//
 		//-- 2.0 - Fetch TASKS				--//
 		//------------------------------------//
-		if( mSettings.deviceData.IOs!==undefined ) {
-            $.each(mSettings.deviceData.IOs, function (sIndex, aIO) {
-                if( aIO.RSTypeId===2001 ) {
-                    aTasks.High.push({
-                        "Type":"DeviceValueKW", 
-                        "Data":{ 
-                            "IOId":             aIO.Id, 
-                            "IODataType":       aIO.DataTypeName,
-                            "SamplerateLimit":  aIO.SamplerateLimit,
-                            "LabelId":			mSettings.labelWidgetID
-                        }
-                    });
-                }
-            });
-        } else {
-            //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+mSettings.deviceData.DeviceName+" has no IOs");
+        try {
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingSettingsMapException("Task data was not given (mSettings).");
+            }
+            
+            if( mSettings.deviceData.IOs!==undefined ) {
+                $.each(mSettings.deviceData.IOs, function (sIndex, aIO) {
+                    if( aIO.RSTypeId===2001 ) {
+                        aTasks.High.push({
+                            "Type":"DeviceValueKW", 
+                            "Data":{ 
+                                "IOId":             aIO.Id, 
+                                "IODataType":       aIO.DataTypeName,
+                                "SamplerateLimit":  aIO.SamplerateLimit,
+                                "LabelId":			mSettings.labelWidgetID
+                            }
+                        });
+                    }
+                });
+            } else {
+                mSettings.onFail("Device "+mSettings.deviceData.DeviceName+" has no IOs");
+            }
+        } catch (e) {
+            mSettings.onFail("Error loading the kW value for device (ID: "+mSettings.deviceData.DeviceId+") ("+e.name+"): " + e.message);
+            
+        } finally {
+            return aTasks;
         }
-		return aTasks;
 	}
 });

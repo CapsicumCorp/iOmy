@@ -36,14 +36,11 @@ sap.ui.controller("pages.staging.Login", {
 		var oView = this.getView();
 		
 		oView.addEventDelegate({
-			onBeforeShow : function (evt) {
-				
+			onBeforeShow : function (evt) {	
 			},
-            
+			
             onAfterShow : function (evt) {
 				try {
-					
-					
 					IomyRe.common.CheckSessionInfo({
 						//----------------------------------------------------//
 						// Function to run if user is currently logged in
@@ -186,84 +183,83 @@ sap.ui.controller("pages.staging.Login", {
 		};
 		
         oController.ToggleInputsAndButton(false);
-        
-		if( sUsername!=="" && sPassword!=="" ){
-			//====================================//
-			//== ATTMEPT TO LOG THE USER IN		==//
-			//====================================//
-			$.ajax({
-				url : IomyRe.apiphp.APILocation('sessioncheck'), 
-				type : "POST",
-				dataType : "json",
-				data : aLoginData,
-				success : function( oResponseData, sHTTPCode, jqXHR ) {
-					
-					//-- Check if the User is logged in --//
-					if( oResponseData.login===true ) {
-                        
-						//----------------------------------------------------------------------------//
-						// Go to the home page.
-						//----------------------------------------------------------------------------//
-						oController.goToHomePage();
-
-					} else {
-						//-- TODO: Add the Appropiate Error Messages from the Session Check when Andrew has completed the Better Error Messages --//
-                        
-                        //-- If the user was simply unsuccessful, get them to check their username or password. --//
-                        if (oResponseData.ErrCode === "0001") {
-                            IomyRe.common.showError(oResponseData.ErrMesg+"\nPlease check that your username and password are correct.", "Login Error",
-                                function () {
-                                    oController.ToggleInputsAndButton(true);
-                                }
-                            );
-                        
-                        } else {
-                            IomyRe.common.showError(oResponseData.ErrMesg, "Error",
-                                function () {
-                                    oController.ToggleInputsAndButton(true);
-                                }
-                            );
-                        }
+		
+        try {
+			if( sUsername!=="" && sPassword!=="" ){
+				//====================================//
+				//== ATTMEPT TO LOG THE USER IN		==//
+				//====================================//
+				$.ajax({
+					url : IomyRe.apiphp.APILocation('sessioncheck'), 
+					type : "POST",
+					dataType : "json",
+					data : aLoginData,
+					success : function( oResponseData, sHTTPCode, jqXHR ) {
+						
+						//-- Check if the User is logged in --//
+						if( oResponseData.login===true ) {
+							
+							//----------------------------------------------------------------------------//
+							// Go to the home page.
+							//----------------------------------------------------------------------------//
+							oController.goToHomePage();
+	
+						} else {
+							//-- TODO: Add the Appropiate Error Messages from the Session Check when Andrew has completed the Better Error Messages --//
+							
+							//-- If the user was simply unsuccessful, get them to check their username or password. --//
+							if (oResponseData.ErrCode === "0001") {
+								IomyRe.common.showError(oResponseData.ErrMesg+"\nPlease check that your username and password are correct.", "Login Error",
+									function () {
+										oController.ToggleInputsAndButton(true);
+									}
+								);
+							
+							} else {
+								IomyRe.common.showError(oResponseData.ErrMesg, "Error",
+									function () {
+										oController.ToggleInputsAndButton(true);
+									}
+								);
+							}
+						}
+					},
+					error : function(err) {
+						//-- TODO: Replace this with a more apporpiate error --//
+						jQuery.sap.log.error(JSON.stringify(err));
+						IomyRe.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy", "Connection Error",
+							function () {
+								oController.ToggleInputsAndButton(true);
+							}
+						);
 					}
-				},
-				error : function(err) {
-					//-- TODO: Replace this with a more apporpiate error --//
-					jQuery.sap.log.error(JSON.stringify(err));
-					IomyRe.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy", "Connection Error",
-                        function () {
-                            oController.ToggleInputsAndButton(true);
-                        }
-                    );
+				});
+			} else if (sUsername === "" && sPassword === "") {
+				//-- ERROR --//
+				IomyRe.common.showError("You must enter your username and password to continue.", "Login Error",
+					function () {
+						oController.ToggleInputsAndButton(true);
+					}
+				);               
+			} else {                       
+				if (sUsername === "") {
+					//-- ERROR --//
+					IomyRe.common.showError("A username is required to login.", "Login Error",
+						function () {
+							oController.ToggleInputsAndButton(true);
+						}
+					);              
+				} else if (sPassword === "") {
+					//-- ERROR --//
+					IomyRe.common.showError("A password is required to login.", "Login Error",
+						function () {
+							oController.ToggleInputsAndButton(true);
+						}
+					);              
 				}
-			});
-		} else if (sUsername === "" && sPassword === "") {
-			//-- ERROR --//
-			IomyRe.common.showError("You must enter your username and password to continue.", "Login Error",
-                function () {
-                    oController.ToggleInputsAndButton(true);
-                }
-            );
-            
-            
-        } else {
-                        
-            if (sUsername === "") {
-                //-- ERROR --//
-                IomyRe.common.showError("A username is required to login.", "Login Error",
-                    function () {
-                        oController.ToggleInputsAndButton(true);
-                    }
-                );
-                
-            } else if (sPassword === "") {
-                //-- ERROR --//
-                IomyRe.common.showError("A password is required to login.", "Login Error",
-                    function () {
-                        oController.ToggleInputsAndButton(true);
-                    }
-                );
-                
-            }
+			}
+		} catch (e1) {
+			jQuery.sap.log.error("Error with handling the login credentials:"+e1.message); 
 		}
 	}
 	

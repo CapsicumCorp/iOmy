@@ -83,6 +83,8 @@ $.extend(IomyRe.devices,{
         var fnSuccess;
         var fnFail;
         
+        var sThingIDMissing = "Thing ID must be given.";
+        
         //--------------------------------------------------------------------//
         // Fetch the Thing ID and the onSuccess and onFail callbacks.
         //--------------------------------------------------------------------//
@@ -97,7 +99,7 @@ $.extend(IomyRe.devices,{
                 }
                 
             } else {
-                throw new MissingArgumentException("Thing ID must be given.");
+                throw new MissingArgumentException(sThingIDMissing);
             }
             
             if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
@@ -113,7 +115,7 @@ $.extend(IomyRe.devices,{
             }
             
         } else {
-            throw new MissingSettingsMapException("Thing ID must be given.");
+            throw new MissingSettingsMapException(sThingIDMissing);
         }
 
         //--------------------------------------------------------------------//
@@ -132,14 +134,17 @@ $.extend(IomyRe.devices,{
                 
             },
             onSuccess : function( sExpectedDataType, aAjaxData ) {
-                if (aAjaxData.Error !== true) {
-                    if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
-                        IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+                try {
+                    if (aAjaxData.Error !== true) {
+                        if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
+                            IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+                        }
+                        fnSuccess(aAjaxData.ThingStatus);
+                    } else {
+                        fnFail(aAjaxData.ErrMesg);
                     }
-
-                    fnSuccess(IomyRe.common.ThingList["_"+iThingId].Status);
-                } else {
-                    fnFail(aAjaxData.ErrMesg);
+                } catch (e1) {
+                    jQuery.sap.log.error("An error has occured within the RunSwitch Ajax Request onSuccess: "+e1.message);
                 }
             }
         });
@@ -153,14 +158,20 @@ $.extend(IomyRe.devices,{
      */
     GetLinkOfThing : function(iThingId) {
         var iLinkId = IomyRe.common.ThingList["_"+iThingId].LinkId;
-        
         var oLink = null;
-        // Using the Link List found in common because the scope is global.
-        if (IomyRe.common.LinkList["_"+iLinkId] !== undefined) {
-            oLink = IomyRe.common.getLink(iLinkId);
+        
+        try {
+            // Using the Link List found in common because the scope is global.
+            if (IomyRe.common.LinkList["_"+iLinkId] !== undefined) {
+                oLink = IomyRe.common.getLink(iLinkId);
+            }
+            return oLink;
+        
+        } catch (e1) {
+            jQuery.sap.log.error("An error has occured within GetLinkOfThing: "+e1.message);
+            return null;
         }
         
-        return oLink;
     },
     
     /**
@@ -182,10 +193,9 @@ $.extend(IomyRe.devices,{
         //------------------------------------------------------------//
         // Declare variables
         //------------------------------------------------------------//
-        var me                = this; // Capture the scope of the current controller
         var bError            = false;
         var aErrorMessages    = [];
-        var sUrl            = IomyRe.apiphp.APILocation("link");
+        var sUrl              = IomyRe.apiphp.APILocation("link");
         var iLinkId;
         var iRoomId;
         var mDeviceIDInfo;
@@ -358,7 +368,7 @@ $.extend(IomyRe.devices,{
             // REQUIRED: Thing Name
             //----------------------------------------------------------------//
             if (mSettings.thingName === undefined) {
-                fnAppendError("Thing Name (thingName) must be specified!");
+                fnAppendError("New Thing Name (thingName) must be specified!");
             } else {
                 sThingText = mSettings.thingName;
             }
@@ -410,7 +420,7 @@ $.extend(IomyRe.devices,{
             
         } else {
             fnAppendError("Thing ID (thingID) must be specified!");
-            fnAppendError("Thing Name (thingName) must be specified!");
+            fnAppendError("New Thing Name (thingName) must be specified!");
             throw new MissingSettingsMapException( aErrorMessages.join("\n") );
         }
 
@@ -436,180 +446,188 @@ $.extend(IomyRe.devices,{
         }
         
         if (bError === false) {
-            mThingChangeSettings.thingID    = iThingId;
-            mThingChangeSettings.thingName  = sThingText;
-            
-            mRoomChangeSettings.thingID     = iThingId;
-            mRoomChangeSettings.roomID      = iRoomId;
-            
-            //----------------------------------------------------------------//
-            // Create the onSuccess and onFail functions based on what fields
-            // are enabled and/or changed.
-            //----------------------------------------------------------------//
-            if (bEditingThing && (bChangingRoom && iRoomId !== null) ) {
-                
-                //------------------------------------------------------------//
-                // We're editing both the thing name and assigning it to a
-                // room.
-                //------------------------------------------------------------//
-                mThingChangeSettings.successful = true;
-                
-                //------------------------------------------------------------//
-                // Create the success function that will create the callback
-                // functions for the room assignment function.
-                //------------------------------------------------------------//
-                fnThingSuccess = function () {
-                    //--------------------------------------------------------//
-                    // Create the success function that will popup a message,
-                    // indicating complete or partial success.
-                    //--------------------------------------------------------//
-                    mRoomChangeSettings.onSuccess = function () {
-                        IomyRe.common.RefreshCoreVariables({
-                            onSuccess : function () {
-                                var sMessage;
-                                
-                                if (mThingChangeSettings.successful === true) {
-                                    sMessage = "Device renamed to "+sThingText+" and is now located in "+sRoomText;
-                                    IomyRe.common.showMessage({
-                                        text : sMessage,
-                                    });
-                                    
-                                    fnSuccess();
-                                    
-                                } else {
-                                    sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
-                                    
-                                    IomyRe.common.showWarning(sMessage, "", function () {
-                                        fnWarning();
-                                    });
-                                }
-                                
-                                fnSuccess();
-                            },
-                            
-                            onFail : fnThingFail
-                        });
-                    };
-                    
-                    //--------------------------------------------------------//
-                    // Create the success function that will popup a message,
-                    // indicating complete or partial failure.
-                    //--------------------------------------------------------//
-                    mRoomChangeSettings.onFail = function (sErrorMessage) {
-                        IomyRe.common.RefreshCoreVariables({
-                            onSuccess : function () {
-                                var sMessage;
+            try {
+                mThingChangeSettings.thingID    = iThingId;
+                mThingChangeSettings.thingName  = sThingText;
 
-                                if (mThingChangeSettings.successful === true) {
-                                    sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
+                mRoomChangeSettings.thingID     = iThingId;
+                mRoomChangeSettings.roomID      = iRoomId;
 
-                                    IomyRe.common.showWarning(sMessage, "", function () {
-                                        fnWarning(sMessage);
-                                    });
+                //----------------------------------------------------------------//
+                // Create the onSuccess and onFail functions based on what fields
+                // are enabled and/or changed.
+                //----------------------------------------------------------------//
+                if (bEditingThing && (bChangingRoom && iRoomId !== null) ) {
 
-                                    jQuery.sap.log.warning(sMessage);
-                                } else {
-                                    sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
+                    //------------------------------------------------------------//
+                    // We're editing both the thing name and assigning it to a
+                    // room.
+                    //------------------------------------------------------------//
+                    mThingChangeSettings.successful = true;
 
-                                    IomyRe.common.showError(sMessage, "", function () {
-                                        fnFail();
-                                    });
-
-                                    jQuery.sap.log.error(sMessage);
-                                }
-                            }
-                        });
-                    };
-                    
-                    //-- Call the room assignment function with the correct configuration. --//
-                    IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
-                };
-                
-                //------------------------------------------------------------//
-                // Create the failure function that will report a failure and
-                // then run the success function to proceed to assign a device
-                // to a room
-                //------------------------------------------------------------//
-                fnThingFail = function (sErrMesg) {
-                    jQuery.sap.log.error(sErrMesg);
-                    mThingChangeSettings.successful = false;
-                    fnThingSuccess();
-                };
-                
-                mThingChangeSettings.onSuccess    = fnThingSuccess;
-                mThingChangeSettings.onFail       = fnThingFail;
-                
-                // Run the API to update the device (thing) name
-                try {
-                    IomyRe.devices.editThingName(mThingChangeSettings);
-
-                } catch (e00033) {
-                    jQuery.sap.log.error(e00033.message);
-                }
-            } else {
-                //------------------------------------------------------------//
-                // We're simply changing the name of a thing.
-                //------------------------------------------------------------//
-                if (bEditingThing) {
-                    fnThingFail = function () {
-                        var sMessage = "Device couldn't be renamed.";
-
-                        IomyRe.common.showError(sMessage, "", function () {
-                            fnFail();
-                        });
-
-                        jQuery.sap.log.error(sMessage);
-                    };
-                    
+                    //------------------------------------------------------------//
+                    // Create the success function that will create the callback
+                    // functions for the room assignment function.
+                    //------------------------------------------------------------//
                     fnThingSuccess = function () {
-                        IomyRe.common.RefreshCoreVariables({
-                            onSuccess : function () {
-                                IomyRe.common.showMessage({
-                                    text : "Device renamed to \""+sThingText+"\"."
-                                });
-                                
-                                fnSuccess();
-                            }
-                        });
+                        //--------------------------------------------------------//
+                        // Create the success function that will popup a message,
+                        // indicating complete or partial success.
+                        //--------------------------------------------------------//
+                        mRoomChangeSettings.onSuccess = function () {
+                            IomyRe.common.RefreshCoreVariables({
+                                onSuccess : function () {
+                                    var sMessage;
+
+                                    if (mThingChangeSettings.successful === true) {
+                                        sMessage = "Device renamed to "+sThingText+" and is now located in "+sRoomText;
+                                        IomyRe.common.showMessage({
+                                            text : sMessage,
+                                        });
+
+                                        fnSuccess();
+
+                                    } else {
+                                        sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
+
+                                        IomyRe.common.showWarning(sMessage, "", function () {
+                                            fnWarning();
+                                        });
+                                    }
+
+                                    fnSuccess();
+                                },
+
+                                onFail : fnThingFail
+                            });
+                        };
+
+                        //--------------------------------------------------------//
+                        // Create the success function that will popup a message,
+                        // indicating complete or partial failure.
+                        //--------------------------------------------------------//
+                        mRoomChangeSettings.onFail = function (sErrorMessage) {
+                            IomyRe.common.RefreshCoreVariables({
+                                onSuccess : function () {
+                                    var sMessage;
+
+                                    if (mThingChangeSettings.successful === true) {
+                                        sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
+
+                                        IomyRe.common.showWarning(sMessage, "", function () {
+                                            fnWarning(sMessage);
+                                        });
+
+                                        jQuery.sap.log.warning(sMessage);
+                                    } else {
+                                        sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
+
+                                        IomyRe.common.showError(sMessage, "", function () {
+                                            fnFail();
+                                        });
+
+                                        jQuery.sap.log.error(sMessage);
+                                    }
+                                }
+                            });
+                        };
+
+                        //-- Call the room assignment function with the correct configuration. --//
+                        IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
                     };
-                    
+
+                    //------------------------------------------------------------//
+                    // Create the failure function that will report a failure and
+                    // then run the success function to proceed to assign a device
+                    // to a room
+                    //------------------------------------------------------------//
+                    fnThingFail = function (sErrMesg) {
+                        jQuery.sap.log.error(sErrMesg);
+                        mThingChangeSettings.successful = false;
+                        fnThingSuccess();
+                    };
+
                     mThingChangeSettings.onSuccess    = fnThingSuccess;
                     mThingChangeSettings.onFail       = fnThingFail;
-                    
-                    IomyRe.devices.editThingName(mThingChangeSettings);
+
+                    // Run the API to update the device (thing) name
+                    try {
+                        IomyRe.devices.editThingName(mThingChangeSettings);
+
+                    } catch (e00033) {
+                        jQuery.sap.log.error(e00033.message);
+                    }
+                } else if (!bEditingThing && !(bChangingRoom && iRoomId !== null)) {
+                    //-- Skip this step and run the success callback --//
+                    fnSuccess();
+
+                } else {
+                    //------------------------------------------------------------//
+                    // We're simply changing the name of a thing.
+                    //------------------------------------------------------------//
+                    if (bEditingThing) {
+                        fnThingFail = function () {
+                            var sMessage = "Device couldn't be renamed.";
+
+                            IomyRe.common.showError(sMessage, "", function () {
+                                fnFail();
+                            });
+
+                            jQuery.sap.log.error(sMessage);
+                        };
+
+                        fnThingSuccess = function () {
+                            IomyRe.common.RefreshCoreVariables({
+                                onSuccess : function () {
+                                    IomyRe.common.showMessage({
+                                        text : "Device renamed to \""+sThingText+"\"."
+                                    });
+
+                                    fnSuccess();
+                                }
+                            });
+                        };
+
+                        mThingChangeSettings.onSuccess    = fnThingSuccess;
+                        mThingChangeSettings.onFail       = fnThingFail;
+
+                        IomyRe.devices.editThingName(mThingChangeSettings);
+                    }
+
+                    //------------------------------------------------------------//
+                    // Or moving a device to another room.
+                    //------------------------------------------------------------//
+                    if (bChangingRoom && iRoomId !== null) {
+                        fnRoomFail = function (sMessage) {
+                            IomyRe.common.showError(sMessage, "", function () {
+                                fnFail();
+                            });
+                        };
+
+                        fnRoomSuccess = function () {
+                            IomyRe.common.RefreshCoreVariables({ 
+                                onSuccess : function () {
+                                    IomyRe.common.showMessage({
+                                        text : "Device is now located in "+sRoomText
+                                    });
+
+                                    fnSuccess();
+                                }
+                            });
+                        };
+
+                        mRoomChangeSettings.onSuccess    = fnRoomSuccess;
+                        mRoomChangeSettings.onFail       = fnRoomFail;
+
+                        IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
+                    }
                 }
-                
-                //------------------------------------------------------------//
-                // Or moving a device to another room.
-                //------------------------------------------------------------//
-                if (bChangingRoom && iRoomId !== null) {
-                    fnRoomFail = function (sMessage) {
-                        IomyRe.common.showError(sMessage, "", function () {
-                            fnFail();
-                        });
-                    };
-                    
-                    fnRoomSuccess = function () {
-                        IomyRe.common.RefreshCoreVariables({ 
-                            onSuccess : function () {
-                                IomyRe.common.showMessage({
-                                    text : "Device is now located in "+sRoomText
-                                });
-                                
-                                fnSuccess();
-                            }
-                        });
-                    };
-                    
-                    mRoomChangeSettings.onSuccess    = fnRoomSuccess;
-                    mRoomChangeSettings.onFail       = fnRoomFail;
-                    
-                    IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
-                }
+            } catch (e) {
+                IomyRe.common.showError(e.name + ": " + e.message, "Error");
             }
             
         } else {
-            IomyRe.common.showError(aErrorMessages.join("\n\n"));
+            IomyRe.common.showError(aErrorMessages.join("\n\n"), "");
             jQuery.sap.log.error(aErrorMessages.join("\n"));
         }
     },
@@ -719,51 +737,58 @@ $.extend(IomyRe.devices,{
      * @returns {string} Page ID of the appropriate device page.
      */
     getDevicePageID : function (iThingTypeId) {
-        //-- Zigbee Netvox Smart Plug --//
-        if( iThingTypeId===2 ) {
-            return IomyRe.devices.zigbeesmartplug.DevicePageID;
-            
-        //-- Philips Hue --//
-        } else if( iThingTypeId===13 ) {
-            return IomyRe.devices.philipshue.DevicePageID;
-            
-        //-- Onvif Stream --//
-        } else if ( iThingTypeId===12) {
-            return IomyRe.devices.onvif.DevicePageID;
-            
-        //-- Motion Sensor --//
-        } else if ( iThingTypeId===3) {
-            return IomyRe.devices.motionsensor.DevicePageID;
-            
-        //-- Temperature Sensor --//
-        } else if ( iThingTypeId===4) {
-            return IomyRe.devices.temperaturesensor.DevicePageID;
-            
-        //-- DevelCo Energy Meter --//
-        } else if ( iThingTypeId===10) {
-            return IomyRe.devices.develco.DevicePageID;
-            
-        //-- Weather Feed --//
-        } else if ( iThingTypeId===14) {
-            return IomyRe.devices.weatherfeed.DevicePageID;
-            
-        //-- IP Camera --//
-        } else if ( iThingTypeId===18) {
-            return IomyRe.devices.ipcamera.DevicePageID;
+        try {
+            //-- Zigbee Netvox Smart Plug --//
+            if( iThingTypeId===2 ) {
+                return IomyRe.devices.zigbeesmartplug.DevicePageID;
+                
+            //-- Philips Hue --//
+            } else if( iThingTypeId===13 ) {
+                return IomyRe.devices.philipshue.DevicePageID;
+                
+            //-- Onvif Stream --//
+            } else if ( iThingTypeId===12) {
+                return IomyRe.devices.onvif.DevicePageID;
+                
+            //-- Motion Sensor --//
+            } else if ( iThingTypeId===3) {
+                return IomyRe.devices.motionsensor.DevicePageID;
+                
+            //-- Temperature Sensor --//
+            } else if ( iThingTypeId===4) {
+                return IomyRe.devices.temperaturesensor.DevicePageID;
+                
+            //-- DevelCo Energy Meter --//
+            } else if ( iThingTypeId===10) {
+                return IomyRe.devices.develco.DevicePageID;
+                
+            //-- Weather Feed --//
+            } else if ( iThingTypeId===14) {
+                return IomyRe.devices.weatherfeed.DevicePageID;
+                
+            //-- IP Camera --//
+            } else if ( iThingTypeId===18) {
+                return IomyRe.devices.ipcamera.DevicePageID;
+            }
+        } catch (e1) {
+            jQuery.sap.log.error("Error: Getting Device Page ID:"+e1.message); 
         }
     },
     
     getSerialCodeOfDevice : function (iThingId) {
         var sSerialCode = null;
-        
-        $.each(IomyRe.common.ThingList, function (sI, mThing) {
-            if (mThing.Id == iThingId) {
-                sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
-                return false;
-            }
-        });
-        
-        return sSerialCode;
+        try {
+            $.each(IomyRe.common.ThingList, function (sI, mThing) {
+                if (mThing.Id == iThingId) {
+                    sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+                    return false;
+                }
+            });
+            return sSerialCode;
+        } catch (e1) {
+            jQuery.sap.log.error("Error: Getting Serial Code of Device:"+e1.message);
+            return null;
+        }
     },
     
     GetUITaskList: function( mSettings ) {
@@ -811,28 +836,416 @@ $.extend(IomyRe.devices,{
         //-- 2.0 - Fetch TASKS                --//
         //------------------------------------//
         
-        //-- Zigbee Netvox Smart Plug --//
-        if( mSettings.deviceData.IOs!==undefined ) {
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.zigbeesmartplug.ThingTypeId ) {
-                aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList(mSettings);
+        try {
+            if( mSettings.deviceData.IOs!==undefined ) {
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.zigbeesmartplug.ThingTypeId ) {
+                    aTasks = IomyRe.devices.zigbeesmartplug.GetUITaskList(mSettings);
+                }
+
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.weatherfeed.ThingTypeId ) {
+                    aTasks = IomyRe.devices.weatherfeed.GetUITaskList(mSettings);
+                }
+
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.motionsensor.ThingTypeId ) {
+                    aTasks = IomyRe.devices.motionsensor.GetUITaskList(mSettings);
+                }
+
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.philipshue.ThingTypeId ) {
+                    aTasks = IomyRe.devices.philipshue.GetUITaskList(mSettings);
+                }
+
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.csrmesh.ThingTypeId ) {
+                    aTasks = IomyRe.devices.csrmesh.GetUITaskList(mSettings);
+                }
+
+    //            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.ipcamera.ThingTypeId ) {
+    //                aTasks = IomyRe.devices.ipcamera.GetUITaskList(mSettings);
+    //            }
+    //            
+    //            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.onvif.ThingTypeId ) {
+    //                aTasks = IomyRe.devices.onvif.GetUITaskList(mSettings);
+    //            }
+
+            } else {
+                //-- TODO: Write a error message --//
+                jQuery.sap.log.error("Device "+mSettings.deviceData.DisplayName+" has no IOs");
             }
-            
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.weatherfeed.ThingTypeId ) {
-                aTasks = IomyRe.devices.weatherfeed.GetUITaskList(mSettings);
-            }
-            
-            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.motionsensor.ThingTypeId ) {
-                aTasks = IomyRe.devices.motionsensor.GetUITaskList(mSettings);
-            }
-            
-        } else {
-            //-- TODO: Write a error message --//
-            jQuery.sap.log.error("Device "+mSettings.deviceData.DisplayName+" has no IOs");
+        } catch (e) {
+            // Something else has gone hideously wrong.
+            $.sap.log.error("Fatal error generating request list for device ("+e.name+"): " + e.message);
+            throw e;
         }
         
         return aTasks;
-    }
+    },
     
+    getHexOfLightColour : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var iThingId;
+        var iTypeId;
+        
+        var sThingIDMissing         = "Thing ID (thingID) must be given.";
+        
+        var fnSuccess   = function () {};
+        var fnFail      = function () {};
+        
+        var fnAppendError = function (sErrMessage) {
+            bError          = true;
+            aErrorMessages  = sErrMessage;
+        };
+        
+        //--------------------------------------------------------------------//
+        // Process the parameter map
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (mInfo.bIsValid) {
+                    iTypeId  = IomyRe.common.ThingList["_"+iThingId].TypeId;
+                    
+                    if (iTypeId !== IomyRe.devices.philipshue.ThingTypeId && iTypeId !== IomyRe.devices.csrmesh.ThingTypeId) {
+                        fnAppendError("Device given is not a light bulb.");
+                    }
+                    
+                } else {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+                }
+            } else {
+                fnAppendError(sThingIDMissing);
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+                
+                if (typeof fnSuccess !== "function") {
+                    fnAppendError("Success callback is not a function. Found '"+typeof fnSuccess+"' instead.");
+                }
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+                
+                if (typeof fnFail !== "function") {
+                    fnAppendError("Failure callback is not a function. Found '"+typeof fnFail+"' instead.");
+                }
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
+            }
+            
+        } else {
+            fnAppendError(sThingIDMissing);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
+        }
+        
+        try {
+            
+            IomyRe.devices.loadLightBulbInformation({
+                thingID : iThingId,
+
+                onSuccess : function (iHue, iSaturation, iLight) {
+                    // FIXME: Someone needs to write code to convert from HSV to HSL.
+                    // The examples I found simply do not work, and I don't know why.
+                    //var sHexString = IomyRe.functions.convertHSLToHex(iHue, iSaturation, Math.floor(iLight / 2));
+                    var sHexString = IomyRe.functions.convertHSL255ToHex( iHue, iSaturation, iLight );
+                    
+                    fnSuccess(sHexString);
+                },
+
+                onFail : function (sErrorMessage) {
+                    fnFail(sErrorMessage);
+                }
+            });
+        } catch (e) {
+            jQuery.sap.log.error("There was an error loading the OData service: "+e.message);
+        }
+    },
+    
+    loadLightBulbInformation : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var aIOFilter           = [];
+        var iThingId;
+        var iTypeId;
+        var mThing;
+        var mIOs;
+        
+        var sThingIDMissing         = "Thing ID (thingID) must be given.";
+        
+        var fnSuccess   = function () {};
+        var fnFail      = function () {};
+        
+        var fnAppendError = function (sErrMessage) {
+            bError          = true;
+            aErrorMessages  = sErrMessage;
+        };
+        
+        //--------------------------------------------------------------------//
+        // Process the parameter map
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (mInfo.bIsValid) {
+                    mThing  = IomyRe.common.ThingList["_"+iThingId];
+                    iTypeId = mThing.TypeId;
+                    
+                    if (iTypeId !== IomyRe.devices.philipshue.ThingTypeId && iTypeId !== IomyRe.devices.csrmesh.ThingTypeId) {
+                        fnAppendError("Device given is not a light bulb.");
+                    }
+                    
+                } else {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mInfo.aErrorMessages);
+                }
+            } else {
+                fnAppendError(sThingIDMissing);
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+                
+                if (typeof fnSuccess !== "function") {
+                    fnAppendError("Success callback is not a function. Found '"+typeof fnSuccess+"' instead.");
+                }
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+                
+                if (typeof fnFail !== "function") {
+                    fnAppendError("Failure callback is not a function. Found '"+typeof fnFail+"' instead.");
+                }
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
+            }
+            
+        } else {
+            fnAppendError(sThingIDMissing);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
+        }
+        
+        //--------------------------------------------------------------------//
+        // Acquire the thing and its IOs
+        //--------------------------------------------------------------------//
+        mThing      = IomyRe.common.ThingList["_"+iThingId];
+        mIOs        = mThing.IO;
+        
+        //--------------------------------------------------------------------//
+        // Determine the conversion rates as the figures from the database will
+        // need to be converted for use with each light bulb type.
+        //--------------------------------------------------------------------//
+        //if (mThing.TypeId == IomyRe.devices.philipshue.ThingTypeId) {
+        //    fHueConversionRate          = 65535 / 360;  // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
+        //    fSaturationConversionRate   = 1.44;         // 144 / 100 (100 being the max saturation value)
+        //    fLightConversionRate        = 2.54;         // 254 / 100 (likewise)
+
+        //} else if (mThing.TypeId == IomyRe.devices.csrmesh.ThingTypeId) {
+        //    fHueConversionRate          = 1;
+        //    fSaturationConversionRate   = 2.55;
+        //    fLightConversionRate        = 2.55;
+        //}
+        
+        try {
+            $.each(mIOs, function (sI, aIO) {
+                if (sI !== undefined && sI !== null && aIO !== undefined && aIO !== null) {
+                    aIOFilter.push("IO_PK eq "+aIO.Id);
+                }
+            });
+            
+            IomyRe.apiodata.AjaxRequest({
+                Url : IomyRe.apiodata.ODataLocation("dataint"),
+                Columns : ["CALCEDVALUE","UTS","RSTYPE_PK","IO_PK"],
+                WhereClause : [
+                    "THING_PK eq "+iThingId,
+                    "("+aIOFilter.join(" or ")+")",
+                ],
+                OrderByClause : ["UTS desc"],
+                Limit : 3,
+                RetryLimit : 5,
+                Retries : 0,
+                format : 'json',
+
+                onSuccess : function (response, data) {
+                    var iHue        = null;
+                    var iSaturation = null;
+                    var iLight      = null;
+                    
+                    for (var i = 0; i < data.length; i++) {
+                        //console.log(JSON.stringify(data));
+                        //----------------------------------------------------//
+                        // If we're grabbing the HUE value
+                        //----------------------------------------------------//
+                        if (data[i].RSTYPE_PK === 3901 && iHue === null) {
+                            //iHue = Math.round(data[i].CALCEDVALUE / fHueConversionRate);
+                            iHue = data[i].CALCEDVALUE;
+                        }
+                        
+                        //----------------------------------------------------//
+                        // If we're grabbing the SATURATION value
+                        //----------------------------------------------------//
+                        if (data[i].RSTYPE_PK === 3902 && iSaturation === null) {
+                            //iSaturation = Math.round(data[i].CALCEDVALUE / fSaturationConversionRate);
+                            iSaturation = data[i].CALCEDVALUE;
+                        }
+                        
+                        //----------------------------------------------------//
+                        // If we're grabbing the LUMINANCE value
+                        //----------------------------------------------------//
+                        if (data[i].RSTYPE_PK === 3903 && iLight === null) {
+                            //iLight = Math.round(data[i].CALCEDVALUE / fLightConversionRate);
+                            iLight = data[i].CALCEDVALUE;
+                        }
+                        
+                        //----------------------------------------------------//
+                        // If we already have what we need, we can finish the
+                        // loop.
+                        //----------------------------------------------------//
+                        if (iHue !== null && iSaturation !== null && iLight !== null) {
+                            break;
+                        } else {
+                            //-----------------------------------------------------//
+                            // Otherwise, if we've finished processing the data and
+                            // we don't have all of it, then increase the limit and
+                            // run the request again. Do this up to 5 times before
+                            // giving up.
+                            //-----------------------------------------------------//
+                            if (i === data.length - 1) {
+                                this.Limit += 3;
+                                this.Retries++;
+                                
+                                if (this.Retries < this.RetryLimit) {
+                                    IomyRe.apiodata.AjaxRequest(this);
+                                    //return;
+                                } else {
+                                    fnFail("Failed to find all of the data for "+mThing.DisplayName+".");
+                                }
+                            }
+                        }
+                    }
+                    
+                    
+                    //----------------------------------------------------//
+                    //-- Convert the Values                             --//
+                    //----------------------------------------------------//
+                    var mConvertedHSL = IomyRe.functions.convertHSL( "DB", "Normal", mThing.TypeId, iHue, iSaturation, iLight );
+                    
+                    if( mConvertedHSL.Error===false ) {
+                        fnSuccess( mConvertedHSL.Hue, mConvertedHSL.Sat, mConvertedHSL.Lig );
+                    } else {
+                        fnFail("Failed to convert HSL data! "+mConvertedHSL.ErrMesg+".");
+                    }
+                },
+
+                onFail : function (response) {
+                    jQuery.sap.log.error("Error Code 9300: There was a fatal error loading current device information: "+JSON.stringify(response));
+                    fnFail(response.responseText);
+                }
+            });
+        } catch (e) {
+            jQuery.sap.log.error("There was an error loading the OData service: "+e.message);
+            fnFail(e.name + ": " + e.message);
+        }
+    },
+    
+    getDeviceAddress : function (iThingId) {
+        var iLinkId         = IomyRe.common.ThingList["_"+iThingId].LinkId;
+        var sAddress        = IomyRe.common.LinkList["_"+iLinkId].LinkConnAddress;
+        var sPort           = IomyRe.common.LinkList["_"+iLinkId].LinkConnPort;
+        
+        return sAddress + ":" + sPort;
+    },
+    
+    pingDevice : function (mSettings) {
+        var iThingId        = 0;
+        
+        var fnResult        = function () {};
+        var sThingIDMissing = "Thing ID must be given (thingID).";
+        
+        //--------------------------------------------------------------------//
+        // Find and validate the thing ID and a callback function if given.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                iThingId = mSettings.thingID;
+                
+                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (!mInfo.bIsValid) {
+                    throw new ThingIDNotValidException(mInfo.aErrorMessages.join("\n\n"));
+                }
+            } else {
+                throw new MissingArgumentException(sThingIDMissing)
+            }
+            
+            if (mSettings.onComplete !== undefined && mSettings.onComplete !== null) {
+                fnResult = mSettings.onComplete;
+                
+                if (typeof fnResult !== "function") {
+                    throw new IllegalArgumentException("'onComplete' is not a function. Received "+typeof fnResult);
+                }
+            }
+            
+        } else {
+            throw new MissingSettingsMapException(sThingIDMissing);
+        }
+        
+        //--------------------------------------------------------------------//
+        // Prepare the request.
+        //--------------------------------------------------------------------//
+        try {
+            $.ajax("http://"+this.getDeviceAddress(iThingId), {
+                crossDomain:            true,
+                type:                   "POST",
+                
+                beforeSend : function (xhr) {
+                    xhr.onreadystatechange = function() {
+                        if (this.status == 404) {
+                           fnResult("Offline");
+                        }
+                    };
+                },
+
+                statusCode: {
+                    404: function() {
+                        fnResult("Offline");
+                    }
+                },
+
+                success : function () {
+                    fnResult("Online");
+                },
+
+                error : function(err) {
+                    if (err.status == '403' || err.status == '401') {
+                        fnResult("Inaccessible");
+                    } else {
+                        fnResult("Offline");
+
+                        if (err.status == '500') {
+                            //-- Bugger! --//
+                            $.sap.log.error("A HTTP 500 error occurred! Check the web server logs.");
+                        }
+                    }
+                }
+            });
+        } catch (e) {
+            fnResult("Offline");
+        }
+    }
     
 });
 

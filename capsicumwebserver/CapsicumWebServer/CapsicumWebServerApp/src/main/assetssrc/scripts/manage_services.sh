@@ -98,7 +98,7 @@ template_to_conf_lighttpd() {
   fi
   servername=$*
 
-  cat "${sbin}/etc/lighttpd/lighttpd.conf.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%docfolder%_${app}_" | ${SED} "s_%webport%_${webport}_" | ${SED} "s_%servername%_${servername}_" > "${sbin}/etc/lighttpd/lighttpd.conf"
+  cat "${sbin}/etc/lighttpd/lighttpd.conf.template" | ${SED} "s*%datafolder%*${app}*" | ${SED} "s*%docfolder%*${app}*" | ${SED} "s_%webport%_${webport}_" | ${SED} "s*%servername%*${servername}*" > "${sbin}/etc/lighttpd/lighttpd.conf"
 }
 
 # Args: docpath webport server name
@@ -121,7 +121,7 @@ template_to_conf_lighttpd_with_docpath() {
   fi
   servername=$*
 
-  cat "${sbin}/etc/lighttpd/lighttpd.conf.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%docfolder%_${docpath}_" | ${SED} "s_%webport%_${webport}_" | ${SED} "s_%servername%_${servername}_" > "${sbin}/etc/lighttpd/lighttpd.conf"
+  cat "${sbin}/etc/lighttpd/lighttpd.conf.template" | ${SED} "s*%datafolder%*${app}*" | ${SED} "s*%docfolder%*${docpath}*" | ${SED} "s_%webport%_${webport}_" | ${SED} "s*%servername%*${servername}*" > "${sbin}/etc/lighttpd/lighttpd.conf"
 }
 
 # Args: datapath ram timezone
@@ -142,7 +142,7 @@ template_to_conf_php() {
     phptimezone="$1"
 		shift
   fi
-  cat "${sbin}/etc/php/php.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%phpram%_${phpram}_" | ${SED} "s_%phptimezone%_${phptimezone}_" > "${sbin}/etc/php/php.ini"
+  cat "${sbin}/etc/php/php.ini.template" | ${SED} "s*%datafolder%*${app}*" | ${SED} "s_%phpram%_${phpram}_" | ${SED} "s_%phptimezone%_${phptimezone}_" > "${sbin}/etc/php/php.ini"
 }
 
 # Args: mysqlport
@@ -163,7 +163,7 @@ template_to_conf_mysql() {
     databaselocation="$1"
     shift
   fi
-  cat "${sbin}/etc/mysql/mysql.ini.template" | ${SED} "s_%datafolder%_${app}_" | ${SED} "s_%databasefolder%_${databaselocation}_" | ${SED} "s_%mysqlport%_${mysqlport}_" > "${sbin}/etc/mysql/mysql.ini"
+  cat "${sbin}/etc/mysql/mysql.ini.template" | ${SED} "s*%datafolder%*${app}*" | ${SED} "s*%databasefolder%*${databaselocation}*" | ${SED} "s_%mysqlport%_${mysqlport}_" > "${sbin}/etc/mysql/mysql.ini"
 }
 
 # Args: <none>
@@ -174,9 +174,9 @@ template_hostname_to_webfiles() {
     # Hostname not available
     return 1
   fi
-  ${SED} -i "s_%hostname%_${thehostname}_" ${app}/htdocs/ui/mobile/index.html
-  ${SED} -i "s_%hostname%_${thehostname}_" ${app}/htdocs/ui/mobile/util/common.js
-  ${SED} -i "s_%hostname%_${thehostname}_" ${app}/htdocs/ui/mobile/opa5test/test.html
+  ${SED} -i "s*%hostname%*${thehostname}*" ${app}/htdocs/ui/mobile/index.html
+  ${SED} -i "s*%hostname%*${thehostname}*" ${app}/htdocs/ui/mobile/util/common.js
+  ${SED} -i "s*%hostname%*${thehostname}*" ${app}/htdocs/ui/mobile/opa5test/test.html
 
   return 0
 }

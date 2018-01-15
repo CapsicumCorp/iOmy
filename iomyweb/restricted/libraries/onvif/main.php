@@ -2914,7 +2914,7 @@ class PHPOnvif {
 		//------------------------------------------------//
 		//-- 4.0 - Execute the script                   --//
 		//------------------------------------------------//
-		$sResult = exec($sScript, $oOutput);
+		$sResult = exec( $sScript, $oOutput );
 		
 		
 		//------------------------------------------------//
@@ -2931,6 +2931,86 @@ class PHPOnvif {
 	}
 	
 	
+	//================================================================================================//
+	//== 
+	//================================================================================================//
+	public function CreateFFMPEGStream( $sUrl, $sFoldername ) {
+		//------------------------------------------------//
+		//-- 1.0 - Declare Variables                    --//
+		//------------------------------------------------//
+		$sScript            = "";
+		$sFolderPath        = "";
+		$sFilePath          = "";
+		$oOutput            = array();
+		
+		
+		try {
+			//------------------------------------------------//
+			//-- 2.0 -            --//
+			//------------------------------------------------//
+			$sFolderPath = SITE_BASE."/restricted/streams/".$sFoldername;
+			$sFilePath   = $sFolderPath."/stream.m3u8";
+			
+			//------------------------------------------------//
+			//-- 3.0 - Check if the folder exists           --//
+			//------------------------------------------------//
+			if( !file_exists( $sFolderPath ) ) {
+				//-- Create the folder --//
+				mkdir( $sFolderPath );
+			}
+			
+			//------------------------------------------------//
+			//-- 4.0 - Prepare the Script to execute        --//
+			//------------------------------------------------//
+			
+			//-- 4.1 - Call ffmpeg --//
+			$sScript .= SITE_BASE."/../scripts/run_ffmpeg.sh ";
+			//$sScript .= "ffmpeg ";
+			
+			//-- 4.2 - System Directory --//
+			$sScript .= "/system ".SITE_BASE."/..";
+			
+			//-- 4.3  --//
+			$sScript .= "-v info ";
+			
+			//-- 4.4 - Stream Location --//
+			$sScript .= " -i ".$sUrl." ";
+			
+			//-- 4.5  --//
+			$sScript .= "-c:v copy -c:a copy -bufsize 1835k -pix_fmt yuv420p -flags -global_header -hls_time 10 -hls_list_size 6 -hls_wrap 10 -start_number 1 ";
+			
+			//-- 4.6 - FolderPath and file --//
+			$sScript .= $sFilePath;
+			
+			//------------------------------------------------//
+			//-- 5.0 - Execute the script                   --//
+			//------------------------------------------------//
+			$aResult = exec($sScript, $oOutput);
+			//echo "Success! \n\n".$sScript."\n\n";
+			
+			//------------------------------------------------//
+			//-- 9.0 - Return the Results                   --//
+			//------------------------------------------------//
+			
+			//-- SUCCESS--//
+			
+			return array( 
+				"Error" =>false, 
+				"Data"  =>array(
+					"Script"            => $sScript,
+					"Output"            => $oOutput,
+					"Result"            => $aResult,
+				)
+			);
+			
+		} catch( Exception $e001 ) {
+			//-- FAILURE --//
+			return array( 
+				"Error"   => true, 
+				"ErrMesg" => "Critical Error: ".$e001->getMessage()
+			);
+		}
+	}
 	
 	
 	//================================================================================================//

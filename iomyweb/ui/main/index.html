@@ -26,20 +26,21 @@ Copyright:2017
 		<!-- ====================================== -->
 		<!-- == SAP UI5 CORE                    === -->
 		<!-- ====================================== -->
-		<script src="https://openui5.hana.ondemand.com/1.50.3/resources/sap-ui-core.js"
-			id="sap-ui-bootstrap"
-			data-sap-ui-libs="sap.m, sap.tnt, sap.uxap, sap.ui.layout"
-			data-sap-ui-theme="sap_belize" 
-			data-sap-ui-bindingSyntax="complex" >
-		</script>
-<!--		<script src="../mobile/OpenUI5/sap-ui-core.js"
+		<!--<script src="https://openui5.hana.ondemand.com/1.50.3/resources/sap-ui-core.js"
 			id="sap-ui-bootstrap"
 			data-sap-ui-libs="sap.m, sap.tnt, sap.uxap, sap.ui.layout"
 			data-sap-ui-theme="sap_belize" 
 			data-sap-ui-bindingSyntax="complex" >
 		</script>-->
+		<script src="OpenUI5/sap-ui-core.js"
+			id="sap-ui-bootstrap"
+			data-sap-ui-libs="sap.m, sap.tnt, sap.uxap, sap.ui.layout"
+			data-sap-ui-theme="sap_belize" 
+			data-sap-ui-bindingSyntax="complex" >
+		</script>
 		
         <script src="resources/js/Mutex.js"></script>
+        <script src="resources/js/AjaxRequestQueue.js"></script>
         <script src="resources/js/iOmyExceptions.js"></script>
 		<!-- ===================================== -->
 		<!-- == CSS                            === -->
@@ -49,7 +50,7 @@ Copyright:2017
 		<!-- Other Additional Support CSS -->
         
         <!-- JQPlot CSS -->
-        <link rel="stylesheet" type="text/css" href="../mobile/resources/jqplot/src/jquery.jqplot.css"/>
+        <link rel="stylesheet" type="text/css" href="resources/jqplot/src/jquery.jqplot.css"/>
 		
 		<!-- Main App CSS -->
 		<link rel="stylesheet" type="text/css" href="resources/css/app.css"/>						<!-- The main CSS for the site -->
@@ -60,19 +61,19 @@ Copyright:2017
 		<link rel="stylesheet" type="text/css" href="resources/css/capsicum_widths.css"/>
         
         <!-- JQPlot -->
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/jquery.jqplot.js"></script>
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.canvasTextRenderer.js"></script> 
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.canvasAxisTickRenderer.js"></script> 
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.canvasAxisLabelRenderer.js"></script> 
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.canvasOverlay.js"></script>
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.highlighter.js"></script>
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.cursor.js"></script>
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.pointLabels.js"></script> 
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.dateAxisRenderer.js"></script> 
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.enhancedLegendRenderer.js"></script> 
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.barRenderer.js"></script>
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.pieRenderer.js"></script>
-        <script type="text/javascript" src="../mobile/resources/jqplot/src/plugins/jqplot.categoryAxisRenderer.js"></script>
+        <script type="text/javascript" src="resources/jqplot/src/jquery.jqplot.js"></script>
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.canvasTextRenderer.js"></script> 
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.canvasAxisTickRenderer.js"></script> 
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.canvasAxisLabelRenderer.js"></script> 
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.canvasOverlay.js"></script>
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.highlighter.js"></script>
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.cursor.js"></script>
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.pointLabels.js"></script> 
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.dateAxisRenderer.js"></script> 
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.enhancedLegendRenderer.js"></script> 
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.barRenderer.js"></script>
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.pieRenderer.js"></script>
+        <script type="text/javascript" src="resources/jqplot/src/plugins/jqplot.categoryAxisRenderer.js"></script>
 		
 		<!-- ======================================================== -->
 		<!-- == 5.0 - LOAD THE WIDGET OBJECTS AND START THE APP   === -->

@@ -82,77 +82,92 @@ sap.ui.jsview("pages.staging.user.UserList", {
 			title: "User Settings",
 			header : IomyRe.widgets.getToolPageHeader(oController),
 			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
-				new sap.ui.table.Table ({
-					rows: "{/UserList}",
-					extension : [
-						new sap.m.Toolbar ({
-							selectionMode:"MultiToggle",
-							content : [
-								new sap.m.Button ({
-									text: "Enable",
-									type: sap.m.ButtonType.Accept
-								}),
-								new sap.m.Button({
-									text: "Disable",
-									type: sap.m.ButtonType.Reject
-								}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.Title ({
-									id: "UserList" ,
-									text: "Users"
-								}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-							]
-						})
-					],
-					columns : [
-						new sap.ui.table.Column ({
-							label : new sap.m.Label({ 
-								text:"User Name" 
-							}),
-							template : oColUName
-						}),
-						new sap.ui.table.Column ({
-							label : new sap.m.Label({ 
-								text:"First Name" 
-							}),
-							template : oColFName
-						}),
-						new sap.ui.table.Column ({
-							label : new sap.m.Label({ 
-								text:"Last Name" 
-							}),
-							template : oColLName
-						}),
-						new sap.ui.table.Column ({
-							label : new sap.m.Label({ 
-								text:"Display Name" 
-							}),
-							template : oColDName
-						}),
-						new sap.ui.table.Column ({
-							width: "11rem",
-							label : new sap.m.Label({ 
-								text:"Status" 
-							}),
-							template : oColStatus
-						}),
-						new sap.ui.table.Column ({
-							width: "11rem",
-							label : new sap.m.Label({ 
-								text:"Status" 
-							}),
-							template : oColEdit
-						}),
-					],
+			mainContents: [
+                new sap.m.ScrollContainer ({
+					width: "100%",
+					height: "100%",
+					vertical : true,
+					content : [
+                        new sap.ui.table.Table (oView.createId("UsersTable"), {
+                            rows: "{/UserList}",
+                            extension : [
+                                new sap.m.Toolbar ({
+                                    selectionMode:"MultiToggle",
+                                    content : [
+                                        new sap.m.Button ({
+                                            text: "Enable",
+                                            type: sap.m.ButtonType.Accept,
+
+                                            press : function () {
+                                                oController.EnableSelectedUsers();
+                                            }
+                                        }),
+                                        new sap.m.Button({
+                                            text: "Disable",
+                                            type: sap.m.ButtonType.Reject,
+
+                                            press : function () {
+                                                oController.DisableSelectedUsers();
+                                            }
+                                        }),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.Title ({
+                                            id: "UserList" ,
+                                            text: "Users"
+                                        }),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({})
+                                    ]
+                                })
+                            ],
+                            columns : [
+                                new sap.ui.table.Column ({
+                                    label : new sap.m.Label({ 
+                                        text:"User Name" 
+                                    }),
+                                    template : oColUName
+                                }),
+                                new sap.ui.table.Column ({
+                                    label : new sap.m.Label({ 
+                                        text:"Given Names" 
+                                    }),
+                                    template : oColFName
+                                }),
+                                new sap.ui.table.Column ({
+                                    label : new sap.m.Label({ 
+                                        text:"Last Name" 
+                                    }),
+                                    template : oColLName
+                                }),
+                                new sap.ui.table.Column ({
+                                    label : new sap.m.Label({ 
+                                        text:"Display Name" 
+                                    }),
+                                    template : oColDName
+                                }),
+                                new sap.ui.table.Column ({
+                                    width: "11rem",
+                                    label : new sap.m.Label({ 
+                                        text:"Status" 
+                                    }),
+                                    template : oColStatus
+                                }),
+                                new sap.ui.table.Column ({
+                                    width: "11rem",
+                                    label : new sap.m.Label({ 
+                                        text:"Editing" 
+                                    }),
+                                    template : oColEdit
+                                }),
+                            ],
+                        })
+					]
 				})
 			]
 		}).addStyleClass("MainBackground");

@@ -25,7 +25,6 @@ $.sap.declare("IomyRe.devices.philipshue",true);
 IomyRe.devices.philipshue = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.philipshue,{
-    Devices: [],
     
     LinkTypeId        : 7,
     ThingTypeId       : 13,
@@ -34,5 +33,38 @@ $.extend(IomyRe.devices.philipshue,{
     RSSaturation    : 3902,
     RSBrightness    : 3903,
     
-    DevicePageID : "pPhilipsHue" // TODO: Is this really necessary anymore?
+    GetUITaskList: function( mSettings ) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        //var oModule         = this;
+        var aTasks          = { "High":[], "Low":[] };                    //-- ARRAY:            --//
+        
+        
+        try {
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingSettingsMapException("Task data was not given (mSettings).");
+            }
+            
+            aTasks.High.push({
+                "Type":"Function", 
+                "Execute": function () {
+                    try {
+                        IomyRe.devices.getHexOfLightColour({
+                            thingID     : mSettings.deviceData.DeviceId,
+                            onSuccess   : mSettings.onSuccess,
+                            onFail      : mSettings.onFail
+                        });
+                    } catch (e) {
+                        mSettings.onFail(e.message);
+                    }
+                }
+            });
+        } catch (e) {
+            mSettings.onFail("Failed to add an Philips Hue Light task to the list ("+e.name+"): " + e.message);
+            
+        } finally {
+            return aTasks;
+        }
+    }
 });

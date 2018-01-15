@@ -13,8 +13,8 @@ model {
             applicationId "com.capsicumcorp.iomy.apps.watchinputs"
             minSdkVersion.apiLevel 10
             targetSdkVersion.apiLevel 22
-            versionCode 8000
-            versionName "0.8.0"
+            versionCode 9000
+            versionName "0.9.0"
         }
     }
 

@@ -26,7 +26,6 @@ $.sap.declare("IomyRe.devices.onvif",true);
 IomyRe.devices.onvif = new sap.ui.base.Object();
 
 $.extend(IomyRe.devices.onvif,{
-    Devices                 : [],
     
     aProfiles               : [],
     sProfileLookupErrors    : [],
@@ -42,8 +41,6 @@ $.extend(IomyRe.devices.onvif,{
     RSThumbnailURL        : 3973,
     RSPTZAxisX            : 3974,
     RSPTZAxisY            : 3975,
-    
-    DevicePageID : "pOnvif",
     
     getStreamURL : function(mSettings) {
         var me                = this;
@@ -376,5 +373,40 @@ $.extend(IomyRe.devices.onvif,{
         });
         
         oRPopover.openBy(oCallingButton);
+    },
+    
+    GetUITaskList : function (mSettings) {
+        //------------------------------------//
+        //-- 1.0 - Initialise Variables        --//
+        //------------------------------------//
+        //var oModule         = this;
+        var aTasks          = { "High":[], "Low":[] };
+        
+        try {
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingSettingsMapException("Task data was not given (mSettings).");
+            }
+            
+            aTasks.High.push({
+                "Type":"Function", 
+                "Execute": function () {
+                    try {
+                        IomyRe.devices.pingDevice({
+                            thingID     : mSettings.deviceData.DeviceId,
+                            onComplete  : mSettings.onComplete
+                        });
+                    } catch (e) {
+                        $.sap.log.error("Failed to run IomyRe.devices.pingDevice() ("+e.name+"): " + e.message);
+                        mSettings.onComplete("N/A");
+                    }
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to add an Onvif stream task ("+e.name+"): " + e.message);
+            mSettings.onComplete("N/A");
+            
+        } finally {
+            return aTasks;
+        }
     }
 });

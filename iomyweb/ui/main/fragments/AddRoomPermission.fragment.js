@@ -6,6 +6,7 @@ sap.ui.jsfragment("fragments.AddRoomPermission", {
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
 		var oFragContent = null;
+        var oView        = oController.getView();
 		
 		var oItemTemplatePremises = new sap.ui.core.Item({
 			key:  "{Id}",
@@ -74,14 +75,14 @@ sap.ui.jsfragment("fragments.AddRoomPermission", {
 				new sap.ui.layout.form.FormElement({
 					label: "",
 					fields: [
-						new sap.m.Button ({
+						new sap.m.Button (oView.createId("SubmitButton"), {
 							text: "Save",
 							type: sap.m.ButtonType.Accept,
 							press:   function( oEvent ) {
 								oController.InsertNewUserInfo( oController );
 							}
 						}),
-						new sap.m.Button ({
+						new sap.m.Button (oView.createId("CancelButton"), {
 							text: "Cancel",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {

@@ -65,7 +65,8 @@ $bFound                     = false;        //-- BOOLEAN:       Used to indicate
 $iAPICommTypeId             = 0;            //-- INTEGER:       Will hold the the CommTypeId for comparisons --//
 $iLinkPermWrite             = 0;            //-- INTEGER:       --//
 $iThumbUrlRSTypeId          = 0;            //-- INTEGER:       --//
-$iThumbUrlId                = 0;            //-- INTEGER:       --//
+$iThumbUrlIOId              = 0;            //-- INTEGER:       --//
+$iStreamUrlIOId             = 0;            //-- INTEGER:       --//
 $iUTS                       = 0;            //-- INTEGER:       --//
 
 
@@ -109,12 +110,12 @@ if($bError===false) {
 		
 		//-- Verify that the mode is supported --//
 		//if( $sPostMode!=="OpenThingThumbnail" && $sPostMode!=="OpenLinkProfileThumbnail" ) {
-		if( $sPostMode!=="OpenThingThumbnail" && $sPostMode!=="UpdateThingThumbnail" ) {
+		if( $sPostMode!=="OpenThingThumbnail" && $sPostMode!=="UpdateThingThumbnail" && $sPostMode!=="SetupStream" ) {
 			$bError    = true;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"OpenThingThumbnail\" or \"UpdateThingThumbnail\" \n\n";
+			$sErrMesg .= "eg. \n \"OpenThingThumbnail\", \"UpdateThingThumbnail\" or \"SetupStream\" \n\n";
 		}
 		
 	} catch( Exception $e0011 ) {
@@ -122,7 +123,7 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"OpenThingThumbnail\" or \"UpdateThingThumbnail\" \n\n";
+		$sErrMesg .= "eg. \n \"OpenThingThumbnail\", \"UpdateThingThumbnail\" or \"SetupStream\" \n\n";
 		//sErrMesg .= e0011.message;
 	}
 	
@@ -156,11 +157,14 @@ if($bError===false) {
 	}
 */
 	
+	
+	
+	
 	//----------------------------------------------------//
 	//-- 2.2.3.A - Retrieve Thing Id                    --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="OpenThingThumbnail" || $sPostMode==="UpdateThingThumbnail" ) {
+		if( $sPostMode==="OpenThingThumbnail" || $sPostMode==="UpdateThingThumbnail" || $sPostMode==="SetupStream" ) {
 			try {
 				//-- Retrieve the "ThingId" --//
 				$iPostThingId = $aHTTPData["ThingId"];
@@ -206,13 +210,12 @@ if( $bError===false ) {
 			}
 		}
 		
-		
 		//================================================================//
 		//== 4.2 - Lookup Thing Info                                    ==//
 		//================================================================//
 		if( $bError===false ) {
 			
-			if( $sPostMode==="OpenThingThumbnail" || $sPostMode==="UpdateThingThumbnail" ) {
+			if( $sPostMode==="OpenThingThumbnail" || $sPostMode==="UpdateThingThumbnail" || $sPostMode==="SetupStream" ) {
 				
 				$iOnvifThingTypeId = LookupFunctionConstant("OnvifThingTypeId");
 				
@@ -252,7 +255,7 @@ if( $bError===false ) {
 		//================================================================//
 		if( $bError===false ) {
 			
-			if( $sPostMode==="OpenThingThumbnail"   || $sPostMode==="OpenLinkProfileThumbnail"   || $sPostMode==="UpdateThingThumbnail" ) {
+			if( $sPostMode==="OpenThingThumbnail"   || $sPostMode==="OpenLinkProfileThumbnail"   || $sPostMode==="UpdateThingThumbnail" || $sPostMode==="SetupStream" ) {
 				//----------------------------------------------------------------------------//
 				//-- STEP 2: Look up the details to the "Link" that belongs to that "Thing" --//
 				//----------------------------------------------------------------------------//
@@ -304,7 +307,7 @@ if( $bError===false ) {
 		//-- 4.4 - ESTABLISH THE PHP ONVIF OBJECT                                   --//
 		//----------------------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="OpenThingThumbnail"       || $sPostMode==="UpdateThingThumbnail" ) {
+			if( $sPostMode==="OpenThingThumbnail"       || $sPostMode==="UpdateThingThumbnail"         || $sPostMode==="SetupStream" ) {
 				//--------------------------------------------------------------------//
 				//-- 4.3.1 - Check if a PHPOnvif class can be created for that IP   --//
 				//--------------------------------------------------------------------//
@@ -321,35 +324,35 @@ if( $bError===false ) {
 		}	//-- ENDIF No errors detected --//
 		
 		//----------------------------------------------------------------------------//
-		//-- 4.5 - LOOKUP THE DESIRED IOs FROM THE THINGID                          --//
+		//-- 4.5 - Lookup the Thumbnail URL                                         --//
 		//----------------------------------------------------------------------------//
 		if( $bError===false ) {
-			
 			if( $sPostMode==="OpenThingThumbnail" || $sPostMode==="UpdateThingThumbnail" ) {
-				$iThumbUrlRSTypeId = LookupFunctionConstant('OnvifThumbnailUrlRSTypeId');
+				//-- Lookup RSTypes --//
+				$iThumbUrlRSTypeId  = LookupFunctionConstant('OnvifThumbnailUrlRSTypeId');
 				
 				//-- List all IOs attached to that Thing --//
 				$aTempFunctionResult1 = GetIOsFromThingId( $iPostThingId );
 				//-- Parse the results --//
 				if( $aTempFunctionResult1['Error']===false ) {
-						
+					
 					//-----------------------------------------------------------------------------------------//
 					//-- Verify that the 3 desired IO Ids are found and stored to their appropiate variables --//
 					//-----------------------------------------------------------------------------------------//
 					foreach( $aTempFunctionResult1['Data'] as $aIO ) {
-						//--------------------//
-						//-- Hue            --//
-						//--------------------//
+						//--------------------------------//
+						//-- Thumbnail Profile URL      --//
+						//--------------------------------//
 						if( $aIO['RSTypeId']===$iThumbUrlRSTypeId ) {
-							$iThumbUrlId = $aIO['IOId'];
-						} 
+							$iThumbUrlIOId = $aIO['IOId'];
+						}
 					} //-- END Foreach --//
-						
-						
+					
+					
 					//----------------------------------------------------//
 					//-- IF a IOId couldn't be retrieved                --//
 					//----------------------------------------------------//
-					if( !($iThumbUrlId>0) ) {
+					if( !($iThumbUrlIOId>0) ) {
 						//-- Id isn't greater than zero --//
 						$bError = true;
 						$iErrCode  = 310;
@@ -362,7 +365,7 @@ if( $bError===false ) {
 					} else {
 						
 						//-- Lookup the IO Info for the ThumbnailUrl from the database --//
-						$aTempFunctionResult2 = GetIOInfo( $iThumbUrlId );
+						$aTempFunctionResult2 = GetIOInfo( $iThumbUrlIOId );
 						
 						if( $aTempFunctionResult2['Error']===true ) {
 							$bError = true;
@@ -370,7 +373,7 @@ if( $bError===false ) {
 							$sErrMesg .= "Error Code:'0311' \n";
 							$sErrMesg .= "Can not retrieve the 'ThumbnailUrl' IO Info.\n";
 							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
-							//$sErrMesg .= "\n".$iThumbUrlId;
+							//$sErrMesg .= "\n".$iThumbUrlIOId;
 						}
 						
 						//-- Lookup the most recent ThumbnailUrl from the database --//
@@ -378,7 +381,7 @@ if( $bError===false ) {
 							//-- Get the current time --//
 							$iUTS = time();
 							
-							$aTempFunctionResult3 = GetIODataMostRecent( $aTempFunctionResult2['Data']['DataTypeId'], $iThumbUrlId, $iUTS );
+							$aTempFunctionResult3 = GetIODataMostRecent( $aTempFunctionResult2['Data']['DataTypeId'], $iThumbUrlIOId, $iUTS );
 							
 							if( $aTempFunctionResult3['Error']===false ) {
 								$sThumbnailUrl = $aTempFunctionResult3['Data']['Value'];
@@ -388,6 +391,94 @@ if( $bError===false ) {
 								$iErrCode  = 312;
 								$sErrMesg .= "Error Code:'0313' \n";
 								$sErrMesg .= "Can not retrieve the 'ThumbnailUrl' most recent value.\n";
+								$sErrMesg .= $aTempFunctionResult3['ErrMesg'];
+								//$sErrMesg .= json_encode( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
+							}
+						}
+					} //-- ENDELSE No errors --//
+				} else {
+					//-- Display the error --//
+					$bError = true;
+					$iErrCode  = 313;
+					$sErrMesg .= "Error Code:'0313' \n";
+					$sErrMesg .= "Error when retrieving the IOs from the ThingId \n";
+					$sErrMesg .= $aTempFunctionResult1['ErrMesg'];
+				} //-- ENDELSE An error was caught --//
+			}
+		} //-- ENDIF No errors detected --//
+		
+		
+		
+		//----------------------------------------------------------------------------//
+		//-- 4.6 - Lookup the Thumbnail URL                                         --//
+		//----------------------------------------------------------------------------//
+		if( $bError===false ) {
+			if( $sPostMode==="SetupStream" ) {
+				//-- Lookup RSTypes --//
+				$iStreamUrlRSTypeId = LookupFunctionConstant('OnvifStreamUrlRSTypeId');
+				
+				//-- List all IOs attached to that Thing --//
+				$aTempFunctionResult1 = GetIOsFromThingId( $iPostThingId );
+				//-- Parse the results --//
+				if( $aTempFunctionResult1['Error']===false ) {
+					
+					//-----------------------------------------------------------------------------------------//
+					//-- Verify that the 3 desired IO Ids are found and stored to their appropiate variables --//
+					//-----------------------------------------------------------------------------------------//
+					foreach( $aTempFunctionResult1['Data'] as $aIO ) {
+						//--------------------------------//
+						//-- Stream Profile URL         --//
+						//--------------------------------//
+						if( $sPostMode==="SetupStream" ) {
+							if( $aIO['RSTypeId']===$iStreamUrlRSTypeId ) {
+								$iStreamUrlIOId = $aIO['IOId'];
+							}
+						}
+					} //-- END Foreach --//
+						
+						
+					//----------------------------------------------------//
+					//-- IF a IOId couldn't be retrieved                --//
+					//----------------------------------------------------//
+					if( !($iStreamUrlIOId>0) ) {
+						//-- Id isn't greater than zero --//
+						$bError = true;
+						$iErrCode  = 320;
+						$sErrMesg .= "Error Code:'0320' \n";
+						$sErrMesg .= "Can not find the 'StreamUrl' IO.\n";
+					
+					//----------------------------------------------------//
+					//-- ELSE Assume that there isn't any errors        --//
+					//----------------------------------------------------//
+					} else {
+						
+						//-- Lookup the IO Info for the StreamUrl from the database --//
+						$aTempFunctionResult2 = GetIOInfo( $iStreamUrlIOId );
+						
+						if( $aTempFunctionResult2['Error']===true ) {
+							$bError = true;
+							$iErrCode  = 311;
+							$sErrMesg .= "Error Code:'0311' \n";
+							$sErrMesg .= "Can not retrieve the 'StreamUrl' IO Info.\n";
+							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
+							//$sErrMesg .= "\n".$iStreamUrlIOId;
+						}
+						
+						//-- Lookup the most recent StreamUrl from the database --//
+						if( $bError===false ) {
+							//-- Get the current time --//
+							$iUTS = time();
+							
+							$aTempFunctionResult3 = GetIODataMostRecent( $aTempFunctionResult2['Data']['DataTypeId'], $iStreamUrlIOId, $iUTS );
+							
+							if( $aTempFunctionResult3['Error']===false ) {
+								$sStreamUrl = $aTempFunctionResult3['Data']['Value'];
+								
+							} else {
+								$bError = true;
+								$iErrCode  = 312;
+								$sErrMesg .= "Error Code:'0313' \n";
+								$sErrMesg .= "Can not retrieve the 'StreamUrl' most recent value.\n";
 								$sErrMesg .= $aTempFunctionResult3['ErrMesg'];
 								//$sErrMesg .= json_encode( $oRestrictedApiCore->oRestrictedDB->QueryLogs );
 							}
@@ -483,7 +574,63 @@ if( $bError===false ) {
 				$sErrMesg .= $e1400->getMessage();
 			}
 		
-			
+		//================================================================//
+		//== 5.4 - MODE: Setup the Stream                               ==//
+		//================================================================//
+		} else if( $sPostMode==="SetupStream" ) {
+			try {
+				//----------------------------------------------------//
+				//-- 5.4.1 - Get FFMPEG to setup the stream         --//
+				//----------------------------------------------------//
+				$aTemp = $oPHPOnvifClient->CreateFFMPEGStream( $sStreamUrl, $iPostThingId );
+				
+				
+				//----------------------------------------------------//
+				//-- 5.4.2 - Setup the Results                      --//
+				//----------------------------------------------------//
+				if( $aTemp['Error']===false ) {
+					$aResult = array(
+						"Error"   => false,
+						"Data"    => array(
+							"Success" => $aTemp['Data']['Result']
+						)
+					);
+					
+				} else {
+					$bError = true;
+					$sErrMesg .= "Error Code:'4400'\n";
+					$sErrMesg .= "Problem setting up the FFMPEG stream!\n";
+					
+				}
+				
+				//----------------------------------------------------//
+				//-- 5.4.3 - Return the Results                     --//
+				//----------------------------------------------------//
+				if( $bError===false ) {
+					try {
+						//-- Set the Header --//
+						header("Content-Type: application/json");
+					
+						//-- Convert results to a string --//
+						$sOutput .= json_encode( $aResult );
+						
+						//-- Output results --//
+						echo $sOutput;
+						
+					} catch( Exception $e0001 ) {
+						header('Content-Type: text/plain');
+						//-- The aResult array cannot be turned into a string due to corruption of the array --//
+						echo "Error Code:'0001'! \n ".$e0001->getMessage()."\" ";
+					}
+				}
+				
+				
+			} catch( Exception $e4400) {
+				$bError = true;
+				$sErrMesg .= "Error Code:'4400'\n";
+				$sErrMesg .= "Problem setting up the stream!\n";
+				$sErrMesg .= $e4400->getMessage();
+			}
 		//================================================================//
 		//== Unsupported Mode                                           ==//
 		//================================================================//
@@ -517,11 +664,7 @@ if( $bError===false ) {
 if( $bError===true) {
 	//-- Set the Page to Plain Text on Error. Note this can be changed to "text/html" or "application/json" --//
 	header('Content-Type: text/plain');
-	if( $bError===false ) {
-		//-- The aResult array has become undefined due to corruption of the array --//
-		$sOutput = "Error Code:'0002'!\n No Result";
-	
-	} else if( $sErrMesg===null || $sErrMesg===false || $sErrMesg==="" ) {
+	if( $sErrMesg===null || $sErrMesg===false || $sErrMesg==="" ) {
 		//-- The Error Message has been corrupted --//
 		$sOutput  = "Error Code:'0003'!\n Critical Error has occured!\n Undefinable Error Message\n";
 	

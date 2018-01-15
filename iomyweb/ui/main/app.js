@@ -2,6 +2,7 @@
 Title: App loader
 Author: Andrew Somerville (Capsicum Corporation) <andrew@capsicumcorp.com>
 Modified: Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
+    Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
 Description: 
 Copyright: Capsicum Corporation 2017
 */
@@ -39,6 +40,9 @@ $.sap.require("IomyRe.pages");
 $.sap.registerModulePath('IomyRe.telnet', sModuleInitialBuildLocation+'libraries/telnet');
 $.sap.require("IomyRe.telnet");
 
+$.sap.registerModulePath('IomyRe.help', sModuleInitialBuildLocation+'libraries/help');
+$.sap.require("IomyRe.help");
+
 $.sap.registerModulePath('IomyRe.time', sModuleInitialBuildLocation+'libraries/time');
 $.sap.require("IomyRe.time");
 
@@ -66,7 +70,7 @@ jQuery.sap.registerResourcePath("pages", sLocalResources);
 //Sets up the fragements location
 jQuery.sap.registerResourcePath("fragments", sModuleInitialBuildLocation+"fragments");
 
-// TODO: Perhaps use the user's language settings instead of that of the webview.
+// TODO: Use the user's language settings instead of that of the webview.
 var language = navigator.language;
 var oApp = new sap.m.App("oApp");
 	
@@ -236,49 +240,15 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.rules.RulesForm\" Page!\n"
 	},
+	{
+		"Id":			"pFFMPEG",
+		"Location":		"pages.staging.FFMPEG",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.FFMPEG\" Page!\n"
+	}
 
 ];
 
-/**
- * Add each page declared in aPages using the map of variables for the page ID,
- * view name and its corresponding controller name, language type (in this it is
- * JS (JavaScript), and also the error message that will be displayed if an error
- * occurs in either its UI5 view or controller.
- */
-//$.each( aPages, function (iIndex, aPageData) {
-//	try {
-//		//--------------------------------//
-//		//-- 1.0 - Declare variables	--//
-//		//--------------------------------//
-//		var sType			= "";
-//		var sErMesg			= aPageData.ErrMesg;
-//		
-//		//--------------------------------//
-//		//--
-//		//--------------------------------//
-//		switch(aPageData.Type) {
-//			case "JS":
-//				sType =		sap.ui.core.mvc.ViewType.JS;
-//				break;
-//			
-//			case "XML":
-//				sType =		sap.ui.core.mvc.ViewType.XML;
-//				break;
-//			
-//		}
-//		
-//        oApp.addPage(
-//			new sap.ui.view({
-//				id:			aPageData.Id,
-//				viewName:	aPageData.Location,
-//				type:		sType
-//			})
-//		);
-//
-//	} catch(ePLogin) {
-//        jQuery.sap.log.error( sErMesg+ePLogin.message );
-//	}
-//});
 
 IomyRe.pages.createPage("pLogin");
 

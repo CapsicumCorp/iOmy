@@ -5,7 +5,8 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 		//--------------------------------------------//
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
-		var oFragContent = null;
+		var oFragContent    = null;
+        var oView           = oController.getView();
 		
 		var oItemTemplateRoomTypes = new sap.ui.core.Item({
 			key:  "{RoomTypeId}",
@@ -55,20 +56,27 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 				new sap.ui.layout.form.FormElement({
 					label: "",
 					fields: [
-						new sap.m.Button ({
+						new sap.m.Button (oView.createId("ButtonSubmit"), {
 							text: "Update",
 							type: sap.m.ButtonType.Accept,
 							press:   function( oEvent ) {
 								oController.UpdateRoomInfoValues( oController );
 							}
 						}),
-						new sap.m.Button ({
+						new sap.m.Button (oView.createId("ButtonCancel"), {
 							text: "Cancel",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
 								IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , false);
 							}
 						}),
+						new sap.m.Button (oView.createId("ButtonDelete"), {
+							text: "Delete",
+							type: sap.m.ButtonType.Reject,
+							press:   function( oEvent ) {
+								oController.DeleteRoomInfoValues();
+							}
+						})
 					]
 				}),
 			]

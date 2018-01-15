@@ -49,7 +49,7 @@ public class PremiseAndHubSetup extends AppCompatActivity {
     }
 
     /**
-     * Gathers form data and either switches to the next page, or brings up a Snackbar notice when
+     * Gathers form data and either switches to the next page, or brings up a popup notice when
      * the data validation fails.
      *
      * @param view          Android button widget used to invoke this procedure
@@ -78,7 +78,7 @@ public class PremiseAndHubSetup extends AppCompatActivity {
             String errorMessages = "";
             for (int i = 0; i < this.installWizard.validationErrorMessages.size(); i++) {
                 if (i > 0) {
-                    errorMessages += "\n";
+                    errorMessages += "\n\n";
                 }
                 errorMessages += this.installWizard.validationErrorMessages.get(i);
             }
@@ -132,20 +132,28 @@ public class PremiseAndHubSetup extends AppCompatActivity {
         TextView tv;
         String label;
 
-        //--------------------------------------------------------------//
-        // Check that the premise name is filled out
-        //--------------------------------------------------------------//
-        if (installWizard.premiseName.length() == 0) {
+        //----------------------------------------------------------------------------------------//
+        // Check that the premise name is filled out and is longer than 3 characters.
+        //----------------------------------------------------------------------------------------//
+        if (installWizard.premiseName.trim().length() == 0) {
             valid = false;
             this.installWizard.validationErrorMessages.add("Premise name must be filled out.");
+
+        } else if (installWizard.premiseName.trim().length() <= 3) {
+            valid = false;
+            this.installWizard.validationErrorMessages.add("Premise name must be longer than 3 characters.");
         }
 
-        //--------------------------------------------------------------//
-        // Check that the hub name is filled out
-        //--------------------------------------------------------------//
-        if (installWizard.hubName.length() == 0) {
+        //----------------------------------------------------------------------------------------//
+        // Check that the hub name is filled out and is longer than 3 characters.
+        //----------------------------------------------------------------------------------------//
+        if (installWizard.hubName.trim().length() == 0) {
             valid = false;
             this.installWizard.validationErrorMessages.add("Hub name must be filled out.");
+
+        } else if (installWizard.hubName.trim().length() <= 3) {
+            valid = false;
+            this.installWizard.validationErrorMessages.add("Hub name must be longer than 3 characters.");
         }
 
         return valid;

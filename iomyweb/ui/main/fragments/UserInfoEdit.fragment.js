@@ -6,6 +6,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
 		var oFragContent = null;
+        var oView        = oController.getView();
 	
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
@@ -15,7 +16,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Given Names",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputGivenNames"), {
 							value:"{/UserInfo/Givenname}"
 						})
 					]
@@ -23,7 +24,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Surname",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputSurname"), {
 							value:"{/UserInfo/Surname}"
 						})
 					]
@@ -31,7 +32,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Display Name",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputDisplayName"), {
 							value:"{/UserInfo/Displayname}"
 						})
 					]
@@ -39,7 +40,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Alert Email",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputEmail"), {
 							value:"{/UserInfo/Email}"
 						})
 					]
@@ -47,7 +48,7 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 				new sap.ui.layout.form.FormElement({
 					label : "Alert Mobile",
 					fields: [
-						new sap.m.Input ({
+						new sap.m.Input (oView.createId("InputMobile"), {
 							value: "{/UserInfo/Phone}"
 						}),
 					]
