@@ -56,6 +56,7 @@ public class MainLib {
     private LockLib mLockLib;
     private TimeRulesLib mTimeRulesLib;
     private BluetoothHWAndroidLib mBluetoothHWAndroidLib;
+    private TIZigBeeLib mTIZigBeeLib;
 
     public native int jniinit();
     public native int jniloadModule(long module);
@@ -101,6 +102,7 @@ public class MainLib {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             mBluetoothHWAndroidLib = new BluetoothHWAndroidLib(context);
         }
+        mTIZigBeeLib=new TIZigBeeLib(AppName);
     }
 
     public int init() {
@@ -253,6 +255,13 @@ public class MainLib {
             }
         } else {
             Log.println(Log.INFO, AppName, "MainLib.loadModules: Not loading bluetoothHWAndroidLib module as it requires Android >= 4.3");
+        }
+        //Add TIZigBee library
+        modulesinfo=mTIZigBeeLib.jnigetmodulesinfo();
+        result=jniloadModule(modulesinfo);
+        if (result!=0) {
+            Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: tizigbeelib");
+            return -1;
         }
         return 0;
     }

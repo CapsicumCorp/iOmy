@@ -29,11 +29,19 @@ package com.hoho.android.usbserial.driver;
  *
  * @author mike wakerly (opensource@hoho.com)
  */
+
+/*
+ * Additions by Capsicum Corporation for TI Serial devices
+ */
+
 public final class UsbId {
 
     public static final int VENDOR_FTDI = 0x0403;
     public static final int FTDI_FT232R = 0x6001;
     public static final int FTDI_FT231X = 0x6015;
+
+    public static final int VENDOR_TI = 0x0451;
+    public static final int TI_CC2531_CDC = 0x16a8;
 
     public static final int VENDOR_ATMEL = 0x03EB;
     public static final int ATMEL_LUFA_CDC_DEMO_APP = 0x2044;

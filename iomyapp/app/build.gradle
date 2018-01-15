@@ -45,6 +45,7 @@ model {
                     project ':ndklocklib'
                     project ':ndktimeruleslib'
                     project ':ndkbluetoothhwandroidlib'
+                    project ':ndktizigbeelib'
                     project ':ndkwatchinputs'
                 }
             }

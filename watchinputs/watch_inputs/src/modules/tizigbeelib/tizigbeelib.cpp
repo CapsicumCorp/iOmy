@@ -3415,9 +3415,15 @@ extern moduleinfo_ver_generic_t *tizigbeelib_getmoduleinfo() {
 }
 
 #ifdef __ANDROID__
+
+//JNI Exports
+extern "C" {
+JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_TIZigBeeLib_jnigetmodulesinfo( JNIEnv* env, jobject obj);
+}
+
 JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_TIZigBeeLib_jnigetmodulesinfo( JNIEnv* env, jobject obj) {
   //First cast to from pointer to long as that is the same size as a pointer then extend to jlong if necessary
   //  jlong is always >= unsigned long
-  return (jlong) ((unsigned long) tizigbeelib_getmoduleinfo();
+  return (jlong) ((unsigned long) tizigbeelib_getmoduleinfo());
 }
 #endif

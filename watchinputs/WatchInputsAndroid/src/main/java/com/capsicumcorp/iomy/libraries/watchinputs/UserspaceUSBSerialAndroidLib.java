@@ -174,6 +174,7 @@ public class UserspaceUSBSerialAndroidLib extends Activity {
 			//Log.println(Log.INFO, Application.getInstance().getAppName(), "SUPER DEBUG UserspaceUSBSerialAndroidLib.serialPortSend: Sent "+src.length+" bytes with result="+result);
     	} catch (Exception e) {
     		//Error while writing
+			displayException("serialPortSend", e);
     		return -2;
     	}
     	return result;

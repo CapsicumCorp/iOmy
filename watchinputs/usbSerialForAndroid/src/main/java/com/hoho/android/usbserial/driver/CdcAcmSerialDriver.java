@@ -19,6 +19,10 @@
  * Project home page: https://github.com/mik3y/usb-serial-for-android
  */
 
+/*
+ * Additions by Capsicum Corporation for TI Serial devices
+ */
+
 package com.hoho.android.usbserial.driver;
 
 import android.hardware.usb.UsbConstants;
@@ -346,6 +350,10 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
         supportedDevices.put(Integer.valueOf(UsbId.VENDOR_LEAFLABS),
                 new int[] {
                     UsbId.LEAFLABS_MAPLE,
+                });
+        supportedDevices.put(Integer.valueOf(UsbId.VENDOR_TI),
+                new int[] {
+                    UsbId.TI_CC2531_CDC,
                 });
         return supportedDevices;
     }
