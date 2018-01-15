@@ -208,9 +208,6 @@ public:
 
   uint8_t join_mode_state=JOIN_MODE_STATE::ENABLED; //TI Firmware defaults to enabled so matched it here at startup
 
-  //TODO: Using these?
-  uint8_t cfgstate=0;
-
   uint8_t device_type=0; //Device Type: 0=Coordinator, 1=Router, 2=End Device
   bool zcl_cluster_registered=false; //True=ZCL Clusters have been registered
   bool zdo_cluster_registered=false; //True=ZDO Clusters have been registered
@@ -794,8 +791,7 @@ static void __tizigbee_send_api_packet(tizigbeedevice_t& tizigbeedevice, uint8_t
   }
   sendbuf[packetlen-1]=checksum;
 
-  //TODO: Comment out
-//#ifdef TIZIGBEELIB_MOREDEBUG
+#ifdef TIZIGBEELIB_MOREDEBUG
   {
     const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
     int i;
@@ -811,7 +807,7 @@ static void __tizigbee_send_api_packet(tizigbeedevice_t& tizigbeedevice, uint8_t
     }
     debuglibifaceptr->debuglib_printf(1, "%s: Sending bytes: %s, length=%d\n", __PRETTY_FUNCTION__, tmpstr.data(), packetlen);
   }
-//#endif
+#endif
   //Now send the packet
   //NOTE: No need to lock as the sending function will lock around the send operation
   tizigbeedevice.sendFuncptr(tizigbeedevice.serdevidx, sendbuf, packetlen);
@@ -1649,8 +1645,6 @@ static void process_zdo_generic_srsp(tizigbeedevice_t& tizigbeedevice) {
   if (apicmd->status!=SUCCESS) {
     debuglibifaceptr->debuglib_printf(1, "%s: Error: 0x%02" PRIX8 " for ZDO TI Command: 0x%" PRIX16 "\n", __PRETTY_FUNCTION__, apicmd->status, apicmd->cmd & 0x3FFF);
   }
-  //TODO: The only time we get to see the seqnumber from the TI is ZDO_MSG_CB_INCOMING but we may
-  //  be able to figure out how to use that for calling process_zdo_seqnumber
   locktizigbee();
   zigbeelibindex=tizigbeedevice.zigbeelibindex;
   unlocktizigbee();
@@ -2102,8 +2096,7 @@ static void receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffer, i
   }
   unlocktizigbee();
 
-  //TODO: Comment out
-//#ifdef TIZIGBEELIB_MOREDEBUG
+#ifdef TIZIGBEELIB_MOREDEBUG
   {
     int i;
     std::array<char,1024> tmpstr;
@@ -2118,7 +2111,7 @@ static void receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffer, i
     }
     debuglibifaceptr->debuglib_printf(1, "%s\n", tmpstr.data());
   }
-//#endif
+#endif
 
 
   //Loop until all waiting serial data has been processed
@@ -2598,8 +2591,7 @@ static int isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, co
   } else {
     list_numitems=tizigbeeit->first;
   }
-  //TODO: Remove
-  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Storing in slot: %" PRId16 "\n", __PRETTY_FUNCTION__, list_numitems);
+  //debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Storing in slot: %" PRId16 "\n", __PRETTY_FUNCTION__, list_numitems);
 
   //Reset detecting device so receiveraw stops using gnewtizigbee
   setdetectingdevice(0);
@@ -2615,8 +2607,7 @@ static int isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, co
   PTHREAD_UNLOCK(&gmutex_initnewtizigbee);
   locktizigbee();
 
-  //TODO: Remove
-  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Num TI Zigbee Devices=%d\n", __PRETTY_FUNCTION__, gtizigbeedevices.size());
+  //debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Num TI Zigbee Devices=%d\n", __PRETTY_FUNCTION__, gtizigbeedevices.size());
 
   //Wakeup the main thread to refresh info about this device
   sem_post(&gmainthreadsleepsem);
@@ -2687,7 +2678,7 @@ static int processcommand(const char *buffer, int clientsock) {
       unlocktizigbee();
       sprintf(tmpstrbuf, "TIZIGBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
-  } else if (strncmp(buffer, "tizigbee_leave_network ", 23)==0 && len>=39) {
+  } /*else if (strncmp(buffer, "tizigbee_leave_network ", 23)==0 && len>=39) {
     //Format: tizigbee_leave_network <64-bit addr>
     sscanf(buffer+23, "%016llX", (unsigned long long *) &addr);
     locktizigbee();
@@ -2702,7 +2693,7 @@ static int processcommand(const char *buffer, int clientsock) {
       unlocktizigbee();
       sprintf(tmpstrbuf, "TIZIGBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
     }
-  } else if (strncmp(buffer, "get_tizigbee_info", 17)==0) {
+  }*/ else if (strncmp(buffer, "get_tizigbee_info", 17)==0) {
     int found=0;
 
     //Format: get_tizigbee_info
