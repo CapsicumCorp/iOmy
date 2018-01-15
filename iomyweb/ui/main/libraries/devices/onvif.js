@@ -42,8 +42,6 @@ $.extend(IomyRe.devices.onvif,{
     RSPTZAxisX            : 3974,
     RSPTZAxisY            : 3975,
     
-    DevicePageID : "pOnvif",
-    
     getStreamURL : function(mSettings) {
         var me                = this;
         var bError            = false;
@@ -385,6 +383,10 @@ $.extend(IomyRe.devices.onvif,{
         var aTasks          = { "High":[], "Low":[] };
         
         try {
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingSettingsMapException("Task data was not given (mSettings).");
+            }
+            
             aTasks.High.push({
                 "Type":"Function", 
                 "Execute": function () {

@@ -75,7 +75,7 @@ $.extend(IomyRe.devices.weatherfeed,{
             throw new MissingArgumentException("Wind direction cardinal must be given and be between 0 and 360.");
             
         } else if (fCardinality < 0 || fCardinality > 360) {
-            throw new IllegalArgumentException("Wind direction cardinal must be between 0 and 360.")
+            throw new IllegalArgumentException("Wind direction cardinal must be between 0 and 360.");
         }
         
         try {
@@ -249,6 +249,10 @@ $.extend(IomyRe.devices.weatherfeed,{
         
         
         try {
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingSettingsMapException("Task data was not given (mSettings).");
+            }
+            
             aTasks.High.push({
                 "Type":"Function", 
                 "Execute": function () {

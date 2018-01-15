@@ -42,6 +42,10 @@ $.extend(IomyRe.devices.philipshue,{
         
         
         try {
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingSettingsMapException("Task data was not given (mSettings).");
+            }
+            
             aTasks.High.push({
                 "Type":"Function", 
                 "Execute": function () {

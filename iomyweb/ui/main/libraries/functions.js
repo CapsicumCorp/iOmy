@@ -553,44 +553,50 @@ $.extend(IomyRe.functions, {
             throw new MissingSettingsMapException(aErrorMessages.join('\n\n'));
         }
         
-        $.each(mSettings, function (sI, iColourValue) {
-            var iResult     = iColourValue;
-            var sCharString = "";
-            var vRemainder;
-            var mHexLetters = {
-                "_10" : "A",
-                "_11" : "B",
-                "_12" : "C",
-                "_13" : "D",
-                "_14" : "E",
-                "_15" : "F"
-            };
-            
-            if (iResult === 0) {
-                sHexString += "00";
-                
-            } else {
-                while (iResult > 0) {
-                    vRemainder  = iResult % 16;
-                    iResult     = (iResult - vRemainder) / 16;
+        try {
+            $.each(mSettings, function (sI, iColourValue) {
+                var iResult     = iColourValue;
+                var sCharString = "";
+                var vRemainder;
+                var mHexLetters = {
+                    "_10" : "A",
+                    "_11" : "B",
+                    "_12" : "C",
+                    "_13" : "D",
+                    "_14" : "E",
+                    "_15" : "F"
+                };
 
-                    if (vRemainder > 9) {
-                        vRemainder = mHexLetters["_"+vRemainder];
+                if (iResult === 0) {
+                    sHexString += "00";
+
+                } else {
+                    while (iResult > 0) {
+                        vRemainder  = iResult % 16;
+                        iResult     = (iResult - vRemainder) / 16;
+
+                        if (vRemainder > 9) {
+                            vRemainder = mHexLetters["_"+vRemainder];
+                        }
+
+                        sCharString = vRemainder + sCharString;
                     }
 
-                    sCharString = vRemainder + sCharString;
+                    if (sCharString.length < 2) {
+                        sCharString = '0' + sCharString;
+                    }
                 }
 
-                if (sCharString.length < 2) {
-                    sCharString = '0' + sCharString;
-                }
-            }
+                sHexString += sCharString;
+
+            });
+        } catch (e) {
+            sHexString = "";
+            $.sap.log.error("Error converting RGB values to HEX format ("+e.name+"): " + e.message);
             
-            sHexString += sCharString;
-            
-        });
-        
-        return sHexString;
+        } finally {
+            return sHexString;
+        }
     },
     
     /**
@@ -875,149 +881,102 @@ $.extend(IomyRe.functions, {
         var aDeviceList;
         var aDeviceTypeList;
         
-        //--------------------------------------------------------------------//
-        // Get the core variables for this function
-        //--------------------------------------------------------------------//
-        aDeviceList        = IomyRe.common.LinkList;
-        aDeviceTypeList    = IomyRe.common.LinkTypeList;
-        
-        //--------------------------------------------------------------------//
-        // Begin Constructing the structure by adding device types.
-        //--------------------------------------------------------------------//
-        $.each(aDeviceTypeList, function (sI, mDeviceType) {
-            // TODO: Place all of these options in alphabetical order.
-            if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId)
-            {
-                structOptions["linkType"+mDeviceType.LinkTypeId] = {
-                    "Hub" : "",
-                    "Premise" : "",
-                    "Modem" : ""
-                };
-            }
+        try {
+            //--------------------------------------------------------------------//
+            // Get the core variables for this function
+            //--------------------------------------------------------------------//
+            aDeviceList        = IomyRe.common.LinkList;
+            aDeviceTypeList    = IomyRe.common.LinkTypeList;
+
+            //--------------------------------------------------------------------//
+            // Begin Constructing the structure by adding device types.
+            //--------------------------------------------------------------------//
+            $.each(aDeviceTypeList, function (sI, mDeviceType) {
+                // TODO: Place all of these options in alphabetical order.
+                if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId)
+                {
+                    structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                        "Hub" : "",
+                        "Premise" : "",
+                        "Modem" : ""
+                    };
+                }
+
+                if (mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId)
+                {
+                    structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                        "Hub" : "",
+                        "Premise" : "",
+                        "Room" : "1",
+                        "IPAddress" : "",
+                        "IPPort" : "",
+                        "DisplayName" : "",
+                        "Username" : "",
+                        "Password" : ""
+                    };
+                }
+
+                if (mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId)
+                {
+                    structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                        "Hub" : "",
+                        "Premise" : "",
+                        "Room" : "1",
+                        "IPAddress" : "",
+                        "IPPort" : "",
+                        "DeviceToken" : "",
+                        "DisplayName" : ""
+                    };
+                }
+
+                if (mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId)
+                {
+                    structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                        "Hub" : "",
+                        "Premise" : "",
+                        "Room" : "1",
+                        "DisplayName" : "",
+                        "StationCode" : "",
+                        "KeyCode" : ""
+                    };
+                }
+
+                if (mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
+                {
+                    structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                        "Hub" : "",
+                        "Premise" : "",
+                        "Room" : "1",
+                        "IPCamType" : "MJPEG",
+                        "Protocol" : "http",
+                        "IPAddress" : "",
+                        "IPPort" : "",
+                        "Path" : "",
+                        "DisplayName" : "",
+                        "LinkName" : "",
+                        "Username" : "",
+                        "Password" : ""
+                    };
+                }
+
+            });
+
+            //--------------------------------------------------------------------//
+            // Add the onvif camera option
+            //--------------------------------------------------------------------//
+            structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
+                "CameraName" : "",
+                "OnvifServer" : "",
+                "StreamProfile" : "",
+                "ThumbnailProfile" : ""
+            };
+        } catch (e) {
+            structOptions = {};
+            $.sap.log.error("Failed the load the device form model ("+e.name+"): " + e.message);
             
-            if (mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId)
-            {
-                structOptions["linkType"+mDeviceType.LinkTypeId] = {
-                    "Hub" : "",
-                    "Premise" : "",
-                    "Room" : "1",
-                    "IPAddress" : "",
-                    "IPPort" : "",
-                    "DisplayName" : "",
-                    "Username" : "",
-                    "Password" : ""
-                };
-            }
-            
-            if (mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId)
-            {
-                structOptions["linkType"+mDeviceType.LinkTypeId] = {
-                    "Hub" : "",
-                    "Premise" : "",
-                    "Room" : "1",
-                    "IPAddress" : "",
-                    "IPPort" : "",
-                    "DeviceToken" : "",
-                    "DisplayName" : ""
-                };
-            }
-            
-            if (mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId)
-            {
-                structOptions["linkType"+mDeviceType.LinkTypeId] = {
-                    "Hub" : "",
-                    "Premise" : "",
-                    "Room" : "1",
-                    "DisplayName" : "",
-                    "StationCode" : "",
-                    "KeyCode" : ""
-                };
-            }
-            
-            if (mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
-            {
-                structOptions["linkType"+mDeviceType.LinkTypeId] = {
-                    "Hub" : "",
-                    "Premise" : "",
-                    "Room" : "1",
-                    "IPCamType" : "MJPEG",
-                    "Protocol" : "http",
-                    "IPAddress" : "",
-                    "IPPort" : "",
-                    "Path" : "",
-                    "DisplayName" : "",
-                    "LinkName" : "",
-                    "Username" : "",
-                    "Password" : ""
-                };
-            }
-            
-        });
-        
-        //--------------------------------------------------------------------//
-        // Add the onvif camera option
-        //--------------------------------------------------------------------//
-        structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
-            "CameraName" : "",
-            "OnvifServer" : "",
-            "StreamProfile" : "",
-            "ThumbnailProfile" : ""
-        };
-        
-//        structOptions["linkType"+mDeviceType.LinkTypeId] = {
-//            "Hub" : {
-//                "type" : "Integer",
-//                "required" : true,
-//                "minValue" : 1,
-//                "value" : ""
-//            },
-//            "Room" : {
-//                "type" : "Integer",
-//                "required" : true,
-//                "validator" : IomyRe.validation.isRoomIDValid,
-//                "minValue" : 1,
-//                "default" : 1,
-//                "value" : ""
-//            },
-//            "Protocol" : {
-//                "type" : "String",
-//                "required" : true,
-//                "default" : "http",
-//                "value" : ""
-//            },
-//            "IPAddress" : {
-//                "type" : "String",
-//                "required" : true,
-//                "validator" : IomyRe.validation.isIPv4AddressValid,
-//                "value" : ""
-//            },
-//            "IPPort" : {
-//                "type" : "String",
-//                "required" : true,
-//                "validator" : IomyRe.validation.isIPv4PortValid,
-//                "value" : ""
-//            },
-//            "Path" : {
-//                "type" : "String",
-//                "required" : true,
-//                "value" : ""
-//            },
-//            "DisplayName" : {
-//                "type" : "String",
-//                "required" : true,
-//                "value" : ""
-//            },
-//            "Username" :{
-//                "type" : "String",
-//                "value" : ""
-//            },
-//            "Password" : {
-//                "type" : "String",
-//                "value" : ""
-//            }
-//        };
-        
-        return structOptions;
+        } finally {
+            return structOptions;
+        }
     },
     
     /**
@@ -1029,34 +988,39 @@ $.extend(IomyRe.functions, {
 	 * @throws IllegalArgumentException when the Thing ID is either not given, invalid, or if it refers to a thing that doesn't exist.
 	 */
 	getHubConnectedToThing : function (iThingId) {
-		//--------------------------------------------------------------------//
-		// Variables
-		//--------------------------------------------------------------------//
-		var bError			= true;
-		var aErrorMessages	= [];
-		var mThingIdInfo	= IomyRe.validation.isThingIDValid(iThingId);
-		var mThing;
-		var iCommId;
-		var iHubId;
-		
-		//--------------------------------------------------------------------//
-		// Check Thing ID
-		//--------------------------------------------------------------------//
-		bError = !mThingIdInfo.bIsValid;
-		aErrorMessages = aErrorMessages.concat(mThingIdInfo.aErrorMessages);
-		
-		if (bError) {
-			throw new IllegalArgumentException(aErrorMessages.join("\n"));
-		}
-		
-		//--------------------------------------------------------------------//
-		// Find its Comm ID and Hub ID and get the hub using the Hub ID.
-		//--------------------------------------------------------------------//
-		mThing	= IomyRe.common.ThingList["_"+iThingId];
-		iCommId	= IomyRe.common.LinkList["_"+mThing.LinkId].CommId;
-		iHubId	= IomyRe.common.CommList["_"+iCommId].HubId;
-		
-		return IomyRe.common.HubList["_"+iHubId];
+        try {
+            //--------------------------------------------------------------------//
+            // Variables
+            //--------------------------------------------------------------------//
+            var bError			= true;
+            var aErrorMessages	= [];
+            var mThingIdInfo	= IomyRe.validation.isThingIDValid(iThingId);
+            var mThing;
+            var iCommId;
+            var iHubId;
+
+            //--------------------------------------------------------------------//
+            // Check Thing ID
+            //--------------------------------------------------------------------//
+            bError = !mThingIdInfo.bIsValid;
+            aErrorMessages = aErrorMessages.concat(mThingIdInfo.aErrorMessages);
+
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+
+            //--------------------------------------------------------------------//
+            // Find its Comm ID and Hub ID and get the hub using the Hub ID.
+            //--------------------------------------------------------------------//
+            mThing	= IomyRe.common.ThingList["_"+iThingId];
+            iCommId	= IomyRe.common.LinkList["_"+mThing.LinkId].CommId;
+            iHubId	= IomyRe.common.CommList["_"+iCommId].HubId;
+
+            return IomyRe.common.HubList["_"+iHubId];
+        } catch (e) {
+            $.sap.log.error("Failed to retrieve hub information for a device ("+e.name+"): " + e.message);
+            return null;
+        }
 		
 	},
     
@@ -1202,19 +1166,29 @@ $.extend(IomyRe.functions, {
      * @returns {map}               Link Conn Information
      */
     getLinkConnInfo : function (iLinkId) {
-        // TODO: Add error checking here.
         
-        var mLink = IomyRe.common.LinkList["_"+iLinkId];
-        var mLinkConnInfo = {
-            LinkConnId              : mLink.LinkConnId,
-            LinkConnName            : mLink.LinkConnName,
-            LinkConnAddress         : mLink.LinkConnAddress,
-            LinkConnUsername        : mLink.LinkConnUsername,
-            LinkConnPassword        : mLink.LinkConnPassword,
-            LinkConnPort            : mLink.LinkConnPort
-        };
-        
-        return mLinkConnInfo;
+        try {
+            var mLinkValidation = IomyRe.validation.isLinkIDValid(iLinkId);
+            
+            if (!mLinkValidation.bIsValid) {
+                throw new MissingSettingsMapException(mLinkValidation.aErrorMessages.join("\n"));
+            }
+            
+            var mLink = IomyRe.common.LinkList["_"+iLinkId];
+            var mLinkConnInfo = {
+                LinkConnId              : mLink.LinkConnId,
+                LinkConnName            : mLink.LinkConnName,
+                LinkConnAddress         : mLink.LinkConnAddress,
+                LinkConnUsername        : mLink.LinkConnUsername,
+                LinkConnPassword        : mLink.LinkConnPassword,
+                LinkConnPort            : mLink.LinkConnPort
+            };
+
+            return mLinkConnInfo;
+        } catch (e) {
+            $.sap.log.error("Failed to fetch LinkConn information ("+e.name+"): " + e.message);
+            return null;
+        }
     },
     
     /**
@@ -1269,87 +1243,114 @@ $.extend(IomyRe.functions, {
         var aDeviceList;
         var aDeviceTypeList;
         
-        //--------------------------------------------------------------------//
-        // Get the core variables for this function
-        //--------------------------------------------------------------------//
-        aDeviceList        = IomyRe.common.LinkList;
-        aDeviceTypeList    = IomyRe.common.LinkTypeList;
-        
-        //--------------------------------------------------------------------//
-        // Begin Constructing the structure by adding device types.
-        //--------------------------------------------------------------------//
-        $.each(aDeviceTypeList, function (sI, mDeviceType) {
-            // TODO: Place all of these options in alphabetical order.
-            if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId ||
-                mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
-            {
-                structOptions["linkType"+mDeviceType.LinkTypeId] = {
-                    "Id"          : mDeviceType.LinkTypeId,
-                    "Name"        : mDeviceType.LinkTypeName,
-                    "Type"        : "link"
-                };
-            }
-            
-        });
-        
-        //--------------------------------------------------------------------//
-        // Add the onvif camera option
-        //--------------------------------------------------------------------//
-        structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
-            "Id"          : IomyRe.devices.onvif.ThingTypeId,
-            "Name"        : "Onvif Stream",
-            "Type"        : "thing"
-        };
+        try {
+            //--------------------------------------------------------------------//
+            // Get the core variables for this function
+            //--------------------------------------------------------------------//
+            aDeviceList        = IomyRe.common.LinkList;
+            aDeviceTypeList    = IomyRe.common.LinkTypeList;
+
+            //--------------------------------------------------------------------//
+            // Begin Constructing the structure by adding device types.
+            //--------------------------------------------------------------------//
+            $.each(aDeviceTypeList, function (sI, mDeviceType) {
+                // TODO: Place all of these options in alphabetical order.
+                if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId ||
+                    mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId ||
+                    mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId ||
+                    mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId ||
+                    mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
+                {
+                    structOptions["linkType"+mDeviceType.LinkTypeId] = {
+                        "Id"          : mDeviceType.LinkTypeId,
+                        "Name"        : mDeviceType.LinkTypeName,
+                        "Type"        : "link"
+                    };
+                }
+
+            });
+
+            //--------------------------------------------------------------------//
+            // Add the onvif camera option
+            //--------------------------------------------------------------------//
+            structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
+                "Id"          : IomyRe.devices.onvif.ThingTypeId,
+                "Name"        : "Onvif Stream",
+                "Type"        : "thing"
+            };
+        } catch (e) {
+            structOptions = {};
+            $.sap.log.error("Failed to generate options for the New Device page ("+e.name+"): " + e.message);
+        }
         
         return structOptions;
     },
     
     getNumberOfDevicesInPremise : function (iPremiseId) {
-        var mIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
-        var iCount  = 0;
+        var iCount = 0;
         
-        if (mIDInfo.bIsValid) {
-            $.each(IomyRe.common.ThingList, function (sI, mThing) {
-                if (iPremiseId == mThing.PremiseId) {
-                    iCount++;
-                }
-            });
+        try {
+            var mIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+        
+            if (mIDInfo.bIsValid) {
+                $.each(IomyRe.common.ThingList, function (sI, mThing) {
+                    if (iPremiseId == mThing.PremiseId) {
+                        iCount++;
+                    }
+                });
+            }
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of devices in the premise (ID: "+iPremiseId+") ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
         }
-        
-        return iCount;
     },
     
     getNumberOfDevicesInRoom : function (iRoomId) {
-        var mIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
-        var iCount  = 0;
+        var iCount = 0;
         
-        if (mIDInfo.bIsValid) {
-            $.each(IomyRe.common.ThingList, function (sI, mThing) {
-                if (iRoomId == mThing.RoomId) {
-                    iCount++;
-                }
-            });
+        try {
+            var mIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
+
+            if (mIDInfo.bIsValid) {
+                $.each(IomyRe.common.ThingList, function (sI, mThing) {
+                    if (iRoomId == mThing.RoomId) {
+                        iCount++;
+                    }
+                });
+            }
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of devices in the room (ID: "+iRoomId+") ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
         }
-        
-        return iCount;
     },
     
     getNumberOfRoomsInPremise : function (iPremiseId) {
-        var mIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
-        var iCount  = 0;
+        var iCount = 0;
         
-        if (mIDInfo.bIsValid) {
-            $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
-                if (sI !== undefined && sI !== null && mRoom !== undefined && mRoom !== null) {
-                    iCount++;
-                }
-            });
+        try {
+            var mIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+
+            if (mIDInfo.bIsValid) {
+                $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
+                    if (sI !== undefined && sI !== null && mRoom !== undefined && mRoom !== null) {
+                        iCount++;
+                    }
+                });
+            }
+
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of rooms in the premise (ID: "+iPremiseId+") ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
         }
-        
-        return iCount;
     },
     
     getRoom : function (iRoomId, iPremiseId) {

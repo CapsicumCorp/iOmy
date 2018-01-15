@@ -624,36 +624,41 @@ sap.ui.controller("pages.staging.Device", {
             throw new MissingSettingsMapException("Thing ID must be given.\nSwitch status attribute must be given.");
         }
         
-        //--------------------------------------------------------------------//
-        // Disable the calling widget and toggle the on/off status.
-        //--------------------------------------------------------------------//
-        oCallingWidget.setEnabled(false);
-        
-        IomyRe.devices.RunSwitch({
-            thingID : iThingId,
-            
-            onSuccess : function (iStatus) {
-                try {
-                    if (iStatus === 0) {
-                        oStatusAttribute.setText("Status: Off");
-                    } else if (iStatus === 1) {
-                        oStatusAttribute.setText("Status: On");
+        try {
+            //--------------------------------------------------------------------//
+            // Disable the calling widget and toggle the on/off status.
+            //--------------------------------------------------------------------//
+            oCallingWidget.setEnabled(false);
+
+            IomyRe.devices.RunSwitch({
+                thingID : iThingId,
+
+                onSuccess : function (iStatus) {
+                    try {
+                        if (iStatus === 0) {
+                            oStatusAttribute.setText("Status: Off");
+                        } else if (iStatus === 1) {
+                            oStatusAttribute.setText("Status: On");
+                        }
+                    } catch (e1) {
+                        jQuery.sap.log.error("Error in the Run Switch onSuccess:"+e1.message); 
                     }
-                } catch (e1) {
-                    jQuery.sap.log.error("Error in the Run Switch onSuccess:"+e1.message); 
+                    oCallingWidget.setEnabled(true);
+                },
+
+                onFail : function (sErrMessage) {
+                    IomyRe.common.showError(sErrMessage, "Error",
+                        function () {
+                            oStatusAttribute.setText( "Status: "+(IomyRe.common.ThingList["_"+iThingId].Status === 1 ? "On" : "Off") );
+                            oCallingWidget.setEnabled(true);
+                        }
+                    );
                 }
-                oCallingWidget.setEnabled(true);
-            },
-            
-            onFail : function (sErrMessage) {
-                IomyRe.common.showError(sErrMessage, "Error",
-                    function () {
-                        oStatusAttribute.setText( "Status: "+(IomyRe.common.ThingList["_"+iThingId].Status === 1 ? "On" : "Off") );
-                        oCallingWidget.setEnabled(true);
-                    }
-                );
-            }
-        });
+            });
+        } catch (e) {
+            jQuery.sap.log.error("Error attempting to run a switch (Device ID "+iThingId+") ("+e.name+"): "+e1.message);
+            oCallingWidget.setEnabled(true);
+        }
     },
     
     RefreshAjaxDataForUI: function() {
@@ -678,6 +683,19 @@ sap.ui.controller("pages.staging.Device", {
                         deviceData : aDevice,
                         labelWidgetID : sPrefix
                     };
+                    
+                    if (aDevice.DeviceTypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+                        mTaskListSettings.onFail = function (sErrMessage) {
+                            $.sap.log.error(sErrMessage);
+
+                            if (oView.byId(sPrefix) !== undefined) {
+                                oView.byId(sPrefix).setNumber("N/A");
+
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
+                        };
+                    }
                     
                     //------------------------------------------------------------//
                     // For certain devices extra information should be parsed to it.

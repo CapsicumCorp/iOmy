@@ -49,8 +49,6 @@ $.extend(IomyRe.devices.motionsensor,{
     RSBitwiseStatus : 3909,
     RSTemperature   : 1701,
     
-    DevicePageID : "pMotionSensor",
-    
     CallAPI : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules
@@ -119,7 +117,6 @@ $.extend(IomyRe.devices.motionsensor,{
                                     var mResponseData = data.Data;
 
                                     var iUTS    = mResponseData.MostRecentMotion;
-                                    var bTamper = mResponseData.CurrentStatus.Tamper;
 
 
                                     var mHumanReadable = {
@@ -156,9 +153,10 @@ $.extend(IomyRe.devices.motionsensor,{
                 }
             });
         } catch (e) {
-            e.message = "Error in IomyRe.devices.motionsensor.CallAPI:\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
+            fnFail("Error in IomyRe.devices.motionsensor.CallAPI ("+e.name+"):\n" + e.message);
+//            e.message = "Error in IomyRe.devices.motionsensor.CallAPI ("+e.name+"):\n" + e.message;
+//            $.sap.log.error(e.message);
+//            throw e;
         }
     },
     
@@ -290,9 +288,10 @@ $.extend(IomyRe.devices.motionsensor,{
 
             });
         } catch (e) {
-            e.message = "Error in IomyRe.devices.motionsensor.FetchODataFields ("+e.name+"):\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
+            fnFail("Error in IomyRe.devices.motionsensor.FetchODataFields ("+e.name+"):\n" + e.message);
+//            e.message = "Error in IomyRe.devices.motionsensor.FetchODataFields ("+e.name+"):\n" + e.message;
+//            $.sap.log.error(e.message);
+//            throw e;
         }
     },
     
@@ -408,9 +407,10 @@ $.extend(IomyRe.devices.motionsensor,{
             });
             
         } catch (e) {
-            e.message = "Error in IomyRe.devices.motionsensor.FetchAllCurrentData ("+e.name+"):\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
+            fnFail("Error in IomyRe.devices.motionsensor.FetchAllCurrentData ("+e.name+"):\n" + e.message);
+//            e.message = "Error in IomyRe.devices.motionsensor.FetchAllCurrentData ("+e.name+"):\n" + e.message;
+//            $.sap.log.error(e.message);
+//            throw e;
         }
     },
     
@@ -423,6 +423,10 @@ $.extend(IomyRe.devices.motionsensor,{
         
         
         try {
+            if (mSettings === undefined || mSettings === null) {
+                throw new MissingSettingsMapException("Task data was not given (mSettings).");
+            }
+            
             aTasks.High.push({
                 "Type":"Function", 
                 "Execute": function () {

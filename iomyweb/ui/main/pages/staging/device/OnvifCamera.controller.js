@@ -37,14 +37,9 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
     wPanel              : null,
     
     oThing : null,
-    mLinkConnInfo : null,
     
     iID : null,
     UTSLastUpdate : null,
-    sDeviceNetworkAddress : null,
-    iDeviceOnvifPort : null,
-    sOnvifUsername : null,
-    sOnvifPassword : null,
     sStreamProfileName : null,
     sStreamProfileUrl : null,
     sThumbnailProfileName : null,
@@ -71,9 +66,9 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                 
                 // Import the given Thing
                 oController.oThing = IomyRe.common.ThingList['_'+evt.data.ThingId];
-
-                oController.loadLinkConn(oController.oThing.LinkId);
-                oController.displayRoomLocation();
+                
+//                oController.loadLinkConn(oController.oThing.LinkId);
+//                oController.displayRoomLocation();
                 
                 oView.wSnapshotTimeField.setText("Loading...");
                 
@@ -127,18 +122,18 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
 //
 //	}
 
-    displayRoomLocation : function () {
-        var oController = this;
-        var oView       = this;
-    },
-    
-    loadLinkConn : function (iLinkId) {
-        this.mLinkConnInfo = IomyRe.functions.getLinkConnInfo(iLinkId);
-        this.sDeviceNetworkAddress = this.mLinkConnInfo.LinkConnAddress;
-        this.iDeviceOnvifPort = this.mLinkConnInfo.LinkConnPort;
-        this.sOnvifUsername = this.mLinkConnInfo.LinkConnUsername;
-        this.sOnvifPassword = this.mLinkConnInfo.LinkConnPassword;
-    },
+//    displayRoomLocation : function () {
+//        var oController = this;
+//        var oView       = this;
+//    },
+//    
+//    loadLinkConn : function (iLinkId) {
+//        this.mLinkConnInfo = IomyRe.functions.getLinkConnInfo(iLinkId);
+//        this.sDeviceNetworkAddress = this.mLinkConnInfo.LinkConnAddress;
+//        this.iDeviceOnvifPort = this.mLinkConnInfo.LinkConnPort;
+//        this.sOnvifUsername = this.mLinkConnInfo.LinkConnUsername;
+//        this.sOnvifPassword = this.mLinkConnInfo.LinkConnPassword;
+//    },
     
     //---------------------------------------------------//
     // PTZ Functionality
@@ -343,6 +338,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
             
         } catch( e001 ) {
             //-- TODO: Error Message --//
+            $.sap.log.error("Failed to setup the stream ("+e001.name+"): " + e001.message);
         }
         
         
@@ -415,8 +411,6 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                         
                         // Display the location of the camera.
                         oView.wLocationField.setText(oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName);
-                    
-                        
                         
                         
                         if( oController.sMode==="Player" ) {
