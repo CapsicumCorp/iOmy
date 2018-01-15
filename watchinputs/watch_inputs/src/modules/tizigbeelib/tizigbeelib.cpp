@@ -1834,6 +1834,7 @@ static void process_af_incoming_msg(tizigbeedevice_t& tizigbeedevice) {
   zclcmd->frame_control=tizclcmd->frame_control;
   zclcmd->zigbeelength=zclzigbeelen;
   if ((tizclcmd->frame_control & 0x4)!=0x4) {
+    zclcmd->manu=0; //Some zigbee functions may get confused if manu isn't set to 0 when not being used
     zclcmd->seqnumber=tizclcmd->seqnumber;
     zclcmd->cmdid=tizclcmd->cmdid;
     memcpy(&zclcmd->zigbeepayload, &tizclcmd->zigbeepayload, zclzigbeelen);
