@@ -1,7 +1,7 @@
 /*
   Title: Common Functions Library Header for Watch Inputs
   Author: Matthew Stapleton (Capsicum Corporation) <matthew@capsicumcorp.com>
-  Copyright: Capsicum Corporation 2011-2016
+  Copyright: Capsicum Corporation 2011-2017
 
 This file is part of Watch Inputs which is part of the iOmy project.
 
@@ -136,7 +136,13 @@ union multitypeval {
 #  define UNUSED_FUNCTION(x) UNUSED_ ## x
 #endif
 
-#ifdef DEBUG
+//Define the following to use legacy pthread lock debugging
+//#define ENABLE_LEGACY_PTHREAD_DEBUG
+
+//Define the following to use modern pthread lock debugging with reference to thislib_backtrace and pretty function
+//#define ENABLE_PTHREAD_DEBUG_V2
+
+#ifdef ENABLE_LEGACY_LOCK_DEBUG
 #warning "PTHREAD_LOCK and PTHREAD_UNLOCK debugging has been enabled"
 #include <errno.h>
 #define PTHREAD_LOCK(mutex) { \
@@ -159,11 +165,95 @@ union multitypeval {
   } \
 }
 
+#elif ENABLE_LOCK_DEBUG_V2
+
+#warning "PTHREAD_LOCK and PTHREAD_UNLOCK debugging has been enabled"
+#include <errno.h>
+#define PTHREAD_LOCK(mutex) { \
+  int lockresult; \
+  lockresult=pthread_mutex_lock(mutex); \
+  if (lockresult==EDEADLK) { \
+    printf("-------------------- WARNING --------------------\nMutex deadlock in file: %s function: %s line: %d\n-------------------------------------------------\n", __FILE__, __PRETTY_FUNCTION__, __LINE__); \
+    thislib_backtrace(); \
+  } else if (lockresult!=0) { \
+    printf("-------------------- WARNING --------------------\nMutex lock returned error: %d in file: %s function: %s line: %d\n-------------------------------------------------\n", lockresult, __FILE__, __PRETTY_FUNCTION__, __LINE__); \
+    thislib_backtrace(); \
+  } \
+}
+
+#define PTHREAD_UNLOCK(mutex) { \
+  int lockresult; \
+  lockresult=pthread_mutex_unlock(mutex); \
+  if (lockresult==EPERM) { \
+    printf("-------------------- WARNING --------------------\nMutex already unlocked in file: %s function: %s line: %d\n-------------------------------------------------\n", __FILE__, __PRETTY_FUNCTION__, __LINE__); \
+    thislib_backtrace(); \
+  } else if (lockresult!=0) { \
+    printf("-------------------- WARNING --------------------\nMutex unlock returned error: %d in file: %s function: %s line: %d\n-------------------------------------------------\n", lockresult, __FILE__, __PRETTY_FUNCTION__, __LINE__); \
+    thislib_backtrace(); \
+  } \
+}
+
 #else
 
 #define PTHREAD_LOCK(mutex) pthread_mutex_lock(mutex)
 #define PTHREAD_UNLOCK(mutex) pthread_mutex_unlock(mutex)
 
+#endif
+
+//Map <libname_LOCKDEBUG to LOCKDEBUG to enable this
+//References getmoduledepifaceptr to get debuglibifaceptr
+#ifdef LOCKDEBUG
+#define LOCKDEBUG_ENTERINGFUNC() { \
+  debuglibifaceptr->debuglib_printf(1, "Entering %s thread id: %lu line: %d\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__); \
+}
+#else
+  #define LOCKDEBUG_ENTERINGFUNC() { }
+#endif
+
+#ifdef LOCKDEBUG
+#define LOCKDEBUG_EXITINGFUNC() { \
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s thread id: %lu line: %d\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__); \
+}
+#else
+  #define LOCKDEBUG_EXITINGFUNC() { }
+#endif
+
+#ifdef LOCKDEBUG
+  #ifndef __cplusplus
+    #define LOCKDEBUG_ADDDEBUGLIBIFACEPTR() debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+  #else
+    #define LOCKDEBUG_ADDDEBUGLIBIFACEPTR() const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  #endif
+#else
+  #define LOCKDEBUG_ADDDEBUGLIBIFACEPTR() { }
+#endif
+
+//Map <libname_MOREDEBUG to MOREDEBUG to enable this
+//References getmoduledepifaceptr to get debuglibifaceptr
+#ifdef MOREDEBUG
+#define MOREDEBUG_ENTERINGFUNC() { \
+  debuglibifaceptr->debuglib_printf(1, "Entering %s thread id: %lu line: %d\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__); \
+}
+#else
+  #define MOREDEBUG_ENTERINGFUNC() { }
+#endif
+
+#ifdef MOREDEBUG
+#define MOREDEBUG_EXITINGFUNC() { \
+  debuglibifaceptr->debuglib_printf(1, "Exiting %s thread id: %lu line: %d\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__); \
+}
+#else
+  #define MOREDEBUG_EXITINGFUNC() { }
+#endif
+
+#ifdef MOREDEBUG
+  #ifndef __cplusplus
+    #define MOREDEBUG_ADDDEBUGLIBIFACEPTR() debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
+  #else
+    #define MOREDEBUG_ADDDEBUGLIBIFACEPTR() const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  #endif
+#else
+  #define MOREDEBUG_ADDDEBUGLIBIFACEPTR() { }
 #endif
 
 #endif
