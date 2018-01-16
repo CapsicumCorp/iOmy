@@ -194,31 +194,78 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
         }
 
         private void openInterface() throws IOException {
-            Log.d(TAG, "claiming interfaces, count=" + mDevice.getInterfaceCount());
+            int interfaceCount=mDevice.getInterfaceCount();
+            Log.d(TAG, "claiming interfaces, count=" + interfaceCount);
 
-            mControlInterface = mDevice.getInterface(0);
-            Log.d(TAG, "Control iface=" + mControlInterface);
-            // class should be USB_CLASS_COMM
-
-            if (!mConnection.claimInterface(mControlInterface, true)) {
-                throw new IOException("Could not claim control interface.");
+            //Find interface with USB_CLASS_COMM
+            mControlInterface=null;
+            for (int iIndex = 0; iIndex < interfaceCount; ++iIndex) {
+                if (mDevice.getInterface(iIndex).getInterfaceClass() == UsbConstants.USB_CLASS_COMM) {
+                    mControlInterface = mDevice.getInterface(iIndex);
+                    break;
+                }
             }
+            if (mControlInterface!=null) {
+                Log.d(TAG, "Control iface=" + mControlInterface);
+                // class should be USB_CLASS_COMM
 
-            mControlEndpoint = mControlInterface.getEndpoint(0);
-            Log.d(TAG, "Control endpoint direction: " + mControlEndpoint.getDirection());
-
-            Log.d(TAG, "Claiming data interface.");
-            mDataInterface = mDevice.getInterface(1);
-            Log.d(TAG, "data iface=" + mDataInterface);
-            // class should be USB_CLASS_CDC_DATA
-
-            if (!mConnection.claimInterface(mDataInterface, true)) {
-                throw new IOException("Could not claim data interface.");
+                if (!mConnection.claimInterface(mControlInterface, true)) {
+                    throw new IOException("Could not claim control interface.");
+                }
+                mControlEndpoint=null;
+                int endCount = mControlInterface.getEndpointCount();
+                for (int i = 0; i < endCount; ++i) {
+                    UsbEndpoint ep = mControlInterface.getEndpoint(i);
+                    if ((ep.getDirection() == UsbConstants.USB_DIR_IN) &&
+                            (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_INT)) {
+                        Log.d(TAG,"Found controlling endpoint");
+                        mControlEndpoint = ep;
+                    }
+                }
+                if (mControlEndpoint == null) {
+                    Log.d(TAG, "Could not find controlling endpoint");
+                }
+            } else {
+                Log.d(TAG, "Could not find control interface");
             }
-            mReadEndpoint = mDataInterface.getEndpoint(1);
-            Log.d(TAG, "Read endpoint direction: " + mReadEndpoint.getDirection());
-            mWriteEndpoint = mDataInterface.getEndpoint(0);
-            Log.d(TAG, "Write endpoint direction: " + mWriteEndpoint.getDirection());
+            //Find interface with USB_CLASS_CDC_DATA
+            mDataInterface=null;
+            for (int iIndex = 0; iIndex < interfaceCount; ++iIndex) {
+                if (mDevice.getInterface(iIndex).getInterfaceClass() == UsbConstants.USB_CLASS_CDC_DATA) {
+                    mDataInterface = mDevice.getInterface(iIndex);
+                    break;
+                }
+            }
+            if (mDataInterface!=null) {
+                Log.d(TAG, "Data iface=" + mDataInterface);
+                // class should be USB_CLASS_CDC_DATA
+
+                if (!mConnection.claimInterface(mDataInterface, true)) {
+                    throw new IOException("Could not claim data interface.");
+                }
+                mReadEndpoint=null;
+                mWriteEndpoint=null;
+                int endCount = mDataInterface.getEndpointCount();
+                for (int i = 0; i < endCount; ++i) {
+                    UsbEndpoint ep = mDataInterface.getEndpoint(i);
+                    if ((ep.getDirection() == UsbConstants.USB_DIR_IN) &&
+                            (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK)) {
+                        Log.d(TAG,"Found reading endpoint");
+                        mReadEndpoint = ep;
+                    } else if ((ep.getDirection() == UsbConstants.USB_DIR_OUT) &&
+                            (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK)) {
+                        Log.d(TAG,"Found writing endpoint");
+                        mWriteEndpoint = ep;
+                    }
+                }
+                if (mReadEndpoint == null || mWriteEndpoint == null) {
+                    Log.d(TAG,"Could not find read and/or write endpoints");
+                    throw new IOException("Could not find read and/or write endpoints");
+                }
+            } else {
+                Log.d(TAG, "Could not find data interface");
+                throw new IOException("Could not find data interface");
+            }
         }
 
         private int sendAcmControlMessage(int request, int value, byte[] buf) {
