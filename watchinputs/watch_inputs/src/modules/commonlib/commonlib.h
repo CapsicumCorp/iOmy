@@ -137,12 +137,12 @@ union multitypeval {
 #endif
 
 //Define the following to use legacy pthread lock debugging
-//#define ENABLE_LEGACY_PTHREAD_DEBUG
+//#define ENABLE_PTHREAD_DEBUG_V1
 
 //Define the following to use modern pthread lock debugging with reference to thislib_backtrace and pretty function
 //#define ENABLE_PTHREAD_DEBUG_V2
 
-#ifdef ENABLE_LEGACY_LOCK_DEBUG
+#ifdef ENABLE_PTHREAD_DEBUG_V1
 #warning "PTHREAD_LOCK and PTHREAD_UNLOCK debugging has been enabled"
 #include <errno.h>
 #define PTHREAD_LOCK(mutex) { \
@@ -165,7 +165,7 @@ union multitypeval {
   } \
 }
 
-#elif ENABLE_LOCK_DEBUG_V2
+#elif ENABLE_PTHREAD_DEBUG_V2
 
 #warning "PTHREAD_LOCK and PTHREAD_UNLOCK debugging has been enabled"
 #include <errno.h>
