@@ -128,79 +128,90 @@ $.extend(IomyRe.telnet,{
 			"content" : "Running " + sCommand + "..."
 		};
         
-        php.AjaxRequest({
-            url : sUrl,
-            data : {"Mode" : "CustomTelnetCommand", "HubId" : iHubId, "CustomCommand" : sCommand},
-            
-            onSuccess : function (dataType, data) {
-				var req = this;
-				
-				oModule.mxExecutionCallbacks.synchronize({
-					
-					task : function () {
-						try {
-							if (data.Error === false || data.Error === undefined) {
-								var sOutput = "\n    " + data.Data.Custom.join("\n    ");
-								req.logOutput(sOutput, false);
+        try {
+            php.AjaxRequest({
+                url : sUrl,
+                data : {"Mode" : "CustomTelnetCommand", "HubId" : iHubId, "CustomCommand" : sCommand},
 
-								IomyRe.rules.loadRules({
-									hubID : iHubId
-								});
+                onSuccess : function (dataType, data) {
+                    var req = this;
 
-								fnSuccess(sOutput);
-							} else {
-								req.logOutput(sOutput, true);
-								fnFail(sOutput, data.ErrMesg);
-							}
-						} catch (error) {
-							req.logOutput(error.name + ": " + error.message);
-							fnFail(sOutput, error.message);
-						}
-					}
-					
-				});
-            },
-            
-            onFail : function (response) {
-				var req = this;
-				
-				oModule.mxExecutionCallbacks.synchronize({
-					
-					task : function () {
-						var sOutput = response.responseText;
-						req.logOutput(sOutput, true);
+                    oModule.mxExecutionCallbacks.synchronize({
 
-						fnFail(sOutput, response.responseText);
-					}
-					
-				});
-            },
+                        task : function () {
+                            try {
+                                if (data.Error === false || data.Error === undefined) {
+                                    var sOutput = "\n    " + data.Data.Custom.join("\n    ");
+                                    req.logOutput(sOutput, false);
+
+                                    IomyRe.rules.loadRules({
+                                        hubID : iHubId
+                                    });
+
+                                    fnSuccess(sOutput);
+                                } else {
+                                    req.logOutput(sOutput, true);
+                                    fnFail(sOutput, data.ErrMesg);
+                                }
+                            } catch (error) {
+                                req.logOutput(error.name + ": " + error.message);
+                                fnFail(sOutput, error.message);
+                            }
+                        }
+
+                    });
+                },
+
+                onFail : function (response) {
+                    var req = this;
+
+                    oModule.mxExecutionCallbacks.synchronize({
+
+                        task : function () {
+                            var sOutput = response.responseText;
+                            req.logOutput(sOutput, true);
+
+                            fnFail(sOutput, response.responseText);
+                        }
+
+                    });
+                },
+
+                logOutput : function (sOutput, bError) {
+
+                    if (bError) {
+                        oModule.TelnetLog["_"+iLogIndex].level = "E";
+                    }
+
+                    // Insert the output into the Telnet log
+                    oModule.TelnetLog["_"+iLogIndex].content = sCommand + ": " + sOutput;
+
+                    oModule.bRunningCommand = false;
+                }
+            });
             
-            logOutput : function (sOutput, bError) {
-				
-				if (bError) {
-					oModule.TelnetLog["_"+iLogIndex].level = "E";
-				}
-                
-				// Insert the output into the Telnet log
-				oModule.TelnetLog["_"+iLogIndex].content = sCommand + ": " + sOutput;
-                
-                oModule.bRunningCommand = false;
-            }
-        });
+        } catch (e) {
+            req.logOutput(error.name + ": " + error.message);
+            fnFail("Program Error", error.message);
+        }
     },
 	
 	compileLog : function () {
 		var oModule     	= this;
 		var aLog			= [];
-		var mEntry;
 		
-		$.each(oModule.TelnetLog, function (sI, mEntry) {
-			aLog.push( mEntry.level + ": " + mEntry.content );
-			
-		});
-		
-		return aLog;
+        try {
+            $.each(oModule.TelnetLog, function (sI, mEntry) {
+                aLog.push( mEntry.level + ": " + mEntry.content );
+
+            });
+
+        } catch (e) {
+            $.sap.log.error("Failed to completely compile the log ("+e.name+"): " + e.message);
+            
+        } finally {
+            return aLog;
+        }
 	}
     
 });

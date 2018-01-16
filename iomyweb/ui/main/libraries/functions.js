@@ -192,64 +192,79 @@ $.extend(IomyRe.functions, {
         var iSat;
         var iLight;
         
-        fRed    = iRed / 255;
-        fGreen  = iGreen / 255;
-        fBlue   = iBlue / 255;
+        var mResult;
         
-        //--------------------------------------------------------------------//
-        // Determine which of the three numbers is the minimum and maximum.
-        //--------------------------------------------------------------------//
-        fMin = Math.min( fRed, fGreen, fBlue );
-        fMax = Math.max( fRed, fGreen, fBlue );
-        
-        fDifference = fMax - fMin;
-        
-        //--------------------------------------------------------------------//
-        // Find the luminance figure.
-        //--------------------------------------------------------------------//
-        iLight = ((fMin + fMax)/2);
-        
-        //--------------------------------------------------------------------//
-        // Find the saturation
-        //--------------------------------------------------------------------//
-        if (fMax === fMin) {
-            iHue = iSat = 0;
-        } else {
+        try {
+            fRed    = iRed / 255;
+            fGreen  = iGreen / 255;
+            fBlue   = iBlue / 255;
+
+            //--------------------------------------------------------------------//
+            // Determine which of the three numbers is the minimum and maximum.
+            //--------------------------------------------------------------------//
+            fMin = Math.min( fRed, fGreen, fBlue );
+            fMax = Math.max( fRed, fGreen, fBlue );
+
             fDifference = fMax - fMin;
-            iSat = iLight > 0.5 ? fDifference / (2 - fMax - fMin) : fDifference / (fMax + fMin);
-            switch (fMax) {
-                case fRed:
-                    iHue = (fGreen - fBlue) / fDifference + (fGreen < fBlue ? 6 : 0);
-                    break;
-                case fGreen:
-                    iHue = (fBlue - fRed) / fDifference + 2;
-                    break;
-                case fBlue:
-                    iHue = (fRed - fGreen) / fDifference + 4;
-                    break;
+
+            //--------------------------------------------------------------------//
+            // Find the luminance figure.
+            //--------------------------------------------------------------------//
+            iLight = ((fMin + fMax)/2);
+
+            //--------------------------------------------------------------------//
+            // Find the saturation
+            //--------------------------------------------------------------------//
+            if (fMax === fMin) {
+                iHue = iSat = 0;
+            } else {
+                fDifference = fMax - fMin;
+                iSat = iLight > 0.5 ? fDifference / (2 - fMax - fMin) : fDifference / (fMax + fMin);
+                switch (fMax) {
+                    case fRed:
+                        iHue = (fGreen - fBlue) / fDifference + (fGreen < fBlue ? 6 : 0);
+                        break;
+                    case fGreen:
+                        iHue = (fBlue - fRed) / fDifference + 2;
+                        break;
+                    case fBlue:
+                        iHue = (fRed - fGreen) / fDifference + 4;
+                        break;
+                }
+                iHue /= 6;
             }
-            iHue /= 6;
+
+            //--------------------------------------------------------------------//
+            // Round off the figures.
+            //--------------------------------------------------------------------//
+            iHue = Math.round(iHue * 360);
+            iSat = Math.round(iSat * 100);
+            iLight = Math.round(iLight * 100);
+
+    //        console.log(iHue);
+    //        console.log(iSat);
+    //        console.log(iLight);
+
+            //--------------------------------------------------------------------//
+            // Return the figures.
+            //--------------------------------------------------------------------//
+            mResult = {
+                "hue"           : iHue,
+                "saturation"    : iSat,
+                "light"         : iLight
+            };
+        } catch (e) {
+            mResult = {
+                "hue"           : 0,
+                "saturation"    : 0,
+                "light"         : 0
+            };
+            
+            $.sap.log.error("Error in IomyRe.functions.convertRGBToHSL ("+e.name+"): " + e.message);
+            
+        } finally {
+            return mResult;
         }
-        
-        //--------------------------------------------------------------------//
-        // Round off the figures.
-        //--------------------------------------------------------------------//
-        iHue = Math.round(iHue * 360);
-        iSat = Math.round(iSat * 100);
-        iLight = Math.round(iLight * 100);
-        
-//        console.log(iHue);
-//        console.log(iSat);
-//        console.log(iLight);
-        
-        //--------------------------------------------------------------------//
-        // Return the figures.
-        //--------------------------------------------------------------------//
-        return {
-            "hue"           : iHue,
-            "saturation"    : iSat,
-            "light"         : iLight
-        };
     },
     
     convertRGBToHSL255 : function (iOldRed, iOldGreen, iOldBlue) {
@@ -264,60 +279,76 @@ $.extend(IomyRe.functions, {
         var iNewSat;
         var iNewLight;
         
-        fOldRed    = iOldRed / 255;
-        fOldGreen  = iOldGreen / 255;
-        fOldBlue   = iOldBlue / 255;
+        var mResult;
         
-        //--------------------------------------------------------------------//
-        // Determine which of the three numbers is the minimum and maximum.
-        //--------------------------------------------------------------------//
-        fMin = Math.min( fOldRed, fOldGreen, fOldBlue );
-        fMax = Math.max( fOldRed, fOldGreen, fOldBlue );
-        
-        fDifference = fMax - fMin;
-        
-        //--------------------------------------------------------------------//
-        // Find the luminance figure.
-        //--------------------------------------------------------------------//
-        iNewLight = ((fMin + fMax)/2);
-        
-        //--------------------------------------------------------------------//
-        // Find the saturation
-        //--------------------------------------------------------------------//
-        if (fMax === fMin) {
-            iNewHue = iNewSat = 0;
-        } else {
+        try {
+            fOldRed    = iOldRed / 255;
+            fOldGreen  = iOldGreen / 255;
+            fOldBlue   = iOldBlue / 255;
+
+            //--------------------------------------------------------------------//
+            // Determine which of the three numbers is the minimum and maximum.
+            //--------------------------------------------------------------------//
+            fMin = Math.min( fOldRed, fOldGreen, fOldBlue );
+            fMax = Math.max( fOldRed, fOldGreen, fOldBlue );
+
             fDifference = fMax - fMin;
-            iNewSat = iNewLight > 0.5 ? fDifference / (2 - fMax - fMin) : fDifference / (fMax + fMin);
-            switch (fMax) {
-                case fOldRed:
-                    iNewHue = (fOldGreen - fOldBlue) / fDifference + (fOldGreen < fOldBlue ? 6 : 0);
-                    break;
-                case fOldGreen:
-                    iNewHue = (fOldBlue - fOldRed) / fDifference + 2;
-                    break;
-                case fOldBlue:
-                    iNewHue = (fOldRed - fOldGreen) / fDifference + 4;
-                    break;
+
+            //--------------------------------------------------------------------//
+            // Find the luminance figure.
+            //--------------------------------------------------------------------//
+            iNewLight = ((fMin + fMax)/2);
+
+            //--------------------------------------------------------------------//
+            // Find the saturation
+            //--------------------------------------------------------------------//
+            if (fMax === fMin) {
+                iNewHue = iNewSat = 0;
+            } else {
+                fDifference = fMax - fMin;
+                iNewSat = iNewLight > 0.5 ? fDifference / (2 - fMax - fMin) : fDifference / (fMax + fMin);
+                switch (fMax) {
+                    case fOldRed:
+                        iNewHue = (fOldGreen - fOldBlue) / fDifference + (fOldGreen < fOldBlue ? 6 : 0);
+                        break;
+                    case fOldGreen:
+                        iNewHue = (fOldBlue - fOldRed) / fDifference + 2;
+                        break;
+                    case fOldBlue:
+                        iNewHue = (fOldRed - fOldGreen) / fDifference + 4;
+                        break;
+                }
+                iNewHue /= 6;
             }
-            iNewHue /= 6;
+
+            //--------------------------------------------------------------------//
+            // Round off the figures.
+            //--------------------------------------------------------------------//
+            iNewHue = Math.round(iNewHue * 360);
+            iNewSat = Math.round(iNewSat * 255);
+            iNewLight = Math.round(iNewLight * 255);
+
+            //--------------------------------------------------------------------//
+            // Return the figures.
+            //--------------------------------------------------------------------//
+            mResult = {
+                "hue"           : iNewHue,
+                "saturation"    : iNewSat,
+                "light"         : iNewLight
+            };
+            
+        } catch (e) {
+            mResult = {
+                "hue"           : 0,
+                "saturation"    : 0,
+                "light"         : 0
+            };
+            
+            $.sap.log.error("Error in IomyRe.functions.convertRGBToHSL255 ("+e.name+"): " + e.message);
+            
+        } finally {
+            return mResult;
         }
-        
-        //--------------------------------------------------------------------//
-        // Round off the figures.
-        //--------------------------------------------------------------------//
-        iNewHue = Math.round(iNewHue * 360);
-        iNewSat = Math.round(iNewSat * 255);
-        iNewLight = Math.round(iNewLight * 255);
-        
-        //--------------------------------------------------------------------//
-        // Return the figures.
-        //--------------------------------------------------------------------//
-        return {
-            "hue"           : iNewHue,
-            "saturation"    : iNewSat,
-            "light"         : iNewLight
-        };
     },
     /**
      * Converts HSL values to RGB values.
@@ -340,89 +371,100 @@ $.extend(IomyRe.functions, {
         var fM;
         var mValues;
         
-        if (!isFinite(iHue)) {
-            iHue = 0;
+        try {
+            if (!isFinite(iHue)) {
+                iHue = 0;
+            }
+
+            if (!isFinite(iSat)) {
+                iSat = 0;
+            }
+
+            if (!isFinite(iLight)) {
+                iLight = 0;
+            }
+
+            //--------------------------------------------------------//
+            // Process the Hue for calculation.
+            //--------------------------------------------------------//
+            iHue /= 60;
+            if (iHue < 0) {
+                iHue = 6 - ((0-iHue) % 6);
+            }
+            iHue = iHue % 6;
+
+            //--------------------------------------------------------//
+            // Process the saturation and luminance.
+            //--------------------------------------------------------//
+            fSaturation = Math.max(0, Math.min(1, iSat / 100));
+            fLuminance  = Math.max(0, Math.min(1, iLight / 100));
+
+            //--------------------------------------------------------//
+            // Get the Chroma and the X value.
+            //--------------------------------------------------------//
+            fChroma = (1 - Math.abs((2 * fLuminance) - 1)) * fSaturation;
+            fX = fChroma * (1 - Math.abs((iHue % 2) - 1));
+
+            //--------------------------------------------------------//
+            // Find the points on the RGB cube.
+            //--------------------------------------------------------//
+            if (iHue < 1) {
+                iRed   = fChroma;
+                iGreen = fX;
+                iBlue  = 0;
+
+            } else if (iHue < 2) {
+                iRed   = fX;
+                iGreen = fChroma;
+                iBlue  = 0;
+
+            } else if (iHue < 3) {
+                iRed   = 0;
+                iGreen = fChroma;
+                iBlue  = fX;
+
+            } else if (iHue < 4) {
+                iRed   = 0;
+                iGreen = fX;
+                iBlue  = fChroma;
+
+            } else if (iHue < 5) {
+                iRed   = fX;
+                iGreen = 0;
+                iBlue  = fChroma;
+
+            } else {
+                iRed   = fChroma;
+                iGreen = 0;
+                iBlue  = fX;
+
+            }
+
+            //--------------------------------------------------------//
+            // Find the individual RGB values to match brightness.
+            //--------------------------------------------------------//
+            fM      = fLuminance - fChroma / 2;
+            iRed    = Math.round((iRed + fM) * 255);
+            iGreen  = Math.round((iGreen + fM) * 255);
+            iBlue   = Math.round((iBlue + fM) * 255);
+
+            mValues = {
+                red     : iRed,
+                green   : iGreen,
+                blue    : iBlue
+            };
+        } catch (e) {
+            mValues = {
+                red     : 0,
+                green   : 0,
+                blue    : 0
+            };
+            
+            $.sap.log.error("Error in IomyRe.functions.convertHSLToRGB ("+e.name+"): " + e.message);
+            
+        } finally {
+            return mValues;
         }
-        
-        if (!isFinite(iSat)) {
-            iSat = 0;
-        }
-        
-        if (!isFinite(iLight)) {
-            iLight = 0;
-        }
-
-        //--------------------------------------------------------//
-        // Process the Hue for calculation.
-        //--------------------------------------------------------//
-        iHue /= 60;
-        if (iHue < 0) {
-            iHue = 6 - ((0-iHue) % 6);
-        }
-        iHue = iHue % 6;
-        
-        //--------------------------------------------------------//
-        // Process the saturation and luminance.
-        //--------------------------------------------------------//
-        fSaturation = Math.max(0, Math.min(1, iSat / 100));
-        fLuminance  = Math.max(0, Math.min(1, iLight / 100));
-
-        //--------------------------------------------------------//
-        // Get the Chroma and the X value.
-        //--------------------------------------------------------//
-        fChroma = (1 - Math.abs((2 * fLuminance) - 1)) * fSaturation;
-        fX = fChroma * (1 - Math.abs((iHue % 2) - 1));
-
-        //--------------------------------------------------------//
-        // Find the points on the RGB cube.
-        //--------------------------------------------------------//
-        if (iHue < 1) {
-            iRed   = fChroma;
-            iGreen = fX;
-            iBlue  = 0;
-
-        } else if (iHue < 2) {
-            iRed   = fX;
-            iGreen = fChroma;
-            iBlue  = 0;
-
-        } else if (iHue < 3) {
-            iRed   = 0;
-            iGreen = fChroma;
-            iBlue  = fX;
-
-        } else if (iHue < 4) {
-            iRed   = 0;
-            iGreen = fX;
-            iBlue  = fChroma;
-
-        } else if (iHue < 5) {
-            iRed   = fX;
-            iGreen = 0;
-            iBlue  = fChroma;
-
-        } else {
-            iRed   = fChroma;
-            iGreen = 0;
-            iBlue  = fX;
-
-        }
-
-        //--------------------------------------------------------//
-        // Find the individual RGB values to match brightness.
-        //--------------------------------------------------------//
-        fM      = fLuminance - fChroma / 2;
-        iRed    = Math.round((iRed + fM) * 255);
-        iGreen  = Math.round((iGreen + fM) * 255);
-        iBlue   = Math.round((iBlue + fM) * 255);
-        
-        mValues = {
-            red     : iRed,
-            green   : iGreen,
-            blue    : iBlue
-        };
-        
-        return mValues;
     },
     
     convertHSL255ToRGB : function (iHue, iSat, iLight) {
@@ -446,86 +488,98 @@ $.extend(IomyRe.functions, {
         var iBlue;
         var mValues;
         
-        
-        if (!isFinite(iHue)) {
-            iHue = 0;
-        }
-        
-        if (!isFinite(iSat)) {
-            iSat = 0;
-        }
-        
-        if (!isFinite(iLight)) {
-            iLight = 0;
-        }
+        try {
+            if (!isFinite(iHue)) {
+                iHue = 0;
+            }
 
-        //--------------------------------------------------------//
-        // Process the Hue for calculation.
-        //--------------------------------------------------------//
-        var iRealHue   = Math.abs( iHue ) % 360;
-        var iHueHexant = Math.floor( iRealHue / 60 );
-        //--------------------------------------------------------//
-        // Process the saturation and luminance.
-        //--------------------------------------------------------//
-        
-        fSaturation = Math.max(0, Math.min(1, iSat / 255));
-        fLuminance  = Math.max(0, Math.min(1, iLight / 255));
-        
-        //--------------------------------------------------------//
-        // Get the Chroma and the X value.
-        //--------------------------------------------------------//
-        fChroma = (1 - Math.abs((2 * fLuminance) - 1)) * fSaturation;
-        fX = fChroma * (1 - Math.abs((iHueHexant % 2) - 1));
-        fM = fLuminance - ( fChroma / 2 );
-        
-        //--------------------------------------------------------//
-        //-- Generate the Hexant Values                         --//
-        //--------------------------------------------------------//
-        switch( iHueHexant ) {
-            case 0:
-                iTempR = fChroma;
-                iTempG = fX;
-                iTempB = 0;
-                break;
-            case 1:
-                iTempR = fX;
-                iTempG = fChroma;
-                iTempB = 0;
-                break;
-            case 2:
-                iTempR = 0;
-                iTempG = fChroma;
-                iTempB = fX;
-                break;
-            case 3:
-                iTempR = 0;
-                iTempG = fX;
-                iTempB = fChroma;
-                break;
-            case 4:
-                iTempR = fX;
-                iTempG = 0;
-                iTempB = fChroma;
-                break;
-            default:
-                iTempR = fChroma;
-                iTempG = 0;
-                iTempB = fX;
-                break;
+            if (!isFinite(iSat)) {
+                iSat = 0;
+            }
+
+            if (!isFinite(iLight)) {
+                iLight = 0;
+            }
+            
+            //--------------------------------------------------------//
+            // Process the Hue for calculation.
+            //--------------------------------------------------------//
+            var iRealHue   = Math.abs( iHue ) % 360;
+            var iHueHexant = Math.floor( iRealHue / 60 );
+            //--------------------------------------------------------//
+            // Process the saturation and luminance.
+            //--------------------------------------------------------//
+
+            fSaturation = Math.max(0, Math.min(1, iSat / 255));
+            fLuminance  = Math.max(0, Math.min(1, iLight / 255));
+
+            //--------------------------------------------------------//
+            // Get the Chroma and the X value.
+            //--------------------------------------------------------//
+            fChroma = (1 - Math.abs((2 * fLuminance) - 1)) * fSaturation;
+            fX = fChroma * (1 - Math.abs((iHueHexant % 2) - 1));
+            fM = fLuminance - ( fChroma / 2 );
+
+            //--------------------------------------------------------//
+            //-- Generate the Hexant Values                         --//
+            //--------------------------------------------------------//
+            switch( iHueHexant ) {
+                case 0:
+                    iTempR = fChroma;
+                    iTempG = fX;
+                    iTempB = 0;
+                    break;
+                case 1:
+                    iTempR = fX;
+                    iTempG = fChroma;
+                    iTempB = 0;
+                    break;
+                case 2:
+                    iTempR = 0;
+                    iTempG = fChroma;
+                    iTempB = fX;
+                    break;
+                case 3:
+                    iTempR = 0;
+                    iTempG = fX;
+                    iTempB = fChroma;
+                    break;
+                case 4:
+                    iTempR = fX;
+                    iTempG = 0;
+                    iTempB = fChroma;
+                    break;
+                default:
+                    iTempR = fChroma;
+                    iTempG = 0;
+                    iTempB = fX;
+                    break;
+            }
+
+            //-- Calculate the RGB values --//
+            iRed   = Math.floor( ( iTempR+fM ) * 255 );
+            iGreen = Math.floor( ( iTempG+fM ) * 255 );
+            iBlue  = Math.floor( ( iTempB+fM ) * 255 );
+
+            mValues = {
+                red     : iRed,
+                green   : iGreen,
+                blue    : iBlue
+            };
+            
+        } catch (e) {
+            mValues = {
+                red     : 0,
+                green   : 0,
+                blue    : 0
+            };
+            
+            $.sap.log.error("Error in IomyRe.functions.convertHSL255ToRGB ("+e.name+"): " + e.message);
+            
+        } finally {
+            return mValues;
         }
         
-        //-- Calculate the RGB values --//
-        iRed   = Math.floor( ( iTempR+fM ) * 255 );
-        iGreen = Math.floor( ( iTempG+fM ) * 255 );
-        iBlue  = Math.floor( ( iTempB+fM ) * 255 );
-        
-        mValues = {
-            red     : iRed,
-            green   : iGreen,
-            blue    : iBlue
-        };
-        
-        return mValues;
     },
     
     /**
@@ -611,7 +665,7 @@ $.extend(IomyRe.functions, {
 
             });
         } catch (e) {
-            sHexString = "";
+            sHexString = null;
             $.sap.log.error("Error converting RGB values to HEX format ("+e.name+"): " + e.message);
             
         } finally {

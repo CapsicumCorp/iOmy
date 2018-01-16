@@ -233,19 +233,19 @@ $.extend(IomyRe.time,{
 
 
                 default:
-                    $.sap.log.error("Time period '"+sPeriod+"' is invalid.");
+                    throw new IllegalArgumentException("Time period '"+sPeriod+"' is invalid.");
             }
+
+        } catch (e) {
+            iStartStamp = -1;
+            $.sap.log.error("Error in IomyRe.time.GetStartStampForTimePeriod: ("+e.name+"): " + e.message);
+            
+        } finally {
             //------------------------------------------------------------//
             //-- 9.0 - Return Results                                   --//
             //------------------------------------------------------------//
 
-
             return iStartStamp;
-
-        } catch (e) {
-            e.message = "Error in IomyRe.time.GetStartStampForTimePeriod:\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
         }
 	},
 	
@@ -289,13 +289,13 @@ $.extend(IomyRe.time,{
             } else {
                 sMilitaryTime += iMinutes;
             }
-
-            return sMilitaryTime;
             
         } catch (e) {
-            e.message = "Error in IomyRe.time.GetMilitaryTimeFromDate:\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
+            sMilitaryTime = null;
+            $.sap.log.error("Error in IomyRe.time.GetMilitaryTimeFromDate: ("+e.name+"): " + e.message);
+            
+        } finally {
+            return sMilitaryTime;
         }
     },
 	
@@ -365,13 +365,13 @@ $.extend(IomyRe.time,{
             date = new Date();
             date.setHours(parseInt(iHours));
             date.setMinutes(parseInt(iMinutes));
-
-            return date;
             
         } catch (e) {
-            e.message = "Error in IomyRe.time.GetDateFromMilitaryTime:\n" + e.message;
-            $.sap.log.error(e.message);
-            throw e;
+            date = null;
+            $.sap.log.error("Error in IomyRe.time.GetDateFromMilitaryTime ("+e.name+"): " + e.message);
+            
+        } finally {
+            return date;
         }
     }
 	

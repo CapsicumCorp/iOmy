@@ -118,36 +118,43 @@ $.extend(IomyRe.devices,{
             throw new MissingSettingsMapException(sThingIDMissing);
         }
 
-        //--------------------------------------------------------------------//
-        // Run the AJAX request to switch on or off.
-        //--------------------------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest({
-            url: IomyRe.apiphp.APILocation("statechange"),
-            type: "POST",
-            data: { 
-                "Mode":"ThingToggleStatus", 
-                "Id": iThingId
-            },
-            onFail : function(response) {
-                
-                fnFail(response.responseText);
-                
-            },
-            onSuccess : function( sExpectedDataType, aAjaxData ) {
-                try {
-                    if (aAjaxData.Error !== true) {
-                        if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
-                            IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+        try {
+            //--------------------------------------------------------------------//
+            // Run the AJAX request to switch on or off.
+            //--------------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest({
+                url: IomyRe.apiphp.APILocation("statechange"),
+                type: "POST",
+                data: { 
+                    "Mode":"ThingToggleStatus", 
+                    "Id": iThingId
+                },
+                onFail : function(response) {
+
+                    fnFail(response.responseText);
+
+                },
+                onSuccess : function( sExpectedDataType, aAjaxData ) {
+                    try {
+                        if (aAjaxData.Error !== true) {
+                            if( aAjaxData.ThingStatus!==undefined && aAjaxData.ThingStatus!==null ) {
+                                IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+                            }
+                            fnSuccess(aAjaxData.ThingStatus);
+                        } else {
+                            fnFail(aAjaxData.ErrMesg);
                         }
-                        fnSuccess(aAjaxData.ThingStatus);
-                    } else {
-                        fnFail(aAjaxData.ErrMesg);
+                    } catch (e1) {
+                        jQuery.sap.log.error("An error has occured within the RunSwitch Ajax Request onSuccess: "+e1.message);
                     }
-                } catch (e1) {
-                    jQuery.sap.log.error("An error has occured within the RunSwitch Ajax Request onSuccess: "+e1.message);
                 }
-            }
-        });
+            });
+            
+        } catch (e) {
+            var sErrMesg = "Error attempting to switch a device on or off (ID: "+iThingId+") ("+e.name+"): " + e.message
+            $.sap.log.error(sErrMesg);
+            fnFail(sErrMesg);
+        }
     },
     
     /**
@@ -203,6 +210,9 @@ $.extend(IomyRe.devices,{
         var fnSuccess;
         var fnFail;
         
+        var sDeviceIDMissing    = "Thing (thingID) or Link (linkID) must be specified!";
+        var sRoomIDMissing      = "Room ID (roomID) must be specified!";
+        
         //--------------------------------------------------------------------//
         // Read the settings map
         //--------------------------------------------------------------------//
@@ -231,7 +241,7 @@ $.extend(IomyRe.devices,{
                         iLinkId = mSettings.linkID;
 //                    }
                 } else {
-                    fnAppendError("Thing (thingID) or Link (linkID) must be specified!");
+                    fnAppendError(sDeviceIDMissing);
                 }
             }
             
@@ -256,7 +266,7 @@ $.extend(IomyRe.devices,{
                     iRoomId        = mSettings.roomID;
                 }
             } else {
-                fnAppendError("Room ID (roomID) must be specified!");
+                fnAppendError(sRoomIDMissing);
             }
             
             //--------------------------------------------------------------------//
@@ -277,34 +287,45 @@ $.extend(IomyRe.devices,{
             }
             
         } else {
-            throw new MissingSettingsMapException();
+            fnAppendError(sDeviceIDMissing);
+            fnAppendError(sRoomIDMissing);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n"));
         }
         
-        //------------------------------------------------------------//
-        // Begin request
-        //------------------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest({
-            url : sUrl,
-            data : {"Mode" : "ChooseRoom", "Id" : parseInt(iLinkId), "RoomId" : parseInt(iRoomId)},
-            
-            onSuccess : function (response, data) {
-                try {
-                    if (data.Error === false) {
-                        fnSuccess();
+        try {
+            //------------------------------------------------------------//
+            // Begin request
+            //------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest({
+                url : sUrl,
+                data : {"Mode" : "ChooseRoom", "Id" : parseInt(iLinkId), "RoomId" : parseInt(iRoomId)},
 
-                    } else {
-                        fnFail(data.ErrMesg);
+                onSuccess : function (response, data) {
+                    try {
+                        if (data.Error === false) {
+                            fnSuccess();
+
+                        } else {
+                            fnFail(data.ErrMesg);
+                        }
+                    } catch (ex) {
+                        fnFail(ex.message);
                     }
-                } catch (ex) {
-                    fnFail(ex.message);
+                },
+
+                onFail : function (error) {
+                    var sErrMessage = "Error (HTTP Status "+error.status+"): "+error.responseText;
+                    jQuery.sap.log.error(sErrMessage);
+                    fnFail(sErrMessage);
                 }
-            },
+            });
             
-            onFail : function (error) {
-                fnFail("Error (HTTP Status "+error.status+"): "+error.responseText);
-                //jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-            }
-        });
+        } catch (e) {
+            var sErrMessage = "Error attempting to assign a device to a room ("+e.name+"): " + e.message;
+            $.sap.log.error(sErrMessage);
+            fnFail(sErrMessage);
+        }
     },
     
     editThing : function (mSettings) {
@@ -336,6 +357,9 @@ $.extend(IomyRe.devices,{
         var mThingChangeSettings = {};
         var mRoomChangeSettings = {};
         
+        var sThingIDMissing     = "Thing ID (thingID) must be specified!";
+        var sThingNameMissing   = "New Thing Name (thingName) must be specified!";
+        
         // Lambda function to run if there are errors.
         var fnAppendError   = function (sErrMesg) {
             bError = true;
@@ -361,14 +385,14 @@ $.extend(IomyRe.devices,{
                     sOldThingText = IomyRe.common.ThingList["_"+iThingId].DisplayName;
                 }
             } else {
-                fnAppendError("Thing ID (thingID) must be specified!");
+                fnAppendError(sThingIDMissing);
             }
             
             //----------------------------------------------------------------//
             // REQUIRED: Thing Name
             //----------------------------------------------------------------//
             if (mSettings.thingName === undefined) {
-                fnAppendError("New Thing Name (thingName) must be specified!");
+                fnAppendError(sThingNameMissing);
             } else {
                 sThingText = mSettings.thingName;
             }
@@ -419,8 +443,9 @@ $.extend(IomyRe.devices,{
             }
             
         } else {
-            fnAppendError("Thing ID (thingID) must be specified!");
-            fnAppendError("New Thing Name (thingName) must be specified!");
+            fnAppendError(sThingIDMissing);
+            fnAppendError(sThingNameMissing);
+            
             throw new MissingSettingsMapException( aErrorMessages.join("\n") );
         }
 
@@ -475,31 +500,39 @@ $.extend(IomyRe.devices,{
                         // indicating complete or partial success.
                         //--------------------------------------------------------//
                         mRoomChangeSettings.onSuccess = function () {
-                            IomyRe.common.RefreshCoreVariables({
-                                onSuccess : function () {
-                                    var sMessage;
+                            try {
+                                IomyRe.common.RefreshCoreVariables({
+                                    onSuccess : function () {
+                                        try {
+                                            var sMessage;
 
-                                    if (mThingChangeSettings.successful === true) {
-                                        sMessage = "Device renamed to "+sThingText+" and is now located in "+sRoomText;
-                                        IomyRe.common.showMessage({
-                                            text : sMessage,
-                                        });
+                                            if (mThingChangeSettings.successful === true) {
+                                                sMessage = "Device renamed to "+sThingText+" and is now located in "+sRoomText;
+                                                IomyRe.common.showMessage({
+                                                    text : sMessage,
+                                                });
 
-                                        fnSuccess();
+                                                fnSuccess();
 
-                                    } else {
-                                        sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
+                                            } else {
+                                                sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
 
-                                        IomyRe.common.showWarning(sMessage, "", function () {
-                                            fnWarning();
-                                        });
-                                    }
+                                                IomyRe.common.showWarning(sMessage, "", function () {
+                                                    fnWarning();
+                                                });
+                                            }
 
-                                    fnSuccess();
-                                },
+                                            fnSuccess();
+                                        } catch (e) {
+                                            $.sap.log.error(e.name + ": " + e.message);
+                                        }
+                                    },
 
-                                onFail : fnThingFail
-                            });
+                                    onFail : fnThingFail
+                                });
+                            } catch (e) {
+                                $.sap.log.error(e.name + ": " + e.message);
+                            }
                         };
 
                         //--------------------------------------------------------//
@@ -507,33 +540,46 @@ $.extend(IomyRe.devices,{
                         // indicating complete or partial failure.
                         //--------------------------------------------------------//
                         mRoomChangeSettings.onFail = function (sErrorMessage) {
-                            IomyRe.common.RefreshCoreVariables({
-                                onSuccess : function () {
-                                    var sMessage;
+                            try {
+                                IomyRe.common.RefreshCoreVariables({
+                                    onSuccess : function () {
+                                        try {
+                                            var sMessage;
 
-                                    if (mThingChangeSettings.successful === true) {
-                                        sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
+                                            if (mThingChangeSettings.successful === true) {
+                                                sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
 
-                                        IomyRe.common.showWarning(sMessage, "", function () {
-                                            fnWarning(sMessage);
-                                        });
+                                                IomyRe.common.showWarning(sMessage, "", function () {
+                                                    fnWarning(sMessage);
+                                                });
 
-                                        jQuery.sap.log.warning(sMessage);
-                                    } else {
-                                        sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
+                                                jQuery.sap.log.warning(sMessage);
+                                            } else {
+                                                sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
 
-                                        IomyRe.common.showError(sMessage, "", function () {
-                                            fnFail();
-                                        });
+                                                IomyRe.common.showError(sMessage, "", function () {
+                                                    fnFail();
+                                                });
 
-                                        jQuery.sap.log.error(sMessage);
+                                                jQuery.sap.log.error(sMessage);
+                                            }
+                                        } catch (e) {
+                                            $.sap.log.error(e.name + ": " + e.message);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            } catch (e) {
+                                $.sap.log.error(e.name + ": " + e.message);
+                            }
                         };
 
                         //-- Call the room assignment function with the correct configuration. --//
-                        IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
+                        try {
+                            IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
+
+                        } catch (e) {
+                            jQuery.sap.log.error(e.name + ": " + e.message);
+                        }
                     };
 
                     //------------------------------------------------------------//
@@ -577,21 +623,31 @@ $.extend(IomyRe.devices,{
                         };
 
                         fnThingSuccess = function () {
-                            IomyRe.common.RefreshCoreVariables({
-                                onSuccess : function () {
-                                    IomyRe.common.showMessage({
-                                        text : "Device renamed to \""+sThingText+"\"."
-                                    });
+                            try {
+                                IomyRe.common.RefreshCoreVariables({
+                                    onSuccess : function () {
+                                        IomyRe.common.showMessage({
+                                            text : "Device renamed to \""+sThingText+"\"."
+                                        });
 
-                                    fnSuccess();
-                                }
-                            });
+                                        fnSuccess();
+                                    }
+                                });
+                            } catch (e) {
+                                $.sap.log.error(e.name + ": " + e.message);
+                            }
                         };
 
                         mThingChangeSettings.onSuccess    = fnThingSuccess;
                         mThingChangeSettings.onFail       = fnThingFail;
 
-                        IomyRe.devices.editThingName(mThingChangeSettings);
+                        // Run the API to update the device (thing) name
+                        try {
+                            IomyRe.devices.editThingName(mThingChangeSettings);
+
+                        } catch (e) {
+                            jQuery.sap.log.error(e.name + ": " + e.message);
+                        }
                     }
 
                     //------------------------------------------------------------//
@@ -605,21 +661,30 @@ $.extend(IomyRe.devices,{
                         };
 
                         fnRoomSuccess = function () {
-                            IomyRe.common.RefreshCoreVariables({ 
-                                onSuccess : function () {
-                                    IomyRe.common.showMessage({
-                                        text : "Device is now located in "+sRoomText
-                                    });
+                            try {
+                                IomyRe.common.RefreshCoreVariables({ 
+                                    onSuccess : function () {
+                                        IomyRe.common.showMessage({
+                                            text : "Device is now located in "+sRoomText
+                                        });
 
-                                    fnSuccess();
-                                }
-                            });
+                                        fnSuccess();
+                                    }
+                                });
+                            } catch (e) {
+                                
+                            }
                         };
 
                         mRoomChangeSettings.onSuccess    = fnRoomSuccess;
                         mRoomChangeSettings.onFail       = fnRoomFail;
 
-                        IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
+                        try {
+                            IomyRe.devices.AssignDeviceToRoom(mRoomChangeSettings);
+
+                        } catch (e) {
+                            jQuery.sap.log.error(e.name + ": " + e.message);
+                        }
                     }
                 }
             } catch (e) {
@@ -704,30 +769,36 @@ $.extend(IomyRe.devices,{
             throw new MissingSettingsMapException( aErrorMessages.join("\n") );
         }
         
-        //--------------------------------------------------------------------//
-        // Run the API to change the thing name.
-        //--------------------------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest({
-            "url" : IomyRe.apiphp.APILocation("thing"),
-            "data" : {"Mode" : "EditName", "Id" : iThingId, "Name" : sThingName},
-            "onSuccess" : function (responseType, data) {
+        try {
+            //--------------------------------------------------------------------//
+            // Run the API to change the thing name.
+            //--------------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest({
+                "url" : IomyRe.apiphp.APILocation("thing"),
+                "data" : {"Mode" : "EditName", "Id" : iThingId, "Name" : sThingName},
+                "onSuccess" : function (responseType, data) {
 
-                try {
-                    if (data.Error === false) {
-                        fnSuccess();
-                        
-                    } else {
-                        fnFail(data.ErrMesg);
+                    try {
+                        if (data.Error === false) {
+                            fnSuccess();
+
+                        } else {
+                            fnFail(data.ErrMesg);
+                        }
+                    } catch (e) {
+                        fnFail(e.message);
                     }
-                } catch (e) {
-                    fnFail(e.message);
-                }
 
-            },
-            "onFail" : function (err) {
-                fnFail(err.responseText);
-            }
-        });
+                },
+                "onFail" : function (err) {
+                    fnFail(err.responseText);
+                }
+            });
+        } catch (e) {
+            var sErrMessage = "Error attempting to change the device name ("+e.name+"): " + e.message;
+            $.sap.log.error(sErrMessage);
+            fnFail(sErrMessage);
+        }
     },
     
     /**
@@ -872,11 +943,12 @@ $.extend(IomyRe.devices,{
             }
         } catch (e) {
             // Something else has gone hideously wrong.
-            $.sap.log.error("Fatal error generating request list for device ("+e.name+"): " + e.message);
-            throw e;
+            aTasks = { "High":[], "Low":[] };
+            $.sap.log.error("Fatal error generating request list for device (ID: "+mSettings.deviceData.DeviceId+") ("+e.name+"): " + e.message);
+            
+        } finally {
+            return aTasks;
         }
-        
-        return aTasks;
     },
     
     getHexOfLightColour : function (mSettings) {
@@ -945,18 +1017,23 @@ $.extend(IomyRe.devices,{
             throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
         }
         
+        //--------------------------------------------------------------------//
+        // Load the information and attempt to perform the calculation.
+        //--------------------------------------------------------------------//
         try {
             
             IomyRe.devices.loadLightBulbInformation({
                 thingID : iThingId,
 
                 onSuccess : function (iHue, iSaturation, iLight) {
-                    // FIXME: Someone needs to write code to convert from HSV to HSL.
-                    // The examples I found simply do not work, and I don't know why.
-                    //var sHexString = IomyRe.functions.convertHSLToHex(iHue, iSaturation, Math.floor(iLight / 2));
-                    var sHexString = IomyRe.functions.convertHSL255ToHex( iHue, iSaturation, iLight );
-                    
-                    fnSuccess(sHexString);
+                    try {
+                        var sHexString = IomyRe.functions.convertHSL255ToHex( iHue, iSaturation, iLight );
+
+                        fnSuccess(sHexString);
+                    } catch (e) {
+                        $.sap.log.error(e.name + ": " + e.message);
+                        fnFail(e.name + ": " + e.message);
+                    }
                 },
 
                 onFail : function (sErrorMessage) {
@@ -964,7 +1041,9 @@ $.extend(IomyRe.devices,{
                 }
             });
         } catch (e) {
-            jQuery.sap.log.error("There was an error loading the OData service: "+e.message);
+            var sErrorMessage = "There was an error while attempting to load the light bulb information ("+e.name+"): "+e.message
+            jQuery.sap.log.error(sErrorMessage);
+            fnFail(sErrorMessage);
         }
     },
     
@@ -1083,70 +1162,88 @@ $.extend(IomyRe.devices,{
                     var iHue        = null;
                     var iSaturation = null;
                     var iLight      = null;
+                    var bError      = false;
+                    var sErrMessage = "";
                     
-                    for (var i = 0; i < data.length; i++) {
-                        //console.log(JSON.stringify(data));
-                        //----------------------------------------------------//
-                        // If we're grabbing the HUE value
-                        //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3901 && iHue === null) {
-                            //iHue = Math.round(data[i].CALCEDVALUE / fHueConversionRate);
-                            iHue = data[i].CALCEDVALUE;
-                        }
-                        
-                        //----------------------------------------------------//
-                        // If we're grabbing the SATURATION value
-                        //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3902 && iSaturation === null) {
-                            //iSaturation = Math.round(data[i].CALCEDVALUE / fSaturationConversionRate);
-                            iSaturation = data[i].CALCEDVALUE;
-                        }
-                        
-                        //----------------------------------------------------//
-                        // If we're grabbing the LUMINANCE value
-                        //----------------------------------------------------//
-                        if (data[i].RSTYPE_PK === 3903 && iLight === null) {
-                            //iLight = Math.round(data[i].CALCEDVALUE / fLightConversionRate);
-                            iLight = data[i].CALCEDVALUE;
-                        }
-                        
-                        //----------------------------------------------------//
-                        // If we already have what we need, we can finish the
-                        // loop.
-                        //----------------------------------------------------//
-                        if (iHue !== null && iSaturation !== null && iLight !== null) {
-                            break;
-                        } else {
-                            //-----------------------------------------------------//
-                            // Otherwise, if we've finished processing the data and
-                            // we don't have all of it, then increase the limit and
-                            // run the request again. Do this up to 5 times before
-                            // giving up.
-                            //-----------------------------------------------------//
-                            if (i === data.length - 1) {
-                                this.Limit += 3;
-                                this.Retries++;
-                                
-                                if (this.Retries < this.RetryLimit) {
-                                    IomyRe.apiodata.AjaxRequest(this);
-                                    //return;
-                                } else {
-                                    fnFail("Failed to find all of the data for "+mThing.DisplayName+".");
+                    try {
+                        for (var i = 0; i < data.length; i++) {
+                            //console.log(JSON.stringify(data));
+                            //----------------------------------------------------//
+                            // If we're grabbing the HUE value
+                            //----------------------------------------------------//
+                            if (data[i].RSTYPE_PK === 3901 && iHue === null) {
+                                //iHue = Math.round(data[i].CALCEDVALUE / fHueConversionRate);
+                                iHue = data[i].CALCEDVALUE;
+                            }
+
+                            //----------------------------------------------------//
+                            // If we're grabbing the SATURATION value
+                            //----------------------------------------------------//
+                            if (data[i].RSTYPE_PK === 3902 && iSaturation === null) {
+                                //iSaturation = Math.round(data[i].CALCEDVALUE / fSaturationConversionRate);
+                                iSaturation = data[i].CALCEDVALUE;
+                            }
+
+                            //----------------------------------------------------//
+                            // If we're grabbing the LUMINANCE value
+                            //----------------------------------------------------//
+                            if (data[i].RSTYPE_PK === 3903 && iLight === null) {
+                                //iLight = Math.round(data[i].CALCEDVALUE / fLightConversionRate);
+                                iLight = data[i].CALCEDVALUE;
+                            }
+
+                            //----------------------------------------------------//
+                            // If we already have what we need, we can finish the
+                            // loop.
+                            //----------------------------------------------------//
+                            if (iHue !== null && iSaturation !== null && iLight !== null) {
+                                break;
+                            } else {
+                                //-----------------------------------------------------//
+                                // Otherwise, if we've finished processing the data and
+                                // we don't have all of it, then increase the limit and
+                                // run the request again. Do this up to 5 times before
+                                // giving up.
+                                //-----------------------------------------------------//
+                                if (i === data.length - 1) {
+                                    this.Limit += 3;
+                                    this.Retries++;
+
+                                    if (this.Retries < this.RetryLimit) {
+                                        IomyRe.apiodata.AjaxRequest(this);
+                                        //return;
+                                    } else {
+                                        fnFail("Failed to find all of the data for "+mThing.DisplayName+".");
+                                    }
                                 }
                             }
                         }
+                    } catch (e) {
+                        bError = true;
+                        sErrMessage = "Failed to find all of the data for "+mThing.DisplayName+" ("+e.name+"): " + e.message;
+                        $.sap.log.error(sErrMessage);
                     }
                     
-                    
-                    //----------------------------------------------------//
-                    //-- Convert the Values                             --//
-                    //----------------------------------------------------//
-                    var mConvertedHSL = IomyRe.functions.convertHSL( "DB", "Normal", mThing.TypeId, iHue, iSaturation, iLight );
-                    
-                    if( mConvertedHSL.Error===false ) {
-                        fnSuccess( mConvertedHSL.Hue, mConvertedHSL.Sat, mConvertedHSL.Lig );
+                    if (!bError) {
+                        try {
+                            //----------------------------------------------------//
+                            //-- Convert the Values                             --//
+                            //----------------------------------------------------//
+                            var mConvertedHSL = IomyRe.functions.convertHSL( "DB", "Normal", mThing.TypeId, iHue, iSaturation, iLight );
+
+                            if( mConvertedHSL.Error===false ) {
+                                fnSuccess( mConvertedHSL.Hue, mConvertedHSL.Sat, mConvertedHSL.Lig );
+                            } else {
+                                fnFail("Failed to convert HSL data! "+mConvertedHSL.ErrMesg+".");
+                            }
+                            
+                        } catch (e) {
+                            sErrMessage = "Failed to process the light bulb data for "+mThing.DisplayName+" ("+e.name+"): " + e.message;
+                            $.sap.log.error(sErrMessage);
+                            fnFail(sErrMessage);
+                        }
                     } else {
-                        fnFail("Failed to convert HSL data! "+mConvertedHSL.ErrMesg+".");
+                        fnFail(sErrMessage);
                     }
                 },
 
@@ -1160,6 +1257,8 @@ $.extend(IomyRe.devices,{
             fnFail(e.name + ": " + e.message);
         }
     },
+    
+    /******** Experimental functions that will need to be fixed up. ********/
     
     getDeviceAddress : function (iThingId) {
         var iLinkId         = IomyRe.common.ThingList["_"+iThingId].LinkId;
