@@ -87,11 +87,11 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 								new sap.m.Input ({
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/KeyCode}",
                                     liveChange : function () {
-                                        if (this.getValue() === "") {
-                                            this.setValueState(sap.ui.core.ValueState.Error);
-                                        } else {
-                                            this.setValueState(sap.ui.core.ValueState.None);
-                                        }
+//                                        if (this.getValue() === "") {
+//                                            this.setValueState(sap.ui.core.ValueState.Error);
+//                                        } else {
+//                                            this.setValueState(sap.ui.core.ValueState.None);
+//                                        }
                                     }
                                 })
 							]

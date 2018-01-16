@@ -71,21 +71,25 @@ sap.ui.controller("pages.staging.Room", {
                             bEditing : oController.bEditing
                         };
                     } else {
-                         $.sap.log.error("Critical Error with bEditing, current state is:"+bEditing);
+                        $.sap.log.error("Critical Error with bEditing, current state is:"+oController.bEditing);
                     }
                 } catch(e1) {
                     $.sap.log.error("onBeforeShow: bEditing Critcal Error:"+e1.message);
                     return false;
                 }
                 
-                oController.IndicateWhetherInEditModeOrNot();
-                
-                //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
-                
-                oController.RefreshModel();
-                
-                oController.BuildRoomListUI();
+                try {
+                    oController.IndicateWhetherInEditModeOrNot();
+
+                    //-- Defines the Device Type --//
+                    IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+
+                    oController.RefreshModel();
+
+                    oController.BuildRoomListUI();
+                } catch (e) {
+                    IomyRe.common.showError(e.message, "Unable to load rooms");
+                }
             }
         });
             
@@ -275,7 +279,26 @@ sap.ui.controller("pages.staging.Room", {
                         }
                     })
                 );
-            }        
-        });  
+            }
+        });
+        
+        //--------------------------------------------------------------------//
+        // If the user has no access to a premise.
+        //--------------------------------------------------------------------//
+        if (JSON.stringify(oController.aaRoomList) === "{}") {
+            wList.addItem(
+                new sap.m.ObjectListItem ({
+                    title: "No rooms",
+                    type: "Active",
+                    //number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
+                    //numberUnit: "Devices",
+                    attributes : [
+                        new sap.m.ObjectAttribute ({
+                            text: "No access to a premise"
+                        })
+                    ]
+                })
+            );
+        }
     }    
 });

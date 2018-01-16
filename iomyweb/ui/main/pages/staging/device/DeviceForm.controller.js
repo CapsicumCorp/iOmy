@@ -562,7 +562,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
         var oCurrentFormData    = oView.getModel().getProperty( "/"+sDevTypeKey+"/" );
         var mData               = {};
-        var oModel              = oView.getModel();
+        //var oModel              = oView.getModel();
         
         // If the Room ID either less than 1 or an invalid value, like null or 
         // undefined, set it to the 'Unassigned' room.
@@ -686,63 +686,71 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             }
 
             mData.onSuccess = function (response, data) {
-                if (data.Error !== true) {
-                    jQuery.sap.log.debug("Success: "+JSON.stringify(response));
-                    jQuery.sap.log.debug("Success: "+JSON.stringify(data));
+                try {
+                    if (data.Error !== true) {
+                        jQuery.sap.log.debug("Success: "+JSON.stringify(response));
+                        jQuery.sap.log.debug("Success: "+JSON.stringify(data));
 
-                    //--------------------------------------------------------------//
-                    // Find the new Link ID                                         //
-                    //--------------------------------------------------------------//
-                    var iLinkId = 0;
+                        //--------------------------------------------------------------//
+                        // Find the new Link ID                                         //
+                        //--------------------------------------------------------------//
+                        var iLinkId = 0;
 
-                    // Should be in this variable
-                    if (data.Data !== undefined) {
-                        if (data.Data.LinkId !== undefined) {
-                            iLinkId = data.Data.LinkId;
+                        // Should be in this variable
+                        if (data.Data !== undefined) {
+                            if (data.Data.LinkId !== undefined) {
+                                iLinkId = data.Data.LinkId;
+                            }
+                        // I found the Open Weather Map feed link ID in this variable!
+                        } else if (data.WeatherStation !== undefined) {
+                            if (data.WeatherStation.LinkId !== undefined) {
+                                iLinkId = data.WeatherStation.LinkId;
+                            }
                         }
-                    // I found the Open Weather Map feed link ID in this variable!
-                    } else if (data.WeatherStation !== undefined) {
-                        if (data.WeatherStation.LinkId !== undefined) {
-                            iLinkId = data.WeatherStation.LinkId;
-                        }
+
+                        IomyRe.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                oController.RefreshModel({
+                                    onSuccess : function () {
+                                        IomyRe.common.showMessage({
+                                            text : "Device successfully created",
+                                            view : oView
+                                        });
+
+                                        if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                            oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
+
+                                            //oCurrentFormData.OnvifServer = iLinkId;
+                                            oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
+
+                                        } else {
+                                            oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
+                                            //IomyRe.common.NavigationChangePage("pBlock", {}, true);
+                                        }
+
+                                        if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+IomyRe.devices.onvif.ThingTypeId) {
+                                            oController.ToggleOnvifStreamControls(false);
+                                            oView.byId("SelectOnvifServer").setEnabled(true);
+                                            oView.byId("ButtonCancel").setEnabled(true);
+                                        } else {
+                                            oController.ToggleSubmitCancelButtons(true);
+                                        }
+
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
+                        IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
+                            oController.ToggleSubmitCancelButtons(true);
+                        });
                     }
-
-                    IomyRe.common.RefreshCoreVariables({
-                        onSuccess : function () {
-                            oController.RefreshModel({
-                                onSuccess : function () {
-                                    IomyRe.common.showMessage({
-                                        text : "Device successfully created",
-                                        view : oView
-                                    });
-
-                                    if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                        oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
-
-                                        //oCurrentFormData.OnvifServer = iLinkId;
-                                        oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
-
-                                    } else {
-                                        oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
-                                        //IomyRe.common.NavigationChangePage("pBlock", {}, true);
-                                    }
-
-                                    if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+IomyRe.devices.onvif.ThingTypeId) {
-                                        oController.ToggleOnvifStreamControls(false);
-                                        oView.byId("SelectOnvifServer").setEnabled(true);
-                                        oView.byId("ButtonCancel").setEnabled(true);
-                                    } else {
-                                        oController.ToggleSubmitCancelButtons(true);
-                                    }
-
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
-                    IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
-                        oView.byId("ButtonSubmit").setEnabled(false);
+                } catch (e) {
+                    var sErrorMessage = "Error creating device:\n\n"+e.message+"\n\n"+IomyRe.common.showContactSupportMessage();
+                    jQuery.sap.log.error(sErrorMessage);
+                    IomyRe.common.showError(sErrorMessage, "", function () {
+                        oController.ToggleSubmitCancelButtons(true);
                     });
                 }
 
@@ -801,7 +809,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     }
                 });
             } catch (e) {
-                IomyRe.common.showError(e.message, "Invalid Input",
+                IomyRe.common.showError(e.message, "Error",
                     function () {
                         oController.ToggleSubmitCancelButtons(true);
                         
