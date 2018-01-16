@@ -331,6 +331,83 @@ $.extend(IomyRe.validation, {
         return mResults;
     },
     
+    /**
+     * Checks a given hub ID to see if it's valid. Three things it checks for
+     * are first whether it's defined, if so, then checks whether it's a valid
+     * number, and checks that the corresponding hub is found in
+     * IomyRe.common.HubList.
+     * 
+     * @param {type} iHubId        ID of a Hub to check.
+     * @returns {map}              Map containg error status and any error messages
+     */
+    isHubIDValid : function (iHubId) {
+        //--------------------------------------------------------------------//
+        // Declare and initialise variables.
+        //--------------------------------------------------------------------//
+        var bError          = false;        // BOOLEAN: Error flag
+        var bIsValid        = false;        // BOOLEAN: Validity flag
+        var aErrorMessages  = [];           // ARRAY:   List of error messages
+        var mResults        = {};           // MAP:     JS Object of validation results
+        
+        // Lambda function to run if there are errors.
+        var fnAppendError   = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+        };
+        
+        try {
+            //--------------------------------------------------------------------//
+            // Check that it's there and it's a valid number
+            //--------------------------------------------------------------------//
+
+            //-- Check the Hub ID --//
+            if (iHubId === undefined) {
+                //-- It doesn't exist --//
+                fnAppendError("Hub ID is not given!");
+
+            } else if (isNaN(iHubId)) {
+                //-- It's not a number --//
+                fnAppendError("Hub ID is not a valid number");
+            }
+
+            //--------------------------------------------------------------------//
+            // If there are no errors, check that it exists in the HubList
+            // variable.
+            //--------------------------------------------------------------------//
+            if (bError === false) {
+                try {
+                    $.each(IomyRe.common.HubList, function (sHubID, mHub) {
+
+                        if (mHub.HubId == iHubId) {
+                            bIsValid = true;
+                        }
+
+                    });
+                } catch (e) {
+                    fnAppendError("Error processing device in iomy.validation.isHubIDValid():\n\n" + e.name + e.message);
+                }
+            }
+
+            //--------------------------------------------------------------------//
+            // If the ID is not in the HubList variable, flag it as an error.
+            //--------------------------------------------------------------------//
+            if (bIsValid === false) {
+                fnAppendError("Hub does not exist!");
+            }
+            
+        } catch (e) {
+            fnAppendError("Error checking the Hub ID:\n\n" + e.name + ": " + e.message);
+        }
+        
+        //--------------------------------------------------------------------//
+        // Prepare the results map
+        //--------------------------------------------------------------------//
+        mResults.bIsValid       = bIsValid;
+        mResults.aErrorMessages = aErrorMessages;
+        
+        return mResults;
+    },
+    
     // TODO: Finish this off and play around with it.
     isFormFieldValid : function (vValue) {
         //-------------------------------------------------//
