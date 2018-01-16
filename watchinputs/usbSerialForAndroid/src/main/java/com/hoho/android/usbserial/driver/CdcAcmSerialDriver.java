@@ -94,7 +94,10 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
 
         public CdcAcmSerialPort(UsbDevice device, int portNumber) {
             super(device, portNumber);
-            mEnableAsyncReads = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
+
+            //Watch Inputs isn't working with async reads at the moment
+            //mEnableAsyncReads = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
+            mEnableAsyncReads = false;
         }
 
         @Override
