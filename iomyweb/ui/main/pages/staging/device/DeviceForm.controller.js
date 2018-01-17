@@ -32,6 +32,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     DeviceOptions           : null,
     iThingId                : null,
     iThingTypeId            : null,
+    iRoomId                 : null,
     bNoRooms                : false,
     
     //bDeviceOptionSelectorDrawn  : false,
@@ -80,6 +81,20 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 } else {
                     oController.bEditExisting   = false;
                     oController.iThingId        = null;
+                }
+                
+                //-- Are we preselecting a room when adding a device? --//
+                if (oEvent.data.RoomId !== undefined && oEvent.data.RoomId !== null && !oController.bEditExisting) {
+                    oController.iRoomId = oEvent.data.RoomId;
+                } else {
+                    oController.iRoomId = null;
+                }
+                
+                //-- Are we preselecting a room when adding a device? --//
+                if (oEvent.data.PremiseId !== undefined && oEvent.data.PremiseId !== null && !oController.bEditExisting) {
+                    oController.iPremiseId = oEvent.data.PremiseId;
+                } else {
+                    oController.iPremiseId = null;
                 }
                 
                 oController.loadDeviceForm();
@@ -308,7 +323,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         //------------------------------------------------//
         //-- Build and Bind Model to the View           --//
         //------------------------------------------------//
-        var oJSON = IomyRe.functions.getDeviceFormJSON();
+        var oJSON = IomyRe.functions.getDeviceFormJSON({
+            roomID : oController.iRoomId,
+            premiseID : oController.iPremiseId
+        });
         
         oJSON.Rooms         = oController.PrepareRoomListForModel(1);
         oJSON.Hubs          = IomyRe.common.HubList;

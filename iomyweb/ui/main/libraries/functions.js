@@ -943,7 +943,7 @@ $.extend(IomyRe.functions, {
      * 
      * @returns {Object}        Data structure
      */
-    getDeviceFormJSON : function () {
+    getDeviceFormJSON : function (mSettings) {
         //--------------------------------------------------------------------//
         // Variables
         //--------------------------------------------------------------------//
@@ -951,13 +951,31 @@ $.extend(IomyRe.functions, {
         //-- List --//
         var structOptions        = {};
         
+        //-- Preselection --//
+        var iRoomId     = "";
+        var iPremiseId  = "";
+        
         //-- Import core variables --//
         var aDeviceList;
         var aDeviceTypeList;
         
         try {
             //--------------------------------------------------------------------//
-            // Get the core variables for this function
+            // Fetch any room and premise selection.
+            //--------------------------------------------------------------------//
+            if (mSettings !== undefined && mSettings !== null) {
+                if (mSettings.roomID !== undefined && mSettings.roomID !== null) {
+                    iRoomId = mSettings.roomID;
+                }
+                
+                if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
+                    iPremiseId = mSettings.premiseID;
+                }
+                
+            }
+            
+            //--------------------------------------------------------------------//
+            // Get the core variables for this function.
             //--------------------------------------------------------------------//
             aDeviceList        = IomyRe.common.LinkList;
             aDeviceTypeList    = IomyRe.common.LinkTypeList;
@@ -971,7 +989,7 @@ $.extend(IomyRe.functions, {
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
-                        "Premise" : "",
+                        "Premise" : iPremiseId,
                         "Modem" : ""
                     };
                 }
@@ -980,8 +998,8 @@ $.extend(IomyRe.functions, {
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
-                        "Premise" : "",
-                        "Room" : "1",
+                        "Premise" : iPremiseId,
+                        "Room" : iRoomId,
                         "IPAddress" : "",
                         "IPPort" : "",
                         "DisplayName" : "",
@@ -994,8 +1012,8 @@ $.extend(IomyRe.functions, {
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
-                        "Premise" : "",
-                        "Room" : "1",
+                        "Premise" : iPremiseId,
+                        "Room" : iRoomId,
                         "IPAddress" : "",
                         "IPPort" : "",
                         "DeviceToken" : "",
@@ -1007,8 +1025,8 @@ $.extend(IomyRe.functions, {
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
-                        "Premise" : "",
-                        "Room" : "1",
+                        "Premise" : iPremiseId,
+                        "Room" : iRoomId,
                         "DisplayName" : "",
                         "StationCode" : "",
                         "KeyCode" : ""
@@ -1019,8 +1037,8 @@ $.extend(IomyRe.functions, {
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
-                        "Premise" : "",
-                        "Room" : "1",
+                        "Premise" : iPremiseId,
+                        "Room" : iRoomId,
                         "IPCamType" : "MJPEG",
                         "Protocol" : "http",
                         "IPAddress" : "",

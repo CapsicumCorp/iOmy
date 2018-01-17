@@ -571,7 +571,28 @@ sap.ui.controller("pages.staging.Device", {
             
         });
         
-        
+        //--------------------------------------------------------------------//
+        // If there were no devices, give the option to add one.
+        //--------------------------------------------------------------------//
+        if (!bHasDevices) {
+            wList.addItem(
+                new sap.m.ObjectListItem ({        
+                    title: "No devices",
+                    type: "Active",
+                    attributes : [
+                        new sap.m.ObjectAttribute ({
+                            text: "Tap to add a device"
+                        })
+                    ],
+                    press : function () {
+                        IomyRe.common.NavigationChangePage( "pDeviceForm" , { 
+                            "RoomId"    : oController.iLastRoomId,
+                            "PremiseId" : oController.iLastPremiseId
+                        } , false);
+                    }
+                })
+            );
+        }
     },
     
     /**
