@@ -47,7 +47,6 @@ $.extend(IomyRe.telnet,{
         // Import modules and widgets.
         //--------------------------------------------------------------------//
         var oModule         = this;
-        var php             = IomyRe.apiphp;
         var bError          = false;
         var aErrorMessages  = [];
 		var iLogIndex		= oModule.iLogIndex++;
@@ -62,7 +61,7 @@ $.extend(IomyRe.telnet,{
         //--------------------------------------------------------------------//
         // API Parameters.
         //--------------------------------------------------------------------//
-        var sUrl            = php.APILocation("hubtelnet");
+        var sUrl            = IomyRe.apiphp.APILocation("hubtelnet");
         var iHubId;
         var sCommand;
         
@@ -129,7 +128,7 @@ $.extend(IomyRe.telnet,{
 		};
         
         try {
-            php.AjaxRequest({
+            IomyRe.apiphp.AjaxRequest({
                 url : sUrl,
                 data : {"Mode" : "CustomTelnetCommand", "HubId" : iHubId, "CustomCommand" : sCommand},
 
@@ -154,8 +153,8 @@ $.extend(IomyRe.telnet,{
                                     fnFail(sOutput, data.ErrMesg);
                                 }
                             } catch (error) {
-                                req.logOutput(error.name + ": " + error.message);
-                                fnFail(sOutput, error.message);
+                                req.logOutput(error.name + ": " + error.message, true);
+                                fnFail("Program Error", error.message);
                             }
                         }
 
@@ -191,7 +190,11 @@ $.extend(IomyRe.telnet,{
             });
             
         } catch (e) {
-            req.logOutput(error.name + ": " + error.message);
+            oModule.TelnetLog["_"+iLogIndex].level = "E";
+            oModule.TelnetLog["_"+iLogIndex].content = sCommand + ": An unexpected error occurred.";
+
+            oModule.bRunningCommand = false;
+            
             fnFail("Program Error", error.message);
         }
     },

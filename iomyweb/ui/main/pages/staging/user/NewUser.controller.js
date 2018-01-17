@@ -199,7 +199,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
                     sLowerCaseUsername === "administrator" || sLowerCaseUsername === "sys" ||
                     sLowerCaseUsername === "manager")
             {
-                fnAppendError("Username must not be any variation of 'admin', 'administrator', 'manager', 'sys', or 'root.");
+                fnAppendError("Username must not be any variation of 'admin', 'administrator', 'manager', 'sys', or 'root'.");
             }
         } else {
             fnAppendError("Username is required.");
