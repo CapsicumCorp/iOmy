@@ -26,6 +26,7 @@ package com.capsicumcorp.iomy.apps.iomy;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -94,9 +95,22 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         String sUrl = installWizard.setupAPI;
         // Parameters
         final Map<String, String> baseparams = new HashMap<String, String>();
+
         baseparams.put("Access", "{\"URI\":\"" + installWizard.dbURI + "\",\"Port\":\"" + installWizard.dbServerPort + "\",\"Username\":\"" + installWizard.dbUsername + "\",\"Password\":\"" + installWizard.dbPassword + "\"}");
         baseparams.put("DBName", installWizard.databaseSchema);
+
+        final Map<String, String> addHubParams = new HashMap<String, String>(baseparams);
+        String addHubDataString="{\"InsertType\":\"NewAll\",\"OwnerUsername\":\""+installWizard.ownerUsername+"\",\"OwnerPassword\":\""+installWizard.ownerPassword+"\",\"PremiseName\":\""+installWizard.premiseName+"\",\"PremiseDesc\":\"\",\"HubName\":\""+installWizard.hubName+"\",\"HubType\":\"2\",\"WatchInputsUsername\":\""+installWizard.watchInputsUsername+"\",\"WatchInputsPassword\":\""+installWizard.watchInputsPassword+"\"";
+
+        // NOTE: According to https://android-developers.googleblog.com/2011/03/identifying-app-installations.html ,
+        //   there are other ways to get a unique serial, but for Android >= 2.3 Build.SERIAL should be fairly unique
+        if (!Build.SERIAL.equals("")) {
+            addHubDataString+=",\"HubSerialCode\":\""+Build.SERIAL+"\"";
+        }
+        addHubDataString+="}";
+
         baseparams.put("Data", "{\"InsertType\":\"NewAll\",\"OwnerUsername\":\""+installWizard.ownerUsername+"\",\"OwnerPassword\":\""+installWizard.ownerPassword+"\",\"PremiseName\":\""+installWizard.premiseName+"\",\"PremiseDesc\":\"\",\"HubName\":\""+installWizard.hubName+"\",\"HubType\":\"2\",\"WatchInputsUsername\":\""+installWizard.watchInputsUsername+"\",\"WatchInputsPassword\":\""+installWizard.watchInputsPassword+"\"}");
+        addHubParams.put("Data", addHubDataString);
 
         final String modeAddHub             = "03_AddHub";
         final String modeCreatePHPConfig    = "02_CreatePHPConfig";
@@ -110,7 +124,7 @@ public class UserPremiseHubProgressPage extends ProgressPage {
                 createErrorRequestListener("Add Premise, Hub, and User")) {
 
             protected Map<String, String> getParams() throws com.android.volley.AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>(baseparams);
+                Map<String, String> params = new HashMap<String, String>(addHubParams);
 
                 // Update the notification text
                 me.runOnUiThread(new Runnable() {
@@ -120,7 +134,6 @@ public class UserPremiseHubProgressPage extends ProgressPage {
                         me.changePercentageText();
                     }
                 });
-
                 params.put("Mode", modeAddHub);
                 return params;
             }
