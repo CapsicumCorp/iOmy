@@ -80,7 +80,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							"RoomPerms":         {}
 						}
 					};
-					
+                    
 					//------------------------------------------------------------//
 					//-- STEP 2 - Start Loading the Ajax Data                   --//
 					//------------------------------------------------------------//
@@ -531,14 +531,14 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			IomyRe.apiphp.AjaxRequest({
 				url:  IomyRe.apiphp.APILocation("rooms"),
 				data: {
-					"Mode":      "AdminRoomList"
+					"Mode":      "RoomAdminRoomList"
 				},
 				onSuccess: function ( sExpectedDataType, aAjaxData ) {
 					try {
 						if( sExpectedDataType==="JSON" && aAjaxData.Error===false ) {
 							
 							//-- Store the values --//
-							oController.mModelData.AllRooms = JSON.parse(JSON.stringify( aAjaxData.Data ) );
+							oController.mModelData.AllRooms = JSON.parse( JSON.stringify( aAjaxData.Data ) );
 							
 							
 							//-- Perform the "onSuccess" function if applicable --//

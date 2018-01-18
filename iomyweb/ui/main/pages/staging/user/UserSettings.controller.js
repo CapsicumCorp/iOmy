@@ -43,31 +43,29 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 
 			onBeforeShow: function ( oEvent ) {
 				//-- Find out if the current user is a premise owner. --//
-                var bIsOwner    = oController.isUserOwner(1);
+                var bIsOwner    = oController.isUserOwner();
 				
-				
-				//-- Update the Model --//
 				oController.RefreshModel( oController, {} );
-                
+
                 oView.byId("PageHeader").setObjectTitle(IomyRe.common.UserInfo.Username);
-                
+
                 if (bIsOwner) {
                     oView.byId("PageHeader").setObjectSubtitle("Owner");
-                    
+
                 } else {
                     oView.byId("PageHeader").setObjectSubtitle("iOmy User");
-                    
+
                 }
-				
-				//-- Check the parameters --//
-				oController.ToggleButtonsAndView( oController, "ShowPassword");
-				oController.ToggleButtonsAndView( oController, "ShowInfo");
-				oController.ToggleButtonsAndView( oController, "ShowAddress");
-				oController.ToggleButtonsAndView( oController, "ShowPremPermissions");
-				oController.ToggleButtonsAndView( oController, "ShowRoomPermissions");
-				
-				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+
+                //-- Check the parameters --//
+                oController.ToggleButtonsAndView( oController, "ShowPassword");
+                oController.ToggleButtonsAndView( oController, "ShowInfo");
+                oController.ToggleButtonsAndView( oController, "ShowAddress");
+                oController.ToggleButtonsAndView( oController, "ShowPremPermissions");
+                oController.ToggleButtonsAndView( oController, "ShowRoomPermissions");
+
+                //-- Defines the Device Type --//
+                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
 			
 		});
@@ -78,98 +76,111 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//------------------------------------------------//
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
-		var oView            = oController.getView();
+		var oView     = oController.getView();
 		var aUserData = {};
-        var aRoomData = JSON.parse(JSON.stringify(IomyRe.common.AllRoomsList))
         var oModel    = new sap.ui.model.json.JSONModel({});
-        
-        aRoomData['_0'] = {
-            RoomId: "0",
-            RoomName: "All Rooms"
-        };
-		
-		//------------------------------------------------//
-		//-- Setup New UserData Array                   --//
-		//------------------------------------------------//
-		if( typeof IomyRe.common.UserInfo!=="undefined" ) {
-			aUserData = JSON.parse(JSON.stringify(IomyRe.common.UserInfo ));
-		}
         
         //-- Make sure the previous data isn't shown before refresh. --//
         oView.setModel( oModel );
-		
-		//------------------------------------------------//
-		//-- Build and Bind Model to the View           --//
-		//------------------------------------------------//
-		oModel = new sap.ui.model.json.JSONModel({
-			"Regions":               IomyRe.common.Regions,
-			"Languages":             IomyRe.common.Languages,
-			"Timezones":             IomyRe.common.Timezones,
-			"Premises":              IomyRe.common.PremiseList,
-			"Rooms":                 IomyRe.common.AllRoomsList,
-            "RoomOptions":           aRoomData,
-			"UserInfo":              aUserData,
-            "Password":              {
-                OldPassword         : "",
-                NewPassword         : "",
-                ConfirmPassword     : ""
-            },
+        
+        IomyRe.common.RetrieveRoomAdminRoomList({
+            premiseID : 1,
             
-            "RoomPermInfo": {
-                "CurrentLevel"  : 2,
-                "RoomId"        : 0,
-                "PremiseId"     : 1
-            },
-            
-            "PermLevels":            {
-               "_1" : {
-                    "Key" : 1,
-                    "Text" : "No Access"
-                },
-                "_2" : {
-                    "Key" : 2,
-                    "Text" : "Read"
-                },
-                "_3" : {
-                    "Key" : 3,
-                    "Text" : "Read, Device Toggle"
-                },
-                "_4" : {
-                    "Key" : 4,
-                    "Text" : "Read/Write"
+            onSuccess : function () {
+                try {
+                    var aRoomData = JSON.parse(JSON.stringify(IomyRe.common.RoomAdminRoomsList));
+                    aRoomData['_0'] = {
+                        RoomId: "0",
+                        RoomName: "All Rooms"
+                    };
+
+                    //------------------------------------------------//
+                    //-- Setup New UserData Array                   --//
+                    //------------------------------------------------//
+                    if( typeof IomyRe.common.UserInfo!=="undefined" ) {
+                        aUserData = JSON.parse(JSON.stringify(IomyRe.common.UserInfo ));
+                    }
+
+                    //------------------------------------------------//
+                    //-- Build and Bind Model to the View           --//
+                    //------------------------------------------------//
+                    oModel = new sap.ui.model.json.JSONModel({
+                        "Regions":               IomyRe.common.Regions,
+                        "Languages":             IomyRe.common.Languages,
+                        "Timezones":             IomyRe.common.Timezones,
+                        "Premises":              IomyRe.common.PremiseList,
+                        "Rooms":                 IomyRe.common.AllRoomsList,
+                        "RoomOptions":           aRoomData,
+                        "UserInfo":              aUserData,
+                        "Password":              {
+                            OldPassword         : "",
+                            NewPassword         : "",
+                            ConfirmPassword     : ""
+                        },
+
+                        "RoomPermInfo": {
+                            "CurrentLevel"  : 2,
+                            "RoomId"        : 0,
+                            "PremiseId"     : 1
+                        },
+
+                        "PermLevels":            {
+                           "_1" : {
+                                "Key" : 1,
+                                "Text" : "No Access"
+                            },
+                            "_2" : {
+                                "Key" : 2,
+                                "Text" : "Read"
+                            },
+                            "_3" : {
+                                "Key" : 3,
+                                "Text" : "Read, Device Toggle"
+                            },
+                            "_4" : {
+                                "Key" : 4,
+                                "Text" : "Read/Write"
+                            }
+                        }
+                    });
+
+                    oModel.setSizeLimit(420);
+                    oView.setModel( oModel );
+
+                    //------------------------------------------------//
+                    //-- Trigger the onSuccess Event                --//
+                    //------------------------------------------------//
+                    if( oConfig.onSuccess ) {
+                        oConfig.onSuccess();
+                    }
+                } catch (e) {
+                    $.sap.log.error(e.name + ": " + e.message);
                 }
             }
-		});
-		
-		oModel.setSizeLimit(420);
-		oView.setModel( oModel );
-		
-		//------------------------------------------------//
-		//-- Trigger the onSuccess Event                --//
-		//------------------------------------------------//
-		if( oConfig.onSuccess ) {
-			oConfig.onSuccess();
-		}
+        })
 		
 	},
     
-    isUserOwner: function( iPremiseId ) {
-		if( iPremiseId>=1 ) {
-			var sPremiseCode    = "_"+iPremiseId;
-			var aPremise        = IomyRe.common.PremiseList[sPremiseCode];
-			var iPremiseOwner;
+    isUserOwner: function(  ) {
+        var bPremiseOwner = false;
+        
+        try {
+            $.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+                
+                if (mPremise.PermOwner === 1) {
+                    bPremiseOwner = true;
+                    return false;
+                }
+                
+            });
             
-            if (aPremise !== undefined) {
-            	iPremiseOwner = aPremise.PermOwner;
-			} else {
-				iPremiseOwner = 0;
-			}
             
-            return iPremiseOwner === 1;
+        } catch (e) {
+            $.sap.log.error("Error searching for the first hub for telnet communication ("+e.name+"): " + e.message);
             
-		} else {
-			throw new IllegalArgumentException("Premise ID must be greater than 0.");
-		}
+        } finally {
+            return bPremiseOwner;
+        }
 	},
     
     TogglePasswordControls : function (bEnabled) {
@@ -361,7 +372,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 													//-- STEP 8 - Load the Display Fragment         --//
 													//------------------------------------------------//
 													oController.ToggleButtonsAndView( oController, "ShowAddress" );
-														
+													
 														
                                                 }, oController )
                                             });    //-- END RefreshControllerModel (STEP 6) --//

@@ -93,19 +93,22 @@ $.extend(IomyRe.common,{
     LinkTypeList            : {},
     
     //============================================//
-    //== PREMISE AND GATEWAY LIST                ==//
+    //== PREMISE AND HUB LIST                   ==//
     //============================================//
-    //-- An Array used to store the 
-    //--------------------------------------------//
     PremiseList:                    {},
     HubList:                        {},
     PremiseListLastUpdate:            new Date(),
     HubListLastUpdate:                new Date(),
     PremiseSelected:                [],
     
+    //============================================//
+    //== ROOM LISTS                             ==//
+    //============================================//
     AllRoomsList:                     {},
     RoomsList:                        {},
-    RoomsListLastUpdate:            new Date(),
+    RoomsListLastUpdate:              new Date(),
+    RoomAdminRoomsList:               {},
+    RoomAdminRoomsListLastUpdate:     new Date(),
     
     //============================================//
     //== DEVICE LIST                            ==//
@@ -1326,6 +1329,92 @@ $.extend(IomyRe.common,{
         });
     },
     
+    RetrieveRoomAdminRoomList : function (mSettings) {
+        var oModule         = this;
+        var bError          = false;
+        var sUrl            = IomyRe.apiphp.APILocation("rooms");
+        var fnSuccess       = function () {};
+        var fnFail          = function () {};
+        var iPremiseId;
+        
+        //--------------------------------------------------------------------//
+        // Find the premise ID.
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
+                iPremiseId = mSettings.premiseID;
+                
+            } else {
+                bError = true;
+            }
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            bError = true;
+        }
+        
+        //-- Clear the list --//
+        oModule.RoomAdminRoomsList = {};
+        
+        //--------------------------------------------------------------------//
+        // Attempt to retrieve the room admin's room list.
+        //--------------------------------------------------------------------//
+        if (!bError) {
+            try {
+                IomyRe.apiphp.AjaxRequest({
+                    url     : sUrl,
+                    data    : {
+                        "Mode":      "RoomAdminRoomList",
+                        "PremiseId": iPremiseId
+                    },
+                    
+                    onSuccess : function (sDataType, aData) {
+                        try {
+                            if (aData.Error !== true) {
+                                var mTemp;
+
+                                for (var i = 0; i < aData.Data.length; i++) {
+                                    mTemp = aData.Data[i];
+
+                                    oModule.RoomAdminRoomsList["_"+mTemp.RoomId] = mTemp;
+                                }
+
+                                fnSuccess();
+                            } else {
+                                $.sap.log.error(aData.ErrMesg);
+                                fnFail(aData.ErrMesg);
+                            }
+                            
+                        } catch (e) {
+                            $.sap.log.error("Error processing Admin's room list ("+e.name+"): " + e.message);
+                        }
+                    },
+                    
+                    onFail : function (response) {
+                        try {
+                            $.sap.log.error("Error loading the room admin's room list: " + response.responseText);
+
+                            fnFail();
+                        } catch (e) {
+                            $.sap.log.error("Error in the failure callback of IomyRe.common.RetrieveRoomAdminRoomList ("+e.name+"): " + e.message);
+                        }
+                    }
+                    
+                });
+                
+            } catch (e) {
+                $.sap.log.error("Error attempting to retrieve the room admin's room list ("+e.name+"): " + e.message);
+            }
+        }
+    },
+    
     /**
      * Loads/reloads the Comm List into memory.
      * 
@@ -2415,6 +2504,9 @@ $.extend(IomyRe.common,{
         this.PremiseList    = {};
         this.RoomList       = {};
         this.UserInfo       = {};
+        
+        this.RoomAdminRoomsList = {};
+        this.UserList           = {};
     },
     
     LookupPremisePermissionFromId: function( iPremiseId ) {
