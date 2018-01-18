@@ -180,47 +180,56 @@ sap.ui.controller("pages.staging.graphs.PieGraph", {
 			onSuccess: function ( sType, aData ) {
 				try {
 					
-					if( sType==="JSON" && aData.Error===false ) {
-					
-						//-- Store the Ajax data --//
-						oController.Graph_Data1 = [
-							[ 'Night',     aData.Data.Night ],
-							[ 'Morning',   aData.Data.Morning ],
-							[ 'Afternoon', aData.Data.Afternoon ],
-							[ 'Evening',   aData.Data.Evening ]
-						];
-						
-						//-- Create the Pie Graph --//
-						var oPieTest = IomyRe.graph_jqplot.CreatePieGraph( 
-							oController,
-							'PieGraphPage_Main',
-							[
-								{
-									"Data": oController.Graph_Data1
-								}
-							],
-							{
-								"sTitle":       "6 Hour Usage",
-								"sType":        "6HourPie",
-								"UseLegend":    true,
-								"LegendPreset": 2
-							}
-						);
-						
-						
-					} else {
-						//-- Run the fail event --//
-						
-					}
+                    if( sType==="JSON") {
+                        if ( aData.Error===false ) {
+
+                            //-- Store the Ajax data --//
+                            oController.Graph_Data1 = [
+                                [ 'Night',     aData.Data.Night ],
+                                [ 'Morning',   aData.Data.Morning ],
+                                [ 'Afternoon', aData.Data.Afternoon ],
+                                [ 'Evening',   aData.Data.Evening ]
+                            ];
+
+                            try {
+                                //-- Create the Pie Graph --//
+                                IomyRe.graph_jqplot.CreatePieGraph( 
+                                    oController,
+                                    'PieGraphPage_Main',
+                                    [
+                                        {
+                                            "Data": oController.Graph_Data1
+                                        }
+                                    ],
+                                    {
+                                        "sTitle":       "6 Hour Usage",
+                                        "sType":        "6HourPie",
+                                        "UseLegend":    true,
+                                        "LegendPreset": 2
+                                    }
+                                );
+
+                            } catch (e) {
+                                $.sap.log.error("An error occurred drawing the pie graph ("+e.name+"): " + e.message);
+                            }
+
+                        } else {
+                            //-- Run the fail event --//
+                            $.sap.log.error("Failed to load pie graph data: " + aData.ErrMesg);
+                        }
+                    } else {
+                        $.sap.log.error("Graph API data returned was not in JSON format. The format was "+sType+".");
+                    }
 					
 				} catch( e01 ) {
-					console.log("Critical Graph Error: NOTE: replace this with a real "+e01.message);
+					$.sap.log.error("An error occurred while processing pie graph data ("+e01.name+"): " + e01.message);
 				}
 				
 				
 			},
-			onFail: function () {
-				
+            
+			onFail: function (response) {
+				$.sap.log.error("An error occurred loading the API: " + response.responseText);
 			}
 		});
     }

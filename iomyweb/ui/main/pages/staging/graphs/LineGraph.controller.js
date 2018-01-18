@@ -121,53 +121,67 @@ sap.ui.controller("pages.staging.graphs.LineGraph", {
 				"Points":   100
 			},
 			onSuccess: function ( sType, aData ) {
-				
-				if( sType==="JSON" && aData.Error===false ) {
-					oController.Graph_Data = [];
-					
-					$.each( aData.Data,function(index, aLineData) {
-						oController.Graph_Data.push( [aLineData.Timestamp, aLineData.Value]);
-					});
-					
-					//----------------------------//
-					//-- GRAPH                  --//
-					//----------------------------//
-					var sDeviceName		= IomyRe.common.ThingList["_"+oController.iThingId].DisplayName;
-					var sIOName			= IomyRe.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].Name;
-					var sUOM			= IomyRe.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].UoMName;
+                try {
+                    //-- Check that the data is JSON. --//
+                    if( sType==="JSON" ) {
+                        //-- Only proceed normally if the error flag is not true. --//
+                        if ( aData.Error !== true ) {
+                            oController.Graph_Data = [];
 
-					var oLineTest = IomyRe.graph_jqplot.CreateLineGraph(
-						oController,
-						'LineGraphPage_Main',
-						[
-							{
-								"Label":    sDeviceName,
-								"Data":     oController.Graph_Data
-							}//,
-							//{
-							//	"Label":    "Fridge",
-							//	"Data":     oController.Graph_Data2
-							//}
-						],
-						{
-							"sTitle":               sDeviceName + " (" + sIOName + ")",
-							"sType":                "1YAxis",
-							"UseLegend":            false,
-							"LegendPreset":         2,
-							"AxisX_Label":          "Time",
-							"AxisX_UseDate":        true,
-							"AxisY_Label":          sUOM,
-							"TimePeriod":           sPeriodType
-						}
-					);
-					
-				} else {
-					//-- Run the fail event
-					
-				}
+                            $.each( aData.Data,function(index, aLineData) {
+                                oController.Graph_Data.push( [aLineData.Timestamp, aLineData.Value]);
+                            });
+
+                            //----------------------------//
+                            //-- GRAPH                  --//
+                            //----------------------------//
+                            var sDeviceName		= IomyRe.common.ThingList["_"+oController.iThingId].DisplayName;
+                            var sIOName			= IomyRe.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].Name;
+                            var sUOM			= IomyRe.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].UoMName;
+
+                            try {
+                                IomyRe.graph_jqplot.CreateLineGraph(
+                                    oController,
+                                    'LineGraphPage_Main',
+                                    [
+                                        {
+                                            "Label":    sDeviceName,
+                                            "Data":     oController.Graph_Data
+                                        }//,
+                                        //{
+                                        //	"Label":    "Fridge",
+                                        //	"Data":     oController.Graph_Data2
+                                        //}
+                                    ],
+                                    {
+                                        "sTitle":               sDeviceName + " (" + sIOName + ")",
+                                        "sType":                "1YAxis",
+                                        "UseLegend":            false,
+                                        "LegendPreset":         2,
+                                        "AxisX_Label":          "Time",
+                                        "AxisX_UseDate":        true,
+                                        "AxisY_Label":          sUOM,
+                                        "TimePeriod":           sPeriodType
+                                    }
+                                );
+                            } catch (e) {
+                                $.sap.log.error("An error occurred drawing the line graph ("+e.name+"): " + e.message);
+                            }
+                            
+                        } else {
+                            $.sap.log.error("Failed to load line graph data: " + aData.ErrMesg);
+                        }
+
+                    } else {
+                        $.sap.log.error("Graph API data returned was not in JSON format. The format was "+sType+".");
+                    }
+                } catch (e) {
+                    $.sap.log.error("An error occurred while processing line graph data ("+e.name+"): " + e.message);
+                }
 			},
-			onFail: function () {
-				
+            
+			onFail: function (response) {
+				$.sap.log.error("An error occurred loading the API: " + response.responseText);
 			}
 		});
 	}

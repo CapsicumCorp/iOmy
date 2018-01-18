@@ -309,53 +309,58 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                                                                                     var aTicks = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
 
-                                                                                    var oVarTest = IomyRe.graph_jqplot.CreateBarGraph( 
-                                                                                        oController,
-                                                                                        'GraphPage_Main',
-                                                                                        [
-                                                                                            aSeriesData
-                                                                                        ],
-                                                                                        {
-                                                                                            "sTitle":       "Weekly Usage for "+sDeviceName,
-                                                                                            "sType":        "Basic",
-                                                                                            "UseLegend":    false,
-                                                                                            "LegendPreset": 2,
-                                                                                            "AxisX_Label":  "Week",
-                                                                                            "AxisY_Label":  aData1Max.UOM_NAME,
-                                                                                            "AxisX_TickCategories": aTicks
-                                                                                        }
-                                                                                    );
-
-
-                                                                                    $('#GraphPage_Main').bind('jqplotDataHighlight', 
-                                                                                        function( ev, seriesIndex, iPointIndex, aData ) {
-                                                                                            //$('#GraphPage_Main_Info').html('series: '+seriesIndex+', point: '+pointIndex+', data: '+data);
-                                                                                            try {
-                                                                                                $('#GraphPage_Main_Info').html(' '+aTicks[iPointIndex]+': '+aData[1]+' ');
-
-                                                                                            } catch( e1 ) {
-                                                                                                $('#GraphPage_Main_Info').html( e1.message );
+                                                                                    try {
+                                                                                        IomyRe.graph_jqplot.CreateBarGraph( 
+                                                                                            oController,
+                                                                                            'GraphPage_Main',
+                                                                                            [
+                                                                                                aSeriesData
+                                                                                            ],
+                                                                                            {
+                                                                                                "sTitle":       "Weekly Usage for "+sDeviceName,
+                                                                                                "sType":        "Basic",
+                                                                                                "UseLegend":    false,
+                                                                                                "LegendPreset": 2,
+                                                                                                "AxisX_Label":  "Week",
+                                                                                                "AxisY_Label":  aData1Max.UOM_NAME,
+                                                                                                "AxisX_TickCategories": aTicks
                                                                                             }
-                                                                                        }
-                                                                                    );
+                                                                                        );
+
+                                                                                        $('#GraphPage_Main').bind('jqplotDataHighlight', 
+                                                                                            function( ev, seriesIndex, iPointIndex, aData ) {
+                                                                                                //$('#GraphPage_Main_Info').html('series: '+seriesIndex+', point: '+pointIndex+', data: '+data);
+                                                                                                try {
+                                                                                                    $('#GraphPage_Main_Info').html(' '+aTicks[iPointIndex]+': '+aData[1]+' ');
+
+                                                                                                } catch( e1 ) {
+                                                                                                    $('#GraphPage_Main_Info').html( e1.message );
+                                                                                                }
+                                                                                            }
+                                                                                        );
 
 
-                                                                                    $('#GraphPage_Main').bind('jqplotDataUnhighlight', 
-                                                                                        function (ev) {
-                                                                                            $('#GraphPage_Main_Info').html('');
-                                                                                        }
-                                                                                    );
+                                                                                        $('#GraphPage_Main').bind('jqplotDataUnhighlight', 
+                                                                                            function (ev) {
+                                                                                                $('#GraphPage_Main_Info').html('');
+                                                                                            }
+                                                                                        );
+                                                                                    
+                                                                                    } catch (e) {
+                                                                                        $.sap.log.error("An error occurred drawing the bar graph ("+e.name+"): " + e.message);
+                                                                                    }
+                                                                                    
                                                                                 } catch( e20 ) {
-                                                                                    console.log( "Data1Min = "+JSON.stringify( aData1Max ) );
-                                                                                    console.log( "Data1Max = "+JSON.stringify( aData1Max ) );
-                                                                                    console.log( "Data2Max = "+JSON.stringify( aData2Max ) );
-                                                                                    console.log( "Data3Max = "+JSON.stringify( aData3Max ) );
-                                                                                    console.log( "Data4Max = "+JSON.stringify( aData4Max ) );
-                                                                                    console.log( "Data5Max = "+JSON.stringify( aData5Max ) );
-                                                                                    console.log( "Data6Max = "+JSON.stringify( aData6Max ) );
-                                                                                    console.log( "Data7Max = "+JSON.stringify( aData7Max ) );
+                                                                                    $.sap.log.error( "Data1Min = "+JSON.stringify( aData1Max ) );
+                                                                                    $.sap.log.error( "Data1Max = "+JSON.stringify( aData1Max ) );
+                                                                                    $.sap.log.error( "Data2Max = "+JSON.stringify( aData2Max ) );
+                                                                                    $.sap.log.error( "Data3Max = "+JSON.stringify( aData3Max ) );
+                                                                                    $.sap.log.error( "Data4Max = "+JSON.stringify( aData4Max ) );
+                                                                                    $.sap.log.error( "Data5Max = "+JSON.stringify( aData5Max ) );
+                                                                                    $.sap.log.error( "Data6Max = "+JSON.stringify( aData6Max ) );
+                                                                                    $.sap.log.error( "Data7Max = "+JSON.stringify( aData7Max ) );
 
-                                                                                    console.log("Critical Error! Bar Graph: "+e20.message );
+                                                                                    $.sap.log.error("Critical Error! Bar Graph: "+e20.message );
                                                                                 }
 
 
