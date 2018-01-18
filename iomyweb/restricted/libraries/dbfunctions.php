@@ -4086,11 +4086,11 @@ function dbSpecialGetAllRoomsFromPremiseId( $iPremiseId ) {
 				
 				//-- Set the SQL Output Columns --//
 				$aOutputCols = array(
-					array( "Name"=>"Id",               "type"=>"INT" ),
-					array( "Name"=>"Name",             "type"=>"STR" ),
-					array( "Name"=>"Floor",            "type"=>"INT" ),
+					array( "Name"=>"RoomId",           "type"=>"INT" ),
+					array( "Name"=>"RoomName",         "type"=>"STR" ),
+					array( "Name"=>"RoomFloor",        "type"=>"INT" ),
 					array( "Name"=>"PremiseId",        "type"=>"INT" ),
-					array( "Name"=>"Desc",             "type"=>"STR" ),
+					array( "Name"=>"RoomDesc",         "type"=>"STR" ),
 					array( "Name"=>"RoomTypeId",       "type"=>"INT" ),
 					array( "Name"=>"RoomTypeName",     "type"=>"STR" ),
 					array( "Name"=>"RoomTypeOutdoors", "type"=>"INT" )
