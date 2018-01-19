@@ -84,7 +84,6 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         oView.setModel( oModel );
         
         IomyRe.common.RetrieveRoomAdminRoomList({
-            premiseID : 1,
             
             onSuccess : function () {
                 try {
@@ -157,7 +156,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                     $.sap.log.error(e.name + ": " + e.message);
                 }
             }
-        })
+        });
 		
 	},
     

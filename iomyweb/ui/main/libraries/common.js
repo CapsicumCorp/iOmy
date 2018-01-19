@@ -1335,7 +1335,7 @@ $.extend(IomyRe.common,{
         var sUrl            = IomyRe.apiphp.APILocation("rooms");
         var fnSuccess       = function () {};
         var fnFail          = function () {};
-        var iPremiseId;
+        var iPremiseId      = 0;
         
         //--------------------------------------------------------------------//
         // Find the premise ID.
@@ -1344,8 +1344,6 @@ $.extend(IomyRe.common,{
             if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
                 iPremiseId = mSettings.premiseID;
                 
-            } else {
-                bError = true;
             }
             
             if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
@@ -1356,8 +1354,6 @@ $.extend(IomyRe.common,{
                 fnFail = mSettings.onFail;
             }
             
-        } else {
-            bError = true;
         }
         
         //-- Clear the list --//
@@ -1367,51 +1363,123 @@ $.extend(IomyRe.common,{
         // Attempt to retrieve the room admin's room list.
         //--------------------------------------------------------------------//
         if (!bError) {
-            try {
-                IomyRe.apiphp.AjaxRequest({
-                    url     : sUrl,
-                    data    : {
-                        "Mode":      "RoomAdminRoomList",
-                        "PremiseId": iPremiseId
-                    },
-                    
-                    onSuccess : function (sDataType, aData) {
-                        try {
-                            if (aData.Error !== true) {
-                                var mTemp;
+            if (iPremiseId > 0) {
+                try {
+                    //--------------------------------------------------------//
+                    // Run the request using a given premise ID.
+                    //--------------------------------------------------------//
+                    IomyRe.apiphp.AjaxRequest({
+                        url     : sUrl,
+                        data    : {
+                            "Mode":      "RoomAdminRoomList",
+                            "PremiseId": iPremiseId
+                        },
 
-                                for (var i = 0; i < aData.Data.length; i++) {
-                                    mTemp = aData.Data[i];
+                        onSuccess : function (sDataType, aData) {
+                            try {
+                                if (aData.Error !== true) {
+                                    var mTemp;
 
-                                    oModule.RoomAdminRoomsList["_"+mTemp.RoomId] = mTemp;
+                                    for (var i = 0; i < aData.Data.length; i++) {
+                                        mTemp = aData.Data[i];
+
+                                        oModule.RoomAdminRoomsList["_"+mTemp.RoomId] = mTemp;
+                                    }
+
+                                    fnSuccess();
+                                } else {
+                                    $.sap.log.error(aData.ErrMesg);
+                                    fnFail(aData.ErrMesg);
                                 }
 
-                                fnSuccess();
-                            } else {
-                                $.sap.log.error(aData.ErrMesg);
-                                fnFail(aData.ErrMesg);
+                            } catch (e) {
+                                $.sap.log.error("Error processing Admin's room list ("+e.name+"): " + e.message);
                             }
+                        },
+
+                        onFail : function (response) {
+                            try {
+                                $.sap.log.error("Error loading the room admin's room list: " + response.responseText);
+                                fnFail(response.responseText);
+
+                            } catch (e) {
+                                $.sap.log.error("Error in the failure callback of IomyRe.common.RetrieveRoomAdminRoomList ("+e.name+"): " + e.message);
+                            }
+                        }
+
+                    });
+                } catch (e) {
+                    $.sap.log.error("Error attempting to retrieve the room admin's room list ("+e.name+"): " + e.message);
+                }
+            } else {
+                try {
+                    //--------------------------------------------------------//
+                    // No premise was given so prepare requests for each
+                    // premise.
+                    //--------------------------------------------------------//
+                    var oQueue = new AjaxRequestQueue({
+                        concurrentRequests  : 2,
+                        executeNow          : false
+                    });
+
+                    $.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+
+                        try {
+                            oQueue.addRequest({
+                                library : "php",
+                                url     : sUrl,
+                                data    : {
+                                    "Mode":      "RoomAdminRoomList",
+                                    "PremiseId": mPremise.Id
+                                },
+
+                                onSuccess : function (sDataType, aData) {
+                                    try {
+                                        if (aData.Error !== true) {
+                                            var mTemp;
+
+                                            for (var i = 0; i < aData.Data.length; i++) {
+                                                mTemp = aData.Data[i];
+
+                                                oModule.RoomAdminRoomsList["_"+mTemp.RoomId] = mTemp;
+                                            }
+
+                                            fnSuccess();
+                                        } else {
+                                            $.sap.log.error(aData.ErrMesg);
+                                            fnFail(aData.ErrMesg);
+                                        }
+
+                                    } catch (e) {
+                                        $.sap.log.error("Error processing Admin's room list ("+e.name+"): " + e.message);
+                                    }
+                                },
+
+                                onFail : function (response) {
+                                    try {
+                                        $.sap.log.error("Error loading the room admin's room list: " + response.responseText);
+                                        fnFail(response.responseText);
+
+                                    } catch (e) {
+                                        $.sap.log.error("Error in the failure callback of IomyRe.common.RetrieveRoomAdminRoomList ("+e.name+"): " + e.message);
+                                    }
+                                }
+
+                            });
                             
                         } catch (e) {
-                            $.sap.log.error("Error processing Admin's room list ("+e.name+"): " + e.message);
+                            $.sap.log.error("Error preparing the admin room list request ("+e.name+"): " + e.message);
                         }
-                    },
-                    
-                    onFail : function (response) {
-                        try {
-                            $.sap.log.error("Error loading the room admin's room list: " + response.responseText);
 
-                            fnFail();
-                        } catch (e) {
-                            $.sap.log.error("Error in the failure callback of IomyRe.common.RetrieveRoomAdminRoomList ("+e.name+"): " + e.message);
-                        }
-                    }
+                    });
                     
-                });
-                
-            } catch (e) {
-                $.sap.log.error("Error attempting to retrieve the room admin's room list ("+e.name+"): " + e.message);
+                    //-- Run all of the requests. --//
+                    oQueue.execute();
+                } catch (e) {
+                    $.sap.log.error("Error attempting to retrieve the room admin's room list with multiple premises ("+e.name+"): " + e.message);
+                }
             }
+                
         }
     },
     

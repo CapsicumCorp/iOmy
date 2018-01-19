@@ -353,7 +353,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- SUCCESS    --//
 							//----------------//
-							var iPermissionLevel = 0;
 							
 							//-- Reset the array --//
 							oController.mModelData.Previous.PremisePerms = {};
@@ -447,7 +446,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- SUCCESS    --//
 							//----------------//
-							var iPermissionLevel = 0;
 							
 							//-- Reset the array --//
 							oController.mModelData.Previous.RoomPerms = {};
@@ -531,7 +529,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			IomyRe.apiphp.AjaxRequest({
 				url:  IomyRe.apiphp.APILocation("rooms"),
 				data: {
-					"Mode":      "RoomAdminRoomList"
+					"Mode":      "AdminRoomList"
 				},
 				onSuccess: function ( sExpectedDataType, aAjaxData ) {
 					try {

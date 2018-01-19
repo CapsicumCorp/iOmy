@@ -1842,11 +1842,11 @@ $.extend(IomyRe.functions, {
                         //------------------------------------------------------------//
                         // Otherwise, validate the room ID.
                         //------------------------------------------------------------//
-                        var mRoomIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
-
-                        if (!mRoomIDInfo.bIsValid) {
-                            aErrorMessages = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
-                        }
+//                        var mRoomIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
+//
+//                        if (!mRoomIDInfo.bIsValid) {
+//                            aErrorMessages = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
+//                        }
                     }
                     
                 } else {
@@ -1959,7 +1959,7 @@ $.extend(IomyRe.functions, {
                     //----------------------------------------------------------------//
                     // Prepare each request.
                     //----------------------------------------------------------------//
-                    $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
+                    $.each(IomyRe.common.RoomAdminRoomsList, function (sI, mRoom) {
 
                         aRequests.push({
                             library : "php",
@@ -2114,11 +2114,11 @@ $.extend(IomyRe.functions, {
                         //------------------------------------------------------------//
                         // Otherwise, validate the room ID.
                         //------------------------------------------------------------//
-                        var mRoomIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
-
-                        if (!mRoomIDInfo.bIsValid) {
-                            aErrorMessages = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
-                        }
+//                        var mRoomIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
+//
+//                        if (!mRoomIDInfo.bIsValid) {
+//                            aErrorMessages = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
+//                        }
                     }
 
                 } else {
@@ -2233,14 +2233,14 @@ $.extend(IomyRe.functions, {
 
                 } else {
                     //----------------------------------------------------------------//
-                    // We will need to lookup permissions for every room in a given
+                    // We will need to update permissions for every room in a given
                     // premise.
                     //----------------------------------------------------------------//
                     var aRequests           = [];
                     var oRequestQueue       = null;
 
                     try {
-                        $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
+                        $.each(IomyRe.common.RoomAdminRoomsList, function (sI, mRoom) {
 
                             aRequests.push({
                                 library : "php",
