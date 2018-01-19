@@ -27,7 +27,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
  * @param {type} message        Error message
  * @returns {iOmyException}
  */
-function IOmyException(message) {
+function iOmyException(message) {
 	if (message === undefined || message === null || message === false) {
 		message = "An exception has occurred in iOmy. No error message specified.";
 	}
@@ -45,12 +45,12 @@ function IOmyException(message) {
 // Sessions, Users, and Permissions
 //----------------------------------------------------------------------------//
 function UserNotSignedInException(message) {
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name       = "UserNotSignedInException";
 }
 
 function PermissionException(message) {
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name       = "PermissionException";
 }
 
@@ -68,7 +68,7 @@ function InvalidPremisePermissionException(message) {
 // Missing and invalid arguments
 //----------------------------------------------------------------------------//
 function MissingArgumentException(message) {
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name       = "MissingArgumentException";
 }
 
@@ -86,7 +86,7 @@ function MissingSettingsMapException(message) {
 }
 
 function IllegalArgumentException(message) {
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name       = "IllegalArgumentException";
 }
 
@@ -99,7 +99,7 @@ function ThingIDNotValidException(message) {
 // Room Management
 //----------------------------------------------------------------------------//
 function RoomException(message, roomName) {
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name       = "RoomException";
     this.room       = roomName;
 }
@@ -118,7 +118,7 @@ function AttemptToDeleteOnlyRoomException(message, roomName) {
 // Premises and Rooms
 //----------------------------------------------------------------------------//
 function NoPremisesVisibleException(message) {
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name       = "NoPremisesVisibleException";
 }
 
@@ -139,7 +139,7 @@ function NoRoomsFoundException(message) {
 // Objects not found
 //----------------------------------------------------------------------------//
 function ObjectNotFoundException(message) {
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name       = "ObjectNotFoundException";
 }
 
@@ -208,7 +208,7 @@ function SerialCodeNullException(message) {
         message = "Serial Code is null.";
     }
     
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name = "SerialCodeNullException";
 }
 
@@ -221,7 +221,7 @@ function NoZigbeeModemsException(message) {
         message = "There are no Zigbee modems attached.";
     }
     
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name = "NoZigbeeModemsException";
 }
 
@@ -234,6 +234,6 @@ function StreamURLNotFoundException(message) {
         message = "Could not find the stream IO in the given thing. The thing given may not be an Onvif stream.";
     }
     
-    IOmyException.call(this, message);
+    iOmyException.call(this, message);
     this.name = "StreamURLNotFoundException";
 }
