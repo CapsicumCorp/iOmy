@@ -307,24 +307,28 @@ AjaxRequestQueue.prototype._run = function (sQueueIndex) {
                 }
             };
 
-            if (mRequestData.library.toLowerCase() === "php") {
-                IomyRe.apiphp.AjaxRequest(mRequestParameters);
-            } else if (mRequestData.library.toLowerCase() === "odata") {
-                IomyRe.apiodata.AjaxRequest(mRequestParameters);
+            if (mRequestData.library !== undefined && mRequestData.library !== null) {
+                if (mRequestData.library.toLowerCase() === "php") {
+                    IomyRe.apiphp.AjaxRequest(mRequestParameters);
+                } else if (mRequestData.library.toLowerCase() === "odata") {
+                    IomyRe.apiodata.AjaxRequest(mRequestParameters);
+                } else {
+    //                if (mRequestData.library !== undefined && mRequestData.library !== null) {
+    //                    if (typeof mRequestData.library === "object") {
+    //                        try {
+    //                            mRequestData.library.AjaxRequest(mRequestParameters);
+    //                        } catch (e) {
+    //                            $.sap.log.error("Invalid module parsed: "+e.message);
+    //                        }
+    //                    } else {
+    //
+    //                    }
+    //                } else {
+                        $.ajax(mRequestData);
+                    //}
+                }
             } else {
-//                if (mRequestData.library !== undefined && mRequestData.library !== null) {
-//                    if (typeof mRequestData.library === "object") {
-//                        try {
-//                            mRequestData.library.AjaxRequest(mRequestParameters);
-//                        } catch (e) {
-//                            $.sap.log.error("Invalid module parsed: "+e.message);
-//                        }
-//                    } else {
-//
-//                    }
-//                } else {
-                    $.ajax(mRequestData);
-                //}
+                $.ajax(mRequestData);
             }
         }
     }
