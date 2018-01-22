@@ -27,7 +27,7 @@ sap.ui.jsfragment("fragments.UserEditPremPermEdit", {
 						new sap.m.Select ({
 							selectedKey: "{/Form/PremisePerm/Id}",
 							items: {
-								path: "/AllPremises",
+								path: "/PremiseSelectOptions",
 								template: oItemTemplatePremise
 							},
 							change: function( oEvent ) {

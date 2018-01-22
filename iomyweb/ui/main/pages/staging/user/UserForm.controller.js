@@ -281,7 +281,14 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							
 							//-- Store the values --//
 							oController.mModelData.AllPremises = JSON.parse(JSON.stringify( aAjaxData.Data ) );
-							
+                            
+                            aAjaxData.Data.push({
+                                "Id"     : 0,
+                                "Name"   : "All Premises",
+                                "Desc"   : ""
+                            });
+                            
+							oController.mModelData.PremiseSelectOptions = JSON.parse(JSON.stringify( aAjaxData.Data ) );
 							
 							//-- Perform the "onSuccess" function if applicable --//
 							if( oConfig.onSuccess ) {
@@ -462,7 +469,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 									"Id":          mRoom.PremiseId,
 									"Name":        mRoom.PremiseName,
 									"PermLevel":   iPermissionLevel
-								}
+								};
 							});
 							
 							oController.mModelData.RoomPerms = JSON.parse(JSON.stringify( oController.mModelData.Previous.RoomPerms ) );
@@ -534,10 +541,17 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				onSuccess: function ( sExpectedDataType, aAjaxData ) {
 					try {
 						if( sExpectedDataType==="JSON" && aAjaxData.Error===false ) {
-							
+                            var aRoomOptions = [];
+                            
 							//-- Store the values --//
 							oController.mModelData.AllRooms = JSON.parse( JSON.stringify( aAjaxData.Data ) );
-							
+                            
+							aAjaxData.Data.push({
+                                "Id"    : 0,
+                                "Name"  : "All Rooms"
+                            });
+                            
+                            oController.mModelData.RoomSelectOptions = JSON.parse( JSON.stringify( aAjaxData.Data ) );
 							
 							//-- Perform the "onSuccess" function if applicable --//
 							if( oConfig.onSuccess ) {
@@ -1319,7 +1333,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				//-- Invalid UserId --//
 				IomyRe.common.showError("Invalid User selected!", "Error" );
 				
-			} else if( !( iPremiseId>=1 ) ) {
+			} else if( !( iPremiseId>=0 ) ) {
 				//-- Invalid RoomId --//
 				IomyRe.common.showError("Invalid Premise selected! Please select a valid Premise.", "Error" );
 				
@@ -1366,76 +1380,224 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					default:
 						bError = true;
 						sErrMesg = "The permission level cannot be edited for that Premise!"
+                        jQuery.sap.log.error(sErrMesg);
 						break;
 				}
 				
 				if( bError===false ) {
-					IomyRe.apiphp.AjaxRequest({
-						url:  IomyRe.apiphp.APILocation("permissions"),
-						data: {
-							"Mode":      "UpdatePremisePerms",
-							"UserId":    iUserId,
-							"PremiseId": iPremiseId,
-							"Data":      "{\"Read\":"+iPermRead+",\"Write\":"+iPermWrite+",\"RoomAdmin\":"+iPermRoomAdmin+"}"
-						},
-						onSuccess: function ( sType, mData ) {
-							
-							try {
-								var sErrMesg = "Error editing the Premise Permissions!\n\n";
-							
-								if( sType!=="JSON" ) {
-									IomyRe.common.showError( sErrMesg+"API didn't return a JSON response.", "Error" );
-									
-								} else if( mData.Error===true ) {
-									IomyRe.common.showError( sErrMesg+"Error with the 'UpdatePremisePerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
-									
-								} else {
-									//----------------------------------------//
-									//-- Refresh the Premise Permissions    --//
-									//----------------------------------------//
-									oController.RefreshUserPremisePerms( oController, {
-										onSuccess: function() {
-											//----------------------------------------//
-											//-- Refresh the Model                  --//
-											//----------------------------------------//
-											oController.RefreshModel( oController, {
-												Reset:     "PremPerm",
-												onSuccess: function() {
-													//-- Go to the Show view --//
-													oController.ToggleButtonsAndView( oController, "PremPermShow" );
-												},
-												onFail: function() {
-													
-												}
-											}); //-- END Refresh Model --//
-										},
-										onFail: function() {
-											//------------------------------------------------//
-											//-- ERROR: User Premise Permissions            --//
-											//------------------------------------------------//
-											IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
-										}
-									}); //-- END Premise Permissions --//
-								}
-							} catch( e3 ) {
-								//------------------------------------------------//
-								//-- CRITICAL ERROR: User Premise Permissions   --//
-								//------------------------------------------------//
-								IomyRe.common.showError( sErrMesg+"Critical Error with the 'UpdatePremisePerms' success in the 'UserForm' controller!", "Error" );
-							}
-						},
-						onFail : function (response) {
-							//------------------------------------------------//
-							//-- ERROR: Updating the User Prem Permissions  --//
-							//------------------------------------------------//
-							IomyRe.common.showError(response.responseText, "Error", function() {} );
-						}
-					});
+                    //------------------------------------------------------------//
+                    // If a specific premise is given, then perform a single
+                    // request to update permissions for that premise.
+                    //------------------------------------------------------------//
+                    if (iPremiseId > 0) {
+                        try {
+                        
+                            IomyRe.apiphp.AjaxRequest({
+                                url:  IomyRe.apiphp.APILocation("permissions"),
+                                data: {
+                                    "Mode":      "UpdatePremisePerms",
+                                    "UserId":    iUserId,
+                                    "PremiseId": iPremiseId,
+                                    "Data":      "{\"Read\":"+iPermRead+",\"Write\":"+iPermWrite+",\"RoomAdmin\":"+iPermRoomAdmin+"}"
+                                },
+                                onSuccess: function ( sType, mData ) {
+
+                                    try {
+                                        var sErrMesg = "Error editing the Premise Permissions!\n\n";
+
+                                        if( sType!=="JSON" ) {
+                                            IomyRe.common.showError( sErrMesg+"API didn't return a JSON response.", "Error" );
+
+                                        } else if( mData.Error===true ) {
+                                            IomyRe.common.showError( sErrMesg+"Error with the 'UpdatePremisePerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
+
+                                        } else {
+                                            //----------------------------------------//
+                                            //-- Refresh the Premise Permissions    --//
+                                            //----------------------------------------//
+                                            oController.RefreshUserPremisePerms( oController, {
+                                                onSuccess: function() {
+                                                    //----------------------------------------//
+                                                    //-- Refresh the Model                  --//
+                                                    //----------------------------------------//
+                                                    oController.RefreshModel( oController, {
+                                                        Reset:     "PremPerm",
+                                                        onSuccess: function() {
+                                                            //-- Go to the Show view --//
+                                                            oController.ToggleButtonsAndView( oController, "PremPermShow" );
+                                                        },
+                                                        onFail: function() {
+
+                                                        }
+                                                    }); //-- END Refresh Model --//
+                                                },
+                                                onFail: function() {
+                                                    //------------------------------------------------//
+                                                    //-- ERROR: User Premise Permissions            --//
+                                                    //------------------------------------------------//
+                                                    IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
+                                                }
+                                            }); //-- END Premise Permissions --//
+                                        }
+                                    } catch( e3 ) {
+                                        //------------------------------------------------//
+                                        //-- CRITICAL ERROR: User Premise Permissions   --//
+                                        //------------------------------------------------//
+                                        IomyRe.common.showError( sErrMesg+"Critical Error with the 'UpdatePremisePerms' success in the 'UserForm' controller!", "Error" );
+                                    }
+                                },
+                                onFail : function (response) {
+                                    //------------------------------------------------//
+                                    //-- ERROR: Updating the User Prem Permissions  --//
+                                    //------------------------------------------------//
+                                    IomyRe.common.showError(response.responseText, "Error", function() {} );
+                                }
+                            });
+                        } catch (e) {
+                            IomyRe.common.showError("Error when updating permissions for a single premise.", "Edit Other User Page");
+                        }
+                    
+                    //------------------------------------------------------------//
+                    // "All Premise" was selected so we prepare requests for each
+                    // premise and then after permissions have been updated, refresh
+                    // the model.
+                    //------------------------------------------------------------//
+                    } else if (iPremiseId == 0) {
+                        try {
+                            var aErrorMessages  = [];
+
+                            var aRequests       = [];
+                            var oRequestQueue;
+
+                            $.each(oController.mModelData.AllPremises, function (vI, mPremise) {
+
+                                aRequests.push({
+                                    library : "php",
+                                    url:  IomyRe.apiphp.APILocation("permissions"),
+                                    data: {
+                                        "Mode":      "UpdatePremisePerms",
+                                        "UserId":    iUserId,
+                                        "PremiseId": mPremise.Id,
+                                        "Data":      "{\"Read\":"+iPermRead+",\"Write\":"+iPermWrite+",\"RoomAdmin\":"+iPermRoomAdmin+"}"
+                                    },
+                                    onSuccess: function ( sType, mData ) {
+
+                                        try {
+                                            var sErrMesg = "Error editing the Premise Permissions!\n\n";
+
+                                            if( sType!=="JSON" ) {
+                                                sErrMesg += "API didn't return a JSON response.";
+
+                                            } else if( mData.Error===true ) {
+                                                sErrMesg += "Error with the 'UpdatePremisePerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg;
+
+                                            }
+                                        } catch( e3 ) {
+                                            //------------------------------------------------//
+                                            //-- CRITICAL ERROR: User Premise Permissions   --//
+                                            //------------------------------------------------//
+                                            sErrMesg += "Critical Error with the 'UpdatePremisePerms' success in the 'UserForm' controller: " + e3.message;
+
+                                        } finally {
+                                            if (bError) {
+                                                aErrorMessages.push("Error while processing room "+mRoom.Id+":\n\n" + sErrMesg);
+                                            }
+                                        }
+                                    },
+                                    onFail : function (response) {
+                                        //------------------------------------------------//
+                                        //-- ERROR: Updating the User Prem Permissions  --//
+                                        //------------------------------------------------//
+                                        aErrorMessages.push(response.responseText);
+                                    }
+                                });
+
+                            });
+
+                            oRequestQueue = new AjaxRequestQueue({
+                                concurrentRequests : 2,
+                                requests : aRequests,
+
+                                onSuccess : function () {
+                                    if (aErrorMessages.length > 0) {
+                                        jQuery.sap.log.error("Errors were found in running the requests:\n\n" + aErrorMessages.join('\n'));
+                                    }
+
+                                    //----------------------------------------//
+                                    //-- Refresh the Premise Permissions    --//
+                                    //----------------------------------------//
+                                    oController.RefreshUserPremisePerms( oController, {
+                                        onSuccess: function() {
+                                            //----------------------------------------//
+                                            //-- Refresh the Model                  --//
+                                            //----------------------------------------//
+                                            oController.RefreshModel( oController, {
+                                                Reset:     "PremPerm",
+                                                onSuccess: function() {
+                                                    //-- Go to the Show view --//
+                                                    oController.ToggleButtonsAndView( oController, "PremPermShow" );
+                                                },
+                                                onFail: function() {
+
+                                                }
+                                            }); //-- END Refresh Model --//
+                                        },
+                                        onFail: function() {
+                                            //------------------------------------------------//
+                                            //-- ERROR: User Premise Permissions            --//
+                                            //------------------------------------------------//
+                                            IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
+                                        }
+                                    }); //-- END Premise Permissions --//
+                                },
+
+                                onWarning : function () {
+                                    IomyRe.common.showWarning("Failed to update permissions for some premises:\n\n" + aErrorMessages.join('\n'), "Error");
+
+                                    //----------------------------------------//
+                                    //-- Refresh the Premise Permissions    --//
+                                    //----------------------------------------//
+                                    oController.RefreshUserPremisePerms( oController, {
+                                        onSuccess: function() {
+                                            //----------------------------------------//
+                                            //-- Refresh the Model                  --//
+                                            //----------------------------------------//
+                                            oController.RefreshModel( oController, {
+                                                Reset:     "PremPerm",
+                                                onSuccess: function() {
+                                                    //-- Go to the Show view --//
+                                                    oController.ToggleButtonsAndView( oController, "PremPermShow" );
+                                                },
+                                                onFail: function() {
+
+                                                }
+                                            }); //-- END Refresh Model --//
+                                        },
+                                        onFail: function() {
+                                            //------------------------------------------------//
+                                            //-- ERROR: User Premise Permissions            --//
+                                            //------------------------------------------------//
+                                            IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
+                                        }
+                                    }); //-- END Premise Permissions --//
+                                },
+
+                                onFail : function () {
+                                    IomyRe.common.showError("Failed to update premise permissions:\n\n" + aErrorMessages.join('\n'), "Error");
+                                }
+                            });
+
+                        } catch (e) {
+                            jQuery.sap.log.error("Error attempting to update permissions for several premises ("+e.name+"): "+e.message);
+                        }
+                    }
+                        
+                    
 				} else {
 					//------------------------------------------------//
 					//-- ERROR: Updating the User Prem Permissions  --//
 					//------------------------------------------------//
-					IomyRe.common.showError("Error when updating the User Premise Permissions! API has returned an error", "Edit Other User Page");
+					IomyRe.common.showError("Error when updating the User Premise Permissions! "+sErrMesg, "Edit Other User Page");
 				}
 			}
 		} catch( e2 ) {
@@ -1467,7 +1629,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				//-- Invalid UserId --//
 				IomyRe.common.showError("Invalid User selected!", "Error", function () {} );
 				
-			} else if( !( iRoomId>=1 ) ) {
+			} else if( !( iRoomId>=0 ) ) {
 				//-- Invalid RoomId --//
 				IomyRe.common.showError("Invalid Room selected! Please select a valid room.", "Error", function () {} );
 				
@@ -1511,69 +1673,227 @@ sap.ui.controller("pages.staging.user.UserForm", {
 						break;
 				}
 				
-				IomyRe.apiphp.AjaxRequest({
-					url:  IomyRe.apiphp.APILocation("permissions"),
-					data: {
-						"Mode":   "UpdateRoomPerms",
-						"UserId": iUserId,
-						"RoomId": iRoomId,
-						"Data":   "{\"Read\":"+iPermRead+",\"DataRead\":"+iPermDataRead+",\"Write\":"+iPermWrite+",\"StateToggle\":"+iPermStateToggle+"}"
-					},			
-					onSuccess: function ( sType, mData ) {
-						
-						try {
-							var sErrMesg = "Error editing the Room Permissions!\n\n";
-						
-							if( sType!=="JSON" ) {
-								IomyRe.common.showError( sErrMesg+"API didn't return a JSON response.", "Error"  );
-								
-							} else if( mData.Error===true ) {
-								IomyRe.common.showError( sErrMesg+"Error with the 'UpdateRoomPerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
-								
-							} else {
-								//----------------------------------------//
-								//-- Refresh the Room Permissions       --//
-								//----------------------------------------//
-								oController.RefreshUserRoomPerms( oController, {
-									onSuccess: function() {
-										//----------------------------------------//
-										//-- Refresh the Model                  --//
-										//----------------------------------------//
-										oController.RefreshModel( oController, {
-											Reset:     "RoomPerm",
-											onSuccess: function() {
-												//----------------------------------------//
-												//-- Go to the Show view                --//
-												//----------------------------------------//
-												oController.ToggleButtonsAndView( oController, "RoomPermShow" );
-											},
-											onFail: function() {
-												
-											}
-										}); //-- END Refresh Model --//
-									},
-									onFail: function() {
-										//------------------------------------------------//
-										//-- ERROR: User Room Permissions               --//
-										//------------------------------------------------//
-										IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
-									}
-								}); //-- END Room Permissions --//
-							}
-						} catch( e3 ) {
-							//------------------------------------------------//
-							//-- CRITICAL ERROR: User Room permissions      --//
-							//------------------------------------------------//
-							IomyRe.common.showError( sErrMesg+"Critical Error with the 'UpdateRoomPerms' success in the 'UserForm' controller!", "Error" );
-						}
-					},
-					onFail : function (response) {
-						//------------------------------------------------//
-						//-- ERROR: Updating the Room Permissions       --//
-						//------------------------------------------------//
-						IomyRe.common.showError(response.responseText, "Error", function () {} );
-					}
-				});
+                //------------------------------------------------------------//
+                // If a specific room is given, then perform a single request
+                // to update permissions for that room.
+                //------------------------------------------------------------//
+                if (iRoomId > 0) {
+                    try {
+                        IomyRe.apiphp.AjaxRequest({
+                            url:  IomyRe.apiphp.APILocation("permissions"),
+                            data: {
+                                "Mode":   "UpdateRoomPerms",
+                                "UserId": iUserId,
+                                "RoomId": iRoomId,
+                                "Data":   "{\"Read\":"+iPermRead+",\"DataRead\":"+iPermDataRead+",\"Write\":"+iPermWrite+",\"StateToggle\":"+iPermStateToggle+"}"
+                            },			
+                            onSuccess: function ( sType, mData ) {
+
+                                try {
+                                    var sErrMesg = "Error editing the Room Permissions!\n\n";
+
+                                    if( sType!=="JSON" ) {
+                                        IomyRe.common.showError( sErrMesg+"API didn't return a JSON response.", "Error"  );
+
+                                    } else if( mData.Error===true ) {
+                                        IomyRe.common.showError( sErrMesg+"Error with the 'UpdateRoomPerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
+
+                                    } else {
+                                        //----------------------------------------//
+                                        //-- Refresh the Room Permissions       --//
+                                        //----------------------------------------//
+                                        oController.RefreshUserRoomPerms( oController, {
+                                            onSuccess: function() {
+                                                //----------------------------------------//
+                                                //-- Refresh the Model                  --//
+                                                //----------------------------------------//
+                                                oController.RefreshModel( oController, {
+                                                    Reset:     "RoomPerm",
+                                                    onSuccess: function() {
+                                                        //----------------------------------------//
+                                                        //-- Go to the Show view                --//
+                                                        //----------------------------------------//
+                                                        oController.ToggleButtonsAndView( oController, "RoomPermShow" );
+                                                    },
+                                                    onFail: function() {
+                                                        IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
+                                                    }
+                                                }); //-- END Refresh Model --//
+                                            },
+                                            onFail: function() {
+                                                //------------------------------------------------//
+                                                //-- ERROR: User Room Permissions               --//
+                                                //------------------------------------------------//
+                                                IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
+                                            }
+                                        }); //-- END Room Permissions --//
+                                    }
+                                } catch( e3 ) {
+                                    //------------------------------------------------//
+                                    //-- CRITICAL ERROR: User Room permissions      --//
+                                    //------------------------------------------------//
+                                    IomyRe.common.showError( sErrMesg+"Critical Error with the 'UpdateRoomPerms' success in the 'UserForm' controller!", "Error" );
+                                }
+                            },
+                            onFail : function (response) {
+                                //------------------------------------------------//
+                                //-- ERROR: Updating the Room Permissions       --//
+                                //------------------------------------------------//
+                                IomyRe.common.showError(response.responseText, "Error", function () {} );
+                            }
+                        });
+                    } catch (e) {
+                        jQuery.sap.log.error("Error attempting to update permissions for a single room ("+e.name+"): "+e.message);
+                    }
+                    
+                //------------------------------------------------------------//
+                // "All Rooms" was selected so we prepare requests for each
+                // room and then after permissions have been updated, refresh
+                // the model.
+                //------------------------------------------------------------//
+                } else if (iRoomId == 0) {
+                    try {
+                        var aErrorMessages  = [];
+                        
+                        var aRequests       = [];
+                        var oRequestQueue;
+                        
+                        //--------------------------------------------------------//
+                        // Process each room
+                        //--------------------------------------------------------//
+                        $.each(oController.mModelData.AllRooms, function (vI, mRoom) {
+                            
+                            aRequests.push({
+                                library : "php",
+                                url:  IomyRe.apiphp.APILocation("permissions"),
+                                data: {
+                                    "Mode":   "UpdateRoomPerms",
+                                    "UserId": iUserId,
+                                    "RoomId": mRoom.Id,
+                                    "Data":   "{\"Read\":"+iPermRead+",\"DataRead\":"+iPermDataRead+",\"Write\":"+iPermWrite+",\"StateToggle\":"+iPermStateToggle+"}"
+                                },			
+                                onSuccess: function ( sType, mData ) {
+                                    var bError   = false;
+
+                                    try {
+                                        var sErrMesg = "Error editing the Room Permissions!\n\n";
+
+                                        if( sType!=="JSON" ) {
+                                            bError = true;
+                                            sErrMesg += "API didn't return a JSON response.";
+
+                                        } else if( mData.Error===true ) {
+                                            bError = true;
+                                            sErrMesg += "Error with the 'UpdateRoomPerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg;
+
+                                        }
+                                        
+                                    } catch( e3 ) {
+                                        //------------------------------------------------//
+                                        //-- CRITICAL ERROR: User Room permissions      --//
+                                        //------------------------------------------------//
+                                        bError = true;
+                                        sErrMesg += "Critical Error with the 'UpdateRoomPerms' success in the 'UserForm' controller!";
+                                        
+                                    } finally {
+                                        if (bError) {
+                                            aErrorMessages.push("Error while processing room "+mRoom.Id+":\n\n" + sErrMesg);
+                                        }
+                                    }
+                                },
+                                onFail : function (response) {
+                                    //------------------------------------------------//
+                                    //-- ERROR: Updating the Room Permissions       --//
+                                    //------------------------------------------------//
+                                    aErrorMessages.push("Error while processing room "+mRoom.Id+":\n\n" + response.responseText);
+                                }
+                            });
+                        });
+                        
+                        //----------------------------------------------------//
+                        // Run the requests to update permissions.
+                        //----------------------------------------------------//
+                        oRequestQueue = new AjaxRequestQueue({
+                            concurrentRequests : 2,
+                            requests : aRequests,
+                            
+                            onSuccess : function () {
+                                if (aErrorMessages.length > 0) {
+                                    jQuery.sap.log.error("Errors were found in running the requests:\n\n" + aErrorMessages.join('\n'));
+                                }
+                                
+                                //----------------------------------------//
+                                //-- Refresh the Room Permissions       --//
+                                //----------------------------------------//
+                                oController.RefreshUserRoomPerms( oController, {
+                                    onSuccess: function() {
+                                        //----------------------------------------//
+                                        //-- Refresh the Model                  --//
+                                        //----------------------------------------//
+                                        oController.RefreshModel( oController, {
+                                            Reset:     "RoomPerm",
+                                            onSuccess: function() {
+                                                //----------------------------------------//
+                                                //-- Go to the Show view                --//
+                                                //----------------------------------------//
+                                                oController.ToggleButtonsAndView( oController, "RoomPermShow" );
+                                            },
+                                            onFail: function() {
+                                                IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
+                                            }
+                                        }); //-- END Refresh Model --//
+                                    },
+                                    onFail: function() {
+                                        //------------------------------------------------//
+                                        //-- ERROR: User Room Permissions               --//
+                                        //------------------------------------------------//
+                                        IomyRe.common.showError( "Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
+                                    }
+                                }); //-- END Room Permissions --//
+                            },
+                            
+                            onWarning : function () {
+                                IomyRe.common.showWarning("Failed to update permissions for some rooms:\n\n" + aErrorMessages.join('\n'), "Error");
+                                
+                                //----------------------------------------//
+                                //-- Refresh the Room Permissions       --//
+                                //----------------------------------------//
+                                oController.RefreshUserRoomPerms( oController, {
+                                    onSuccess: function() {
+                                        //----------------------------------------//
+                                        //-- Refresh the Model                  --//
+                                        //----------------------------------------//
+                                        oController.RefreshModel( oController, {
+                                            Reset:     "RoomPerm",
+                                            onSuccess: function() {
+                                                //----------------------------------------//
+                                                //-- Go to the Show view                --//
+                                                //----------------------------------------//
+                                                oController.ToggleButtonsAndView( oController, "RoomPermShow" );
+                                            },
+                                            onFail: function() {
+                                                IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
+                                            }
+                                        }); //-- END Refresh Model --//
+                                    },
+                                    onFail: function() {
+                                        //------------------------------------------------//
+                                        //-- ERROR: User Room Permissions               --//
+                                        //------------------------------------------------//
+                                        IomyRe.common.showError( "Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
+                                    }
+                                }); //-- END Room Permissions --//
+                            },
+                            
+                            onFail : function () {
+                                IomyRe.common.showError("Failed to update room permissions:\n\n" + aErrorMessages.join('\n'), "Error");
+                            }
+                        });
+                        
+                    } catch (e) {
+                        jQuery.sap.log.error("Error attempting to update permissions for several rooms ("+e.name+"): "+e.message);
+                    }
+                }
 			}
 		} catch( e2 ) {
 			jQuery.sap.log.error("Error with the 'UpdateRoomPerms' success in the 'UserForm' controller! "+e2.message);

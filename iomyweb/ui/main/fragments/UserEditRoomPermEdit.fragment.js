@@ -45,7 +45,7 @@ sap.ui.jsfragment("fragments.UserEditRoomPermEdit", {
 						IomyRe.widgets.selectBoxRoom({
 							selectedKey: "{/Form/RoomPerm/Id}",
 							template: {
-								path: "/PremiseRooms",
+								path: "/RoomSelectOptions",
 								item: new sap.ui.core.Item({
 									key:    "{Id}",
 									text:   "{Name}"
