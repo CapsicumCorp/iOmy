@@ -165,7 +165,7 @@ union multitypeval {
   } \
 }
 
-#elif ENABLE_PTHREAD_DEBUG_V2
+#elif defined(ENABLE_PTHREAD_DEBUG_V2)
 
 #warning "PTHREAD_LOCK and PTHREAD_UNLOCK debugging has been enabled"
 #include <errno.h>
