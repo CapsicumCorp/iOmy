@@ -540,6 +540,19 @@ static bool zigbeelib_zigbeedefsloaded=false;
 static locklib_ifaceptrs_ver_1_t *locklibifaceptr;
 #endif
 
+//High Level Definitions
+static const int16_t ZIGBEELIB_HIGH_LEVEL_ANYENDPOINT=-1;
+
+static const uint8_t ZIGBEELIB_HIGH_LEVEL_OFF=0;
+static const uint8_t ZIGBEELIB_HIGH_LEVEL_ON=1;
+static const uint8_t ZIGBEELIB_HIGH_LEVEL_TOGGLE=2;
+static const uint8_t ZIGBEELIB_HIGH_LEVEL_UNKNOWN=3;
+
+static const int16_t ZIGBEELIB_HIGH_LEVEL_ERROR_DEVICE_NOT_FOUND=-1;
+static const int16_t ZIGBEELIB_HIGH_LEVEL_ERROR_ENDPOINT_NOT_FOUND=-2;
+static const int16_t ZIGBEELIB_HIGH_LEVEL_ERROR_CLUSTER_NOT_FOUND=-3;
+static const int16_t ZIGBEELIB_HIGH_LEVEL_ERROR_ATTRIBUTE_NOT_FOUND=-4;
+
 //Function Declarations
 static void zigbee_send_multi_attribute_configure_reporting_request(int localzigbeeindex, int zigbeedeviceindex, uint8_t srcendpnt, uint8_t destendpnt, uint16_t clusterid, const uint16_t *manu, std::list<zigbee_zcl_configure_reporting_attr_record_t> attrs, long *localzigbeelocked, long *zigbeelocked);
 void zigbeelib_send_queue_match_zdo_response(int localzigbeeindex, char timeout, uint16_t netaddr, uint16_t clusterid, uint8_t *seqnumber, long *localzigbeelocked, long *zigbeelocked);
@@ -553,6 +566,9 @@ STATIC zigbeeendpoint_t *_zigbeelib_find_zigbee_endpointptr_match_profile_match_
 STATIC zigbeeendpoint_t *zigbeelib_find_zigbee_endpointptr_match_profile_match_icluster(zigbeedevice_t *zigbeedeviceptr, uint16_t profileid, uint16_t iclusterid, long *localzigbeelocked, long *zigbeelocked);
 STATIC uint8_t _zigbeelib_find_zigbee_endpoint_match_profile_match_icluster(zigbeedevice_t *zigbeedeviceptr, uint16_t profileid, uint16_t iclusterid, long *localzigbeelocked, long *zigbeelocked);
 STATIC uint8_t zigbeelib_find_zigbee_endpoint_match_profile_match_icluster(zigbeedevice_t *zigbeedeviceptr, uint16_t profileid, uint16_t iclusterid, long *localzigbeelocked, long *zigbeelocked);
+
+static int16_t zigbeelib_highlevel_get_onoff_zigbee_device(uint64_t zigbeeaddr, int16_t port);
+static int16_t zigbeelib_highlevel_set_onoff_zigbee_device(uint64_t zigbeeaddr, int16_t port, int state);
 
 static void zigbeelib_match_zigbeedevice_basicinfo(int localzigbeeindex, int zigbeeidx, long *localzigbeelocked, long *zigbeelocked);
 
@@ -599,10 +615,51 @@ static zigbeelib_ifaceptrs_ver_1_t zigbeelib_ifaceptrs_ver_1={
   zigbeelib_remove_localzigbeedevice
 };
 
+static zigbeelib_ifaceptrs_ver_2_t zigbeelib_ifaceptrs_ver_2={
+  zigbeelib_process_zdo_send_status,
+  zigbeelib_process_zcl_send_status,
+  zigbeelib_process_zdo_seqnumber,
+  zigbeelib_process_zcl_seqnumber,
+  zigbeelib_process_zdo_response_received,
+  process_zdo_response_timeout,
+  zigbeelib_decode_zigbee_home_automation_attribute,
+  zigbeelib_process_zcl_response_received,
+  process_zcl_response_timeout,
+  zigbeelib_find_zigbee_device,
+  zigbeelib_add_zigbee_device,
+  zigbeelib_remove_zigbee_device,
+  zigbeelib_remove_all_zigbee_devices,
+  zigbeelib_get_zigbee_info,
+  zigbeelib_get_zigbee_endpoints,
+  zigbeelib_get_zigbee_next_endpoint_info,
+  zigbeelib_register_home_automation_endpointid,
+  zigbeelib_add_localzigbeedevice,
+  zigbeelib_remove_localzigbeedevice,
+
+  zigbeelib_highlevel_get_onoff_zigbee_device,
+  zigbeelib_highlevel_set_onoff_zigbee_device,
+
+  &ZIGBEELIB_HIGH_LEVEL_ANYENDPOINT,
+
+  &ZIGBEELIB_HIGH_LEVEL_OFF,
+  &ZIGBEELIB_HIGH_LEVEL_ON,
+  &ZIGBEELIB_HIGH_LEVEL_TOGGLE,
+  &ZIGBEELIB_HIGH_LEVEL_UNKNOWN,
+
+  &ZIGBEELIB_HIGH_LEVEL_ERROR_DEVICE_NOT_FOUND,
+  &ZIGBEELIB_HIGH_LEVEL_ERROR_ENDPOINT_NOT_FOUND,
+  &ZIGBEELIB_HIGH_LEVEL_ERROR_CLUSTER_NOT_FOUND,
+  &ZIGBEELIB_HIGH_LEVEL_ERROR_ATTRIBUTE_NOT_FOUND,
+};
+
 static moduleiface_ver_1_t zigbeelib_ifaces[]={
   {
     &zigbeelib_ifaceptrs_ver_1,
     ZIGBEELIBINTERFACE_VER_1
+  },
+  {
+    &zigbeelib_ifaceptrs_ver_2,
+    ZIGBEELIBINTERFACE_VER_2
   },
   {
     nullptr, 0
@@ -5969,6 +6026,161 @@ void zigbeelib_get_zigbee_next_endpoint_info(int localzigbeeindex, uint64_t addr
   }
   zigbeelib_unlockzigbee(zigbeelocked);
 }
+
+//---------------------------
+//High Level Zigbee Functions
+//---------------------------
+
+/*
+ * Return the current state on/off of a Zigbee device
+ * zigbeeaddr: The 64-bit destination IEEE address of the Zigbee device
+ * port: Thing Port id with On/Off or another special value listed below
+ *   You can use HIGH_LEVEL_ANYENDPOINT to use the first available endpoint that supports on/off
+ * Returns ON, OFF or HIGH_LEVEL_UNKNOWN on success or negative value on error
+ */
+static int16_t zigbeelib_highlevel_get_onoff_zigbee_device(uint64_t zigbeeaddr, int16_t port) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  zigbeelib_lockzigbee();
+
+  //Find the Zigbee device
+  int i, found;
+
+  found=-1;
+  for (i=0; i<zigbeelib_numlocalzigbeedevices; i++) {
+    found=zigbeelib_find_zigbee_device_and_use(i, zigbeeaddr, 0xFFFF);
+    if (found!=-1) {
+      break;
+    }
+  }
+  if (found==-1) {
+    //Zigbee Device not found
+    return ZIGBEELIB_HIGH_LEVEL_ERROR_DEVICE_NOT_FOUND;
+  }
+  zigbeedevice_t *zigbeedeviceptr=&zigbeelib_localzigbeedevices[i].zigbeedevices.at(found);
+  uint8_t endpointid;
+  const zigbeeendpoint_t *endpointptr=NULL;
+  if (port==ZIGBEELIB_HIGH_LEVEL_ANYENDPOINT) {
+    for (const auto &endpointit : zigbeedeviceptr->endpoints) {
+      try {
+        if (endpointit.second.iclusters.at(ZIGBEE_HOME_AUTOMATION_ONOFF_CLUSTER).id) {
+          endpointid=endpointit.first;
+          endpointptr=&endpointit.second;
+          break;
+        }
+      } catch (std::out_of_range& e) {
+        //Cluster ID not found; do nothing
+      }
+    }
+  } else {
+    try {
+      //Find the endpoint that has both the thing port id matching port parameter
+      for (const auto &endpointit : zigbeedeviceptr->endpoints) {
+        if (endpointit.second.thingport==port && endpointit.second.iclusters.at(ZIGBEE_HOME_AUTOMATION_ONOFF_CLUSTER).id) {
+          endpointid=endpointit.first;
+          endpointptr=&endpointit.second;
+          break;
+        }
+      }
+    } catch (std::out_of_range& e) {
+      //Cluster ID not found; do nothing
+    }
+  }
+  if (!endpointptr) {
+    zigbeelib_unlockzigbee();
+    return ZIGBEELIB_HIGH_LEVEL_ERROR_ENDPOINT_NOT_FOUND;
+  }
+  uint8_t state;
+  try {
+    if (endpointptr->iclusters.at(ZIGBEE_HOME_AUTOMATION_ONOFF_CLUSTER).attrs.at(0).at(ZIGBEE_HA_ONOFF_CLUSTER_ONOFF_ATTR).invaltime!=0) {
+      state=endpointptr->iclusters.at(ZIGBEE_HOME_AUTOMATION_ONOFF_CLUSTER).attrs.at(0).at(ZIGBEE_HA_ONOFF_CLUSTER_ONOFF_ATTR).val.getval().uval8bit;
+      debuglibifaceptr->debuglib_printf(1, "%s: Returning state: %d for local zigbee: %016" PRIX64 ", zigbee: %016" PRIX64 ", endpoint: %d\n", __PRETTY_FUNCTION__, (int) state, zigbeelib_localzigbeedevices[i].addr, zigbeedeviceptr->addr, endpointid);
+    } else {
+      //Current On/Off state hasn't been retrieved yet
+      state=ZIGBEELIB_HIGH_LEVEL_UNKNOWN;
+    }
+  } catch (std::out_of_range& e) {
+    //Attribute not found
+    zigbeelib_unlockzigbee();
+    return ZIGBEELIB_HIGH_LEVEL_ERROR_ATTRIBUTE_NOT_FOUND;
+  }
+  zigbeelib_unlockzigbee();
+
+  return state;
+}
+
+/*
+ * Turn a Zigbee device on/off or and some devices also support toggle
+ * zigbeeaddr: The 64-bit destination IEEE address of the Zigbee device
+ * port: Thing Port id with On/Off or another special value listed below
+ *   You can use HIGH_LEVEL_ANYENDPOINT to use the first available endpoint that supports on/off
+ * state: Off/On or in some cases TOGGLE will work as well
+ * Returns 0 on success or negative value on error
+ */
+static int16_t zigbeelib_highlevel_set_onoff_zigbee_device(uint64_t zigbeeaddr, int16_t port, int state) {
+  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+
+  zigbeelib_lockzigbee();
+
+  //Find the Zigbee device
+  int i, found;
+
+  found=-1;
+  for (i=0; i<zigbeelib_numlocalzigbeedevices; i++) {
+    found=zigbeelib_find_zigbee_device_and_use(i, zigbeeaddr, 0xFFFF);
+    if (found!=-1) {
+      break;
+    }
+  }
+  if (found==-1) {
+    //Zigbee Device not found
+    return ZIGBEELIB_HIGH_LEVEL_ERROR_DEVICE_NOT_FOUND;
+  }
+  //See if the on/off cluster can be found for this device
+  zigbeedevice_t *zigbeedeviceptr=&zigbeelib_localzigbeedevices[i].zigbeedevices.at(found);
+  uint8_t endpointid;
+  const zigbeeendpoint_t *endpointptr=NULL;
+  if (port==ZIGBEELIB_HIGH_LEVEL_ANYENDPOINT) {
+    for (const auto &endpointit : zigbeedeviceptr->endpoints) {
+      try {
+        if (endpointit.second.iclusters.at(ZIGBEE_HOME_AUTOMATION_ONOFF_CLUSTER).id) {
+          endpointid=endpointit.first;
+          endpointptr=&endpointit.second;
+          break;
+        }
+      } catch (std::out_of_range& e) {
+        //Cluster ID not found; do nothing
+      }
+    }
+  } else {
+    try {
+      //Find the endpoint that has both the thing port id matching port parameter
+      for (const auto &endpointit : zigbeedeviceptr->endpoints) {
+        if (endpointit.second.thingport==port && endpointit.second.iclusters.at(ZIGBEE_HOME_AUTOMATION_ONOFF_CLUSTER).id) {
+          endpointid=endpointit.first;
+          endpointptr=&endpointit.second;
+          break;
+        }
+      }
+    } catch (std::out_of_range& e) {
+      //Cluster ID not found; do nothing
+    }
+  }
+  if (!endpointptr) {
+    zigbeelib_unlockzigbee();
+    return ZIGBEELIB_HIGH_LEVEL_ERROR_ENDPOINT_NOT_FOUND;
+  }
+  //Need to send a special command to change on/off value
+  debuglibifaceptr->debuglib_printf(1, "%s: Setting state: %d for local zigbee: %016" PRIX64 ", zigbee: %016" PRIX64 ", endpoint: %d\n", __PRETTY_FUNCTION__, zigbeelib_localzigbeedevices[i].addr, zigbeedeviceptr->addr, endpointid, (int) state);
+  long localzigbeelocked=0, zigbeelocked=0;
+  zigbeelib_homeautomation_send_on_off(i, found, zigbeelib_localzigbeedevices[i].haendpointid, endpointid, state, &localzigbeelocked, &zigbeelocked);
+
+  zigbeelib_unlockzigbee();
+
+  return 0;
+}
+
+//---------------------------
 
 /*
   Process a command sent by the user using the cmd network interface

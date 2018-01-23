@@ -173,8 +173,65 @@ typedef struct {
   int (*add_localzigbeedevice)(zigbeelib_localzigbeedevice_ver_1_t *localzigbeedevice, zigbeelib_localzigbeedevice_iface_ver_1_t *zigbeedeviceiface, unsigned long long features, long *localzigbeelocked, long *zigbeelocked);
 
   int (*remove_localzigbeedevice)(int localzigbeeindex, long *localzigbeelocked, long *zigbeelocked);
-
 } zigbeelib_ifaceptrs_ver_1_t;
+
+typedef struct {
+  void (*process_zdo_send_status)(int localzigbeeindex, uint8_t status, uint8_t *seqnumber, long *localzigbeelocked, long *zigbeelocked);
+  void (*process_zcl_send_status)(int localzigbeeindex, uint8_t status, uint8_t *seqnumber, long *localzigbeelocked, long *zigbeelocked);
+  void (*process_zdo_seqnumber)(int localzigbeeindex, uint16_t netaddr, uint8_t seqnumber, long *localzigbeelocked, long *zigbeelocked);
+  void (*process_zcl_seqnumber)(int localzigbeeindex, uint16_t netaddr, uint8_t seqnumber, long *localzigbeelocked, long *zigbeelocked);
+
+  void (*process_zdo_response_received)(int localzigbeeindex, zigbee_zdo_response_header_t *zdocmd, long *localzigbeelocked, long *zigbeelocked);
+  void (*process_zdo_response_timeout)(int localzigbeeindex, uint16_t netaddr, uint16_t clusterid, uint8_t *seqnumber, long *localzigbeelocked, long *zigbeelocked);
+
+  void (*decode_zigbee_home_automation_attribute)(int localzigbeeindex, uint16_t netaddr, uint8_t endpoint, uint16_t clusterid, uint16_t manu, uint16_t attrid, uint8_t status, uint8_t attrtype, const zigbee_attrval_t * const attrvalptr, uint8_t *attrsizeptr, long *localzigbeelocked, long *zigbeelocked);
+  void (*process_zcl_response_received)(int localzigbeeindex, zigbee_zcl_command_with_manu_t *zclcmd, long *localzigbeelocked, long *zigbeelocked);
+  void (*process_zcl_response_timeout)(int localzigbeeindex, uint16_t netaddr, uint16_t clusterid, uint8_t *seqnumber, long *localzigbeelocked, long *zigbeelocked);
+
+  int (*find_zigbee_device)(int localzigbeeindex, uint64_t addr, uint16_t netaddr, long *localzigbeelocked, long *zigbeelocked);
+
+  int (*add_zigbee_device)(int localzigbeeindex, uint64_t addr, uint16_t netaddr, char devicetype, char rxonidle, long *localzigbeelocked, long *zigbeelocked);
+
+  int (*remove_zigbee_device)(int localzigbeeindex, uint64_t addr, uint16_t netaddr, long *localzigbeelocked, long *zigbeelocked);
+  void (*remove_all_zigbee_devices)(int localzigbeeindex, long *localzigbeelocked, long *zigbeelocked);
+
+  void (*get_zigbee_info)(int localzigbeeindex, uint64_t addr, uint16_t netaddr, int pos, long *localzigbeelocked, long *zigbeelocked);
+  void (*get_zigbee_endpoints)(int localzigbeeindex, uint64_t addr, uint16_t netaddr, long *rapidhalocked, long *zigbeelocked);
+  void (*get_zigbee_next_endpoint_info)(int localzigbeeindex, uint64_t addr, uint16_t netaddr, long *rapidhalocked, long *zigbeelocked);
+
+  int (*register_home_automation_endpointid)(int localzigbeeindex, uint8_t haendpointid, long *localzigbeelocked, long *zigbeelocked);
+
+  //Tell this library to start using a local zigbee home automation device handled by a lower level library
+  //The low level library that calls this function should fill in the local zigbee device structure before calling this function
+  //WARNING: You should never add the same zigbee device more than once without previously removing it
+  //Args: zigbeedeviceinfo is a structure with info about the zigbee device
+  //      zigbeedeviceiface is a pointer to functions that this library can call to interface with the local zigbee device
+  //      features A bitwise value indicating what features are supported by the local zigbee device
+  //      localzigbeelocked is a pointer to a variable that indicates whether the parent library has its mutex locked in this thread or not and is important if this library needs to call the parent library's interface functions
+  //      zigbeelocked is a pointer to a variable that indicates whether this library has its mutex locked or not in this thread and is important if the parent library was called by this library and is calling back into this library
+  //Returns: Index number to use with other functions on success or negative value on error
+  //  If an error is returned, assume that the zigbee device wasn't added to this library
+  int (*add_localzigbeedevice)(zigbeelib_localzigbeedevice_ver_1_t *localzigbeedevice, zigbeelib_localzigbeedevice_iface_ver_1_t *zigbeedeviceiface, unsigned long long features, long *localzigbeelocked, long *zigbeelocked);
+
+  int (*remove_localzigbeedevice)(int localzigbeeindex, long *localzigbeelocked, long *zigbeelocked);
+
+  //High Level Functions
+  int16_t (*highlevel_get_onoff_zigbee_device)(uint64_t zigbeeaddr, int16_t port);
+  int16_t (*highlevel_set_onoff_zigbee_device)(uint64_t zigbeeaddr, int16_t port, int state);
+
+  //High Level Definitions
+  const int16_t *HIGH_LEVEL_ANYENDPOINT;
+
+  const uint8_t *HIGH_LEVEL_OFF;
+  const uint8_t *HIGH_LEVEL_ON;
+  const uint8_t *HIGH_LEVEL_TOGGLE;
+  const uint8_t *HIGH_LEVEL_UNKNOWN;
+
+  const int16_t *HIGH_LEVEL_ERROR_DEVICE_NOT_FOUND;
+  const int16_t *HIGH_LEVEL_ERROR_ENDPOINT_NOT_FOUND;
+  const int16_t *HIGH_LEVEL_ERROR_CLUSTER_NOT_FOUND;
+  const int16_t *HIGH_LEVEL_ERROR_ATTRIBUTE_NOT_FOUND;
+} zigbeelib_ifaceptrs_ver_2_t;
 
 #ifdef __cplusplus
 }
@@ -183,6 +240,7 @@ typedef struct {
 #pragma pack(pop)
 
 #define ZIGBEELIBINTERFACE_VER_1 1 //A version number for the zigbeelib interface version
+#define ZIGBEELIBINTERFACE_VER_2 2 //A version number for the zigbeelib interface version
 
 
 //RapidHA Primary Frame Types
