@@ -257,6 +257,12 @@ var aPages = [
 		"Location":		"pages.staging.Development.NewRulesList",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.NewRulesList\" Page!\n"
+	},
+	{
+		"Id":			"pServerInfo",
+		"Location":		"pages.staging.Development.ServerInfo",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.ServerInfo\" Page!\n"
 	}
 
 ];
