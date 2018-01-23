@@ -1110,11 +1110,11 @@ if($bError===false) {
 							break;
 						
 						case "02_CreateTables5":
-							$aResult = DB_CreateTables( $sPostDatabaseName, array( "IO", "Data1", "Data2", "Data3", "Data4" ) );
+							$aResult = DB_CreateTables( $sPostDatabaseName, array( "IO", "Data1", "Data2", "Data3", "Data4", "Data5" ) );
 							break;
 							
 						case "02_CreateTables6":
-							$aResult = DB_CreateTables( $sPostDatabaseName, array( "Data5", "Datatype", "RSCat", "RSType", "UoM", "Rule1" ) );
+							$aResult = DB_CreateTables( $sPostDatabaseName, array( "Datatype", "RSCat", "RSType", "UoM", "Rule1" ) );
 							break;
 							
 						//--------------------//

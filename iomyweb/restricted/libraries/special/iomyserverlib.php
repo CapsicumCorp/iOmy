@@ -1024,13 +1024,14 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "	primary key (`RULE1_PK`) \n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table ".$sDBName.".`RULE1` comment 'This table is used to store the first version of the Database rules system. NOTE: Future versions will probably use a different table for new rules.';\n";
-			
+			/*
 			$sSQL .= "create table `".$sDBName."`.`RULE1TYPE` \n";
 			$sSQL .= "( \n";
 			$sSQL .= "	`RULE1TYPE_PK`       int not null auto_increment comment 'Primary Key', \n";
 			$sSQL .= "	`RULE1TYPE_NAME`     int not null comment 'Foreign Key', \n";
 			$sSQL .= "	primary key (`RULE1TYPE_PK`) \n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
+			*/
 			break;
 			
 			
@@ -1363,14 +1364,14 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/*==============================================================*/
 		case 'Target':
 			$sSQL .= null;
-			
+			break;
 		/*==============================================================*/
 		/* Table: RULE1                                                 */
 		/*==============================================================*/
 		case 'Rule1':
-			$sSQL .= "alter table `".$sDBName."`.`RULE1` add constraint FK_REFERENCE_109 foreign key (`RULE1_HUB_FK`) references IOMY.HUB (`HUB_PK`) on delete restrict on update restrict; \n";
-			$sSQL .= "alter table `".$sDBName."`.`RULE1` add constraint FK_REFERENCE_78 foreign key (`RULE1_RULE1TYPE_FK`) references RULE1TYPE (`RULE1TYPE_PK`) on delete restrict on update restrict; \n";
-			
+			$sSQL .= "alter table `".$sDBName."`.`RULE1` add constraint FK_REFERENCE_109 foreign key (`RULE1_HUB_FK`) references `".$sDBName."`.HUB (`HUB_PK`) on delete restrict on update restrict; \n";
+			$sSQL .= "alter table `".$sDBName."`.`RULE1` add constraint FK_REFERENCE_78 foreign key (`RULE1_RULE1TYPE_FK`) references `".$sDBName."`.`RULE1TYPE` (`RULE1TYPE_PK`) on delete restrict on update restrict; \n";
+			break;
 		/*==============================================================*/
 		/* ERROR: UNSUPPORTED PARAMETER                                 */
 		/*==============================================================*/
