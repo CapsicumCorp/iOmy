@@ -170,7 +170,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                     ]
                                                 }),
                                             ]
-                                        }) /* ,
+                                        }),
                                         new sap.ui.layout.BlockLayoutRow ({
                                             content : [ 
                                                 new sap.ui.layout.BlockLayoutCell ({
@@ -179,18 +179,34 @@ sap.ui.jsview("pages.staging.Block", {
                                                             width: "100%",
                                                             content : [
                                                                 new sap.m.Link ({
-                                                                    text : "FFMPEG",
+                                                                    text : "NewRuleForm",
                                                                     emphasized : true,
                                                                     press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pFFMPEG" , {} , false);
+                                                                        IomyRe.common.NavigationChangePage( "pNewAddRule" , {} , false);
                                                                     }
                                                                 }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk")
                                                             ]
                                                         })
                                                     ]
-                                                })
+                                                }),
+                                                new sap.ui.layout.BlockLayoutCell ({
+                                                    content : [
+                                                        new sap.ui.layout.VerticalLayout ({
+                                                            width: "100%",
+                                                            content : [
+                                                                new sap.m.Link ({
+                                                                    text : "NewRuleList",
+                                                                    emphasized : true,
+                                                                    press : function () {
+                                                                        IomyRe.common.NavigationChangePage( "pNewRules" , {} , false);
+                                                                    }
+                                                                }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk")
+                                                            ]
+                                                        })
+                                                    ]
+                                                }),
                                             ]
-                                        }) */
+                                        })
                                     ]
                                 })
                             ]

@@ -245,6 +245,18 @@ var aPages = [
 		"Location":		"pages.staging.FFMPEG",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.FFMPEG\" Page!\n"
+	},
+	{
+		"Id":			"pNewAddRule",
+		"Location":		"pages.staging.Development.NewRulesForm",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.NewRulesForm\" Page!\n"
+	},
+	{
+		"Id":			"pNewRules",
+		"Location":		"pages.staging.Development.NewRulesList",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.NewRulesList\" Page!\n"
 	}
 
 ];
