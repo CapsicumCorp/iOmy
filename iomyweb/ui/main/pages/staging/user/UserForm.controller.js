@@ -541,7 +541,6 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				onSuccess: function ( sExpectedDataType, aAjaxData ) {
 					try {
 						if( sExpectedDataType==="JSON" && aAjaxData.Error===false ) {
-                            var aRoomOptions = [];
                             
 							//-- Store the values --//
 							oController.mModelData.AllRooms = JSON.parse( JSON.stringify( aAjaxData.Data ) );
@@ -1066,6 +1065,70 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		return oFormSection;
 	},
 	
+    //========================================================//
+    //== 5.0 - Update Model after permission updates
+    //========================================================//
+    UpdatePremisePermissionModel : function () {
+        var oController = this;
+        //----------------------------------------//
+        //-- Refresh the Premise Permissions    --//
+        //----------------------------------------//
+        oController.RefreshUserPremisePerms( oController, {
+            onSuccess: function() {
+                //----------------------------------------//
+                //-- Refresh the Model                  --//
+                //----------------------------------------//
+                oController.RefreshModel( oController, {
+                    Reset:     "PremPerm",
+                    onSuccess: function() {
+                        //-- Go to the Show view --//
+                        oController.ToggleButtonsAndView( oController, "PremPermShow" );
+                    },
+                    onFail: function() {
+                        IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Premise Permissions!", "Edit Other User Page");
+                    }
+                }); //-- END Refresh Model --//
+            },
+            onFail: function() {
+                //------------------------------------------------//
+                //-- ERROR: User Premise Permissions            --//
+                //------------------------------------------------//
+                IomyRe.common.showError( "Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
+            }
+        }); //-- END Premise Permissions --//
+    },
+    
+    UpdateRoomPermissionModel : function () {
+        var oController = this;
+        //----------------------------------------//
+        //-- Refresh the Room Permissions       --//
+        //----------------------------------------//
+        oController.RefreshUserRoomPerms( oController, {
+            onSuccess: function() {
+                //----------------------------------------//
+                //-- Refresh the Model                  --//
+                //----------------------------------------//
+                oController.RefreshModel( oController, {
+                    Reset:     "RoomPerm",
+                    onSuccess: function() {
+                        //----------------------------------------//
+                        //-- Go to the Show view                --//
+                        //----------------------------------------//
+                        oController.ToggleButtonsAndView( oController, "RoomPermShow" );
+                    },
+                    onFail: function() {
+                        IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
+                    }
+                }); //-- END Refresh Model --//
+            },
+            onFail: function() {
+                //------------------------------------------------//
+                //-- ERROR: User Room Permissions               --//
+                //------------------------------------------------//
+                IomyRe.common.showError( "Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
+            }
+        }); //-- END Room Permissions --//
+    },
 
 	//========================================================//
 	//== 5.1 - Update Database                              ==//
@@ -1148,7 +1211,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 													oController.ToggleButtonsAndView( oController, "UserInfoShow" );
 												},
 												onFail: function() {
-													
+													IomyRe.common.showError("Problem refreshing the model after updating the new User Information!", "Edit Other User Page");
 												}
 											}); //-- END Refresh Model --//
 										},
@@ -1412,32 +1475,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                             IomyRe.common.showError( sErrMesg+"Error with the 'UpdatePremisePerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
 
                                         } else {
-                                            //----------------------------------------//
-                                            //-- Refresh the Premise Permissions    --//
-                                            //----------------------------------------//
-                                            oController.RefreshUserPremisePerms( oController, {
-                                                onSuccess: function() {
-                                                    //----------------------------------------//
-                                                    //-- Refresh the Model                  --//
-                                                    //----------------------------------------//
-                                                    oController.RefreshModel( oController, {
-                                                        Reset:     "PremPerm",
-                                                        onSuccess: function() {
-                                                            //-- Go to the Show view --//
-                                                            oController.ToggleButtonsAndView( oController, "PremPermShow" );
-                                                        },
-                                                        onFail: function() {
-
-                                                        }
-                                                    }); //-- END Refresh Model --//
-                                                },
-                                                onFail: function() {
-                                                    //------------------------------------------------//
-                                                    //-- ERROR: User Premise Permissions            --//
-                                                    //------------------------------------------------//
-                                                    IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
-                                                }
-                                            }); //-- END Premise Permissions --//
+                                            oController.UpdatePremisePermissionModel();
                                         }
                                     } catch( e3 ) {
                                         //------------------------------------------------//
@@ -1469,6 +1507,9 @@ sap.ui.controller("pages.staging.user.UserForm", {
                             var aRequests       = [];
                             var oRequestQueue;
 
+                            //----------------------------------------------------//
+                            // Process each premise.
+                            //----------------------------------------------------//
                             $.each(oController.mModelData.AllPremises, function (vI, mPremise) {
 
                                 aRequests.push({
@@ -1514,6 +1555,9 @@ sap.ui.controller("pages.staging.user.UserForm", {
 
                             });
 
+                            //----------------------------------------------------//
+                            // Create and run the request queue with the requests.
+                            //----------------------------------------------------//
                             oRequestQueue = new AjaxRequestQueue({
                                 concurrentRequests : 2,
                                 requests : aRequests,
@@ -1523,63 +1567,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                         jQuery.sap.log.error("Errors were found in running the requests:\n\n" + aErrorMessages.join('\n'));
                                     }
 
-                                    //----------------------------------------//
-                                    //-- Refresh the Premise Permissions    --//
-                                    //----------------------------------------//
-                                    oController.RefreshUserPremisePerms( oController, {
-                                        onSuccess: function() {
-                                            //----------------------------------------//
-                                            //-- Refresh the Model                  --//
-                                            //----------------------------------------//
-                                            oController.RefreshModel( oController, {
-                                                Reset:     "PremPerm",
-                                                onSuccess: function() {
-                                                    //-- Go to the Show view --//
-                                                    oController.ToggleButtonsAndView( oController, "PremPermShow" );
-                                                },
-                                                onFail: function() {
-
-                                                }
-                                            }); //-- END Refresh Model --//
-                                        },
-                                        onFail: function() {
-                                            //------------------------------------------------//
-                                            //-- ERROR: User Premise Permissions            --//
-                                            //------------------------------------------------//
-                                            IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
-                                        }
-                                    }); //-- END Premise Permissions --//
+                                    oController.UpdatePremisePermissionModel();
                                 },
 
                                 onWarning : function () {
                                     IomyRe.common.showWarning("Failed to update permissions for some premises:\n\n" + aErrorMessages.join('\n'), "Error");
 
-                                    //----------------------------------------//
-                                    //-- Refresh the Premise Permissions    --//
-                                    //----------------------------------------//
-                                    oController.RefreshUserPremisePerms( oController, {
-                                        onSuccess: function() {
-                                            //----------------------------------------//
-                                            //-- Refresh the Model                  --//
-                                            //----------------------------------------//
-                                            oController.RefreshModel( oController, {
-                                                Reset:     "PremPerm",
-                                                onSuccess: function() {
-                                                    //-- Go to the Show view --//
-                                                    oController.ToggleButtonsAndView( oController, "PremPermShow" );
-                                                },
-                                                onFail: function() {
-
-                                                }
-                                            }); //-- END Refresh Model --//
-                                        },
-                                        onFail: function() {
-                                            //------------------------------------------------//
-                                            //-- ERROR: User Premise Permissions            --//
-                                            //------------------------------------------------//
-                                            IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
-                                        }
-                                    }); //-- END Premise Permissions --//
+                                    oController.UpdatePremisePermissionModel();
                                 },
 
                                 onFail : function () {
@@ -1699,34 +1693,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                         IomyRe.common.showError( sErrMesg+"Error with the 'UpdateRoomPerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
 
                                     } else {
-                                        //----------------------------------------//
-                                        //-- Refresh the Room Permissions       --//
-                                        //----------------------------------------//
-                                        oController.RefreshUserRoomPerms( oController, {
-                                            onSuccess: function() {
-                                                //----------------------------------------//
-                                                //-- Refresh the Model                  --//
-                                                //----------------------------------------//
-                                                oController.RefreshModel( oController, {
-                                                    Reset:     "RoomPerm",
-                                                    onSuccess: function() {
-                                                        //----------------------------------------//
-                                                        //-- Go to the Show view                --//
-                                                        //----------------------------------------//
-                                                        oController.ToggleButtonsAndView( oController, "RoomPermShow" );
-                                                    },
-                                                    onFail: function() {
-                                                        IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
-                                                    }
-                                                }); //-- END Refresh Model --//
-                                            },
-                                            onFail: function() {
-                                                //------------------------------------------------//
-                                                //-- ERROR: User Room Permissions               --//
-                                                //------------------------------------------------//
-                                                IomyRe.common.showError( sErrMesg+"Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
-                                            }
-                                        }); //-- END Room Permissions --//
+                                        oController.UpdateRoomPermissionModel();
                                     }
                                 } catch( e3 ) {
                                     //------------------------------------------------//
@@ -1822,67 +1789,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                     jQuery.sap.log.error("Errors were found in running the requests:\n\n" + aErrorMessages.join('\n'));
                                 }
                                 
-                                //----------------------------------------//
-                                //-- Refresh the Room Permissions       --//
-                                //----------------------------------------//
-                                oController.RefreshUserRoomPerms( oController, {
-                                    onSuccess: function() {
-                                        //----------------------------------------//
-                                        //-- Refresh the Model                  --//
-                                        //----------------------------------------//
-                                        oController.RefreshModel( oController, {
-                                            Reset:     "RoomPerm",
-                                            onSuccess: function() {
-                                                //----------------------------------------//
-                                                //-- Go to the Show view                --//
-                                                //----------------------------------------//
-                                                oController.ToggleButtonsAndView( oController, "RoomPermShow" );
-                                            },
-                                            onFail: function() {
-                                                IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
-                                            }
-                                        }); //-- END Refresh Model --//
-                                    },
-                                    onFail: function() {
-                                        //------------------------------------------------//
-                                        //-- ERROR: User Room Permissions               --//
-                                        //------------------------------------------------//
-                                        IomyRe.common.showError( "Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
-                                    }
-                                }); //-- END Room Permissions --//
+                                oController.UpdateRoomPermissionModel();
                             },
                             
                             onWarning : function () {
                                 IomyRe.common.showWarning("Failed to update permissions for some rooms:\n\n" + aErrorMessages.join('\n'), "Error");
                                 
-                                //----------------------------------------//
-                                //-- Refresh the Room Permissions       --//
-                                //----------------------------------------//
-                                oController.RefreshUserRoomPerms( oController, {
-                                    onSuccess: function() {
-                                        //----------------------------------------//
-                                        //-- Refresh the Model                  --//
-                                        //----------------------------------------//
-                                        oController.RefreshModel( oController, {
-                                            Reset:     "RoomPerm",
-                                            onSuccess: function() {
-                                                //----------------------------------------//
-                                                //-- Go to the Show view                --//
-                                                //----------------------------------------//
-                                                oController.ToggleButtonsAndView( oController, "RoomPermShow" );
-                                            },
-                                            onFail: function() {
-                                                IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
-                                            }
-                                        }); //-- END Refresh Model --//
-                                    },
-                                    onFail: function() {
-                                        //------------------------------------------------//
-                                        //-- ERROR: User Room Permissions               --//
-                                        //------------------------------------------------//
-                                        IomyRe.common.showError( "Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
-                                    }
-                                }); //-- END Room Permissions --//
+                                oController.UpdateRoomPermissionModel();
                             },
                             
                             onFail : function () {
