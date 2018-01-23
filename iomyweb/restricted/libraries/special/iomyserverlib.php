@@ -1024,17 +1024,14 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "	primary key (`RULE1_PK`) \n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table ".$sDBName.".`RULE1` comment 'This table is used to store the first version of the Database rules system. NOTE: Future versions will probably use a different table for new rules.';\n";
-			/*
+			
 			$sSQL .= "create table `".$sDBName."`.`RULE1TYPE` \n";
 			$sSQL .= "( \n";
 			$sSQL .= "	`RULE1TYPE_PK`       int not null auto_increment comment 'Primary Key', \n";
-			$sSQL .= "	`RULE1TYPE_NAME`     int not null comment 'Foreign Key', \n";
+			$sSQL .= "	`RULE1TYPE_NAME`     varchar(64) not null, \n";
 			$sSQL .= "	primary key (`RULE1TYPE_PK`) \n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
-			*/
 			break;
-			
-			
 			
 		default:
 			$sSQL = null;
@@ -5454,6 +5451,14 @@ function DB_CreateDefaultData5( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`ROOMTYPE` ( `ROOMTYPE_NAME`, `ROOMTYPE_OUTDOORS` ) VALUES ( 'Recreation Room', 0 ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`ROOMTYPE` ( `ROOMTYPE_NAME`, `ROOMTYPE_OUTDOORS` ) VALUES ( 'Utility Cabinet', 1 ); \n";
 			
+			
+			/*============================================================
+			  == #6.9# - RULETYPE1                                      ==
+			  ============================================================*/
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 1, 'Turn On (Once only)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 2, 'Turn Off (Once only)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 3, 'Turn On (Reoccurring)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 4, 'Turn Off (Reoccurring)' ); \n";
 			
 			/*============================================================
 			  == #6.9# - TARGETCOMP                                     ==
