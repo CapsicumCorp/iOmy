@@ -69,6 +69,7 @@ NOTE: RapidHA seems to have a total in transit buffer limit of 5 packets which i
 #include <sstream>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp>
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
@@ -6055,6 +6056,7 @@ static int16_t zigbeelib_highlevel_get_onoff_zigbee_device(uint64_t zigbeeaddr, 
   }
   if (found==-1) {
     //Zigbee Device not found
+    zigbeelib_unlockzigbee();
     return ZIGBEELIB_HIGH_LEVEL_ERROR_DEVICE_NOT_FOUND;
   }
   zigbeedevice_t *zigbeedeviceptr=&zigbeelib_localzigbeedevices[i].zigbeedevices.at(found);
@@ -6134,6 +6136,7 @@ static int16_t zigbeelib_highlevel_set_onoff_zigbee_device(uint64_t zigbeeaddr, 
   }
   if (found==-1) {
     //Zigbee Device not found
+    zigbeelib_lockzigbee();
     return ZIGBEELIB_HIGH_LEVEL_ERROR_DEVICE_NOT_FOUND;
   }
   //See if the on/off cluster can be found for this device
@@ -6193,6 +6196,8 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) zigbeelib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
   char tmpstrbuf[50];
 	std::string tmpstring;
+	std::string bufferstring;
+	std::vector<std::string> buffertokens;
   int i, len, found;
   uint64_t addr, zigbeeaddr=0;
   long localzigbeelocked=0, zigbeelocked=0;
@@ -6202,6 +6207,15 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
   }
   MOREDEBUG_ENTERINGFUNC();
   len=strlen(buffer);
+
+  //Convert the string to tokens using C++ Boost algorithms for easier access
+  bufferstring=buffer;
+  boost::algorithm::trim(bufferstring);
+  boost::algorithm::split(buffertokens, bufferstring, boost::algorithm::is_any_of(" "), boost::algorithm::token_compress_on);
+  if (buffertokens.size()==0) {
+    //No valid tokens found
+    return CMDLISTENER_NOTHANDLED;
+  }
   if (strncmp(buffer, "zigbee_enable_tempjoin", 22)==0) {
     //Format: zigbee_enable_tempjoin : Enable on all coordinators and routers but only if 1 local zigbee device is connected
 		//        zigbee_enable_tempjoin <64-bit address> : Enable on all coordinators and routers on the same network as the specified address
@@ -6448,6 +6462,69 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
 			tmpstring+=" NOT FOUND\n";
       commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
     }
+  } else if ((buffertokens[0]=="zigbee_switch_on" || buffertokens[0]=="zigbee_switch_off") && buffertokens.size()>=2) {
+    //Format: zigbee_switch_on <64-bit addr> [port]
+    //Format: zigbee_switch_off <64-bit addr> [port]
+    uint64_t addr;
+    int16_t port;
+    int16_t result;
+
+    sscanf(buffertokens[1].c_str(), "%016llX", (unsigned long long *) &addr);
+    if (buffertokens.size()>=3) {
+      sscanf(buffertokens[2].c_str(), "%d", (int16_t *) &port);
+    } else {
+      port=ZIGBEELIB_HIGH_LEVEL_ANYENDPOINT;
+    }
+    if (buffertokens[0]=="zigbee_switch_on" && buffertokens.size()>=2) {
+      result=zigbeelib_highlevel_set_onoff_zigbee_device(addr, port, ZIGBEELIB_HIGH_LEVEL_ON);
+    } else {
+      result=zigbeelib_highlevel_set_onoff_zigbee_device(addr, port, ZIGBEELIB_HIGH_LEVEL_OFF);
+    }
+    if (result==0) {
+      tmpstring="OKAY\n";
+    } else {
+      tmpstring="ERROR(";
+      sprintf(tmpstrbuf, "%" PRId16, result);
+      tmpstring+=tmpstrbuf;
+      tmpstring+=")\n";
+    }
+    commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+  } else if (buffertokens[0]=="zigbee_switch_status" && buffertokens.size()>=2) {
+    //Format: zigbee_switch_status <64-bit addr> [port]
+    uint64_t addr;
+    int16_t port;
+    int16_t result;
+
+    sscanf(buffertokens[1].c_str(), "%016llX", (unsigned long long *) &addr);
+    if (buffertokens.size()>=3) {
+      sscanf(buffertokens[2].c_str(), "%" SCNd16, &port);
+    } else {
+      port=ZIGBEELIB_HIGH_LEVEL_ANYENDPOINT;
+    }
+    result=zigbeelib_highlevel_get_onoff_zigbee_device(addr, port);
+    if (result<0) {
+      tmpstring="ERROR(";
+      sprintf(tmpstrbuf, "%" PRId16, result);
+      tmpstring+=tmpstrbuf;
+      tmpstring+=")\n";
+    } else {
+      tmpstring="Zigbee Device: ";
+      tmpstring+=buffertokens[1];
+      tmpstring+=": ";
+      if (result==ZIGBEELIB_HIGH_LEVEL_OFF) {
+        tmpstring+="OFF\n";
+      }
+      else if (result==ZIGBEELIB_HIGH_LEVEL_ON) {
+        tmpstring+="ON\n";
+      } else {
+        tmpstring+="UNKNOWN(";
+        sprintf(tmpstrbuf, "%" PRId16, result);
+        tmpstring+=tmpstrbuf;
+        tmpstring+=")\n";
+      }
+    }
+    commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+
   } else {
     return CMDLISTENER_NOTHANDLED;
   }
