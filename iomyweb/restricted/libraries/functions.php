@@ -37,6 +37,7 @@
 //-- #12.0# - IO Data Functions                                     --//
 //-- #12.0# - Graph Functions                                       --//
 //-- #15.0# - RSCat & UoM Functions                                 --//
+//-- #21.0# - Rules Functions                                       --//
 //====================================================================//
 
 
@@ -2043,6 +2044,18 @@ function GetPremisesInfoFromPremiseId( $iId ) {
 	return $aResult;
 }
 
+
+function GetPremiseFromHubId( $iHubId ) {
+	$aResult = dbGetPremiseFromHubId( $iHubId );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		$aResult = array( "Error"=>true, "ErrMesg"=>"Premise wasn't found! \nPremise either doesn't exist or you do not have permission to access it!\n" );
+	} 
+	
+	//-- Return the results --//
+	return $aResult;
+}
 
 function GetPremisesAddressFromPremiseId($iPremiseId) {
 	//-- Retrieve all the premises --//
@@ -4549,6 +4562,786 @@ function DeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
 	}
 }
 
+//========================================================================================================================//
+//== #21.0# - Rule Functions                                                                                            ==//
+//========================================================================================================================//
+function ExtractTimeValuesFromString( $sString ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	$bError   = false;
+	$sErrMesg = "";
+	
+	//--------------------------------------------//
+	//-- 2.0 - Breakup the String               --//
+	//--------------------------------------------//
+	$aTimeTemp = explode( ":", $sString );
+	
+	
+	//--------------------------------------------//
+	//-- 3.0 - Parse the Values                 --//
+	//--------------------------------------------//
+	
+	//------------------------//
+	//-- Hour               --//
+	if( $aTimeTemp[0]>=0 && $aTimeTemp[0]<=23 ) {
+		$iHour = $aTimeTemp[0];
+	} else {
+		$bError    = true;
+		$sErrMesg .= "Problem with the Hour value.\n";
+	}
+	
+	//------------------------//
+	//-- Minute             --//
+	if( $aTimeTemp[1]>=0 && $aTimeTemp[1]<=59 ) {
+		$iMinute = $aTimeTemp[1];
+	} else {
+		$bError    = true;
+		$sErrMesg .= "Problem with the Minute value.\n";
+	}
+	
+	//------------------------//
+	//-- Seconds            --//
+	if( $aTimeTemp[2]>=0 && $aTimeTemp[2]<=59 ) {
+		$iSecond = $aTimeTemp[2];
+	} else {
+		$bError    = true;
+		$sErrMesg .= "Problem with the Seconds value.\n";
+	}
+	
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return the Results               --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array(
+			"Error" => false,
+			"Data"  => array(
+				"Hour" => $iHour,
+				"Min"  => $iMinute,
+				"Sec"  => $iSecond
+			)
+		);
+	} else {
+		return array(
+			"Error"   => $bError,
+			"ErrMesg" => $sErrMesg
+		);
+	}
+}
+
+
+
+function ExtractDateTimeValuesFromUnixTS( $iUnixTS, $sTimezone ) {
+	
+	$dDateTime = DateTime::createFromFormat( "U", $iUnixTS );
+	$dDateTime->setTimezone( new DateTimeZone($sTimezone) );
+	
+	$aReturn = array(
+		"Year"  => $dDateTime->format('Y'),
+		"Month" => $dDateTime->format('m'),
+		"Day"   => $dDateTime->format('d'),
+		"Hour"  => $dDateTime->format('H'),
+		"Min"   => $dDateTime->format('i'),
+		"Sec"   => $dDateTime->format('s')
+	);
+	
+	//echo "FormatA = ".$dDateTime->format('Y-m-d H:i:s')."\n";
+	//echo "Output = ".date( 'Y-m-d H:i:s', $dDateTime->getTimestamp())."\n";
+	//var_dump( $aReturn );
+	
+	return $aReturn;
+}
+
+function CreateUnixTSFromTimeData( $aTimeData, $sTimezone ) {
+	
+	//------------------------------------------------//
+	//-- STEP 1 - Create the String                 --//
+	//------------------------------------------------//
+	$sDateTime    = $aTimeData['Year']."-".$aTimeData["Month"]."-".$aTimeData['Day']." ".$aTimeData['Hour'].":".$aTimeData['Min'].":".$aTimeData['Sec'];
+	
+	//var_dump( $sDateTime );
+	//echo "\n\n";
+	//------------------------------------------------//
+	//-- STEP 2- Create the Date Time Object        --//
+	//------------------------------------------------//
+	$dDateTime    = DateTime::createFromFormat( "Y-m-d H:i:s", $sDateTime, new DateTimeZone( $sTimezone ) );
+	
+	//var_dump( $dDateTime );
+	//echo "\n\n";
+	//------------------------------------------------//
+	//-- Get Unix TS from DateTimeObject            --//
+	//------------------------------------------------//
+	if( $dDateTime!==false ) {
+		$iUnixTS      = $dDateTime->getTimestamp();
+		
+		//var_dump( $iUnixTS );
+		//echo "\n\n";
+	
+	} else {
+		$iUnixTS = 0;
+	}
+	
+
+	
+	return $iUnixTS;
+	
+}
+
+
+
+function FindNextUTSFromTime( $sTimezone, $sTime ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                --//
+	//------------------------------------------------------------//
+	$bError       = false;
+	$sErrMesg     = "";
+	$bTimePassed  = false;
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - ???                                              --//
+	//------------------------------------------------------------//
+	
+	//-- Extract the desired time values from string --//
+	if( $bError===false ) {
+		$aTime = ExtractTimeValuesFromString( $sTime );
+		
+		if( $aTime['Error']===true ) {
+			$bError    = true;
+			$sErrMesg .= $aTime['ErrMesg'];
+		}
+	}
+	
+	//-- Get the Current DateTime to compare against --//
+	if( $bError===false ) {
+		$aCurrentDateTimeData = ExtractDateTimeValuesFromUnixTS( time(), $sTimezone );
+	}
+	
+	
+	//------------------------------------------------------------//
+	//-- Check if the Time has passed for the current day       --//
+	if( $bError===false ) {
+		//--------------------//
+		//-- Hour Check     --//
+		if( $aTime['Data']['Hour'] < $aCurrentDateTimeData['Hour'] ) {
+			//-- Desired time already happened today --//
+			$bTimePassed = true;
+			
+		} else if( $aTime['Data']['Hour']===$aCurrentDateTimeData['Hour'] ) {
+			//--------------------//
+			//-- Minute Check   --//
+			if( $aTime['Data']['Min'] < $aCurrentDateTimeData['Min'] ) {
+				$bTimePassed = true;
+				
+			} else if( $aTime['Data']['Min']===$aCurrentDateTimeData['Min'] ) {
+				//--------------------//
+				//-- Seconds Check  --//
+				if( $aTime['Data']['Min'] <= $aCurrentDateTimeData['Min'] ) {
+					$bTimePassed = true;
+				}
+			}
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- Create the new UTS                                     --//
+	if( $bError===false ) {
+		$aNewDateTimeData = array(
+			"Year"  => $aCurrentDateTimeData['Year'],
+			"Month" => $aCurrentDateTimeData['Month'],
+			"Day"   => $aCurrentDateTimeData['Day'],
+			"Hour"  => $aTime['Data']['Hour'],
+			"Min"   => $aTime['Data']['Min'],
+			"Sec"   => $aTime['Data']['Sec']
+		);
+		
+		
+		$iUnixTS = CreateUnixTSFromTimeData( $aNewDateTimeData, $sTimezone );
+		
+		if( $bTimePassed===true ) {
+			$iUnixTS += 86400;
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - 
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		return array(
+			"Error"  => false,
+			"UnixTS" => $iUnixTS
+		);
+	} else {
+		return array(
+			"Error"   => true,
+			"ErrMesg" => $sErrMesg
+		);
+	}
+}
+
+
+
+function CheckUserPermissionsForRules( $iHubId=null ) {
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	$bPermHub  = false;
+	$bPermPrem = false;
+	
+	//----------------------------------------------------//
+	//-- 2.0 - Check Hub Permissions                    --//
+	//----------------------------------------------------//
+	try {
+		//-- TODO: Better checks will have to be performed when we upgrade to a iomy version that has multi-premise support --//
+		//-- NOTE: This section doesn't return an error if can't find anything because Step 2 only happens if this step doesn't find anything --//
+		
+		if( $iHubId!==null ) {
+			$aTempFunctionResult1 = WatchInputsHubRetrieveInfoAndPermission( $iHubId );
+		} else {
+			$aTempFunctionResult1 = WatchInputsHubRetrieveInfoAndPermission( 1 );
+		}
+		
+		if( $aTempFunctionResult1['Error']===false ) {
+			if( $aTempFunctionResult1['Data']['HubId']>=1 ) {
+				//-- Found a Hub Permission --//
+				$bPermHub = true;
+			}
+		}
+	} catch( Exception $e0211 ) {
+		
+	}
+	
+	//----------------------------------------------------//
+	//-- STEP 2 - Check Premise Permissions             --//
+	//----------------------------------------------------//
+	if( $bPermHub===false ) {
+		try {
+			$aTempFunctionResult2 = GetAllPremiseInfo();
+			
+			if( $aTempFunctionResult2['Error']===false ) {
+				foreach( $aTempFunctionResult2['Data'] as $PremKey => $aPremise ) {
+					if( $aPremise['PermOwner']===1 ) {
+						$bPermPrem = true;
+					}
+				}
+			}
+		} catch( Exception $e0212 ) {
+			
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- Return Results                                 --//
+	//----------------------------------------------------//
+	if( $bPermHub===false && $bPermPrem===false ) {
+		return false;
+		
+		//$bError    = true;
+		//$iErrCode  = 201;
+		//$sErrMesg .= "Error Code:'0201' \n";
+		//$sErrMesg .= "Your User account doesn't seem to have permission to access the Rules system!\n";
+	} else {
+		return true;
+	}
+}
+
+
+function GetAllRules( $bActiveRulesOnly=false ) {
+	//----------------------------------------------------------------//
+	//-- This is for fetching all the rules                         --//
+	//-- ErrCode Range: 0-3                                         --//
+	//----------------------------------------------------------------//
+	
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$bError   = false;
+	$sErrMesg = "";
+	
+	//----------------------------------------------------------------//
+	//-- 2.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	try {
+		//----------------------------------------------------//
+		//-- 2.1 - Check if the User has permission         --//
+		if( $bError===false ) {
+			$bPermission = CheckUserPermissionsForRules( null );
+			
+			
+			if( $bPermission===false ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+				);
+			}
+		}
+		
+	} catch( Exception $e20 ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 0,
+			"ErrMesg" => "Critical Error: Problem checking the permissions to the Rule system!\n "
+		);
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 5.0 - Get all Rules                                        --//
+	//----------------------------------------------------------------//
+	try {
+		$aResult = dbGetAllRules( $bActiveRulesOnly );
+		
+		
+	} catch( exception $e50 ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 2,
+			"ErrMesg" => "Critical Error: Problem getting the list of all the Rules!\n"
+		);
+	}
+	
+	//----------------------------------------------------//
+	//-- 9.0 - Return Results                           --//
+	//----------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 3,
+			"ErrMesg" => $aResult['ErrMesg']
+		);
+	} else {
+		return $aResult;
+	}
+}
+
+
+function GetRuleFromRuleId( $iRuleId ) {
+	//----------------------------------------------------------------//
+	//-- This is for fetching all the rules                         --//
+	//-- ErrCode Range: 0-3                                         --//
+	//----------------------------------------------------------------//
+	
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$bError   = false;
+	$sErrMesg = "";
+	
+	
+	//----------------------------------------------------------------//
+	//-- 5.0 - Lookup the Rule from the Id                          --//
+	//----------------------------------------------------------------//
+	try {
+		//-- 5.1 - Lookup the Rule --//
+		$aResult = dbGetRuleFromRuleId( $iRuleId );
+		
+		if( $aResult['Error']===false ) {
+			//-- 5.2 - Check User Permissions --//
+			$bPermission = CheckUserPermissionsForRules( $aResult['Data']['HubId'] );
+			
+			//-- 5.3 - Check Permissions --//
+			if( $bPermission===false ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+				);
+			}
+			
+		} else {
+			return array(
+				"Error"   => true,
+				"ErrCode" => 1,
+				"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+			);
+		}
+		
+	} catch( exception $e50 ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 2,
+			"ErrMesg" => "Critical Error: Problem looking up the Rule!\n"
+		);
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 9.0 - Return Results                                       --//
+	//----------------------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 3,
+			"ErrMesg" => $aResult['ErrMesg']
+		);
+	} else {
+		return $aResult;
+	}
+}
+
+
+function UpdateRuleEnabledStatus( $iRuleId, $iNewStatus ) {
+	//----------------------------------------------------------------//
+	//-- Used for setting if a Rule is enabled/disabled             --//
+	//-- ErrCode Range: 0-3                                         --//
+	//----------------------------------------------------------------//
+	
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$bError   = false;
+	$sErrMesg = "";
+	
+	//----------------------------------------------------------------//
+	//-- 2.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	try {
+		//----------------------------------------------------//
+		//-- 2.1 - Check if the User has permission         --//
+		if( $bError===false ) {
+			$bPermission = CheckUserPermissionsForRules( null );
+			
+			if( $bPermission===false ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+				);
+			}
+		}
+		
+	} catch( Exception $e20 ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 0,
+			"ErrMesg" => "Critical Error: Problem checking the permissions to the Rule system!\n "
+		);
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 5.0 - Get all Rules                                        --//
+	//----------------------------------------------------------------//
+	try {
+		$aResult = dbUpdateRuleEnabledStatus( $iRuleId, $iNewStatus );
+		
+		
+	} catch( exception $e50 ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 2,
+			"ErrMesg" => "Critical Error: Problem setting the Rule Status!\n"
+		);
+	}
+	
+	
+	//----------------------------------------------------//
+	//-- 9.0 - Return Results                           --//
+	//----------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 3,
+			"ErrMesg" => "Error: Problem setting the Rule Status! \n".$aResult['ErrMesg']
+		);
+	} else {
+		return $aResult;
+	}
+}
+
+
+function RuleMarkAsRan( $iRuleId, $iNextRun, $iLastRun, $iHubId ) {
+	//----------------------------------------------------------------//
+	//-- Used for setting if a Rule is enabled/disabled             --//
+	//-- ErrCode Range: 0-3                                         --//
+	//----------------------------------------------------------------//
+	
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$bError   = false;
+	$sErrMesg = "";
+	
+	//----------------------------------------------------------------//
+	//-- 2.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	try {
+		//----------------------------------------------------//
+		//-- 2.1 - Check if the User has permission         --//
+		if( $bError===false ) {
+			$bPermission = CheckUserPermissionsForRules( $iHubId );
+			
+			if( $bPermission===false ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+				);
+			}
+		}
+		
+	} catch( Exception $e20 ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 0,
+			"ErrMesg" => "Critical Error: Problem checking the permissions to the Rule system!\n "
+		);
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 5.0 - Get all Rules                                        --//
+	//----------------------------------------------------------------//
+	try {
+		$aResult = dbRuleMarkAsRan( $iRuleId, $iNextRun, $iLastRun );
+		
+		
+	} catch( exception $e50 ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 2,
+			"ErrMesg" => "Critical Error: Problem setting the Rule Status!\n"
+		);
+	}
+	
+	
+	//----------------------------------------------------//
+	//-- 9.0 - Return Results                           --//
+	//----------------------------------------------------//
+	if( $aResult['Error']===true ) {
+		return array(
+			"Error"   => true,
+			"ErrCode" => 3,
+			"ErrMesg" => "Error: Problem setting the Rule Status! \n".$aResult['ErrMesg']
+		);
+	} else {
+		return $aResult;
+	}
+}
+
+
+function AddNewRuleToDatabase( $iRuleTypeId, $iHubId, $sName, $sTime, $aParameter, $iEnabled, $iNextRun ) {
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$bError   = false;
+	$sErrMesg = "";
+	
+	
+	//----------------------------------------------------------------//
+	//-- 2.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	try {
+		//----------------------------------------------------//
+		//-- 2.1 - Check if the User has permission         --//
+		if( $bError===false ) {
+			$bPermission = CheckUserPermissionsForRules( $iHubId );
+			
+			if( $bPermission===false ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+				);
+			}
+		}
+		
+		//----------------------------------------------------//
+		//-- 2.2 - Convert Parameter array into JSON        --//
+		//----------------------------------------------------//
+		if( $bError===false ) {
+			$sParameter = json_encode( $aParameter );
+		}
+		
+		//----------------------------------------------------//
+		//-- 2.3 - Lookup User Details                      --//
+		//----------------------------------------------------//
+		if( $bError===false ) {
+			$aUserDetails = GetCurrentUserDetails();
+			
+			if( $aUserDetails['Error']===false ) {
+				$iUserId = $aUserDetails['Data']['UserId'];
+				
+			} else {
+				$sErrMesg  = "Error: Problem occurred when checking the prerequisites for adding a new Rule!\n";
+				$sErrMesg .= "There is an issue with looking up the User Details!\n";
+				$sErrMesg .= $aUserDetails['ErrMesg'];
+				
+				return array(
+					"Error"   => true,
+					"ErrCode" => 2,
+					"ErrMesg" => $sErrMesg
+				);
+			}
+		}
+		
+		
+		//----------------------------------------------------//
+		//-- 2.4 - Convert Parameter array into JSON        --//
+		//----------------------------------------------------//
+		if( $bError===false ) {
+			$iLastModified     = time();
+			$sLastModifiedCode = "Initialise_U".$iUserId;
+		}
+		
+	} catch( Exception $e2 ) {
+		$sErrMesg  = "Critical Error: Problem occurred when checking the prerequisites for adding a new Rule!\n";
+		$sErrMesg .= $e2->getMessage();
+		$sErrMesg .= "\n";
+		
+		return array(
+			"Error"   => true,
+			"ErrCode" => 2,
+			"ErrMesg" => $sErrMesg
+		);
+	}
+	
+	
+	//----------------------------------------------------------------//
+	//-- 5.0 - Main                                                 --//
+	//----------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			$aResult = dbAddNewRule( $iRuleTypeId, $iHubId, $sName, $sTime, $sParameter, $iEnabled, $iLastModified, $sLastModifiedCode, -1, $iNextRun );
+			
+			if( $aResult["Error"]===true ) {
+				$sErrMesg  = "Error: Problem occurred when attempting to create a new rule!\n";
+				$sErrMesg .= $aResult["ErrMesg"];
+				
+				return array(
+					"Error"   => true,
+					"ErrCode" => 3,
+					"ErrMesg" => $sErrMesg
+				);
+			}
+		} catch( Exception $e5 ) {
+			$sErrMesg  = "Critical Error: Problem occurred when attempting to create a new rule!\n";
+			$sErrMesg .= $e5->getMessage();
+			
+			return array(
+				"Error"   => true,
+				"ErrCode" => 4,
+				"ErrMesg" => $sErrMesg
+			);
+		}
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message                  --//
+	//----------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- 9.A - SUCCESS --//
+		return array(
+			"Error"  =>false, 
+			"Data"   =>array( 
+				"RuleId"    =>$aResult["LastId"]
+			)
+		);
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrCode"=>2, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+
+
+function ChangeRule( $iRuleId, $iHubId, $iRuleTypeId, $sName, $sTime, $iEnabled, $iNextRun ) {
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$bError   = false;
+	$sErrMesg = "";
+	
+	//----------------------------------------------------------------//
+	//-- 2.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	try {
+		//----------------------------------------------------//
+		//-- 2.1 - Check if the User has permission         --//
+		if( $bError===false ) {
+			$bPermission = CheckUserPermissionsForRules( $iHubId );
+			
+			if( $bPermission===false ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+				);
+			}
+		}
+		
+		
+		//----------------------------------------------------//
+		//-- 2.2 - Lookup User Details                      --//
+		//----------------------------------------------------//
+		if( $bError===false ) {
+			$aUserDetails = GetCurrentUserDetails();
+			
+			if( $aUserDetails['Error']===false ) {
+				$iUserId = $aUserDetails['Data']['UserId'];
+				
+				
+			} else {
+				$sErrMesg  = "Error: Problem occurred when checking the prerequisites for adding a new Rule!\n";
+				$sErrMesg .= "There is an issue with looking up the User Details!\n";
+				$sErrMesg .= $aUserDetails['ErrMesg'];
+				
+				return array(
+					"Error"   => true,
+					"ErrCode" => 2,
+					"ErrMesg" => $sErrMesg
+				);
+			}
+		}
+		
+		
+		//----------------------------------------------------//
+		//-- 2.4 - Convert Parameter array into JSON        --//
+		//----------------------------------------------------//
+		if( $bError===false ) {
+			$iLastModified     = time();
+			$sLastModifiedCode = "Edit_U".$iUserId;
+		}
+		
+	} catch( Exception $e2 ) {
+		$sErrMesg  = "Critical Error: Problem occurred when checking the prerequisites for adding a new Rule!\n";
+		$sErrMesg .= $e2->getMessage();
+		$sErrMesg .= "\n";
+		
+		return array(
+			"Error"   => true,
+			"ErrCode" => 2,
+			"ErrMesg" => $sErrMesg
+		);
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 5.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	try {
+		$aResult = dbChangeRule( $iRuleId, $iRuleTypeId, $sName, $sTime, $iEnabled, $iLastModified, $sLastModifiedCode, $iNextRun );
+		
+		if( $aResult["Error"]===true ) {
+			$bError = true;
+			$sErrMesg .= "Error occurred when attempting to change Rule! \n";
+			$sErrMesg .= $aResult["ErrMesg"];
+		}
+	} catch( Exception $e1 ) {
+		$bError = true;
+		$sErrMesg .= "Critical Error occurred when attempting to change Rule! \n";
+		$sErrMesg .= $e1->getMessage();
+	}
+	
+	
+	//----------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message                  --//
+	//----------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- 9.A - SUCCESS --//
+		return $aResult;
+	} else {
+		//-- 9.B - FAILURE --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
 //========================================================================================================================//
 //== #25.0# - Onvif Functions                                                                                           ==//

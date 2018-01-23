@@ -1114,7 +1114,7 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateTables6":
-							$aResult = DB_CreateTables( $sPostDatabaseName, array( "Data5", "Datatype", "RSCat", "RSType", "UoM" ) );
+							$aResult = DB_CreateTables( $sPostDatabaseName, array( "Data5", "Datatype", "RSCat", "RSType", "UoM", "Rule1" ) );
 							break;
 							
 						//--------------------//
@@ -1197,7 +1197,7 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateForeignKeys20":
-							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "UoM" ) );
+							$aResult = DB_CreateForeignKeys( $sPostDatabaseName, array( "UoM", "Rule1" ) );
 							break;
 						
 						//--------------------//

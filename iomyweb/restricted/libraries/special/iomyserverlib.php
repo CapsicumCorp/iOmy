@@ -120,6 +120,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 	RSCat
 	RSType
 	UoM
+	Rules
 	*/
 	
 	$sSQL            = "";
@@ -1003,6 +1004,37 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "alter table ".$sDBName.".TARGETTYPE comment 'Not Operational Yet.';\n";
 			break;
 			
+		/*==============================================================*/
+		/* Table: Rule                                                  */
+		/*==============================================================*/
+		case 'Rule1':
+			$sSQL .= "create table `".$sDBName."`.`RULE1` \n";
+			$sSQL .= "( \n";
+			$sSQL .= "	RULE1_PK             int not null auto_increment comment 'Primary Key', \n";
+			$sSQL .= "	RULE1_RULE1TYPE_FK   int not null comment 'Foreign Key', \n";
+			$sSQL .= "	RULE1_HUB_FK         bigint not null comment 'Foreign Key', \n";
+			$sSQL .= "	RULE1_NAME           varchar(128) not null comment 'This is used so the users can assign names to individual rules.', \n";
+			$sSQL .= "	RULE1_TIME           time not null comment 'This is used to store the time that gets converted into the next run unix timestamp.', \n";
+			$sSQL .= "	RULE1_PARAMETER      varchar(64) not null comment 'This is used to hold the parameters (like which device) in JSON string format.', \n";
+			$sSQL .= "	RULE1_ENABLED        tinyint(4) not null comment 'This is used to indicate if a rule is enabled or disabled.', \n";
+			$sSQL .= "	RULE1_LASTMODIFIED   int not null comment 'This is used to indicate when the \"Add Rule\" or \"Edit Rule\" modes was last used on this particular rule.', \n";
+			$sSQL .= "	RULE1_LASTMODIFIEDCODE varchar(32) not null comment 'This is a code used for debugging the rules system.', \n";
+			$sSQL .= "	RULE1_LASTRUN        int not null comment 'Stores the UnixTS of the last time the rile has been run. -1 is used to indicate the Rule hasn ever been run.', \n";
+			$sSQL .= "	RULE1_NEXTRUN        int not null comment 'Used to indicate the next time this rule should be run in UnixTS format.', \n";
+			$sSQL .= "	primary key (`RULE1_PK`) \n";
+			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
+			$sSQL .= "alter table ".$sDBName.".`RULE1` comment 'This table is used to store the first version of the Database rules system. NOTE: Future versions will probably use a different table for new rules.';\n";
+			
+			$sSQL .= "create table `".$sDBName."`.`RULE1TYPE` \n";
+			$sSQL .= "( \n";
+			$sSQL .= "	`RULE1TYPE_PK`       int not null auto_increment comment 'Primary Key', \n";
+			$sSQL .= "	`RULE1TYPE_NAME`     int not null comment 'Foreign Key', \n";
+			$sSQL .= "	primary key (`RULE1TYPE_PK`) \n";
+			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
+			break;
+			
+			
+			
 		default:
 			$sSQL = null;
 			
@@ -1048,6 +1080,7 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 	RSCat
 	RSType
 	UoM
+	Rule1
 */
 	
 	$sSQL = "";
@@ -1330,7 +1363,14 @@ function DB_FetchCreateForeignKeySQL( $sDBName, $sName ) {
 		/*==============================================================*/
 		case 'Target':
 			$sSQL .= null;
-		
+			
+		/*==============================================================*/
+		/* Table: RULE1                                                 */
+		/*==============================================================*/
+		case 'Rule1':
+			$sSQL .= "alter table `".$sDBName."`.`RULE1` add constraint FK_REFERENCE_109 foreign key (`RULE1_HUB_FK`) references IOMY.HUB (`HUB_PK`) on delete restrict on update restrict; \n";
+			$sSQL .= "alter table `".$sDBName."`.`RULE1` add constraint FK_REFERENCE_78 foreign key (`RULE1_RULE1TYPE_FK`) references RULE1TYPE (`RULE1TYPE_PK`) on delete restrict on update restrict; \n";
+			
 		/*==============================================================*/
 		/* ERROR: UNSUPPORTED PARAMETER                                 */
 		/*==============================================================*/

@@ -40,6 +40,7 @@
 //-- #12.0# - IO Data Functions                                     --//
 //-- #13.0# - Graph Functions                                       --//
 //-- #15.0# - RSCat & UoM Functions                                 --//
+//-- #21.0# - Rules Functions                                       --//
 //--                                                                --//
 //====================================================================//
 
@@ -2434,8 +2435,6 @@ function dbUpdateUserRoomPermissions( $iRoomPermId, $iPermRead, $iPermWriter, $i
 //========================================================================================================================//
 //== #5.0# - Premise Functions                                                                                          ==//
 //========================================================================================================================//
-
-
 function dbGetAllPremiseInfo() {
 	//----------------------------------------//
 	//-- 1.0 - Declare Variables            --//
@@ -2666,6 +2665,105 @@ function dbGetPremisesInfoFromPremiseId( $iId ) {
 
 
 
+function dbGetPremiseFromHubId( $iHubId ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:   --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$sView              = "";           //-- STRING:    --//
+	$aTemporaryView     = array();      //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("Hub");
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+				$bError = true;
+				$sErrMesg = $aTemporaryView["ErrMesg"];
+				
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "    `PERMPREMISE_OWNER`, ";
+				$sSQL .= "    `PERMPREMISE_WRITE`, ";
+				$sSQL .= "    `PERMPREMISE_STATETOGGLE`, ";
+				$sSQL .= "    `PERMPREMISE_READ`, ";
+				$sSQL .= "    `PERMPREMISE_ROOMADMIN`, ";
+				$sSQL .= "    `PREMISE_PK`, ";
+				$sSQL .= "    `PREMISE_NAME`, ";
+				$sSQL .= "    `HUB_PK`, ";
+				$sSQL .= "    `HUB_NAME` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `HUB_PK` = :HubId ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array(
+					array( "Name"=>"HubId",     "type"=>"INT",      "value"=>$iHubId )
+				);
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputCols = array(
+					array( "Name"=>"PermOwner",             "type"=>"INT" ),
+					array( "Name"=>"PermWrite",             "type"=>"INT" ),
+					array( "Name"=>"PermStateToggle",       "type"=>"INT" ),
+					array( "Name"=>"PermRead",              "type"=>"INT" ),
+					array( "Name"=>"PermRoomAdmin",         "type"=>"INT" ),
+					array( "Name"=>"PremiseId",             "type"=>"INT" ),
+					array( "Name"=>"PremiseName",           "type"=>"STR" ),
+					array( "Name"=>"HubId",                 "type"=>"INT" ),
+					array( "Name"=>"HubName",               "type"=>"STR" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			}
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"GetPremiseFromHubId: ".$sErrMesg );
+	}
+}
+
 
 function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 	//----------------------------------------//
@@ -2730,13 +2828,13 @@ function dbGetPremisesAddressFromPremiseId( $iPremiseId ) {
 				$sSQL .= "FROM `".$sView."` ";
 				$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
 				$sSQL .= "LIMIT 1 ";
-
+				
 				//-- Set the SQL Input Parameters --//
 				$aInputVals = array(
 					array( "Name"=>"PremiseId",		"type"=>"INT",		"value"=>$iPremiseId )
 				);
-					
-					
+				
+				
 				//-- Set the SQL Output Columns --//
 				$aOutputCols = array(
 					array( "Name"=>"PermOwner",						"type"=>"INT" ),
@@ -4342,7 +4440,7 @@ function dbWatchInputsHubRetrieveInfoAndPermission( $iHubId ) {
 			} else {
 				//-- store the view --//
 				$sView = $aTemporaryView["View"];
-
+				
 				$sSQL .= "SELECT ";
 				$sSQL .= "    `HUB_PK`, ";
 				$sSQL .= "    `HUB_PREMISE_FK`, ";
@@ -9504,7 +9602,593 @@ function dbDeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
 }
 
 
+//========================================================================================================================//
+//== #21.0# - Rules Functions                                                                                           ==//
+//========================================================================================================================//
+function dbGetAllRules( $bActiveRulesOnly=false ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `RULE1_PK`, ";
+			$sSQL .= "    `RULE1_RULE1TYPE_FK`, ";
+			$sSQL .= "    `RULE1_HUB_FK`, ";
+			$sSQL .= "    `RULE1_NAME`, ";
+			$sSQL .= "    `RULE1_TIME`, ";
+			$sSQL .= "    `RULE1_PARAMETER`, ";
+			$sSQL .= "    `RULE1_ENABLED`, ";
+			$sSQL .= "    `RULE1_LASTMODIFIED`, ";
+			$sSQL .= "    `RULE1_LASTMODIFIEDCODE`, ";
+			$sSQL .= "    `RULE1_LASTRUN`, ";
+			$sSQL .= "    `RULE1_NEXTRUN` ";
+			$sSQL .= "FROM `".$sSchema."`.`RULE1` ";
+			if( $bActiveRulesOnly===true ) {
+				$sSQL .= "WHERE `RULE1_ENABLED` = 1";
+			}
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array();
+			
+			//----------------------------------------------------//
+			//-- 4.3 - Setup SQL Output                         --//
+			//----------------------------------------------------//
+			$aOutputCols = array(
+				array( "Name"=>"Id",                                "type"=>"INT" ),
+				array( "Name"=>"TypeId",                            "type"=>"INT" ),
+				array( "Name"=>"HubId",                             "type"=>"INT" ),
+				array( "Name"=>"Name",                              "type"=>"STR" ),
+				array( "Name"=>"Time",                              "type"=>"STR" ),
+				array( "Name"=>"Parameter",                         "type"=>"STR" ),
+				array( "Name"=>"Enabled",                           "type"=>"INT" ),
+				array( "Name"=>"LastModified",                      "type"=>"INT" ),
+				array( "Name"=>"LastModifiedCode",                  "type"=>"STR" ),
+				array( "Name"=>"LastRunUTS",                        "type"=>"INT" ),
+				array( "Name"=>"NextRunUTS",                        "type"=>"INT" )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+			
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array( 
+			"Error"   => true, 
+			"ErrMesg" => "GetAllRules: ".$sErrMesg 
+		);
+	}
+}
 
+function dbGetRuleFromRuleId( $iRuleId ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT ";
+			$sSQL .= "    `RULE1_PK`, ";
+			$sSQL .= "    `RULE1_RULE1TYPE_FK`, ";
+			$sSQL .= "    `RULE1_HUB_FK`, ";
+			$sSQL .= "    `RULE1_NAME`, ";
+			$sSQL .= "    `RULE1_TIME`, ";
+			$sSQL .= "    `RULE1_PARAMETER`, ";
+			$sSQL .= "    `RULE1_ENABLED`, ";
+			$sSQL .= "    `RULE1_LASTMODIFIED`, ";
+			$sSQL .= "    `RULE1_LASTMODIFIEDCODE`, ";
+			$sSQL .= "    `RULE1_LASTRUN`, ";
+			$sSQL .= "    `RULE1_NEXTRUN` ";
+			$sSQL .= "FROM `".$sSchema."`.`RULE1` ";
+			$sSQL .= "WHERE `RULE1_PK` = :RuleId ";
+			$sSQL .= "LIMIT 1 ";
+			
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"RuleId",            "type"=>"BINT",     "value"=>$iRuleId        )
+			);
+			
+			//----------------------------------------------------//
+			//-- 4.3 - Setup SQL Output                         --//
+			//----------------------------------------------------//
+			$aOutputCols = array(
+				array( "Name"=>"Id",                                "type"=>"INT" ),
+				array( "Name"=>"TypeId",                            "type"=>"INT" ),
+				array( "Name"=>"HubId",                             "type"=>"INT" ),
+				array( "Name"=>"Name",                              "type"=>"STR" ),
+				array( "Name"=>"Time",                              "type"=>"STR" ),
+				array( "Name"=>"Parameter",                         "type"=>"STR" ),
+				array( "Name"=>"Enabled",                           "type"=>"INT" ),
+				array( "Name"=>"LastModified",                      "type"=>"INT" ),
+				array( "Name"=>"LastModifiedCode",                  "type"=>"STR" ),
+				array( "Name"=>"LastRunUTS",                        "type"=>"INT" ),
+				array( "Name"=>"NextRunUTS",                        "type"=>"INT" )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	//----------------------------------------------------//
+	//-- 9.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array( 
+			"Error"   => true, 
+			"ErrMesg" => "GetRuleFromId: ".$sErrMesg 
+		);
+	}
+}
+
+
+
+function dbUpdateRuleEnabledStatus( $iRuleId, $iNewStatus ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "UPDATE `".$sSchema."`.`RULE1` ";
+			$sSQL .= "SET ";
+			$sSQL .= "    `RULE1_ENABLED` = :State ";
+			$sSQL .= "WHERE `RULE1_PK` = :RuleId; ";
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"State",             "type"=>"INT",      "value"=>$iNewStatus     ),
+				array( "Name"=>"RuleId",            "type"=>"BINT",     "value"=>$iRuleId        )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array( 
+			"Error"   => true, 
+			"ErrMesg" => "UpdateRuleStatus: ".$sErrMesg 
+		);
+	}
+}
+
+
+function dbAddNewRule( $iRuleTypeId, $iHubId, $sName, $sTime, $sParameter, $iEnabled, $iLastModif, $sLastModifCode, $iLastRun, $iNextRun ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "INSERT INTO `".$sSchema."`.`RULE1` (";
+			$sSQL .= "    `RULE1_RULE1TYPE_FK`,            `RULE1_HUB_FK`, ";
+			$sSQL .= "    `RULE1_NAME`,                    `RULE1_TIME`, ";
+			$sSQL .= "    `RULE1_PARAMETER`,               `RULE1_ENABLED`, ";
+			$sSQL .= "    `RULE1_LASTMODIFIED`,            `RULE1_LASTMODIFIEDCODE`, ";
+			$sSQL .= "    `RULE1_LASTRUN`,                 `RULE1_NEXTRUN` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :RuleTypeId,       :HubId, ";
+			$sSQL .= "    :Name,             :Time, ";
+			$sSQL .= "    :Parameter,        :Enabled, ";
+			$sSQL .= "    :LastModified,     :LastModifiedCode, ";
+			$sSQL .= "    :LastRun,          :NextRun ";
+			$sSQL .= ") ";
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"RuleTypeId",        "type"=>"INT",      "value"=>$iRuleTypeId    ),
+				array( "Name"=>"HubId",             "type"=>"INT",      "value"=>$iHubId         ),
+				array( "Name"=>"Name",              "type"=>"STR",      "value"=>$sName          ),
+				array( "Name"=>"Time",              "type"=>"STR",      "value"=>$sTime          ),
+				array( "Name"=>"Parameter",         "type"=>"STR",      "value"=>$sParameter     ),
+				array( "Name"=>"Enabled",           "type"=>"INT",      "value"=>$iEnabled       ),
+				array( "Name"=>"LastModified",      "type"=>"INT",      "value"=>$iLastModif     ),
+				array( "Name"=>"LastModifiedCode",  "type"=>"STR",      "value"=>$sLastModifCode ),
+				array( "Name"=>"LastRun",           "type"=>"INT",      "value"=>$iLastRun       ),
+				array( "Name"=>"NextRun",           "type"=>"INT",      "value"=>$iNextRun       )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindInsertQuery( $sSQL, $aInputVals );
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array( 
+			"Error"   => true, 
+			"ErrMesg" => "InsertRule: ".$sErrMesg 
+		);
+	}
+}
+
+
+function dbChangeRule( $iRuleId, $iRuleTypeId, $sName, $sTime, $iEnabled, $iLastModif, $sLastModifCode, $iNextRun ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "UPDATE `".$sSchema."`.`RULE1` ";
+			$sSQL .= "SET ";
+			$sSQL .= "    `RULE1_RULE1TYPE_FK`     = :RuleTypeId, ";
+			$sSQL .= "    `RULE1_NAME`             = :Name, ";
+			$sSQL .= "    `RULE1_TIME`             = :Time, ";
+			$sSQL .= "    `RULE1_ENABLED`          = :Enabled, ";
+			$sSQL .= "    `RULE1_LASTMODIFIED`     = :LastModified, ";
+			$sSQL .= "    `RULE1_LASTMODIFIEDCODE` = :LastModifiedCode, ";
+			$sSQL .= "    `RULE1_NEXTRUN`          = :NextRun ";
+			$sSQL .= "WHERE `RULE1_PK` = :RuleId; ";
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"RuleTypeId",        "type"=>"INT",      "value"=>$iRuleTypeId    ),
+				array( "Name"=>"Name",              "type"=>"STR",      "value"=>$sName          ),
+				array( "Name"=>"Time",              "type"=>"STR",      "value"=>$sTime          ),
+				array( "Name"=>"Enabled",           "type"=>"INT",      "value"=>$iEnabled       ),
+				array( "Name"=>"LastModified",      "type"=>"INT",      "value"=>$iLastModif     ),
+				array( "Name"=>"LastModifiedCode",  "type"=>"STR",      "value"=>$sLastModifCode ),
+				array( "Name"=>"NextRun",           "type"=>"INT",      "value"=>$iNextRun       ),
+				array( "Name"=>"RuleId",            "type"=>"INT",      "value"=>$iRuleId        )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array( 
+			"Error"   => true, 
+			"ErrMesg" => "EditRule: ".$sErrMesg 
+		);
+	}
+}
+
+
+function dbDeleteRule( $iRuleId ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "DELETE FROM `".$sSchema."`.`RULE1` ";
+			$sSQL .= "WHERE `RULE1_PK` = :RuleId; ";
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"RuleId",            "type"=>"INT",      "value"=>$iRuleId        )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array( 
+			"Error"   => true,
+			"ErrMesg" => "DeleteRule: ".$sErrMesg 
+		);
+	}
+}
+
+
+function dbRuleMarkAsRan( $iRuleId, $iNextRun, $iLastRun ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "UPDATE `".$sSchema."`.`RULE1` ";
+			$sSQL .= "SET ";
+			$sSQL .= "    `RULE1_NEXTRUN`          = :NextRun, ";
+			$sSQL .= "    `RULE1_LASTRUN`          = :LastRun ";
+			$sSQL .= "WHERE `RULE1_PK` = :RuleId; ";
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"NextRun",           "type"=>"INT",      "value"=>$iNextRun       ),
+				array( "Name"=>"LastRun",           "type"=>"INT",      "value"=>$iLastRun       ),
+				array( "Name"=>"RuleId",            "type"=>"INT",      "value"=>$iRuleId        )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array( 
+			"Error"   => true,
+			"ErrMesg" => "MarkRuleAsRan: ".$sErrMesg 
+		);
+	}
+}
+
+//========================================================================================================================//
+//== #??.0# - Other Functions                                                                                           ==//
+//========================================================================================================================//
 function DB_APICore_UserData( $oDBConnection ) {
 	//----------------------------------------//
 	//-- 1.0 - Declare Variables            --//
@@ -9532,7 +10216,7 @@ function DB_APICore_UserData( $oDBConnection ) {
 				//-- if an error has occurred --//
 				$bError = true;
 				$sErrMesg = $aTemporaryView["ErrMesg"];
-	
+			
 			} else {
 				
 				$sView = $aTemporaryView["View"];
