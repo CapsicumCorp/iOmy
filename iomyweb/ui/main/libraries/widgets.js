@@ -253,10 +253,13 @@ $.extend( IomyRe.widgets, {
 				IomyRe.common.NavigationChangePage( "pTelnet" , {} , true);
 			}
 		});
-		
+
 		oNavCapsicum = new sap.tnt.NavigationListItem ({
 			icon: "",
-			text: "Powered by Capsicum"
+			text: "Powered by Capsicum",
+			select : function () {
+				IomyRe.common.NavigationChangePage( "pServerInfo" , {} , true);
+			}
 		});
 		
 		
