@@ -45,12 +45,12 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
 	createContent : function(oController) {
 		var oView = this;
 		
-		var oColDName = new sap.m.Text ({
-			text : "{DeviceName}"			
+		var oColRName = new sap.m.Text ({
+			text : "{RuleName}"
 		});
 		
-		var oColDType = new sap.m.Text ({
-			text : "{DeviceType}"
+		var oColRState = new sap.m.Text ({
+			text : "{RuleState}"
 		});
 		
 		var oColEType = new sap.m.Text ({
@@ -66,10 +66,11 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
 			text: "Edit",
 			type: "Transparent",
 			width: "100%",
+            enabled : "{/ControlButtonsEnabled}",
 			press : function (oEvent) {
-				IomyRe.common.NavigationChangePage( "pRulesForm" , {
+				IomyRe.common.NavigationChangePage( "pNewAddRule" , {
                     "bEditing": true,
-                    "ThingId" : oEvent.getSource().getBindingContext().getProperty("DeviceId")
+                    "ThingId" : oEvent.getSource().getBindingContext().getProperty("RuleId")
                 }, false);
 			}
 		});
@@ -93,6 +94,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
                                         new sap.m.Button (oView.createId("ButtonAdd"), {
                                             text: "Add",
                                             type: sap.m.ButtonType.Accept,
+                                            enabled : "{/ControlButtonsEnabled}",
                                             press : function () {
                                                 IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
                                             }
@@ -100,6 +102,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
                                         new sap.m.Button(oView.createId("ButtonDiscard"), {
                                             text: "Discard",
                                             type: sap.m.ButtonType.Reject,
+                                            enabled : "{/ControlButtonsEnabled}",
                                             press : function () {
                                             	oController.DiscardRule();
                                             }
@@ -107,8 +110,10 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
 										 new sap.m.Button(oView.createId("ButtonToggle"), {
                                             text: "Toggle",
                                             type: sap.m.ButtonType.Default,
+                                            //enabled : "{/ControlButtonsEnabled}",
                                             press : function () {
-                                            	
+                                            	oController.ToggleControls( !oController.buttonsEnabled );
+                                                oController.buttonsEnabled = !oController.buttonsEnabled;
                                             }
                                         }),
                                         new sap.m.ToolbarSpacer({}),
@@ -132,13 +137,13 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
                                     label : new sap.m.Label({ 
                                         text:"Rule Name" 
                                     }),
-                                    template : oColDName
+                                    template : oColRName
                                 }),
                                 new sap.ui.table.Column ({
                                     label : new sap.m.Label({ 
                                         text:"Rule State" 
                                     }),
-                                    template : oColDType
+                                    template : oColRState
                                 }),
                                 new sap.ui.table.Column ({
                                     label : new sap.m.Label({ 

@@ -49,6 +49,9 @@ $.sap.require("IomyRe.time");
 $.sap.registerModulePath('IomyRe.rules', sModuleInitialBuildLocation+'libraries/rules');
 $.sap.require("IomyRe.rules");
 
+$.sap.registerModulePath('IomyRe.dbrules', sModuleInitialBuildLocation+'libraries/dbrules');
+$.sap.require("IomyRe.dbrules");
+
 $.sap.registerModulePath('IomyRe.validation', sModuleInitialBuildLocation+'libraries/validation');
 $.sap.require("IomyRe.validation");
 

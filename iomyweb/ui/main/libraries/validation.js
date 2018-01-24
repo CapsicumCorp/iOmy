@@ -408,26 +408,19 @@ $.extend(IomyRe.validation, {
         return mResults;
     },
     
-    // TODO: Finish this off and play around with it.
-    isFormFieldValid : function (vValue) {
-        //-------------------------------------------------//
-        // Variables
-        //-------------------------------------------------//
-        var bError = false;
-        
-        //--------------------------------------------------------------------//
-        // Check if the value is given
-        //--------------------------------------------------------------------//
-        if (vValue === undefined || vValue === null) {
-            bError = true;
-        }
-        
-        //--------------------------------------------------------------------//
-        // Prepare the results map
-        //--------------------------------------------------------------------//
-        
-        return bError;
+    isValueGiven : function (vValue) {
+        return vValue !== undefined && vValue !== null;
     },
+    
+//    isReValueGiven : function (vValue, vValueReturnedIfTrue, vValueReturnedIfFalse) {
+//        var oLibrary = this;
+//        
+//        if (oLibrary.isValueGiven(vValue)) {
+//            return vValueReturnedIfTrue;
+//        } else {
+//            return vValueReturnedIfFalse;
+//        }
+//    },
     
     /**
      * Checks an IPv4 address to see if it's in a valid format.

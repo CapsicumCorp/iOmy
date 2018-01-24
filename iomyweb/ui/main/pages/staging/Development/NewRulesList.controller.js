@@ -24,7 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 $.sap.require("sap.ui.table.Table");
 sap.ui.controller("pages.staging.Development.NewRulesList", {
 	
-	
+	buttonsEnabled : true,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -46,7 +46,7 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
 				//MyApp.common.NavigationRefreshButtons( oController );
 				
 				//-- Update the Model --//
-				//oController.RefreshModel( oController, {} );
+				oController.RefreshModel( oController, {} );
 				
 				//-- Check the parameters --//
                 oController.LoadList();
@@ -60,17 +60,17 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
 		
 	},
     
-    ToggleControls : function (bEnabled) {
-        var oView = this.getView();
-        
-        oView.byId("ButtonAdd").setEnabled(bEnabled);
-        oView.byId("ButtonDiscard").setEnabled(bEnabled);
-    },
+//    ToggleControls : function (bEnabled) {
+//        var oView = this.getView();
+//        
+//        oView.byId("ButtonAdd").setEnabled(bEnabled);
+//        oView.byId("ButtonDiscard").setEnabled(bEnabled);
+//    },
     
     LoadList : function () {
         var oController = this;
         
-        IomyRe.rules.loadRules({
+        IomyRe.dbrules.loadRules({
             hubID : 1,
             
             onSuccess : function () {
@@ -79,14 +79,24 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
             
             onFail : function (sErrMessage) {
                 jQuery.sap.log.error("Unable to Load the rules list:"+e1.message);
-				 IomyRe.common.showError(sErrMessage, "Error",
-                    function () {
-                        oStatusAttribute.setText( "Unable to load rules" );
-                        oCallingWidget.setEnabled(true);
-                    }
+				IomyRe.common.showError(sErrMessage, "Error",
+                    function () {}
                 );
             }
         });
+    },
+    
+    ToggleControls : function (bEnabled) {
+        try {
+            var oView           = this.getView();
+            var oData           = JSON.parse(oView.getModel().getJSON());
+
+            oData.ControlButtonsEnabled = bEnabled;
+
+            oView.setModel(new sap.ui.model.json.JSONModel(oData));
+        } catch (e) {
+            $.sap.log.error("Failed to toggle form controls ("+e.name+"): " + e.message);
+        }
     },
     
 	RefreshModel: function( oController, oConfig ) {
@@ -95,40 +105,25 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
 		//------------------------------------------------//
 		var oView           = oController.getView();
         var aaRulesList     = JSON.parse(JSON.stringify(IomyRe.rules.RulesList));
-        var aaThingList     = JSON.parse(JSON.stringify(IomyRe.common.ThingList));
         var aRules          = [];
-        var mRule;
-        var sSerialCode;
+        var oModel          = {};
         
         //--------------------------------------------------------------------//
 		//-- Create the model-friendly data from the rules list             --//
 		//--------------------------------------------------------------------//
-        $.each(aaThingList, function (sI, mThing) {
-			try { 
-				if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
-					sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
-					mRule = aaRulesList[sSerialCode];
-					
-					if (mRule !== undefined && mRule !== null) {
-						aRules.push({
-							"DeviceId"      : mThing.Id,
-							"DeviceName"    : mThing.DisplayName,
-							"DeviceType"    : mThing.TypeName,
-							"DeviceSerial"  : sSerialCode,
-							"EventType"     : "On",
-							"EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
-						});
-	
-						aRules.push({
-							"DeviceId"      : mThing.Id,
-							"DeviceName"    : mThing.DisplayName,
-							"DeviceType"    : mThing.TypeName,
-							"DeviceSerial"  : sSerialCode,
-							"EventType"     : "Off",
-							"EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Offtime ), "", true, false)
-						});
-					}
-				}
+        $.each(aaRulesList, function (sI, mRule) {
+			try {
+				if (mRule !== undefined && mRule !== null) {
+                    
+                    aRules.push({
+                        "RuleId"        : mRule.Id,
+                        "RuleName"      : mRule.Name,
+                        "RuleState"     : mRule.Enabled,
+                        "EventType"     : IomyRe.dbrules.getRuleTypeName(mRule.TypeId),
+                        "EventTime"     : mRule.Time
+                        //"EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
+                    });
+                }
 			} catch (e1) {
 				jQuery.sap.log.error("Error with RefreshModel:"+e1.message); 
 			}
@@ -137,11 +132,12 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
-		oView.setModel( 
-			new sap.ui.model.json.JSONModel({
-				"RulesList":   aRules
-			})
-		);
+		oModel = new sap.ui.model.json.JSONModel({
+            "RulesList"             : aRules,
+            "ControlButtonsEnabled" : true
+        });
+        
+        oView.setModel(oModel);
 		
 		//------------------------------------------------//
 		//-- Trigger the onSuccess Event                --//
@@ -202,6 +198,7 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
                 );
             }
         } catch (e) {
+            oController.ToggleControls(true);
             $.sap.log.error(e.name + ": " + e.message);
         }
     },

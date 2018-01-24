@@ -145,6 +145,10 @@ $.extend(IomyRe.apiphp,{
             case "devicerules":
 				sReturn = sUrlRestricted+'/php/api_devicerulesconfig.php';
 				break;
+                
+            case "hubrules":
+				sReturn = sUrlRestricted+'/php/api_hubrules.php';
+				break;
 		}
 		
 		//--------------------------------------------------------//

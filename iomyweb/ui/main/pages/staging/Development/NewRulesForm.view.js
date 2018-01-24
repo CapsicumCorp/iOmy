@@ -44,6 +44,11 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var oView = this;
+        
+        var oDevicesTemplate = new sap.ui.core.Item({
+            "key"   : "{Id}",
+            "text"  : "{DisplayName}"
+        });
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Room Form",
@@ -93,6 +98,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 															fields: [
 																new sap.m.Select({
 																	selectedKey : "1",
+                                                                    enabled : "{/FormControlsEnabled}",
 																	items : [
 																		new sap.ui.core.Item ({
 																			key: "1",
@@ -120,16 +126,11 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 															fields: [
 																new sap.m.Select({
 																	selectedKey : "1",
-																	items : [
-																		new sap.ui.core.Item ({
-																			key: "1",
-																			text: "Fridge"
-																		}),
-																		new sap.ui.core.Item ({
-																			key: "2",
-																			text: "Freezer"
-																		}),
-																	]
+                                                                    enabled : "{/FormControlsEnabled}",
+																	items : {
+                                                                        path : "/SupportedDevices",
+                                                                        template : oDevicesTemplate
+                                                                    }
 																})
 															]
 														}),
@@ -137,7 +138,10 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 															//label : "Display Name",
 															label : "Rule Name",
 															fields: [
-																new sap.m.Input
+																new sap.m.Input({
+                                                                    value : "{/Form/Name}",
+                                                                    enabled : "{/FormControlsEnabled}"
+                                                                })
 															]
 														}),
 														new sap.ui.layout.form.FormElement({
@@ -147,6 +151,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 																	valueFormat: "hh:mm",
 																	displayFormat: "hh:mm a",
 																	placeholder: "Select an On Time",
+                                                                    enabled : "{/FormControlsEnabled}"
 																})
 															]
 														}),
@@ -154,7 +159,10 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 															//"Rule Type" Defined in Database 
 															label : "Enabled",
 															fields: [
-																new sap.m.CheckBox
+																new sap.m.CheckBox({
+                                                                    selected : "{/Form/Enabled}",
+                                                                    enabled : "{/FormControlsEnabled}"
+                                                                })
 															]
 														}),
 														new sap.ui.layout.form.FormElement({
@@ -163,10 +171,15 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 																new sap.m.Button (oView.createId("ButtonSubmit"), {
 																	text: "Update",
 																	type: sap.m.ButtonType.Accept,
+                                                                    enabled : "{/FormControlsEnabled}",
+                                                                    press : function () {
+                                                                        
+                                                                    }
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
 																	text: "Cancel",
 																	type: sap.m.ButtonType.Reject,
+                                                                    enabled : "{/FormControlsEnabled}"
 																})
 															]
 														})
