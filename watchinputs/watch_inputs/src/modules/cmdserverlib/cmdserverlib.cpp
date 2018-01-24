@@ -18,6 +18,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
+//The telnet code is based on some debugging with packet dumps of Quagga's Telnet interface and
+//  some Windows and Linux telnet clients
+
 */
 
 #include <boost/config.hpp>
@@ -67,7 +70,8 @@ typedef struct {
   int clientsock;
   char *buffer;
   char *netgetc_buffer;
-  bool istelnetclient; //Set to true if a telnet client is detected
+  bool istelnetclient=false; //Set to true if a telnet client is detected
+  bool telnetsuppressecho=false; //If true, then don't echo back what the client sends when in telnet mode
 } cmdserv_clientthreaddata_t;
 
 struct cmdserver_cmdfunc {
@@ -375,7 +379,7 @@ static void cmdserverlib_cleanupClientThread(void *val) {
   NOTE: Only some telnet commands are handled at the moment and they are all currently ignored
   Reads at most one less than size characters and adds '\0' after the last character
 */
-static char *cmdserverlib_netgets_with_telnet(char *s, int size, int sock, char *netgetc_buffer, size_t netgetc_bufsize, int *netgetc_pos, int *netgetc_received, int (* const getAbortEarlyfuncptr)(void), int quitpipefd, bool *istelnetclient=NULL) {
+static char *cmdserverlib_netgets_with_telnet(char *s, int size, int sock, char *netgetc_buffer, size_t netgetc_bufsize, int *netgetc_pos, int *netgetc_received, int (* const getAbortEarlyfuncptr)(void), int quitpipefd, bool *istelnetclient=NULL, bool telnetsuppressecho=false) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) cmdserverlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) cmdserverlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
   int c=EOF;
@@ -389,9 +393,10 @@ static char *cmdserverlib_netgets_with_telnet(char *s, int size, int sock, char 
 
   while (pos < (size-1)) {
     c=commonserverlibifaceptr->serverlib_netgetc_with_quitpipe(sock, netgetc_buffer, netgetc_bufsize, netgetc_pos, netgetc_received, getAbortEarlyfuncptr, quitpipefd);
-    if (c == EOF || c=='\n') {
+    if (c == EOF) {
       break;
     }
+    //Handle Telnet commands first before doing translation and carriage return detection
     if (!in_telnet_command && c==IAC) {
       if (istelnetclient) {
         if (*istelnetclient==false) {
@@ -419,6 +424,55 @@ static char *cmdserverlib_netgets_with_telnet(char *s, int size, int sock, char 
         }
       }
       continue;
+    }
+    //If in Telnet mode, send back the characters that were sent to us if
+    //  suppressecho is also not true
+    if (istelnetclient) {
+      if (*istelnetclient==true) {
+        if (!telnetsuppressecho) {
+          char tmpstr[4];
+          int sendlen=0, sendpos=0;
+          bool contaftersend=false; //Continue back to beginning of while after sending back the characters instead of storing to buffer
+
+          if (c=='\b' || c==0x7F) {
+            if (pos>0) {
+              //Backspace
+              tmpstr[sendpos++]='\b';
+              tmpstr[sendpos++]=' ';
+              tmpstr[sendpos++]='\b';
+              sendlen+=3;
+              pos--; //Actually apply the backspace to the buffer
+            }
+            contaftersend=true; //Jump back to beginning of while loop so we don't store the backspace in the buffer
+          } else if (c==0) {
+            //Some Linux/BSD Telnet clients send '\r', 0 instead of '\r\n'
+            tmpstr[sendpos]='\n';
+            ++sendlen;
+          } else {
+            tmpstr[sendpos]=c;
+            ++sendlen;
+          }
+          if (sendlen>0) {
+            send(sock, tmpstr, sendlen, MSG_NOSIGNAL);
+          }
+          if (contaftersend) {
+            continue;
+          }
+        }
+        //Checks even with echo suppression enabled
+        if (c=='\b' || c==0x7F) {
+          if (pos>0) {
+            //Backspace
+            pos--; //Actually apply the backspace to the buffer
+          }
+          continue; //Jump back to beginning of while loop so we don't store the backspace in the buffer
+        } else if (c==0) {
+          c='\n';
+        }
+      }
+    }
+    if (c=='\n') {
+      break;
     }
     s[pos]=c;
     pos++;
@@ -553,7 +607,9 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
   //NOTE: Some clients won't send Telnet commands unless they first receive Telnet commands so we send
   //  this sequence to get them started in Telnet mode
   //Non-telnet programs should filter out character codes > 127 to ignore these characters
-  const unsigned char strtelnetcmds[]={IAC, DO, TELOPT_SGA, IAC, DO, TELOPT_STATUS, 0};
+  //Tell the Telnet client that we will echo back characters the user types
+  //Tell the Telnet client to disable line buffering
+  const unsigned char strtelnetcmds[]={IAC, WILL, TELOPT_ECHO, IAC, WILL, TELOPT_SGA, IAC, DONT, TELOPT_LINEMODE, 0};
   cmdserverlib_netputs_with_telnet_command((const char *) strtelnetcmds, dataptr->clientsock, cmdserverlib_getneedtoquit);
 
   cmdserverlib_netputs("\n"
@@ -602,7 +658,7 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
       std::string inputusername, inputpassword;
       authattempts++;
       cmdserverlib_netputs("Username: ", dataptr->clientsock, cmdserverlib_getneedtoquit);
-      if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient) != NULL) {
+      if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient, dataptr->telnetsuppressecho) != NULL) {
         if (cmdserverlib_getneedtoquit()) {
           continue;
         }
@@ -626,22 +682,28 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
       cmdserverlib_netputs("Password: ", dataptr->clientsock, cmdserverlib_getneedtoquit);
 
       //Turn off local echo for password input if Telnet client detection
-      unsigned char strtmp[5];
-      if (dataptr->istelnetclient) {
-        strtmp[0]=IAC;
-        strtmp[1]=WILL;
-        strtmp[2]=TELOPT_ECHO;
-        strtmp[3]=0;
-        cmdserverlib_netputs_with_telnet_command((const char *) strtmp, dataptr->clientsock, cmdserverlib_getneedtoquit);
-      }
-      char *netgets_result=cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient);
+      dataptr->telnetsuppressecho=true;
+      //unsigned char strtmp[5];
+      //if (dataptr->istelnetclient) {
+      //  strtmp[0]=IAC;
+      //  strtmp[1]=WILL;
+      //  strtmp[2]=TELOPT_ECHO;
+      //  strtmp[3]=0;
+      //  cmdserverlib_netputs_with_telnet_command((const char *) strtmp, dataptr->clientsock, cmdserverlib_getneedtoquit);
+      //}
+      char *netgets_result=cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient, dataptr->telnetsuppressecho);
 
       //Turn on local echo and add a newline if Telnet client detected
+      dataptr->telnetsuppressecho=false;
+      //if (dataptr->istelnetclient) {
+      //  strtmp[1]=WONT;
+      //  strtmp[3]='\n';
+      //  strtmp[4]=0;
+      //  cmdserverlib_netputs_with_telnet_command((const char *) strtmp, dataptr->clientsock, cmdserverlib_getneedtoquit);
+      //}
+      //Send a newline if in Telnet mode after password input
       if (dataptr->istelnetclient) {
-        strtmp[1]=WONT;
-        strtmp[3]='\n';
-        strtmp[4]=0;
-        cmdserverlib_netputs_with_telnet_command((const char *) strtmp, dataptr->clientsock, cmdserverlib_getneedtoquit);
+        cmdserverlib_netputs("\n", dataptr->clientsock, cmdserverlib_getneedtoquit);
       }
       if (netgets_result!=NULL) {
         if (cmdserverlib_getneedtoquit()) {
@@ -676,7 +738,7 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
   //Command Loop
   while (!cmdserverlib_getneedtoquit()) {
     cmdserverlib_netputs("> ", dataptr->clientsock, cmdserverlib_getneedtoquit);
-    if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient) != NULL) {
+    if (cmdserverlib_netgets_with_telnet(dataptr->buffer, BUFFER_SIZE, dataptr->clientsock, dataptr->netgetc_buffer, SMALLBUF_SIZE*sizeof(char), &netgetc_pos, &netgetc_received, cmdserverlib_getneedtoquit, -1, &dataptr->istelnetclient, dataptr->telnetsuppressecho) != NULL) {
       len=strlen(dataptr->buffer);
 
       //Remove trailing whitespace at the end of the command
