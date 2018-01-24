@@ -115,7 +115,7 @@ static moduleinfo_ver_1_t commonserverlib_moduleinfo_ver_1={
 static int serverlib_netgetc_with_quitpipe(int sock, char *buffer, size_t bufsize, int *pos, int *received, int (* const getAbortEarlyfuncptr)(void), int quitpipefd) {
   struct pollfd fds[2];
   nfds_t nfds;
-  int result, lerrno;
+  int result, lerrno=0;
   int finished=0;
 
   if (quitpipefd!=-1) {
@@ -125,6 +125,9 @@ static int serverlib_netgetc_with_quitpipe(int sock, char *buffer, size_t bufsiz
   }
   if (*received <= 0 || (*pos)==(*received)) {
     //The buffer is empty so try to read more characters
+    //First reset the received and pos values in case we don't get to do more reading
+    *received=0;
+    *pos=0;
 
     //Wait for the socket to become ready to read
     if (getAbortEarlyfuncptr) {
@@ -161,7 +164,11 @@ static int serverlib_netgetc_with_quitpipe(int sock, char *buffer, size_t bufsiz
       }
       //Read data from the socket
       *received = recv(sock, buffer, bufsize, 0);
-      lerrno=errno;
+      if (*received<0) {
+        lerrno=errno;
+      } else {
+        lerrno=0;
+      }
       *pos=0;
       finished=1;
     }
