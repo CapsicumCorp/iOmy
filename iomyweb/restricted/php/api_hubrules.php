@@ -178,8 +178,8 @@ if($bError===false) {
 	if( $bError===false ) {
 		if( 
 			$sPostMode==="AddRule"             || $sPostMode==="EditRule"            || 
-			$sPostMode==="SetRuleEnabled"      || $sPostMode==="DeleteRule"          || 
-			$sPostMode==="ListHubRules"        || $sPostMode==="ListHubEnabledRules" 
+			$sPostMode==="SetRuleEnabled"      || $sPostMode==="ListHubRules"        || 
+			$sPostMode==="ListHubEnabledRules" 
 		) {
 			
 			try {
@@ -406,6 +406,8 @@ if( $bError===false ) {
 							if( isset( $aPostParameter['ThingId'] ) ) {
 								if( is_numeric( $aPostParameter['ThingId'] ) ) {
 									$iPostDataParamThingId = $aPostParameter['ThingId'];
+								} else {
+									//-- TODO: Error Message --//
 								}
 								
 							//------------------------//
@@ -441,12 +443,18 @@ if( $bError===false ) {
 		//-- 4.2 - Lookup the Rule Data                             --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="MarkRuleAsJustRan" || $sPostMode==="EditRule" ) {
+			if( $sPostMode==="MarkRuleAsJustRan" || $sPostMode==="EditRule" || $sPostMode==="DeleteRule" ) {
 				$aRuleTemp = GetRuleFromRuleId( $iPostId );
 				
 				if( $aRuleTemp['Error']===false ) {
 					$iPostHubId = $aRuleTemp['Data']['HubId'];
 					
+					if( $sPostMode==="EditRule" ) {
+						$aFunctionTemp5        = json_decode( $aRuleTemp['Data']['Parameter'], true );
+						if( isset( $aFunctionTemp5['ThingId'] ) ) {
+							$iPostDataParamThingId = $aFunctionTemp5['ThingId'];
+						}
+					}
 				} else {
 					$bError    = true;
 					$iErrCode  = 220+$aRuleTemp['ErrCode'];
@@ -514,6 +522,80 @@ if( $bError===false ) {
 					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 					$sErrMesg .= " \n";
 					$sErrMesg .= $aNextUnixTS['ErrMesg'];
+				}
+			}
+		}
+		
+		//------------------------------------------------------------//
+		//-- 4.5 - Check For Conflicts                              --//
+		//------------------------------------------------------------//
+		if( $bError===false ) {
+			if( $sPostMode==="AddRule" || $sPostMode==="EditRule" ) {
+				//-- Lookup All Rules --//
+				$aRuleListTemp = GetAllRules( false );
+				
+				if( $aRuleListTemp['Error']===false ) {
+					foreach( $aRuleListTemp['Data'] as $aRule ) {
+						//-- Setup Variables and Extract the values from the database result --//
+						$sTempTime      = $aRule['Time'];
+						$iTempRuleId    = $aRule['Id'];
+						$aTempParamData = json_decode( $aRule['Parameter'], true );
+						$iTempThingId   = null;
+						
+						
+						if( $aTempParamData!==null && $aTempParamData!==false && isset( $aTempParamData['ThingId'] )) {
+							$iTempThingId = $aTempParamData['ThingId'];
+							
+							
+							//----------------------------//
+							//-- IF AddRule             --//
+							if( $sPostMode==="AddRule" ) {
+								//-- Check to make sure ThingId and Time do not match --//
+								if( $sPostTime===$sTempTime && $iPostDataParamThingId===$iTempThingId ) {
+									//-- ERROR: Invalid Add Rule --//
+									$bError    = true;
+									$iErrCode  = 275;
+									$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+									$sErrMesg .= "Error: Problem occurred when attempting to add a new Rule!\n";
+									$sErrMesg .= "The desired rule conflicts with an existing rule! \n";
+									$sErrMesg .= "Please change the Time or pick a different Device.\n";
+									break;
+								}
+								
+								
+							//----------------------------//
+							//-- ELSEIF Edit Rule       --//
+							} else if( $sPostMode==="EditRule" ) {
+								//-- IF the RuleId is different than check that the Time and ThingId do no match --//
+								if( $iPostId!==$iTempRuleId ) {
+									if( $sPostTime===$sTempTime && $iPostDataParamThingId===$iTempThingId ) {
+										//-- ERROR: Invalid Edit Rule --//
+										$bError    = true;
+										$iErrCode  = 276;
+										$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+										$sErrMesg .= "Error: Problem occurred when attempting to edit an existing Rule!\n";
+										$sErrMesg .= "The desired rule conflicts with an existing rule! \n";
+										$sErrMesg .= "Please change the Time or ThingId to a different value.\n";
+										break;
+									}
+								}
+							}
+						
+						} else {
+							//-- ERROR: Abort --//
+							$bError    = true;
+							$iErrCode  = 274;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Error: Problem occurred when parsing existing rules!\n";
+						}
+						
+					}	//-- ENDFOREACH Database Rule --//
+				} else {
+					//-- ERROR: --//
+					$bError    = true;
+					$iErrCode  = 270;
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Error: Problem occurred when checking for existing rules!\n";
 				}
 			}
 		}
@@ -655,7 +737,7 @@ if( $bError===false ) {
 		//================================================================//
 		} else if( $sPostMode==="DeleteRule" ) {
 			try {
-				//$aResult = UpdateRuleEnabledStatus( $iPostId, $iPostNewStatus );
+				$aResult = DeleteExistingRule( $iPostId );
 				
 				
 			} catch( Exception $e5400 ) {

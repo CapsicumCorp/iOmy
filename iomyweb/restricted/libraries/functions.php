@@ -5268,7 +5268,6 @@ function ChangeRule( $iRuleId, $iHubId, $iRuleTypeId, $sName, $sTime, $iEnabled,
 			}
 		}
 		
-		
 		//----------------------------------------------------//
 		//-- 2.2 - Lookup User Details                      --//
 		//----------------------------------------------------//
@@ -5316,20 +5315,21 @@ function ChangeRule( $iRuleId, $iHubId, $iRuleTypeId, $sName, $sTime, $iEnabled,
 	//----------------------------------------------------------------//
 	//-- 5.0 - Begin                                                --//
 	//----------------------------------------------------------------//
-	try {
-		$aResult = dbChangeRule( $iRuleId, $iRuleTypeId, $sName, $sTime, $iEnabled, $iLastModified, $sLastModifiedCode, $iNextRun );
-		
-		if( $aResult["Error"]===true ) {
+	if( $bError===false ) {
+		try {
+			$aResult = dbChangeRule( $iRuleId, $iRuleTypeId, $sName, $sTime, $iEnabled, $iLastModified, $sLastModifiedCode, $iNextRun );
+			
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg .= "Error occurred when attempting to change Rule! \n";
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e1 ) {
 			$bError = true;
-			$sErrMesg .= "Error occurred when attempting to change Rule! \n";
-			$sErrMesg .= $aResult["ErrMesg"];
+			$sErrMesg .= "Critical Error occurred when attempting to change Rule! \n";
+			$sErrMesg .= $e1->getMessage();
 		}
-	} catch( Exception $e1 ) {
-		$bError = true;
-		$sErrMesg .= "Critical Error occurred when attempting to change Rule! \n";
-		$sErrMesg .= $e1->getMessage();
 	}
-	
 	
 	//----------------------------------------------------------------//
 	//-- 9.0 - Return the Results or Error Message                  --//
@@ -5342,6 +5342,80 @@ function ChangeRule( $iRuleId, $iHubId, $iRuleTypeId, $sName, $sTime, $iEnabled,
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
+
+
+function DeleteExistingRule( $iRuleId ) {
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$bError         = false;
+	$sErrMesg       = "";
+	$aResult        = array();
+	$aTempRestult   = array();
+	
+	
+	//----------------------------------------------------------------//
+	//-- 2.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	try {
+		//----------------------------------------------------//
+		//-- 2.1 - Check if the User has permission         --//
+		if( $bError===false ) {
+			$bPermission = CheckUserPermissionsForRules( null );
+			
+			if( $bPermission===false ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+				);
+			}
+		}
+		
+		
+	} catch( Exception $e2 ) {
+		$sErrMesg  = "Critical Error: Problem occurred when checking the prerequisites for deleting a Rule!\n";
+		$sErrMesg .= $e2->getMessage();
+		$sErrMesg .= "\n";
+		
+		return array(
+			"Error"   => true,
+			"ErrCode" => 2,
+			"ErrMesg" => $sErrMesg
+		);
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 5.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			$aResult = dbDeleteRule( $iRuleId );
+			
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg .= "Error occurred when attempting to delete Rule! \n";
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e1 ) {
+			$bError = true;
+			$sErrMesg .= "Critical Error occurred when attempting to delete Rule! \n";
+			$sErrMesg .= $e1->getMessage();
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS  --//
+		return $aResult;
+	} else {
+		//-- 9.B - FAILURE  --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
 
 //========================================================================================================================//
 //== #25.0# - Onvif Functions                                                                                           ==//
