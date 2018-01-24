@@ -550,6 +550,9 @@ static void *cmdserverlib_networkClientLoop(void *thread_val) {
     return (void *) 1;
   }
   //First output Telnet setup commands for if the client is a Telnet client
+  //NOTE: Some clients won't send Telnet commands unless they first receive Telnet commands so we send
+  //  this sequence to get them started in Telnet mode
+  //Non-telnet programs should filter out character codes > 127 to ignore these characters
   const unsigned char strtelnetcmds[]={IAC, DO, TELOPT_SGA, IAC, DO, TELOPT_STATUS, 0};
   cmdserverlib_netputs_with_telnet_command((const char *) strtelnetcmds, dataptr->clientsock, cmdserverlib_getneedtoquit);
 
