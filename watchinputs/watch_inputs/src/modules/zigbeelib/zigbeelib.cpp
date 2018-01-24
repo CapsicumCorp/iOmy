@@ -6049,7 +6049,7 @@ static int16_t zigbeelib_highlevel_get_onoff_zigbee_device(uint64_t zigbeeaddr, 
 
   found=-1;
   for (i=0; i<zigbeelib_numlocalzigbeedevices; i++) {
-    found=zigbeelib_find_zigbee_device_and_use(i, zigbeeaddr, 0xFFFF);
+    found=zigbeelib_find_zigbee_device(i, zigbeeaddr, 0xFFFF);
     if (found!=-1) {
       break;
     }
@@ -6129,14 +6129,14 @@ static int16_t zigbeelib_highlevel_set_onoff_zigbee_device(uint64_t zigbeeaddr, 
 
   found=-1;
   for (i=0; i<zigbeelib_numlocalzigbeedevices; i++) {
-    found=zigbeelib_find_zigbee_device_and_use(i, zigbeeaddr, 0xFFFF);
+    found=zigbeelib_find_zigbee_device(i, zigbeeaddr, 0xFFFF);
     if (found!=-1) {
       break;
     }
   }
   if (found==-1) {
     //Zigbee Device not found
-    zigbeelib_lockzigbee();
+    zigbeelib_unlockzigbee();
     return ZIGBEELIB_HIGH_LEVEL_ERROR_DEVICE_NOT_FOUND;
   }
   //See if the on/off cluster can be found for this device
@@ -6524,7 +6524,6 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
       }
     }
     commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
-
   } else {
     return CMDLISTENER_NOTHANDLED;
   }
