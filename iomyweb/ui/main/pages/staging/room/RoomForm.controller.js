@@ -323,7 +323,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 					onFail: function (response) {
 						var sErrorMessage = "Error creating the room:\n\n" + response.responseText;
                         
-						jQuery.sap.log.error();
+						jQuery.sap.log.error(sErrorMessage);
                         IomyRe.common.showError( sErrorMessage, "Error", function () {
                             oController.ToggleSubmitCancelButtons(true);
                         });

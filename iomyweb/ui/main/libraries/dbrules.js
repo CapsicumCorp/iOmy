@@ -65,28 +65,30 @@ $.extend(IomyRe.dbrules, {
 		//--------------------------------------------------------------------//
         // Check the hub ID.
         //--------------------------------------------------------------------//
-		if (iHub === undefined || iHub === null) {
-			throw new MissingArgumentException("Hub ID must be specified.");
-		} else if (isNaN(iHub)) {
-			throw new IllegalArgumentException("Hub ID must be a number.");
-		}
-		
-		var mHub;
-		var bSupported;
-		
-		try {
-			mHub = IomyRe.common.getHub(iHub);
-		} catch (ex) {
-			throw ex;
-		}
-		
-		if (mHub.HubTypeId == 2) {
-			bSupported = true;
-		} else {
-			bSupported = false;
-		}
-		
-		return bSupported;
+        try {
+            if (iHub === undefined || iHub === null) {
+                throw new MissingArgumentException("Hub ID must be specified.");
+            } else if (isNaN(iHub)) {
+                throw new IllegalArgumentException("Hub ID must be a number.");
+            }
+
+            var mHub;
+            var bSupported;
+
+            mHub = IomyRe.common.getHub(iHub);
+
+            if (mHub.HubTypeId == 2) {
+                bSupported = true;
+            } else {
+                bSupported = false;
+            }
+        } catch (e) {
+            bSupported = false;
+            $.sap.log.error("Failed to find if the hub supports rules.");
+            
+        } finally {
+            return bSupported;
+        }
 	},
     
     /**
@@ -207,7 +209,7 @@ $.extend(IomyRe.dbrules, {
         }
         
         try {
-            IomyRe.rules.RulesList = {};
+            IomyRe.dbrules.RulesList = {};
             
             //--------------------------------------------------------------------//
             // Run the API to acquire the list of rules.
@@ -235,7 +237,7 @@ $.extend(IomyRe.dbrules, {
                             for (var i = 0; i < aRules.length; i++) {
                                 mRule = aRules[i];
 
-                                IomyRe.rules.RulesList["_"+mRule.Id] = mRule;
+                                IomyRe.dbrules.RulesList["_"+mRule.Id] = mRule;
                             }
 
                             fnSuccess();
@@ -273,16 +275,7 @@ $.extend(IomyRe.dbrules, {
     },
     
     /**
-     * Loads all of the rules into memory.
-     * 
-     * Required parameters in mSettings:
-     * 
-     * hubID                : ID of the hub
-     * 
-     * Optional parameters:
-     * 
-     * onSuccess            : function to run if the rules have loaded successfully
-     * onFail(sErrMesg)     : function to run after an error is encountered. Accepts an error message as a parameter.
+     * Creates a new rule. Requires a name, time, type of event, 
      * 
      * @param {type} mSettings          Map containing parameters
      */
@@ -307,11 +300,10 @@ $.extend(IomyRe.dbrules, {
 		var mHub;
         var mThing;
         
-        var sHubMissing     = "A Hub (hubID) must be specified.";
         var sThingMissing   = "A Device (thingID) must be specified.";
-        var sTimeMissing    = "";
-        var sNameMissing    = "";
-        var sTypeMissing    = "";
+        var sTimeMissing    = "A time must be given.";
+        var sNameMissing    = "The rule must have a name.";
+        var sTypeMissing    = "The type of rule must be specified.";
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -322,27 +314,27 @@ $.extend(IomyRe.dbrules, {
         // Check that all the parameters are there
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
-            //----------------------------------------------------------------//
-            // Find the hub ID and verify that it is a valid type.
-            //----------------------------------------------------------------//
-            if (mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError(sHubMissing);
-            } else {
-                iHub = mSettings.hubID;
-                
-                var mHubInfo = IomyRe.validation.isHubIDValid(iHub);
-                
-                if (mHubInfo.bIsValid) {
-                    mHub = IomyRe.common.HubList["_"+iHub];
-				
-                    if (mHub.HubTypeId != 2) {
-                        fnAppendError("The given hub does not support device rules.");
-                    }
-                } else {
-                    bError = true;
-                    aErrorMessages = aErrorMessages.concat(mHubInfo.aErrorMessages);
-                }
-            }
+//            //----------------------------------------------------------------//
+//            // Find the hub ID and verify that it is a valid type.
+//            //----------------------------------------------------------------//
+//            if (mSettings.hubID === undefined || mSettings.hubID === null) {
+//                fnAppendError(sHubMissing);
+//            } else {
+//                iHub = mSettings.hubID;
+//                
+//                var mHubInfo = IomyRe.validation.isHubIDValid(iHub);
+//                
+//                if (mHubInfo.bIsValid) {
+//                    mHub = IomyRe.common.HubList["_"+iHub];
+//				
+//                    if (mHub.HubTypeId != 2) {
+//                        fnAppendError("The given hub does not support device rules.");
+//                    }
+//                } else {
+//                    bError = true;
+//                    aErrorMessages = aErrorMessages.concat(mHubInfo.aErrorMessages);
+//                }
+//            }
             
             //----------------------------------------------------------------//
             // Find the thing ID and verify that it is a valid type.
@@ -350,16 +342,25 @@ $.extend(IomyRe.dbrules, {
             if (mSettings.thingID === undefined || mSettings.thingID === null) {
                 fnAppendError(sThingMissing);
             } else {
-                iThingId = mSettings.thingID;
+                iThingId = parseInt(mSettings.thingID);
                 
                 var mThingInfo = IomyRe.validation.isThingIDValid(iThingId);
                 
                 if (mThingInfo.bIsValid) {
                     mThing = IomyRe.common.ThingList["_"+iThingId];
+                    mHub = IomyRe.functions.getHubConnectedToThing(iThingId);
 				
-                    if (mThing.ThingTypeId != IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+                    if (mThing.TypeId != IomyRe.devices.zigbeesmartplug.ThingTypeId) {
                         fnAppendError("The given device is not supported.");
                     }
+                    
+                    // TODO: Perhaps check the hub type as the supported devices is being constructed.
+                    if (mHub.HubTypeId != 2) {
+                        fnAppendError("The hub the device is attached to does not support device rules.");
+                    } else {
+                        iHub = mHub.HubId;
+                    }
+                    
                 } else {
                     bError = true;
                     aErrorMessages = aErrorMessages.concat(mThingInfo.aErrorMessages);
@@ -369,7 +370,7 @@ $.extend(IomyRe.dbrules, {
             //----------------------------------------------------------------//
             // Get the time
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.time)) {
+            if (IomyRe.validation.isValueGiven(mSettings.time) && mSettings.time !== "") {
                 sTime = mSettings.time;
             } else {
                 fnAppendError(sTimeMissing);
@@ -430,10 +431,9 @@ $.extend(IomyRe.dbrules, {
             }
             
         } else {
-            fnAppendError(sHubMissing);
             fnAppendError(sThingMissing);
-            fnAppendError(sTimeMissing);
             fnAppendError(sNameMissing);
+            fnAppendError(sTimeMissing);
             fnAppendError(sTypeMissing);
             
             throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
@@ -441,7 +441,7 @@ $.extend(IomyRe.dbrules, {
         
         try {
             //--------------------------------------------------------------------//
-            // Run the API to acquire the list of rules.
+            // Run the API to add a rule.
             //--------------------------------------------------------------------//
             IomyRe.apiphp.AjaxRequest({
 
@@ -454,7 +454,7 @@ $.extend(IomyRe.dbrules, {
                         "Time":sTime,
                         "Name":sRuleName,
                         "RuleTypeId":iRuleTypeId,
-                        "Parameter":{"ThingId":iThingId}
+                        "Parameter":{'ThingId':iThingId}
                     })
                 },
 
@@ -524,9 +524,9 @@ $.extend(IomyRe.dbrules, {
         var iRuleTypeId;
         
         var sRuleMissing    = "A Rule (hubID) must be specified.";
-        var sTimeMissing    = "";
-        var sNameMissing    = "";
-        var sTypeMissing    = "";
+        var sTimeMissing    = "A time must be given.";
+        var sNameMissing    = "The rule must have a name.";
+        var sTypeMissing    = "The type of rule must be specified.";
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -549,7 +549,7 @@ $.extend(IomyRe.dbrules, {
             //----------------------------------------------------------------//
             // Get the time.
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.time)) {
+            if (IomyRe.validation.isValueGiven(mSettings.time) && mSettings.time !== "") {
                 sTime = mSettings.time;
             } else {
                 fnAppendError(sTimeMissing);
@@ -620,13 +620,14 @@ $.extend(IomyRe.dbrules, {
         
         try {
             //--------------------------------------------------------------------//
-            // Run the API to acquire the list of rules.
+            // Run the API to edit a rule.
             //--------------------------------------------------------------------//
             IomyRe.apiphp.AjaxRequest({
 
                 url : sURL,
                 data : {
                     "Mode"  : sMode,
+                    "Id"    : iRuleId,
                     "Data"  : JSON.stringify({
                         "Enabled":iEnabled,
                         "Time":sTime,
@@ -651,7 +652,7 @@ $.extend(IomyRe.dbrules, {
                             });
 
                         } else {
-                            var sErrMessage = "Error adding a rule: " + data.ErrMesg;
+                            var sErrMessage = "Error editing a rule: " + data.ErrMesg;
                             jQuery.sap.log.error(sErrMessage);
                             fnFail(sErrMessage);
 
@@ -659,7 +660,7 @@ $.extend(IomyRe.dbrules, {
 
                     } catch (e) {
 
-                        var sErrMessage = "Error after creating a rule: " + e.message;
+                        var sErrMessage = "Error after editing a rule: " + e.message;
                         jQuery.sap.log.error(sErrMessage);
                         fnFail(sErrMessage);
 
@@ -675,14 +676,14 @@ $.extend(IomyRe.dbrules, {
 
             });
         } catch (e) {
-            var sErrMessage = "Error attempting to add a rule ("+e.name+"): " + e.message;
+            var sErrMessage = "Error attempting to edit a rule ("+e.name+"): " + e.message;
             jQuery.sap.log.error(sErrMessage);
             fnFail(sErrMessage);
         }
         
     },
     
-    discardRule : function (mSettings) {
+    discardRules : function (mSettings) {
         
         var bError              = false;
         var aErrorMessages      = [];
@@ -727,7 +728,32 @@ $.extend(IomyRe.dbrules, {
                 throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
             }
             
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onSuccess callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
             
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onWarning callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onWarning === undefined) {
+                fnWarning = function () {};
+            } else {
+                fnWarning = mSettings.onWarning;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
             
         } else {
             fnAppendError(sRuleMissing);
@@ -741,8 +767,12 @@ $.extend(IomyRe.dbrules, {
             //--------------------------------------------------------------------//
             for (var i = 0; i < aRuleIDs.length; i++) {
                 aDiscardRequests.push({
-                    Mode : "DeleteRule",
-                    Id : aRuleIDs[i],
+                    library : "php",
+                    url : IomyRe.apiphp.APILocation("hubrules"),
+                    data : {
+                        Mode : "DeleteRule",
+                        Id : aRuleIDs[i]
+                    },
                     
                     onSuccess : function (sType, mData) {
                         try {
@@ -826,6 +856,10 @@ $.extend(IomyRe.dbrules, {
             fnFail("Failed to process rules ("+e.name+"): " + e.message);
             
         }
+    },
+    
+    toggleRules : function (mSettings) {
+        
     }
     
 });

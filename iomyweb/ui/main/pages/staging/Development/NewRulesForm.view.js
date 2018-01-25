@@ -86,6 +86,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 											toolbar : new sap.m.Toolbar({
 												content : [
 													new sap.m.Title (oView.createId("RuleToolbarTitle"),{
+                                                        text : "{/ToolbarTitle}"
 													}),
 												]
 											}).addStyleClass("MarBottom1d0Rem"),
@@ -97,24 +98,24 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 															label : "Rule Type",
 															fields: [
 																new sap.m.Select({
-																	selectedKey : "1",
+																	selectedKey : "{/Form/TypeId}",
                                                                     enabled : "{/FormControlsEnabled}",
 																	items : [
 																		new sap.ui.core.Item ({
 																			key: "1",
-																			text: "Turn On Device (Once only)"
+																			text: "Turn On Device (One-time)"
 																		}),
 																		new sap.ui.core.Item ({
 																			key: "2",
-																			text: "Turn Off Device (Once only)"
+																			text: "Turn Off Device (One-time)"
 																		}),
 																		new sap.ui.core.Item ({
 																			key: "3",
-																			text: "Turn On Device (Reoccurring)"
+																			text: "Turn On Device (Recurring)"
 																		}),
 																		new sap.ui.core.Item ({
 																			key: "4",
-																			text: "Turn Off Device (Reoccurring)"
+																			text: "Turn Off Device (Recurring)"
 																		}),
 																	]
 																})
@@ -125,8 +126,8 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 															label : "Device",
 															fields: [
 																new sap.m.Select({
-																	selectedKey : "1",
-                                                                    enabled : "{/FormControlsEnabled}",
+																	selectedKey : "{/Form/ThingId}",
+                                                                    enabled : "{/DeviceSBoxEnabled}",
 																	items : {
                                                                         path : "/SupportedDevices",
                                                                         template : oDevicesTemplate
@@ -148,10 +149,11 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 															label : "Time",
 															fields: [
 																new sap.m.TimePicker ({
-																	valueFormat: "hh:mm",
+																	valueFormat: "HH:mm:ss",
 																	displayFormat: "hh:mm a",
 																	placeholder: "Select an On Time",
-                                                                    enabled : "{/FormControlsEnabled}"
+                                                                    enabled : "{/FormControlsEnabled}",
+                                                                    value : "{/Form/Time}"
 																})
 															]
 														}),
@@ -173,13 +175,17 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 																	type: sap.m.ButtonType.Accept,
                                                                     enabled : "{/FormControlsEnabled}",
                                                                     press : function () {
-                                                                        
+                                                                        oController.submitRuleInformation();
                                                                     }
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
 																	text: "Cancel",
 																	type: sap.m.ButtonType.Reject,
-                                                                    enabled : "{/FormControlsEnabled}"
+                                                                    enabled : "{/FormControlsEnabled}",
+                                                                    
+                                                                    press : function () {
+                                                                        oController.GoToRulesList();
+                                                                    }
 																})
 															]
 														})

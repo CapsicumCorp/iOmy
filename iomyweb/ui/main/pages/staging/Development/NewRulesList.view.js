@@ -69,8 +69,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
             enabled : "{/ControlButtonsEnabled}",
 			press : function (oEvent) {
 				IomyRe.common.NavigationChangePage( "pNewAddRule" , {
-                    "bEditing": true,
-                    "ThingId" : oEvent.getSource().getBindingContext().getProperty("RuleId")
+                    "RuleId" : oEvent.getSource().getBindingContext().getProperty("RuleId")
                 }, false);
 			}
 		});
@@ -96,7 +95,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
                                             type: sap.m.ButtonType.Accept,
                                             enabled : "{/ControlButtonsEnabled}",
                                             press : function () {
-                                                IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
+                                                IomyRe.common.NavigationChangePage( "pNewAddRule" ,  {"bEditing": false} , false);
                                             }
                                         }),
                                         new sap.m.Button(oView.createId("ButtonDiscard"), {
@@ -112,8 +111,8 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
                                             type: sap.m.ButtonType.Default,
                                             //enabled : "{/ControlButtonsEnabled}",
                                             press : function () {
-                                            	oController.ToggleControls( !oController.buttonsEnabled );
-                                                oController.buttonsEnabled = !oController.buttonsEnabled;
+//                                            	oController.ToggleControls( !oController.buttonsEnabled );
+//                                                oController.buttonsEnabled = !oController.buttonsEnabled;
                                             }
                                         }),
                                         new sap.m.ToolbarSpacer({}),
