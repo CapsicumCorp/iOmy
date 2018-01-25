@@ -84,7 +84,6 @@ class PHPTelnet {
 				stream_set_timeout( $this->oSocket, 2 );
 				$this->bInitialised = true;
 				
-				
 			} else {
 				//-- Error --//
 				//echo "Failed to connect!\nError ".$iSockErrNo.":".$sSockErrStr;
@@ -115,7 +114,7 @@ class PHPTelnet {
 	
 	
 	
-	public function AddToDebuggingLog( $sString ) {
+	public function AddToDebuggingLog( $aLog ) {
 		
 		try {
 			switch( $this->iDebuggingType ) {
@@ -124,7 +123,7 @@ class PHPTelnet {
 				//------------------------------------//
 				case 1:
 					//-- Add to the Logs --//
-					$this->aDebbugingLogs[] = $sString;
+					$this->aDebbugingLogs[] = $aLog;
 					
 					//-- Success --//
 					return true;
@@ -137,10 +136,16 @@ class PHPTelnet {
 				//------------------------------------//
 				case 2:
 					//-- Add to the Logs --//
-					$this->aDebbugingLogs[] = $sString;
+					$this->aDebbugingLogs[] = $aLog;
 					
 					//-- Output the debugging --//
-					echo $sString."\n";
+					if( is_string( $aLog ) ) {
+						echo $aLog."\n";
+					} else {
+						echo json_encode( $aLog );
+						echo "\n";
+					}
+					
 					//-- Success --//
 					return true;
 					
@@ -181,9 +186,17 @@ class PHPTelnet {
 		if( $this->bInitialised===true ) {
 			foreach( $aInputArray as $sInput ) {
 				//-- Write the output --//
-				$InputRestult = fwrite ( $this->oSocket, $sInput );
+				$InputResult = fwrite ( $this->oSocket, $sInput );
 				
-				$this->AddToDebuggingLog( "Input: (".$InputRestult.") = ".$sInput );
+				//-- Add to the Debugging log --//
+				$this->AddToDebuggingLog( 
+					array(
+						"Type"   => "Input",
+						"Result" => $InputResult,
+						"Input"  => $sInput
+					)
+				);
+				
 				//-- Increment the count of how many successful Input --//
 				$iInputsWritten++;
 			}
@@ -199,9 +212,6 @@ class PHPTelnet {
 		//------------------------------------//
 		return false;
 	}
-	
-	
-	
 	
 	
 	public function FetchRows( $iColumnMax=null, $iMaxRows=25, $bHideComments=false ) {
@@ -234,55 +244,101 @@ class PHPTelnet {
 						//-- IF the TelnetType is WatchInputs       --//
 						//--------------------------------------------//
 						if( $this->sTelnetType==="WatchInputs") {
-							//-- Trim the Output --//
-							$sTrimedOutput = trim( $sOutput );
+							//--------------------------------------------//
+							//-- STEP 1 - Trim Whitespace               --//
+							$sTrimedOutput   = trim( $sOutput );
 							
-							if( !empty($sTrimedOutput) ) {
+							//--------------------------------------------//
+							//-- STEP 2 - Filter unwanted characters    --//
+							$sFilteredOutput = filter_var( $sTrimedOutput, FILTER_UNSAFE_RAW, array( 'flags' => FILTER_FLAG_STRIP_LOW|FILTER_FLAG_STRIP_HIGH ) );
+							
+							//--------------------------------------------//
+							//-- STEP 3 - Remove GreaterThan symbols    --//
+							if( $sFilteredOutput==="> logout" ) {
+								$sFilteredOutput = "";
+								
+								//-- Add to the debugging log --//
+								$this->AddToDebuggingLog( 
+									array(
+										"Type"   => "Debug",
+										"Mesg"   => "Hide the logout message!"
+									)
+								);
+								
+							} else if( substr($sFilteredOutput, 0, 2)==='> ' ) {
+								//-- Add to the Result --//
+								$sFilteredOutput = substr( $sFilteredOutput, 2 );
+								
+							}
+							
+							//--------------------------------------------//
+							//-- STEP 4 - Return the Results            --//
+							if( !empty($sFilteredOutput) ) {
 								
 								if( $bHideComments===false ) {
 									//-- Add to the Result --//
-									$aResult[] = $sTrimedOutput;
+									$aResult[] = $sFilteredOutput;
 									
 									//-- Add to the debugging log --//
-									$this->AddToDebuggingLog( "Output: ".$sTrimedOutput."\n" );
+									$this->AddToDebuggingLog( 
+										array(
+											"Type"   => "Output",
+											"Value"  => $sFilteredOutput
+										)
+									);
 									
 								} else {
 									//-- IF the first character isn't the character used for comments --//
-									if( substr($sTrimedOutput, 0, 1)!=='#' ) {
+									if( substr($sFilteredOutput, 0, 1)!=='#' ) {
 										//-- Add to the Result --//
-										$aResult[] = $sTrimedOutput;
+										$aResult[] = $sFilteredOutput;
 										
 										//-- Add to the debugging log --//
-										$this->AddToDebuggingLog( "Output: ".$sTrimedOutput."\n" );
+										$this->AddToDebuggingLog( 
+										array(
+												"Type"   => "Output",
+												"Value"  => $sFilteredOutput
+											)
+										);
 										
 									} //-- ELSE the Output is a comment so do nothing --//
 								}
-								
 							} else {
 								//-- Increment the count of invalid rows --//
 								$j++;
 							}
 							
 						//--------------------------------------------//
-						//-- ELSE Just do the Normal                --//
+						//-- ELSE Unsupported Type                  --//
 						//--------------------------------------------//
 						} else {
-							//-- TODO: This --//
-							
-							
-							
+							//-- TODO: Add other types --//
+							$this->AddToDebuggingLog( 
+								array(
+									"Type"   => "Error",
+									"Value"  => "Unsupported Telnet Type."
+								)
+							);
 						}
 					} else {
 						//-- Value is false indicating that it couldn't retrieve the value --//
 						$j++;
 					}
-				}
+				}	//-- ENDWHILE Loop --//
 				
 				
 				//--------------------------------------------//
 				//-- Return the Results                     --//
 				//--------------------------------------------//
 				return $aResult;
+			} else {
+				$this->AddToDebuggingLog( 
+					array(
+						"Type"   => "Error",
+						"Value"  => "Unsupported MaxRows parameter."
+					)
+				);
+				return false;
 			}
 		}
 		
