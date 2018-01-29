@@ -151,7 +151,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 																new sap.m.TimePicker ({
 																	valueFormat: "HH:mm:ss",
 																	displayFormat: "hh:mm a",
-																	placeholder: "Select an On Time",
+																	placeholder: "Select a Time",
                                                                     enabled : "{/FormControlsEnabled}",
                                                                     value : "{/Form/Time}"
 																})

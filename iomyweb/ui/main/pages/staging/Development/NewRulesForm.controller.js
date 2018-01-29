@@ -118,7 +118,7 @@ sap.ui.controller("pages.staging.Development.NewRulesForm", {
                 "Name"      : mRule.Name,
                 "Time"      : mRule.Time,
                 "TypeId"    : mRule.TypeId,
-                "ThingId"   : mRule.Parameter.ThingId,
+                "ThingId"   : JSON.parse(mRule.Parameter).ThingId,
                 "Enabled"   : iEnabled
             };
         }

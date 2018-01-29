@@ -281,54 +281,58 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
         var oView               = oController.getView();
         var aSelectedRules      = oController.GetSelectedRules();
         
-        try {
-            
-            //--------------------------------------------------------------//
-            // Begin deleting the rule(s).
-            //--------------------------------------------------------------//
-            IomyRe.dbrules.toggleRules({
-                ruleIDs : aSelectedRules,
+        if (aSelectedRules.length > 0) {
+            try {
+                oController.ToggleControls(false);
 
-                onSuccess : function () {
-                    var sMessage = "";
-                    if (aSelectedRules.length === 1) {
-                        sMessage = aSelectedRules.length + " rule toggled."
-                    } else {
-                        sMessage = aSelectedRules.length + " rules toggled."
+                //--------------------------------------------------------------//
+                // Begin deleting the rule(s).
+                //--------------------------------------------------------------//
+                IomyRe.dbrules.toggleRules({
+                    ruleIDs : aSelectedRules,
+
+                    onSuccess : function () {
+                        var sMessage = "";
+                        
+                        if (aSelectedRules.length === 1) {
+                            sMessage = aSelectedRules.length + " rule toggled."
+                        } else {
+                            sMessage = aSelectedRules.length + " rules toggled."
+                        }
+
+                        IomyRe.common.showMessage({
+                            text : sMessage
+                        });
+
+                        oController.RefreshModel(oController, {});
+                        oController.ToggleControls(true);
+                    },
+
+                    onWarning : function (sError) {
+                        IomyRe.common.showWarning("An error occurred while deleting the rule states:\n\n"+sError, "Error",
+                            function () {
+                                oController.RefreshModel(oController, {});
+                                oController.ToggleControls(true);
+                            }
+                        );
+                    },
+
+                    onFail : function (sError) {
+                        IomyRe.common.showError("An error occurred while toggling the rule states:\n\n"+sError, "Error",
+                            function () {
+                                oController.RefreshModel(oController, {});
+                                oController.ToggleControls(true);
+                            }
+                        );
                     }
-                    
-                    IomyRe.common.showMessage({
-                        text : sMessage
-                    });
+                });
+            } catch (e) {
+                $.sap.log.error("Error toggling rules states!");
+                $.sap.log.error(e.name + ": " + e.message);
 
-                    oController.RefreshModel(oController, {});
-                    oController.ToggleControls(true);
-                },
-                
-                onWarning : function (sError) {
-                    IomyRe.common.showWarning("An error occurred while deleting the rule states:\n\n"+sError, "Error",
-                        function () {
-                            oController.RefreshModel(oController, {});
-                            oController.ToggleControls(true);
-                        }
-                    );
-                },
-
-                onFail : function (sError) {
-                    IomyRe.common.showError("An error occurred while toggling the rule states:\n\n"+sError, "Error",
-                        function () {
-                            oController.RefreshModel(oController, {});
-                            oController.ToggleControls(true);
-                        }
-                    );
-                }
-            });
-        } catch (e) {
-            $.sap.log.error("Error toggling rules states!");
-            $.sap.log.error(e.name + ": " + e.message);
-
-            oController.RefreshModel(oController, {});
-            oController.ToggleControls(true);
+                oController.RefreshModel(oController, {});
+                oController.ToggleControls(true);
+            }
         }
     }
 
