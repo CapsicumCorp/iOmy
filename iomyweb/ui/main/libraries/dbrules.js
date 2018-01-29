@@ -684,7 +684,6 @@ $.extend(IomyRe.dbrules, {
     },
     
     discardRules : function (mSettings) {
-        
         var bError              = false;
         var aErrorMessages      = [];
         var oModule             = this;
@@ -848,7 +847,7 @@ $.extend(IomyRe.dbrules, {
                 },
                 
                 onFail : function () {
-                    fnFail("Failed to discard rule(s).");
+                    fnFail("Failed to discard rule(s):\n\n"+aErrorMessages.join("\n"));
                 }
             });
             
@@ -859,7 +858,178 @@ $.extend(IomyRe.dbrules, {
     },
     
     toggleRules : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var oModule             = this;
+        var aRuleIDs            = [];
+        var aToggleRequests     = [];
+        var iEnabled            = 0;
+        var oRequestQueue       = null;
+        var fnSuccess           = function () {};
+        var fnWarning           = function () {};
+        var fnFail              = function () {};
         
+        var sRuleMissing        = "Rule IDs must be specified.";
+        
+        var fnAppendError = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Check that all the parameters are there
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Find the rule ID
+            //----------------------------------------------------------------//
+            if (mSettings.ruleIDs === undefined || mSettings.ruleIDs === null) {
+                fnAppendError(sRuleMissing);
+            } else {
+                if (typeof mSettings.ruleIDs === "string" || typeof mSettings.ruleIDs === "number") {
+                    aRuleIDs.push(mSettings.ruleIDs);
+                } else if (mSettings.ruleIDs instanceof Array) {
+                    aRuleIDs = mSettings.ruleIDs;
+                } else {
+                    fnAppendError("Invalid 'ruleIDs' parameter parsed. Type given: " + typeof mSettings.ruleIDs);
+                }
+            }
+            
+            //----------------------------------------------------------------//
+            // Check for errors and throw an exception if there are errors.
+            //----------------------------------------------------------------//
+            if (bError) {
+                throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onSuccess callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onWarning callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onWarning === undefined) {
+                fnWarning = function () {};
+            } else {
+                fnWarning = mSettings.onWarning;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            fnAppendError(sRuleMissing);
+            
+            throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
+        }
+        
+        try {
+            //--------------------------------------------------------------------//
+            // Process each rule for removal.
+            //--------------------------------------------------------------------//
+            for (var i = 0; i < aRuleIDs.length; i++) {
+                iEnabled = (IomyRe.dbrules.RulesList["_"+aRuleIDs[i]].Enabled + 1) % 2;
+                
+                aToggleRequests.push({
+                    library : "php",
+                    url : IomyRe.apiphp.APILocation("hubrules"),
+                    data : {
+                        Mode : "SetRuleEnabled",
+                        Id : aRuleIDs[i],
+                        Data : JSON.stringify({ 'Enabled' : iEnabled })
+                    },
+                    
+                    onSuccess : function (sType, mData) {
+                        try {
+                            if (sType === "JSON") {
+                                if (mData.Error) {
+                                    aErrorMessages.push("Error after a successful API call: " + mData.ErrMesg);
+                                }
+                                
+                            } else {
+                                aErrorMessages.push("A successful call to the rules API did not return a JSON response. Received " + sType + ".");
+                            }
+                            
+                        } catch (e) {
+                            aErrorMessages.push("Error after a successful API call ("+e.name+"): " + e.message);
+                        }
+                    },
+                    
+                    onFail : function (response) {
+                        aErrorMessages.push(response.responseText);
+                    }
+                });
+            }
+            
+            //--------------------------------------------------------------------//
+            // Create the queue and run each request. Reload the rules list from
+            // the database afterward.
+            //--------------------------------------------------------------------//
+            oRequestQueue = new AjaxRequestQueue({
+                requests                : aToggleRequests,
+                concurrentRequests      : 2,
+                
+                onSuccess : function () {
+                    try {
+                        oModule.loadRules({
+                            onSuccess : function () {
+                                if (aErrorMessages.length > 0) {
+                                    fnWarning(aErrorMessages.join("\n"));
+                                } else {
+                                    fnSuccess();
+                                }
+                            },
+                            
+                            onFail : function (sErrMessage) {
+                                aErrorMessages.push(sErrMessage);
+                                fnWarning(aErrorMessages.join("\n"));
+                            }
+                        });
+                    } catch (e) {
+                        aErrorMessages.push("Error attempting to reload rules ("+e.name+"): " + e.message);
+                        fnWarning(aErrorMessages.join("\n"));
+                    }
+                },
+                
+                onWarning : function () {
+                    try {
+                        oModule.loadRules({
+                            onSuccess : function () {
+                                fnWarning(aErrorMessages.join("\n"));
+                            },
+                            
+                            onFail : function (sErrMessage) {
+                                aErrorMessages.push(sErrMessage);
+                                fnWarning(aErrorMessages.join("\n"));
+                            }
+                        });
+                    } catch (e) {
+                        aErrorMessages.push("Error attempting to reload rules ("+e.name+"): " + e.message);
+                        fnWarning(aErrorMessages.join("\n"));
+                    }
+                },
+                
+                onFail : function () {
+                    fnFail("Failed to enable/disable rule(s):\n\n"+aErrorMessages.join("\n"));
+                }
+            });
+            
+        } catch (e) {
+            fnFail("Failed to process rules ("+e.name+"): " + e.message);
+            
+        }
     }
     
 });

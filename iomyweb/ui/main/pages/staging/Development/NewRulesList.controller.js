@@ -280,8 +280,6 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
         var oController         = this;
         var oView               = oController.getView();
         var aSelectedRules      = oController.GetSelectedRules();
-        var iEnabledCount       = 0;
-        var iDisabledCount      = 0;
         
         try {
             
@@ -292,8 +290,15 @@ sap.ui.controller("pages.staging.Development.NewRulesList", {
                 ruleIDs : aSelectedRules,
 
                 onSuccess : function () {
+                    var sMessage = "";
+                    if (aSelectedRules.length === 1) {
+                        sMessage = aSelectedRules.length + " rule toggled."
+                    } else {
+                        sMessage = aSelectedRules.length + " rules toggled."
+                    }
+                    
                     IomyRe.common.showMessage({
-                        text : sSuccessMessage
+                        text : sMessage
                     });
 
                     oController.RefreshModel(oController, {});

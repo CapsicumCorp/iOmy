@@ -111,8 +111,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesList", {
                                             type: sap.m.ButtonType.Default,
                                             //enabled : "{/ControlButtonsEnabled}",
                                             press : function () {
-//                                            	oController.ToggleControls( !oController.buttonsEnabled );
-//                                                oController.buttonsEnabled = !oController.buttonsEnabled;
+                                                oController.toggleRuleStates();
                                             }
                                         }),
                                         new sap.m.ToolbarSpacer({}),
