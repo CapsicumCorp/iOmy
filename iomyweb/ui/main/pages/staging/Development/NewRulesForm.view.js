@@ -173,7 +173,7 @@ sap.ui.jsview("pages.staging.Development.NewRulesForm", {
 																new sap.m.Button (oView.createId("ButtonSubmit"), {
 																	text: "Update",
 																	type: sap.m.ButtonType.Accept,
-                                                                    enabled : "{/FormControlsEnabled}",
+                                                                    enabled : "{/UpdateEnabled}",
                                                                     press : function () {
                                                                         oController.submitRuleInformation();
                                                                     }

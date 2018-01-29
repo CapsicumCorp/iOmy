@@ -28,7 +28,7 @@ sap.ui.controller("pages.staging.Development.NewRulesForm", {
 	
 	bEditing            : false,
     bControlsEnabled    : true,
-    
+    bDevicesAvailable   : true,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -67,7 +67,8 @@ sap.ui.controller("pages.staging.Development.NewRulesForm", {
             oController.bControlsEnabled = bEnabled;
 
             oData.FormControlsEnabled   = oController.bControlsEnabled;
-            oData.DeviceSBoxEnabled     = !oController.bEditing && oController.bControlsEnabled;
+            oData.DeviceSBoxEnabled     = oController.bDevicesAvailable && !oController.bEditing && oController.bControlsEnabled;
+            oData.UpdateEnabled         = oController.bDevicesAvailable && oController.bControlsEnabled;
 
             oView.setModel(new sap.ui.model.json.JSONModel(oData));
         } catch (e) {
@@ -86,6 +87,27 @@ sap.ui.controller("pages.staging.Development.NewRulesForm", {
             "FormControlsEnabled"   : true
         };
         
+        //--------------------------------------------------------------------//
+        // Check if the update button should be enabled. 
+        //--------------------------------------------------------------------//
+        if (aSupportedDevices.length > 0) {
+            oController.bDevicesAvailable = true;
+            oData.UpdateEnabled = true;
+        } else {
+            oController.bDevicesAvailable = false;
+            oData.UpdateEnabled = false;
+            oData.DeviceSBoxEnabled = false;
+            
+            aSupportedDevices.push({
+                "Id"            : -1,
+                "DisplayName"   : "No supported devices"
+            });
+        }
+        
+        //--------------------------------------------------------------------//
+        // Populate the model either with default data if we're adding a rule,
+        // or data from a selected if we're editing one.
+        //--------------------------------------------------------------------//
         if (oController.iRuleId === null) {
             oData.ToolbarTitle = "New Rule";
             oData.DeviceSBoxEnabled = true;
@@ -172,7 +194,7 @@ sap.ui.controller("pages.staging.Development.NewRulesForm", {
                     
                     onSuccess : function () {
                         IomyRe.common.showMessage({
-                            text : sRuleName + " successfully updated."
+                            text : "'"+ sRuleName + "' successfully updated."
                         });
                         
                         oController.GoToRulesList();
@@ -220,7 +242,7 @@ sap.ui.controller("pages.staging.Development.NewRulesForm", {
                     
                     onSuccess : function () {
                         IomyRe.common.showMessage({
-                            text : sRuleName + " successfully created."
+                            text : "'"+ sRuleName + "' successfully created."
                         });
                         
                         oController.GoToRulesList();
