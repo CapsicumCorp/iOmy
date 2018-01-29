@@ -238,6 +238,10 @@ $.extend(IomyRe.common,{
                 //== 2.A - User is currently logged in          ==//
                 //================================================//
                 if (response.login===true) {
+                    var mServerDB = response.ServerDBVer;
+                    
+                    IomyRe.common.DatabaseVersion = mServerDB.Version1 + "." + mServerDB.Version2 + "." + mServerDB.Version3;
+                    
                     aConfig.OnUserSessionActive(response);
                     
                 //================================================//
@@ -276,9 +280,9 @@ $.extend(IomyRe.common,{
             type : "POST",
             dataType : "json",
             data : {
-                "username":	"",
-                "password":	"",
-                "AttemptLogin":	"1"
+                "username":    "",
+                "password":    "",
+                "AttemptLogin":    "1"
             },
             success : function( oResponseData, sHTTPCode, jqXHR ) {
                 IomyRe.common.WipeCoreVariables();
@@ -317,7 +321,7 @@ $.extend(IomyRe.common,{
                 }
             );
         } catch (e1) {
-            $.sap.log.error("Error with displaying the MessageBox:"+e1.message);
+            $.sap.log.error("Error with displaying the MessageBox: "+e1.message);
         }
     },
     
@@ -2578,11 +2582,11 @@ $.extend(IomyRe.common,{
     },
     
     LookupPremisePermissionFromId: function( iPremiseId ) {
-		if( iPremiseId>=1 ) {
-			var sPremiseCode = "_"+iPremiseId;
-			var aPremise     = IomyRe.common.PremiseList[sPremiseCode];
-			
-			var iPremiseWrite         = aPremise.PermWrite;
+        if( iPremiseId>=1 ) {
+            var sPremiseCode = "_"+iPremiseId;
+            var aPremise     = IomyRe.common.PremiseList[sPremiseCode];
+            
+            var iPremiseWrite         = aPremise.PermWrite;
             var iPremiseOwner         = aPremise.PermOwner;
             var iPremiseRoomAdmin     = aPremise.PermRoomAdmin;
             var sPermissionText       = "";
@@ -2597,18 +2601,18 @@ $.extend(IomyRe.common,{
                  sPermissionText = "Read Only Access";
             }
             
-			return sPermissionText;
-		} else {
-			return false;
-		}
-	},
+            return sPermissionText;
+        } else {
+            return false;
+        }
+    },
     
     LookupRoomPermissionFromId: function( iRoomId ) {
-		if( iRoomId>=1 ) {
-			var sRoomCode = "_"+iRoomId;
-			var aRoom     = IomyRe.common.AllRoomsList[sRoomCode];
-			
-			var iRoomRead              = aRoom.PermDeviceRead;             
+        if( iRoomId>=1 ) {
+            var sRoomCode = "_"+iRoomId;
+            var aRoom     = IomyRe.common.AllRoomsList[sRoomCode];
+            
+            var iRoomRead              = aRoom.PermDeviceRead;             
             var iRoomWrite             = aRoom.PermWrite;            
             var iRoomStateToggle       = aRoom.PermStateToggle;
             var sPermissionText        = "";
@@ -2625,159 +2629,159 @@ $.extend(IomyRe.common,{
                 }
             }
             
-			return sPermissionText;
-		} else {
-			return false;
-		}
-	},
+            return sPermissionText;
+        } else {
+            return false;
+        }
+    },
     
     LookupRegionNameFromRegionId: function( iRegionId ) {
-		if( iRegionId>=1 ) {
-			var sRegionCode = "_"+iRegionId;
-			var aRegion     = IomyRe.common.Regions[sRegionCode];
-			
-			var sRegionName     = aRegion.RegionName;
-			return sRegionName;
-		} else {
-			return false;
-		}
-	},
+        if( iRegionId>=1 ) {
+            var sRegionCode = "_"+iRegionId;
+            var aRegion     = IomyRe.common.Regions[sRegionCode];
+            
+            var sRegionName     = aRegion.RegionName;
+            return sRegionName;
+        } else {
+            return false;
+        }
+    },
     
     LookupTimezoneNameFromTimezoneId: function( iTimezoneId ) {
-		if( iTimezoneId>=1 ) {
-			var sTimezoneCode = "_"+iTimezoneId;
-			var aTimezone     = IomyRe.common.Timezones[sTimezoneCode];
-			
-			var sTimezoneName     = aTimezone.TimezoneName;
-			return sTimezoneName;
-		} else {
-			return false;
-		}
-	},
+        if( iTimezoneId>=1 ) {
+            var sTimezoneCode = "_"+iTimezoneId;
+            var aTimezone     = IomyRe.common.Timezones[sTimezoneCode];
+            
+            var sTimezoneName     = aTimezone.TimezoneName;
+            return sTimezoneName;
+        } else {
+            return false;
+        }
+    },
     
     LookupLanguageNameFromLanguageId: function( iLanguageId ) {
-		if( iLanguageId>=1 ) {
-			var sLanguageCode = "_"+iLanguageId;
-			var aLanguage     = IomyRe.common.Languages[sLanguageCode];
-			
-			var sLanguageName     = aLanguage.LanguageName;
-			return sLanguageName;
-		} else {
-			return false;
-		}
-	},
-	
-	
-	//================================================================//
-	//== Lookup and Format Permissions functions                    ==//
-	//================================================================//
-	LookupPremPermLevelName: function ( iPermLevel ) {
-		var sKey = "_"+iPermLevel;
-		
-		if( typeof IomyRe.common.PermLevelsPremise[sKey]!=="undefined" ) {
-			return IomyRe.common.PermLevelsPremise[sKey].Name;
-		} else {
-			return "Error has occurred!";
-		}
-	},
-	
-	LookupPremPermLevelEditable: function ( iPermLevel ) {
-		if( iPermLevel>=4 ) {
-			return false;
-		} else {
-			return true;
-		}
-	},
-	
-	LookupPremisePermLevelFromPermissions: function ( mPremise ) {
-		if( mPremise.PremiseId>=1 ) {
-			var iPremPermLevel = 0;
-			
-			var iPremiseRead          = mPremise.PermRead;
-			var iPremiseWrite         = mPremise.PermWrite;
-			var iPremiseOwner         = mPremise.PermOwner;
-			var iPremiseRoomAdmin     = mPremise.PermRoomAdmin;
-			
-			//------------------------------------//
-			//-- Premise Adminstrator Access    --//
-			//------------------------------------//
-			if ( iPremiseOwner===1 ) {
-				if( iPremiseRead===1 ) {
-					//-- Premise Administrator with Premise Visible --//
-					iPremPermLevel = 5;
-				} else {
-					//-- Premise Administrator with Premise Hidden --//
-					iPremPermLevel = 4;
-				}
-				
-			//------------------------------------//
-			//-- Regular User Access            --//
-			//------------------------------------//
-			} else  {
-				if ( iPremiseRoomAdmin===1 ) {
-					//-- Premise Room Manager --//
-					iPremPermLevel = 3;
-				} else if ( iPremiseWrite===1 ) {
-					//-- Premise Read and Write access --//
-					iPremPermLevel = 2;
-				} else if ( iPremiseRead===1 ) {
-					//-- Premise Read access --//
-					iPremPermLevel = 1;
-				} else {
-					//-- No Access --//
-					iPremPermLevel = 0;
-				}
-			}
-			
-			return iPremPermLevel;
-			
-		} else {
-			return 0;
-		}
-		
-	},
-	
-	LookupRoomPermLevelName: function ( iPermLevel ) {
-		var sKey = "_"+iPermLevel;
-		
-		if( typeof IomyRe.common.PermLevelsRoom[sKey]!=="undefined" ) {
-			return IomyRe.common.PermLevelsRoom[sKey].Name;
-		} else {
-			return "Error has occurred!";
-		}
-	},
-	
-	LookupRoomPermLevelFromPermissions: function ( mRoom ) {
-		if( mRoom.RoomId>=1 ) {
-			var iRoomPermLevel = 0;
-			
-			var iRoomRead             = mRoom.PermRead;
-			var iRoomWrite            = mRoom.PermWrite;
-			var iRoomStateToggle      = mRoom.PermStateToggle;
-			
-			//------------------------------------//
-			//-- Premise Adminstrator Access    --//
-			//------------------------------------//
-			if ( iRoomWrite===1 ) {
-				//-- Premise Room Manager --//
-				iRoomPermLevel = 3;
-			} else if ( iRoomStateToggle===1 ) {
-				//-- Premise Read and Write access --//
-				iRoomPermLevel = 2;
-			} else if ( iRoomRead===1 ) {
-				//-- Premise Read access --//
-				iRoomPermLevel = 1;
-			} else {
-				//-- No Access --//
-				iRoomPermLevel = 0;
-			}
-			
-			return iRoomPermLevel;
-			
-		} else {
-			return 0;
-		}
-	},
+        if( iLanguageId>=1 ) {
+            var sLanguageCode = "_"+iLanguageId;
+            var aLanguage     = IomyRe.common.Languages[sLanguageCode];
+            
+            var sLanguageName     = aLanguage.LanguageName;
+            return sLanguageName;
+        } else {
+            return false;
+        }
+    },
+    
+    
+    //================================================================//
+    //== Lookup and Format Permissions functions                    ==//
+    //================================================================//
+    LookupPremPermLevelName: function ( iPermLevel ) {
+        var sKey = "_"+iPermLevel;
+        
+        if( typeof IomyRe.common.PermLevelsPremise[sKey]!=="undefined" ) {
+            return IomyRe.common.PermLevelsPremise[sKey].Name;
+        } else {
+            return "Error has occurred!";
+        }
+    },
+    
+    LookupPremPermLevelEditable: function ( iPermLevel ) {
+        if( iPermLevel>=4 ) {
+            return false;
+        } else {
+            return true;
+        }
+    },
+    
+    LookupPremisePermLevelFromPermissions: function ( mPremise ) {
+        if( mPremise.PremiseId>=1 ) {
+            var iPremPermLevel = 0;
+            
+            var iPremiseRead          = mPremise.PermRead;
+            var iPremiseWrite         = mPremise.PermWrite;
+            var iPremiseOwner         = mPremise.PermOwner;
+            var iPremiseRoomAdmin     = mPremise.PermRoomAdmin;
+            
+            //------------------------------------//
+            //-- Premise Adminstrator Access    --//
+            //------------------------------------//
+            if ( iPremiseOwner===1 ) {
+                if( iPremiseRead===1 ) {
+                    //-- Premise Administrator with Premise Visible --//
+                    iPremPermLevel = 5;
+                } else {
+                    //-- Premise Administrator with Premise Hidden --//
+                    iPremPermLevel = 4;
+                }
+                
+            //------------------------------------//
+            //-- Regular User Access            --//
+            //------------------------------------//
+            } else  {
+                if ( iPremiseRoomAdmin===1 ) {
+                    //-- Premise Room Manager --//
+                    iPremPermLevel = 3;
+                } else if ( iPremiseWrite===1 ) {
+                    //-- Premise Read and Write access --//
+                    iPremPermLevel = 2;
+                } else if ( iPremiseRead===1 ) {
+                    //-- Premise Read access --//
+                    iPremPermLevel = 1;
+                } else {
+                    //-- No Access --//
+                    iPremPermLevel = 0;
+                }
+            }
+            
+            return iPremPermLevel;
+            
+        } else {
+            return 0;
+        }
+        
+    },
+    
+    LookupRoomPermLevelName: function ( iPermLevel ) {
+        var sKey = "_"+iPermLevel;
+        
+        if( typeof IomyRe.common.PermLevelsRoom[sKey]!=="undefined" ) {
+            return IomyRe.common.PermLevelsRoom[sKey].Name;
+        } else {
+            return "Error has occurred!";
+        }
+    },
+    
+    LookupRoomPermLevelFromPermissions: function ( mRoom ) {
+        if( mRoom.RoomId>=1 ) {
+            var iRoomPermLevel = 0;
+            
+            var iRoomRead             = mRoom.PermRead;
+            var iRoomWrite            = mRoom.PermWrite;
+            var iRoomStateToggle      = mRoom.PermStateToggle;
+            
+            //------------------------------------//
+            //-- Premise Adminstrator Access    --//
+            //------------------------------------//
+            if ( iRoomWrite===1 ) {
+                //-- Premise Room Manager --//
+                iRoomPermLevel = 3;
+            } else if ( iRoomStateToggle===1 ) {
+                //-- Premise Read and Write access --//
+                iRoomPermLevel = 2;
+            } else if ( iRoomRead===1 ) {
+                //-- Premise Read access --//
+                iRoomPermLevel = 1;
+            } else {
+                //-- No Access --//
+                iRoomPermLevel = 0;
+            }
+            
+            return iRoomPermLevel;
+            
+        } else {
+            return 0;
+        }
+    },
     
     /**
      * Returns the ID of the first premise found to be able to communicate
@@ -2806,7 +2810,7 @@ $.extend(IomyRe.common,{
             return iPremiseId;
         }
     },
-	
+    
     //============================================//
     //== NAVIGATION FUNCTIONS                    ==//
     //============================================//
