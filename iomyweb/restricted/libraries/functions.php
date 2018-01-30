@@ -88,6 +88,9 @@ function LookupFunctionConstant( $sValue ) {
 		//----------------//
 		//-- LINKS      --//
 		//----------------//
+		case "GenericZigbeeHALinkTypeId":
+			return 2;
+			
 		case "HueBridgeLinkTypeId":
 			return 7;
 			

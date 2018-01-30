@@ -80,6 +80,7 @@ require_once SITE_BASE.'/restricted/libraries/motion/netvox.php';
 //-- 1.5 - Fetch Constants (Will be replaced)               --//
 //------------------------------------------------------------//
 $iNetvoxMotionLinkTypeId  = LookupFunctionConstant("NetvoxMotionSensorLinkTypeId");
+$iZigbeeHALinkTypeId      = LookupFunctionConstant("GenericZigbeeHALinkTypeId");
 $iNetvoxMotionThingTypeId = LookupFunctionConstant("NetvoxMotionSensorThingTypeId");
 
 
@@ -263,7 +264,7 @@ if( $bError===false ) {
 					//============================================//
 					//== NETVOX MOTION SENSOR                   ==//
 					//============================================//
-					if( $iLinkTypeId===$iNetvoxMotionLinkTypeId ) {
+					if( $iLinkTypeId===$iNetvoxMotionLinkTypeId || $iLinkTypeId===$iZigbeeHALinkTypeId ) {
 						//-- IF Netvox Motion Sensor itself and not the Thermometer --//
 						if( $iThingTypeId===$iNetvoxMotionThingTypeId ) {
 							
