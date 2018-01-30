@@ -1,0 +1,16 @@
+; An upgrade script to migrate the web server files from version 6 to version 7
+; skipfolderifexist skips files in that folder unless they don't exist
+; skipfile will always re-extract if the file doesn't exist
+; deletefolder will recursively delete everything in the folder
+; changedfile entries will override skipfolder entries
+
+;Always skip this folder as it contains the MySQL database
+;Old command, not having newfile entries for this will now skip the file/folder
+;NOTE: Make sure components/mysql/sbin/data isn't in the newfile list below
+;skipfolder components/mysql/sbin/data
+
+; From compare_iomy_apks.sh
+newfile zigbeedefs.ini
+newfile htdocs/restricted/libraries/functions.php
+newfile htdocs/restricted/php/api_motionsensor.php
+
