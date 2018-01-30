@@ -28,6 +28,31 @@ IomyRe.rules = new sap.ui.base.Object();
 $.extend(IomyRe.rules, {
     
     RulesList : {},
+    
+    getRuleTypeName : function (iRuleTypeId) {
+        var sName = null;
+        
+        try {
+            if (iRuleTypeId == 1) {
+                sName = "Turn On (One-time)";
+            } else if (iRuleTypeId == 2) {
+                sName = "Turn Off (One-time)";
+            } else if (iRuleTypeId == 3) {
+                sName = "Turn On (Recurring)";
+            } else if (iRuleTypeId == 4) {
+                sName = "Turn Off (Recurring)";
+            } else if (iRuleTypeId < 1 || iRuleTypeId > 4) {
+                throw new IllegalArgumentException("Rule type ID must be between 1 and 4.");
+            }
+            
+        } catch (e) {
+            sName = null;
+            $.sap.log.error("Failed to get the name of the rule type ("+e.name+"): " + e.message);
+            
+        } finally {
+            return sName;
+        }
+    },
 	
     /**
      * Checks a given hub to check whether the rules feature can be used for
@@ -40,28 +65,30 @@ $.extend(IomyRe.rules, {
 		//--------------------------------------------------------------------//
         // Check the hub ID.
         //--------------------------------------------------------------------//
-		if (iHub === undefined || iHub === null) {
-			throw new MissingArgumentException("Hub ID must be specified.");
-		} else if (isNaN(iHub)) {
-			throw new IllegalArgumentException("Hub ID must be a number.");
-		}
-		
-		var mHub;
-		var bSupported;
-		
-		try {
-			mHub = IomyRe.common.getHub(iHub);
-		} catch (ex) {
-			throw ex;
-		}
-		
-		if (mHub.HubTypeId == 2) {
-			bSupported = true;
-		} else {
-			bSupported = false;
-		}
-		
-		return bSupported;
+        try {
+            if (iHub === undefined || iHub === null) {
+                throw new MissingArgumentException("Hub ID must be specified.");
+            } else if (isNaN(iHub)) {
+                throw new IllegalArgumentException("Hub ID must be a number.");
+            }
+
+            var mHub;
+            var bSupported;
+
+            mHub = IomyRe.common.getHub(iHub);
+
+            if (mHub.HubTypeId == 2) {
+                bSupported = true;
+            } else {
+                bSupported = false;
+            }
+        } catch (e) {
+            bSupported = false;
+            $.sap.log.error("Failed to find if the hub supports rules.");
+            
+        } finally {
+            return bSupported;
+        }
 	},
     
     /**
@@ -70,77 +97,22 @@ $.extend(IomyRe.rules, {
      * @returns {object}        Associative array of supported devices.
      */
     loadSupportedDevices : function () {
-        var aaDevices   = {};
+        var aDevices   = [];
         
         try {
             $.each(IomyRe.common.ThingList, function (sI, mThing) {
                 if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
-                    aaDevices[sI] = mThing;
+                    aDevices.push(mThing);
                 }
             });
             
         } catch (e) {
-            aaDevices = {};
+            aDevices = [];
             $.sap.log.error("Error loading supported devices for rules ("+e.name+"): " + e.message);
             
         } finally {
-            return aaDevices;
+            return aDevices;
         }
-    },
-    
-    getDeviceUsingSerial : function (sSerialCode) {
-        var mDevice = null;
-        
-        try {
-            $.each(IomyRe.common.ThingList, function (sI, mThing) {
-                var sSerialCodeToCheck = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
-
-                // If the device is found, grab the display name and terminate the
-                // loop.
-                if (sSerialCodeToCheck === sSerialCode) {
-                    mDevice = mThing;
-                    return false;
-                }
-            });
-            
-        } catch (e) {
-            mDevice = null;
-            $.sap.log.error("Error fetching device information matching the serial number ("+e.name+"): " + e.message);
-            
-        } finally {
-            return mDevice;
-        }
-    },
-    
-    /**
-     * Fetch the display name of a device using its serial number.
-     * 
-     * @param {string} sSerialCode          Serial code
-     * @returns {string}                    Display name
-     */
-    getDeviceDisplayName : function (sSerialCode) {
-        var sDisplayName        = "";
-        
-        try {
-            $.each(IomyRe.common.ThingList, function (sI, mThing) {
-                var sSerialCodeToCheck = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
-
-                // If the device is found, grab the display name and terminate the
-                // loop.
-                if (sSerialCodeToCheck === sSerialCode) {
-                    sDisplayName = mThing.DisplayName;
-                    return false;
-                }
-            });
-            
-        } catch (e) {
-            sDisplayName = null;
-            $.sap.log.error("Error finding display name of a device using its serial code ("+e.name+"): " + e.message);
-            
-        } finally {
-            return sDisplayName;
-        }
-        
     },
     
     /**
@@ -163,13 +135,14 @@ $.extend(IomyRe.rules, {
         //--------------------------------------------------------------------//
         var bError          = false;
         var aErrorMessages  = [];
-        var sURL            = IomyRe.apiphp.APILocation("devicerules");
-        var iHub;
-		var mHub;
+        var sURL            = IomyRe.apiphp.APILocation("hubrules");
+        //var iHub            = null;
+        var sMode           = "ListAllRules";
+		//var mHub;
         var fnSuccess;
         var fnFail;
         
-        var sHubMissing = "A Hub (hubID) must be specified.";
+        //var sHubMissing = "A Hub (hubID) must be specified.";
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -180,33 +153,36 @@ $.extend(IomyRe.rules, {
         // Check that all the parameters are there
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
-            //----------------------------------------------------------------//
-            // REQUIRED: Find the hub ID and verify that it is a valid type.
-            //----------------------------------------------------------------//
-            if (mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError(sHubMissing);
-            } else {
-                iHub = mSettings.hubID;
-                
-                var mHubInfo = IomyRe.validation.isHubIDValid(iHub);
-                
-                if (mHubInfo.bIsValid) {
-                    mHub = IomyRe.common.HubList["_"+iHub];
-				
-                    if (mHub.HubTypeId != 2) {
-                        fnAppendError("The given hub does not support device rules.");
-                    }
-                } else {
-                    bError = true;
-                    aErrorMessages = aErrorMessages.concat(mHubInfo.aErrorMessages);
-                }
-            }
+//            //----------------------------------------------------------------//
+//            // REQUIRED: Find the hub ID and verify that it is a valid type.
+//            //----------------------------------------------------------------//
+//            if (mSettings.hubID === undefined || mSettings.hubID === null) {
+//                fnAppendError(sHubMissing);
+//            } else {
+//                iHub = mSettings.hubID;
+//                
+//                var mHubInfo = IomyRe.validation.isHubIDValid(iHub);
+//                
+//                if (mHubInfo.bIsValid) {
+//                    mHub = IomyRe.common.HubList["_"+iHub];
+//				
+//                    if (mHub.HubTypeId != 2) {
+//                        fnAppendError("The given hub does not support device rules.");
+//                    }
+//                } else {
+//                    bError = true;
+//                    aErrorMessages = aErrorMessages.concat(mHubInfo.aErrorMessages);
+//                }
+//            }
             
-            //----------------------------------------------------------------//
-            // Check for errors and throw an exception if there are errors.
-            //----------------------------------------------------------------//
-            if (bError) {
-                throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
+            if (IomyRe.validation.isValueGiven(mSettings.enabledOnly)) {
+                if (mSettings.enabledOnly === true) {
+                    sMode = "ListAllActiveRules";
+                } else {
+                    sMode = "ListAllRules";
+                }
+            } else {
+                sMode = "ListAllRules";
             }
             
             //----------------------------------------------------------------//
@@ -228,11 +204,13 @@ $.extend(IomyRe.rules, {
             }
             
         } else {
-            fnAppendError(sHubMissing);
+            //fnAppendError(sHubMissing);
             throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
         }
         
         try {
+            IomyRe.rules.RulesList = {};
+            
             //--------------------------------------------------------------------//
             // Run the API to acquire the list of rules.
             //--------------------------------------------------------------------//
@@ -240,8 +218,8 @@ $.extend(IomyRe.rules, {
 
                 url : sURL,
                 data : {
-                    "Mode"  : "FetchConfigArray",
-                    "HubId" : iHub
+                    "Mode"  : sMode,
+                    //"HubId" : iHub
                 },
 
                 onSuccess : function (type, data) {
@@ -253,17 +231,13 @@ $.extend(IomyRe.rules, {
                             // Create the list of rules identified by the serial
                             // numbers of the devices.
                             //----------------------------------------------------//
-                            var aData = data.Data.timerules;
+                            var aRules = data.Data;
                             var mRule = {};
 
-                            for (var i = 0; i < aData.length; i++) {
-                                mRule = aData[i];
+                            for (var i = 0; i < aRules.length; i++) {
+                                mRule = aRules[i];
 
-                                IomyRe.rules.RulesList[mRule.Serial] = mRule;
-                            }
-
-                            if (aData.length === 0) {
-                                jQuery.sap.log.warning("No rules to load.");
+                                IomyRe.rules.RulesList["_"+mRule.Id] = mRule;
                             }
 
                             fnSuccess();
@@ -275,9 +249,9 @@ $.extend(IomyRe.rules, {
 
                         }
 
-                    } catch (Exception) {
+                    } catch (e) {
 
-                        var sErrMessage = "Error loading rules in memory: " + Exception.message;
+                        var sErrMessage = "Error loading rules in memory: " + e.message;
                         jQuery.sap.log.error(sErrMessage);
                         fnFail(sErrMessage);
 
@@ -301,35 +275,35 @@ $.extend(IomyRe.rules, {
     },
     
     /**
-     * Saves the list of rules to the device rules file.
+     * Creates a new rule. Requires a name, time, type of event, 
      * 
-     * Required parameters in mSettings:
-     * 
-     * hubID                : ID of the hub
-     * 
-     * Optional parameters:
-     * 
-     * onSuccess            : function to run if successful
-     * onFail(sErrMesg)     : function to run after an error is encountered. Accepts an error message as a parameter
-     * 
-     * @param {type} mSettings      Map containing parameters.
+     * @param {type} mSettings          Map containing parameters
      */
-    saveRules : function (mSettings) {
+    addRule : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare and initialise variables
         //--------------------------------------------------------------------//
-        var bError          = false;
-        var aErrorMessages  = [];
-        var sExMessage      = ""; // Message created using an exception object.
-        var sURL            = IomyRe.apiphp.APILocation("devicerules");
-        var aTimeRules      = [];
-        //var bReloadRules    = true;
-        var mRulesConfig;
-        var iHub;
-        var fnSuccess;
-        var fnFail;
+        var oModule             = this;
+        var bError              = false;
+        var aErrorMessages      = [];
+        var sURL                = IomyRe.apiphp.APILocation("hubrules");
+        var iHub                = null;
+        var sMode               = "AddRule";
+        var fnSuccess           = function () {};
+        var fnWarning           = function () {};
+        var fnFail              = function () {};
+        var iEnabled            = true;
+        var iThingId;
+        var sTime;
+        var sRuleName;
+        var iRuleTypeId;
+		var mHub;
+        var mThing;
         
-        var sHubMissing = "A Hub must be specified.";
+        var sThingMissing   = "A Device (thingID) must be specified.";
+        var sTimeMissing    = "A time must be given.";
+        var sNameMissing    = "The rule must have a name.";
+        var sTypeMissing    = "The type of rule must be specified.";
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -340,27 +314,98 @@ $.extend(IomyRe.rules, {
         // Check that all the parameters are there
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
+//            //----------------------------------------------------------------//
+//            // Find the hub ID and verify that it is a valid type.
+//            //----------------------------------------------------------------//
+//            if (mSettings.hubID === undefined || mSettings.hubID === null) {
+//                fnAppendError(sHubMissing);
+//            } else {
+//                iHub = mSettings.hubID;
+//                
+//                var mHubInfo = IomyRe.validation.isHubIDValid(iHub);
+//                
+//                if (mHubInfo.bIsValid) {
+//                    mHub = IomyRe.common.HubList["_"+iHub];
+//				
+//                    if (mHub.HubTypeId != 2) {
+//                        fnAppendError("The given hub does not support device rules.");
+//                    }
+//                } else {
+//                    bError = true;
+//                    aErrorMessages = aErrorMessages.concat(mHubInfo.aErrorMessages);
+//                }
+//            }
+            
             //----------------------------------------------------------------//
-            // REQUIRED: Find the hub ID
+            // Find the thing ID and verify that it is a valid type.
             //----------------------------------------------------------------//
-            if (mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError(sHubMissing);
+            if (mSettings.thingID === undefined || mSettings.thingID === null) {
+                fnAppendError(sThingMissing);
             } else {
-                iHub = mSettings.hubID;
+                iThingId = parseInt(mSettings.thingID);
+                
+                var mThingInfo = IomyRe.validation.isThingIDValid(iThingId);
+                
+                if (mThingInfo.bIsValid) {
+                    mThing = IomyRe.common.ThingList["_"+iThingId];
+                    mHub = IomyRe.functions.getHubConnectedToThing(iThingId);
+				
+                    if (mThing.TypeId != IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+                        fnAppendError("The given device is not supported.");
+                    }
+                    
+                    // TODO: Perhaps check the hub type as the supported devices is being constructed.
+                    if (mHub.HubTypeId != 2) {
+                        fnAppendError("The hub the device is attached to does not support device rules.");
+                    } else {
+                        iHub = mHub.HubId;
+                    }
+                    
+                } else {
+                    bError = true;
+                    aErrorMessages = aErrorMessages.concat(mThingInfo.aErrorMessages);
+                }
             }
             
             //----------------------------------------------------------------//
-            // Check for errors and throw an exception if there are errors.
+            // Get the time
             //----------------------------------------------------------------//
-            if (bError) {
-                throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
+            if (IomyRe.validation.isValueGiven(mSettings.time) && mSettings.time !== "") {
+                sTime = mSettings.time;
+            } else {
+                fnAppendError(sTimeMissing);
             }
             
             //----------------------------------------------------------------//
-            // OPTIONAL: Find the onBefore callback function and execute it
+            // Get the name of the rule
             //----------------------------------------------------------------//
-            if (mSettings.onBefore !== undefined) {
-                mSettings.onBefore();
+            if (IomyRe.validation.isValueGiven(mSettings.name) && mSettings.name !== "") {
+                sRuleName = mSettings.name;
+            } else {
+                fnAppendError(sNameMissing);
+            }
+            
+            //----------------------------------------------------------------//
+            // Get the rule type ID
+            //----------------------------------------------------------------//
+            if (IomyRe.validation.isValueGiven(mSettings.ruleTypeID)) {
+                iRuleTypeId = mSettings.ruleTypeID;
+            } else {
+                fnAppendError(sTypeMissing);
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the 'enabled' flag to have this rule enabled or
+            // disabled. Default is true
+            //----------------------------------------------------------------//
+            if (mSettings.enabled !== undefined) {
+                iEnabled = mSettings.enabled;
+                
+                if (iEnabled) {
+                    iEnabled = 1;
+                } else {
+                    iEnabled = 0;
+                }
             }
             
             //----------------------------------------------------------------//
@@ -380,131 +425,108 @@ $.extend(IomyRe.rules, {
             } else {
                 fnFail = mSettings.onFail;
             }
-		
-//            //----------------------------------------------------------------//
-//            // OPTIONAL: Are we reloading rules or not?
-//            //----------------------------------------------------------------//
-//            if (mSettings.reloadRules !== undefined && mSettings.reloadRules !== null) {
-//                bReloadRules = mSettings.reloadRules;
-//            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
+            }
             
         } else {
-            fnAppendError(sHubMissing);
+            fnAppendError(sThingMissing);
+            fnAppendError(sNameMissing);
+            fnAppendError(sTimeMissing);
+            fnAppendError(sTypeMissing);
+            
             throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
         }
         
         try {
             //--------------------------------------------------------------------//
-            // Compose an array of rules out of the associative array
+            // Run the API to add a rule.
             //--------------------------------------------------------------------//
-            $.each(IomyRe.rules.RulesList, function (sSerialCode, mRuleInfo) {
+            IomyRe.apiphp.AjaxRequest({
 
-                if (sSerialCode !== undefined && sSerialCode !== null &&
-                    mRuleInfo !== undefined && mRuleInfo !== null)
-                {
-                    aTimeRules.push(mRuleInfo);
+                url : sURL,
+                data : {
+                    "Mode"  : sMode,
+                    "HubId" : iHub,
+                    "Data"  : JSON.stringify({
+                        "Enabled":iEnabled,
+                        "Time":sTime,
+                        "Name":sRuleName,
+                        "RuleTypeId":iRuleTypeId,
+                        "Parameter":{'ThingId':iThingId}
+                    })
+                },
+
+                onSuccess : function (type, data) {
+
+                    try {
+
+                        if (data.Error === false) {
+                            oModule.loadRules({
+                                onSuccess : function () {
+                                    fnSuccess();
+                                },
+
+                                onFail : function (sErrMessage) {
+                                    fnWarning(sErrMessage);
+                                }
+                            });
+
+                        } else {
+                            var sErrMessage = "Error adding a rule: " + data.ErrMesg;
+                            jQuery.sap.log.error(sErrMessage);
+                            fnFail(sErrMessage);
+
+                        }
+
+                    } catch (e) {
+
+                        var sErrMessage = "Error after creating a rule: " + e.message;
+                        jQuery.sap.log.error(sErrMessage);
+                        fnFail(sErrMessage);
+
+                    }
+
+                },
+
+                onFail : function (error) {
+                    var sErrMessage = "Error accessing the rules API: " + error.responseText;
+                    jQuery.sap.log.error(sErrMessage);
+                    fnFail(sErrMessage);
                 }
 
             });
-
-            mRulesConfig        = {
-                "timerules":aTimeRules
-            };
-            
         } catch (e) {
-            sExMessage = "Error composing the rules list ("+e.name+"): " + e.message;
-            $.sap.log.error(sExMessage);
-            fnAppendError(sExMessage);
+            var sErrMessage = "Error attempting to add a rule ("+e.name+"): " + e.message;
+            jQuery.sap.log.error(sErrMessage);
+            fnFail(sErrMessage);
         }
         
-        try {
-            if (!bError) {
-                //--------------------------------------------------------------------//
-                // Update the rules file.
-                //--------------------------------------------------------------------//
-                IomyRe.apiphp.AjaxRequest({
-
-                    url : sURL,
-                    data : {
-                        "Mode"  : "SaveConfigArray",
-                        "HubId" : iHub,
-                        "RulesConfig" : JSON.stringify(mRulesConfig)
-                    },
-
-                    onSuccess : function (responseType, responseData) {
-
-                        try {
-
-                            if (responseData.Error === false) {
-
-                                // Run the telnet command to reload the rules file
-                                IomyRe.telnet.RunCommand({
-                                    "command"   : "timerules_reload",
-                                    "hubID"     : iHub,
-                                    "onSuccess" : fnSuccess,
-                                    "onFail"    : fnFail
-                                });
-
-                            } else {
-                                var sErrMessage = "Error saving rules through API: " + responseData.ErrMesg;
-                                jQuery.sap.log.error(sErrMessage);
-                                fnFail(sErrMessage);
-                            }
-
-                        } catch (Exception) {
-
-                            var sErrMessage = "Error saving rules from memory: " + Exception.message;
-                            jQuery.sap.log.error(sErrMessage);
-                            fnFail(sErrMessage);
-                        }
-
-                    },
-
-                    onFail : function (error) {
-                        var sErrMessage = "Error accessing the rules API: " + error.responseText;
-                        jQuery.sap.log.error(sErrMessage);
-                        fnFail(sErrMessage);
-                    }
-
-                });
-            } else {
-                fnFail(aErrorMessages.join("\n\n"));
-            }
-        } catch (e) {
-            sExMessage = "Error attempting to save the rules ("+e.name+"): " + e.message;
-            $.sap.log.error(sExMessage);
-            fnFail(sExMessage);
-        }
     },
     
-    /**
-     * Creates a new, or edits an exisiting rule to the Rules list and saves the
-     * changes.
-     * 
-     * Required parameters in mSettings:
-     * 
-     * hubID                : ID of the hub
-     * rule                 : Object containing times to turn a device on or off
-     * rule.Serial          : Serial ID of the device
-     * rule.Ontime          : Time to turn the device on
-     * rule.Offtime         : Time to turn the device off
-     * 
-     * Optional parameters:
-     * 
-     * onSuccess            : function to run if successful
-     * onFail(sErrMesg)     : function to run after an error is encountered. Accepts an error message as a parameter
-     * 
-     * @param {type} mSettings          Map containing parameters
-     */
-    applyRule : function (mSettings) {
+    editRule : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare and initialise variables
         //--------------------------------------------------------------------//
-        var bError          = false;
-        var aErrorMessages  = [];
-        var oModule         = this;
-        var mRule           = {"Type" : "DeviceTimeRule"};
-        var sSerialCode;
+        var oModule             = this;
+        var bError              = false;
+        var aErrorMessages      = [];
+        var sURL                = IomyRe.apiphp.APILocation("hubrules");
+        var sMode               = "EditRule";
+        var fnSuccess           = function () {};
+        var fnWarning           = function () {};
+        var fnFail              = function () {};
+        var iEnabled            = 1;
+        var iRuleId;
+        var sTime;
+        var sRuleName;
+        var iRuleTypeId;
+        
+        var sRuleMissing    = "A Rule (hubID) must be specified.";
+        var sTimeMissing    = "A time must be given.";
+        var sNameMissing    = "The rule must have a name.";
+        var sTypeMissing    = "The type of rule must be specified.";
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -516,100 +538,163 @@ $.extend(IomyRe.rules, {
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             //----------------------------------------------------------------//
-            // REQUIRED: Find the hub ID
+            // Find the thing ID and verify that it is a valid type.
             //----------------------------------------------------------------//
-            if (mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError("A Hub must be specified.");
-            }
-            
-            //----------------------------------------------------------------//
-            // REQUIRED: Find the rule
-            //----------------------------------------------------------------//
-            if (mSettings.rule === undefined || mSettings.rule === null) {
-                fnAppendError("A rule must be specified.");
-                
+            if (IomyRe.validation.isValueGiven(mSettings.ruleID)) {
+                iRuleId = mSettings.ruleID;
             } else {
-                //------------------------------------------------------------//
-                // REQUIRED: Find the serial code
-                //------------------------------------------------------------//
-                if (mSettings.rule.Serial === undefined || mSettings.rule.Serial === null) {
-                    fnAppendError("The serial number for the device must be specified.");
-                } else {
-                    sSerialCode = mSettings.rule.Serial;
-                    mRule.Serial = sSerialCode;
-                }
+                fnAppendError(sRuleMissing);
+            }
+            
+            //----------------------------------------------------------------//
+            // Get the time.
+            //----------------------------------------------------------------//
+            if (IomyRe.validation.isValueGiven(mSettings.time) && mSettings.time !== "") {
+                sTime = mSettings.time;
+            } else {
+                fnAppendError(sTimeMissing);
+            }
+            
+            //----------------------------------------------------------------//
+            // Get the name of the rule.
+            //----------------------------------------------------------------//
+            if (IomyRe.validation.isValueGiven(mSettings.name) && mSettings.name !== "") {
+                sRuleName = mSettings.name;
+            } else {
+                fnAppendError(sNameMissing);
+            }
+            
+            //----------------------------------------------------------------//
+            // Get the rule type ID.
+            //----------------------------------------------------------------//
+            if (IomyRe.validation.isValueGiven(mSettings.ruleTypeID)) {
+                iRuleTypeId = mSettings.ruleTypeID;
+            } else {
+                fnAppendError(sTypeMissing);
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the 'enabled' flag to have this rule enabled or
+            // disabled. Default is true.
+            //----------------------------------------------------------------//
+            if (mSettings.enabled !== undefined) {
+                iEnabled = mSettings.enabled;
                 
-                //------------------------------------------------------------//
-                // REQUIRED: Find the time to turn the device on
-                //------------------------------------------------------------//
-                if (mSettings.rule.Ontime === undefined || mSettings.rule.Ontime === null) {
-                    fnAppendError("The time the device turns on must be specified.");
+                if (iEnabled) {
+                    iEnabled = 1;
                 } else {
-                    mRule.Ontime = mSettings.rule.Ontime;
-                }
-                
-                //------------------------------------------------------------//
-                // REQUIRED: Find the time to turn the device off
-                //------------------------------------------------------------//
-                if (mSettings.rule.Offtime === undefined || mSettings.rule.Offtime === null) {
-                    fnAppendError("The time the device turns off must be specified.");
-                } else {
-                    mRule.Offtime = mSettings.rule.Offtime;
+                    iEnabled = 0;
                 }
             }
             
             //----------------------------------------------------------------//
-            // Check for errors and throw an exception if there are errors.
+            // OPTIONAL: Find the onSuccess callback function.
             //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function.
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
             if (bError) {
-                throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
             }
             
         } else {
-            throw new MissingSettingsMapException();
+            fnAppendError(sRuleMissing);
+            fnAppendError(sTimeMissing);
+            fnAppendError(sNameMissing);
+            fnAppendError(sTypeMissing);
+            
+            throw new MissingSettingsMapException(aErrorMessages.join("\n\n"));
         }
         
-        //--------------------------------------------------------------------//
-        // Apply the rule to memory and save the changes.
-        //--------------------------------------------------------------------//
         try {
-            oModule.RulesList[ sSerialCode ] = mRule;
+            //--------------------------------------------------------------------//
+            // Run the API to edit a rule.
+            //--------------------------------------------------------------------//
+            IomyRe.apiphp.AjaxRequest({
 
-            oModule.saveRules(mSettings);
+                url : sURL,
+                data : {
+                    "Mode"  : sMode,
+                    "Id"    : iRuleId,
+                    "Data"  : JSON.stringify({
+                        "Enabled":iEnabled,
+                        "Time":sTime,
+                        "Name":sRuleName,
+                        "RuleTypeId":iRuleTypeId
+                    })
+                },
+
+                onSuccess : function (type, data) {
+
+                    try {
+
+                        if (data.Error === false) {
+                            oModule.loadRules({
+                                onSuccess : function () {
+                                    fnSuccess();
+                                },
+
+                                onFail : function (sErrMessage) {
+                                    fnWarning(sErrMessage);
+                                }
+                            });
+
+                        } else {
+                            var sErrMessage = "Error editing a rule: " + data.ErrMesg;
+                            jQuery.sap.log.error(sErrMessage);
+                            fnFail(sErrMessage);
+
+                        }
+
+                    } catch (e) {
+
+                        var sErrMessage = "Error after editing a rule: " + e.message;
+                        jQuery.sap.log.error(sErrMessage);
+                        fnFail(sErrMessage);
+
+                    }
+
+                },
+
+                onFail : function (error) {
+                    var sErrMessage = "Error accessing the rules API: " + error.responseText;
+                    jQuery.sap.log.error(sErrMessage);
+                    fnFail(sErrMessage);
+                }
+
+            });
         } catch (e) {
-            //----------------------------------------------------------------//
-            // Rethrow the exception because the required parameters have
-            // already been checked. There is something else wrong.
-            //----------------------------------------------------------------//
-            $.sap.log.error("Failed to apply rules ("+e.name+"): " + e.message);
-            throw e;
+            var sErrMessage = "Error attempting to edit a rule ("+e.name+"): " + e.message;
+            jQuery.sap.log.error(sErrMessage);
+            fnFail(sErrMessage);
         }
+        
     },
     
-    /**
-     * Removes a rule from the list and saves the changes.
-     * 
-     * Required parameters in mSettings:
-     * 
-     * hubID                : ID of the hub
-     * Serial               : Serial number of the device to discard the rule for
-     * 
-     * Optional parameters:
-     * 
-     * onSuccess            : function to run if successful
-     * onFail(sErrMesg)     : function to run after an error is encountered. Accepts an error message as a parameter
-     * 
-     * @param {type} mSettings          Map containing parameters
-     */
-    discardRule : function (mSettings) {
+    discardRules : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var oModule             = this;
+        var aRuleIDs            = [];
+        var aDiscardRequests    = [];
+        var oRequestQueue       = null;
+        var fnSuccess           = function () {};
+        var fnWarning           = function () {};
+        var fnFail              = function () {};
         
-        var bError          = false;
-        var aErrorMessages  = [];
-        var oModule         = this;
-        var aSerialCode		= [];
-        
-        var sHubMissing         = "A Hub must be specified.";
-        var sSerialCodeMissing  = "The serial number for the device must be specified.";
+        var sRuleMissing        = "Rule IDs must be specified.";
         
         var fnAppendError = function (sErrMesg) {
             bError = true;
@@ -621,23 +706,17 @@ $.extend(IomyRe.rules, {
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             //----------------------------------------------------------------//
-            // REQUIRED: Find the hub ID
+            // REQUIRED: Find the rule ID
             //----------------------------------------------------------------//
-            if (mSettings.hubID === undefined || mSettings.hubID === null) {
-                fnAppendError(sHubMissing);
-            }
-            
-            //----------------------------------------------------------------//
-            // REQUIRED: Find the serial code
-            //----------------------------------------------------------------//
-            if (mSettings.Serial === undefined || mSettings.Serial === null) {
-                fnAppendError(sSerialCodeMissing);
-                
+            if (mSettings.ruleIDs === undefined || mSettings.ruleIDs === null) {
+                fnAppendError(sRuleMissing);
             } else {
-                if (typeof mSettings.Serial === "string") {
-                    aSerialCode.push(mSettings.Serial);
-                } else if (typeof mSettings.Serial === "Array") {
-                    aSerialCode = mSettings.Serial;
+                if (typeof mSettings.ruleIDs === "string" || typeof mSettings.ruleIDs === "number") {
+                    aRuleIDs.push(mSettings.ruleIDs);
+                } else if (mSettings.ruleIDs instanceof Array) {
+                    aRuleIDs = mSettings.ruleIDs;
+                } else {
+                    fnAppendError("Invalid 'ruleIDs' parameter parsed. Type given: " + typeof mSettings.ruleIDs);
                 }
             }
             
@@ -648,31 +727,308 @@ $.extend(IomyRe.rules, {
                 throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
             }
             
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onSuccess callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onWarning callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onWarning === undefined) {
+                fnWarning = function () {};
+            } else {
+                fnWarning = mSettings.onWarning;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
         } else {
-            fnAppendError(sHubMissing);
-            fnAppendError(sSerialCodeMissing);
+            fnAppendError(sRuleMissing);
             
             throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
         
-        //--------------------------------------------------------------------//
-        // Remove the rule from memory and save the changes.
-        //--------------------------------------------------------------------//
         try {
-            for (var i = 0; i < aSerialCode.length; i++) {
-                if (oModule.RulesList[ aSerialCode[i] ] !== undefined) {
-                    delete oModule.RulesList[ aSerialCode[i] ];
+            //--------------------------------------------------------------------//
+            // Process each rule for removal.
+            //--------------------------------------------------------------------//
+            for (var i = 0; i < aRuleIDs.length; i++) {
+                aDiscardRequests.push({
+                    library : "php",
+                    url : IomyRe.apiphp.APILocation("hubrules"),
+                    data : {
+                        Mode : "DeleteRule",
+                        Id : aRuleIDs[i]
+                    },
+                    
+                    onSuccess : function (sType, mData) {
+                        try {
+                            if (sType === "JSON") {
+                                if (!mData.Error) {
+                                    delete IomyRe.rules.RulesList["_"+aRuleIDs[i]];
+                                    
+                                } else {
+                                    aErrorMessages.push("Error after a successful API call: " + mData.ErrMesg);
+                                }
+                                
+                            } else {
+                                aErrorMessages.push("A successful call to the rules API did not return a JSON response. Received " + sType + ".");
+                            }
+                            
+                        } catch (e) {
+                            aErrorMessages.push("Error after a successful API call ("+e.name+"): " + e.message);
+                        }
+                    },
+                    
+                    onFail : function (response) {
+                        aErrorMessages.push(response.responseText);
+                    }
+                });
+            }
+            
+            //--------------------------------------------------------------------//
+            // Create the queue and run each request. Reload the rules list from
+            // the database afterward.
+            //--------------------------------------------------------------------//
+            oRequestQueue = new AjaxRequestQueue({
+                requests                : aDiscardRequests,
+                concurrentRequests      : 2,
+                
+                onSuccess : function () {
+                    try {
+                        oModule.loadRules({
+                            onSuccess : function () {
+                                if (aErrorMessages.length > 0) {
+                                    fnWarning(aErrorMessages.join("\n"));
+                                } else {
+                                    fnSuccess();
+                                }
+                            },
+                            
+                            onFail : function (sErrMessage) {
+                                aErrorMessages.push(sErrMessage);
+                                fnWarning(aErrorMessages.join("\n"));
+                            }
+                        });
+                    } catch (e) {
+                        aErrorMessages.push("Error attempting to reload rules ("+e.name+"): " + e.message);
+                        fnWarning(aErrorMessages.join("\n"));
+                    }
+                },
+                
+                onWarning : function () {
+                    try {
+                        oModule.loadRules({
+                            onSuccess : function () {
+                                fnWarning(aErrorMessages.join("\n"));
+                            },
+                            
+                            onFail : function (sErrMessage) {
+                                aErrorMessages.push(sErrMessage);
+                                fnWarning(aErrorMessages.join("\n"));
+                            }
+                        });
+                    } catch (e) {
+                        aErrorMessages.push("Error attempting to reload rules ("+e.name+"): " + e.message);
+                        fnWarning(aErrorMessages.join("\n"));
+                    }
+                },
+                
+                onFail : function () {
+                    fnFail("Failed to discard rule(s):\n\n"+aErrorMessages.join("\n"));
+                }
+            });
+            
+        } catch (e) {
+            fnFail("Failed to process rules ("+e.name+"): " + e.message);
+            
+        }
+    },
+    
+    toggleRules : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        var oModule             = this;
+        var aRuleIDs            = [];
+        var aToggleRequests     = [];
+        var iEnabled            = 0;
+        var oRequestQueue       = null;
+        var fnSuccess           = function () {};
+        var fnWarning           = function () {};
+        var fnFail              = function () {};
+        
+        var sRuleMissing        = "Rule IDs must be specified.";
+        
+        var fnAppendError = function (sErrMesg) {
+            bError = true;
+            aErrorMessages.push(sErrMesg);
+        };
+        
+        //--------------------------------------------------------------------//
+        // Check that all the parameters are there
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Find the rule ID
+            //----------------------------------------------------------------//
+            if (mSettings.ruleIDs === undefined || mSettings.ruleIDs === null) {
+                fnAppendError(sRuleMissing);
+            } else {
+                if (typeof mSettings.ruleIDs === "string" || typeof mSettings.ruleIDs === "number") {
+                    aRuleIDs.push(mSettings.ruleIDs);
+                } else if (mSettings.ruleIDs instanceof Array) {
+                    aRuleIDs = mSettings.ruleIDs;
+                } else {
+                    fnAppendError("Invalid 'ruleIDs' parameter parsed. Type given: " + typeof mSettings.ruleIDs);
                 }
             }
-
-            oModule.saveRules(mSettings);
+            
+            //----------------------------------------------------------------//
+            // Check for errors and throw an exception if there are errors.
+            //----------------------------------------------------------------//
+            if (bError) {
+                throw new MissingArgumentException("* "+aErrorMessages.join("\n* "));
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onSuccess callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onWarning callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onWarning === undefined) {
+                fnWarning = function () {};
+            } else {
+                fnWarning = mSettings.onWarning;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            fnAppendError(sRuleMissing);
+            
+            throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
+        }
+        
+        try {
+            //--------------------------------------------------------------------//
+            // Process each rule for removal.
+            //--------------------------------------------------------------------//
+            for (var i = 0; i < aRuleIDs.length; i++) {
+                iEnabled = (IomyRe.rules.RulesList["_"+aRuleIDs[i]].Enabled + 1) % 2;
+                
+                aToggleRequests.push({
+                    library : "php",
+                    url : IomyRe.apiphp.APILocation("hubrules"),
+                    data : {
+                        Mode : "SetRuleEnabled",
+                        Id : aRuleIDs[i],
+                        Data : JSON.stringify({ 'Enabled' : iEnabled })
+                    },
+                    
+                    onSuccess : function (sType, mData) {
+                        try {
+                            if (sType === "JSON") {
+                                if (mData.Error) {
+                                    aErrorMessages.push("Error after a successful API call: " + mData.ErrMesg);
+                                }
+                                
+                            } else {
+                                aErrorMessages.push("A successful call to the rules API did not return a JSON response. Received " + sType + ".");
+                            }
+                            
+                        } catch (e) {
+                            aErrorMessages.push("Error after a successful API call ("+e.name+"): " + e.message);
+                        }
+                    },
+                    
+                    onFail : function (response) {
+                        aErrorMessages.push(response.responseText);
+                    }
+                });
+            }
+            
+            //--------------------------------------------------------------------//
+            // Create the queue and run each request. Reload the rules list from
+            // the database afterward.
+            //--------------------------------------------------------------------//
+            oRequestQueue = new AjaxRequestQueue({
+                requests                : aToggleRequests,
+                concurrentRequests      : 2,
+                
+                onSuccess : function () {
+                    try {
+                        oModule.loadRules({
+                            onSuccess : function () {
+                                if (aErrorMessages.length > 0) {
+                                    fnWarning(aErrorMessages.join("\n"));
+                                } else {
+                                    fnSuccess();
+                                }
+                            },
+                            
+                            onFail : function (sErrMessage) {
+                                aErrorMessages.push(sErrMessage);
+                                fnWarning(aErrorMessages.join("\n"));
+                            }
+                        });
+                    } catch (e) {
+                        aErrorMessages.push("Error attempting to reload rules ("+e.name+"): " + e.message);
+                        fnWarning(aErrorMessages.join("\n"));
+                    }
+                },
+                
+                onWarning : function () {
+                    try {
+                        oModule.loadRules({
+                            onSuccess : function () {
+                                fnWarning(aErrorMessages.join("\n"));
+                            },
+                            
+                            onFail : function (sErrMessage) {
+                                aErrorMessages.push(sErrMessage);
+                                fnWarning(aErrorMessages.join("\n"));
+                            }
+                        });
+                    } catch (e) {
+                        aErrorMessages.push("Error attempting to reload rules ("+e.name+"): " + e.message);
+                        fnWarning(aErrorMessages.join("\n"));
+                    }
+                },
+                
+                onFail : function () {
+                    fnFail("Failed to enable/disable rule(s):\n\n"+aErrorMessages.join("\n"));
+                }
+            });
+            
         } catch (e) {
-            //----------------------------------------------------------------//
-            // Rethrow the exception because the required parameters have
-            // already been checked. There is something else wrong.
-            //----------------------------------------------------------------//
-            $.sap.log.error("Failed to apply rules ("+e.name+"): " + e.message);
-            throw e;
+            fnFail("Failed to process rules ("+e.name+"): " + e.message);
+            
         }
     }
     

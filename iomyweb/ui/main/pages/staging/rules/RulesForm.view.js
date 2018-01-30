@@ -44,6 +44,11 @@ sap.ui.jsview("pages.staging.rules.RulesForm", {
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var oView = this;
+        
+        var oDevicesTemplate = new sap.ui.core.Item({
+            "key"   : "{Id}",
+            "text"  : "{DisplayName}"
+        });
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Room Form",
@@ -81,11 +86,111 @@ sap.ui.jsview("pages.staging.rules.RulesForm", {
 											toolbar : new sap.m.Toolbar({
 												content : [
 													new sap.m.Title (oView.createId("RuleToolbarTitle"),{
+                                                        text : "{/ToolbarTitle}"
 													}),
 												]
 											}).addStyleClass("MarBottom1d0Rem"),
 											formContainers : [
-											
+												new sap.ui.layout.form.FormContainer({
+													formElements : [
+														new sap.ui.layout.form.FormElement({
+															//"Rule Type" Defined in Database 
+															label : "Rule Type",
+															fields: [
+																new sap.m.Select({
+																	selectedKey : "{/Form/TypeId}",
+                                                                    enabled : "{/FormControlsEnabled}",
+																	items : [
+																		new sap.ui.core.Item ({
+																			key: "1",
+																			text: "Turn On Device (One-time)"
+																		}),
+																		new sap.ui.core.Item ({
+																			key: "2",
+																			text: "Turn Off Device (One-time)"
+																		}),
+																		new sap.ui.core.Item ({
+																			key: "3",
+																			text: "Turn On Device (Recurring)"
+																		}),
+																		new sap.ui.core.Item ({
+																			key: "4",
+																			text: "Turn Off Device (Recurring)"
+																		}),
+																	]
+																})
+															]
+														}),
+														new sap.ui.layout.form.FormElement({
+															//label : "Display Name",
+															label : "Device",
+															fields: [
+																new sap.m.Select({
+																	selectedKey : "{/Form/ThingId}",
+                                                                    enabled : "{/DeviceSBoxEnabled}",
+																	items : {
+                                                                        path : "/SupportedDevices",
+                                                                        template : oDevicesTemplate
+                                                                    }
+																})
+															]
+														}),
+														new sap.ui.layout.form.FormElement({
+															//label : "Display Name",
+															label : "Rule Name",
+															fields: [
+																new sap.m.Input({
+                                                                    value : "{/Form/Name}",
+                                                                    enabled : "{/FormControlsEnabled}"
+                                                                })
+															]
+														}),
+														new sap.ui.layout.form.FormElement({
+															label : "Time",
+															fields: [
+																new sap.m.TimePicker ({
+																	valueFormat: "HH:mm:ss",
+																	displayFormat: "hh:mm a",
+																	placeholder: "Select a time",
+                                                                    enabled : "{/FormControlsEnabled}",
+                                                                    value : "{/Form/Time}"
+																})
+															]
+														}),
+														new sap.ui.layout.form.FormElement({
+															//"Rule Type" Defined in Database 
+															label : "Enabled",
+															fields: [
+																new sap.m.CheckBox({
+                                                                    selected : "{/Form/Enabled}",
+                                                                    enabled : "{/FormControlsEnabled}"
+                                                                })
+															]
+														}),
+														new sap.ui.layout.form.FormElement({
+															label: "",
+															fields: [
+																new sap.m.Button (oView.createId("ButtonSubmit"), {
+																	text: "Update",
+																	type: sap.m.ButtonType.Accept,
+                                                                    enabled : "{/UpdateEnabled}",
+                                                                    press : function () {
+                                                                        oController.submitRuleInformation();
+                                                                    }
+																}),
+																new sap.m.Button (oView.createId("ButtonCancel"), {
+																	text: "Cancel",
+																	type: sap.m.ButtonType.Reject,
+                                                                    enabled : "{/FormControlsEnabled}",
+                                                                    
+                                                                    press : function () {
+                                                                        oController.GoToRulesList();
+                                                                    }
+																})
+															]
+														})
+													]
+												})
 											]
 										})
 									]									

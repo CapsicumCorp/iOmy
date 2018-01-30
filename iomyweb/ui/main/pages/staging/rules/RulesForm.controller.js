@@ -24,9 +24,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("pages.staging.rules.RulesForm", {
 	aFormFragments: 	{},
-	bEditing: false,
-    iThingId: null,
+    iRuleId : null,
 	
+	bEditing            : false,
+    bControlsEnabled    : true,
+    bDevicesAvailable   : true,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -39,225 +41,246 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 		var oView = this.getView();
 		
 		oView.addEventDelegate({
-
-			onBeforeShow: function ( oEvent ) {
-				
-				oController.mPageData = oEvent.data;
-                
-                if (oController.mPageData.bEditing !== undefined && oController.mPageData.bEditing !== null) {
-                    oController.bEditing = oController.mPageData.bEditing;
-                    
-                    if (oController.bEditing) {
-                        //-- Store the Current Id --//
-                        if (oController.mPageData.ThingId !== undefined && oController.mPageData.ThingId !== null) {
-                            oController.iThingId = oController.mPageData.ThingId;
-                            
-                        } else {
-                            $.sap.log.error("bEditing was set to true but the ThingId parameter was not given. Add Rule form fragment will be loaded instead.");
-                            oController.bEditing = false;
-                            oController.iThingId = null;
-                        }
-                        
-                    }
-                } else {
-                    oController.bEditing = false;
-                    oController.iThingId = null;
-                }
-                
-				
-				//-- Update the Model --//
-				oController.RefreshModel( oController, {} );
-				
-				oController.ToggleButtonsAndView( oController, oController.bEditing );
-				
+			onBeforeShow : function (evt) {
 				//-- Defines the Device Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                
+                if (IomyRe.validation.isValueGiven(evt.data.RuleId)) {
+                    oController.iRuleId     = evt.data.RuleId;
+                    oController.bEditing    = true;
+                } else {
+                    oController.iRuleId     = null;
+                    oController.bEditing    = false;
+                }
+                
+                oController.RefreshModel();
 			}
-			
 		});
-		
 	},
     
     ToggleControls : function (bEnabled) {
-		var oView       = this.getView();
-		
-		oView.byId("ButtonSubmit").setEnabled(bEnabled);
-		oView.byId("ButtonCancel").setEnabled(bEnabled);
-	},
-    
-    RefreshModel : function( oController, oConfig ) {
-		//------------------------------------------------//
-		//-- Declare Variables                          --//
-		//------------------------------------------------//
-		var oView       = oController.getView();
-        var mRule;
-        
-        if (oController.bEditing) {
-            var mThing      = IomyRe.common.ThingList["_"+oController.iThingId];
-            var sSerialCode = IomyRe.common.LinkList["_"+mThing.LinkId].LinkSerialCode;
+        try {
+            var oController     = this;
+            var oView           = this.getView();
+            var oData           = JSON.parse(oView.getModel().getJSON());
 
-            mRule = JSON.parse(JSON.stringify(IomyRe.rules.RulesList[sSerialCode]));
-            mRule.Ontime = IomyRe.time.GetDateFromMilitaryTime(mRule.Ontime);
-            mRule.Offtime = IomyRe.time.GetDateFromMilitaryTime(mRule.Offtime);
+            oController.bControlsEnabled = bEnabled;
+
+            //-- Boolean evaluation. --//
+            oData.FormControlsEnabled   = oController.bControlsEnabled;
+            oData.UpdateEnabled         = oController.bControlsEnabled && oController.bDevicesAvailable;
+            oData.DeviceSBoxEnabled     = oController.bControlsEnabled && oController.bDevicesAvailable && !oController.bEditing;
+
+            oView.setModel(new sap.ui.model.json.JSONModel(oData));
             
-        } else {
-            mRule = {
-                "Type"          : "DeviceTimeRule",
-                "Serial"        : sSerialCode,
-                "Ontime"        : null,
-                "Offtime"       : null
-            };
+        } catch (e) {
+            $.sap.log.error("Failed to toggle form controls ("+e.name+"): " + e.message);
         }
-		
-		//------------------------------------------------//
-		//-- Build and Bind Model to the View           --//
-		//------------------------------------------------//
-		oView.setModel( 
-			new sap.ui.model.json.JSONModel({
-				"Rule": mRule,
-                "Devices": IomyRe.rules.loadSupportedDevices()
-			})
-		);	
-		
-		//------------------------------------------------//
-		//-- Trigger the onSuccess Event                --//
-		//------------------------------------------------//
-		if( oConfig.onSuccess ) {
-			oConfig.onSuccess();
-		}
-	},
-
-	
-	ToggleButtonsAndView: function ( oController, bEditing ) {
-		var oView = this.getView();
-
-		try {	
-			if(bEditing === false ) {
-				oView.byId("RuleToolbarTitle").setText("Add Rule");
-				IomyRe.common.ShowFormFragment( oController, "rules.AddRule", "RuleBlock_Form", "FormContainer" );
-			} else if(bEditing === true) {
-				oView.byId("RuleToolbarTitle").setText("Edit Rule");
-				IomyRe.common.ShowFormFragment( oController, "rules.EditRule", "RuleBlock_Form", "FormContainer" );
-			} else {
-				$.sap.log.error("ToggleButtonsAndView: Critcal Error. bEditing set incorrectly:"+bEditing);
-			}
-		} catch(e1) {
-			$.sap.log.error("ToggleButtonsAndView: Critcal Error:"+e1.message);
-			return false;
-		}
-	},
-    
-//    cancelChanges : function () {
-//		IomyRe.common.NavigationTriggerBackForward();
-//	},
-//    
-    saveRule : function () {
-        var oController         = this;
-        var oView               = this.getView();
-		var bError              = false;
-		var aErrorMessages      = [];
-        var oCurrentFormData    = oView.getModel().getProperty( "/Rule/" );
-        var mThing;
-        
-        if (oController.iThingId === null) {
-            mThing = IomyRe.rules.getDeviceUsingSerial(oCurrentFormData.Serial);
-            
-        } else {
-            mThing = IomyRe.common.ThingList["_"+oController.iThingId];
-        }
-		
-		oController.ToggleControls(false);
-        
-		if (oCurrentFormData.Ontime === null) {
-			bError = true;
-			aErrorMessages.push("Time the device turns on must be given!");
-		}
-		
-		if (oCurrentFormData.Offtime === null) {
-			bError = true;
-			aErrorMessages.push("Time the device turns off must be given!");
-		}
-		
-		if (!bError) {
-			var mRule = {
-				"Type" : "DeviceTimeRule",
-				"Serial" : oCurrentFormData.Serial,
-				"Ontime" : IomyRe.time.GetMilitaryTimeFromDate(oCurrentFormData.Ontime),
-				"Offtime" : IomyRe.time.GetMilitaryTimeFromDate(oCurrentFormData.Offtime),
-			};
-
-			IomyRe.rules.applyRule({
-				rule : mRule,
-				hubID : IomyRe.functions.getHubConnectedToThing(mThing.Id).HubId,
-
-				onSuccess : function () {
-					IomyRe.common.showMessage({
-						text : "Rule for "+mThing.DisplayName+" was successfully applied."
-					});
-					
-					oController.ToggleControls(true);
-					IomyRe.common.NavigationChangePage( "pRulesList", {}, true);
-				},
-
-				onFail : function (sError) {
-					IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be applied.\n\n"+sError, "Error",
-						function () {
-							oController.ToggleControls(true);
-						}
-					);
-				}
-			});
-		} else {
-			IomyRe.common.showError(aErrorMessages.join('\n\n'), "Error",
-                function () {
-                    oController.ToggleControls(true);
-                }
-            );
-		}
-        
     },
     
-    deleteRule : function () {
-        var oController          = this;
-        var mThing      = IomyRe.common.ThingList["_"+oController.iThingId];
-        var sSerialCode = IomyRe.common.getLink(mThing.LinkId).LinkSerialCode;
-		
-		oController.ToggleControls(false);
+    RefreshModel : function (mSettings) {
+        var oController         = this;
+        var oView               = this.getView();
+        var oModel              = {};
+        var aSupportedDevices   = JSON.parse(JSON.stringify(IomyRe.rules.loadSupportedDevices()));
         
-        IomyRe.common.showConfirmQuestion("Are you sure you wish to discard this rule?", "",
-            function () {
-				try {
-					IomyRe.rules.discardRule({
-						hubID : 1,
-						Serial : sSerialCode,
-
-						onSuccess : function () {
-							IomyRe.common.showMessage({
-								text : "Rule for "+mThing.DisplayName+" was successfully removed.",
-								view : oController.getView()
-							});
-							
-							oController.ToggleControls(true);
-							IomyRe.common.NavigationChangePage( "pRuleDeviceList", {}, true);
-						},
-
-						onFail : function (sError) {
-							IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+sError, "Error",
-								function () {
-									oController.ToggleControls(true);
-								}
-							);
-						}
-					});
-				} catch (error) {
-					IomyRe.common.showError("Rule for "+mThing.DisplayName+" could not be removed.\n\n"+error.message, "Error",
-						function () {
-							oController.ToggleControls(true);
-						}
-					);
-				}
+        var oData               = {
+            "SupportedDevices"      : aSupportedDevices,
+            "FormControlsEnabled"   : true
+        };
+        
+        //--------------------------------------------------------------------//
+        // Check if the update button should be enabled. 
+        //--------------------------------------------------------------------//
+        if (aSupportedDevices.length > 0) {
+            oController.bDevicesAvailable = true;
+            oData.UpdateEnabled = true;
+        } else {
+            oController.bDevicesAvailable = false;
+            oData.UpdateEnabled = false;
+            oData.DeviceSBoxEnabled = false;
+            
+            aSupportedDevices.push({
+                "Id"            : -1,
+                "DisplayName"   : "No supported devices"
+            });
+        }
+        
+        //--------------------------------------------------------------------//
+        // Populate the model either with default data if we're adding a rule,
+        // or data from a selected if we're editing one.
+        //--------------------------------------------------------------------//
+        if (oController.iRuleId === null) {
+            oData.ToolbarTitle = "New Rule";
+            oData.DeviceSBoxEnabled = true;
+            
+            oData.Form = {
+                "Name"      : "",
+                "Time"      : "",
+                "TypeId"    : 1,
+                "ThingId"   : null,
+                "Enabled"   : true
+            };
+            
+            if (aSupportedDevices.length > 0) {
+                oData.Form.ThingId = aSupportedDevices[0].Id;
             }
-        );
-    }
+        } else {
+            var mRule = JSON.parse(JSON.stringify(IomyRe.rules.RulesList["_"+oController.iRuleId]));
+            var iEnabled;
+            
+            if (mRule.Enabled === 1) {
+                iEnabled = true;
+            } else {
+                iEnabled = false;
+            }
+            
+            oData.ToolbarTitle = "Edit Rule";
+            oData.DeviceSBoxEnabled = false;
+            
+            oData.Form = {
+                "Name"      : mRule.Name,
+                "Time"      : mRule.Time,
+                "TypeId"    : mRule.TypeId,
+                "ThingId"   : JSON.parse(mRule.Parameter).ThingId,
+                "Enabled"   : iEnabled
+            };
+        }
+        
+        oModel = new sap.ui.model.json.JSONModel(oData);
+        
+        oView.setModel(oModel);
 
+        //-- Refresh Controls --//
+        oController.ToggleControls(true);
+    },
+    
+    GoToRulesList : function () {
+        IomyRe.common.NavigationChangePage( "pRulesList" , {}, false);
+    },
+    
+    submitRuleInformation : function () {
+        var oController     = this;
+        var oView           = this.getView();
+        var oData           = JSON.parse(oView.getModel().getJSON());
+        
+        var sRuleName;
+        var sTime;
+        var bEnabled;
+        var iRuleTypeId;
+        var iThingId;
+        
+        try {
+            sRuleName   = oData.Form.Name;
+            sTime       = oData.Form.Time;
+            iRuleTypeId = oData.Form.TypeId;
+            iThingId    = oData.Form.ThingId;
+            bEnabled    = oData.Form.Enabled;
+        } catch (e) {
+            $.sap.log.error("Failed to fetch the form data ("+e.name+"): " + e.message);
+            oController.ToggleControls(true);
+            return;
+        }
+        
+        //-- Disable all of the controls on the page. Re-enable them afterwards. --//
+        oController.ToggleControls(false);
+        
+        if (oController.iRuleId !== null) {
+            //----------------------------------------------------------------//
+            // If a rule ID is found, call the edit rule function.
+            //----------------------------------------------------------------//
+            try {
+                IomyRe.rules.editRule({
+                    ruleID      : oController.iRuleId,
+                    name        : sRuleName,
+                    ruleTypeID  : iRuleTypeId,
+                    time        : sTime,
+                    enabled     : bEnabled,
+                    
+                    onSuccess : function () {
+                        IomyRe.common.showMessage({
+                            text : "'"+ sRuleName + "' successfully updated."
+                        });
+                        
+                        oController.GoToRulesList();
+                    },
+                    
+                    onWarning : function (sErrorMessage) {
+                        // This will likely execute if the rules could not be reloaded
+                        // from the database.
+                        IomyRe.common.showWarning(sErrorMessage, "Warning",
+                            function () {
+                                oController.ToggleControls(true);
+                            }
+                        );
+                    },
+                    
+                    onFail : function (sErrorMessage) {
+                        IomyRe.common.showError(sErrorMessage, "Error",
+                            function () {
+                                oController.ToggleControls(true);
+                            }
+                        );
+                    }
+                });
+                
+            } catch (e) {
+                $.sap.log.error("Error editing a rule ("+e.name+"): " + e.message);
+                IomyRe.common.showError(e.message, "Error",
+                    function () {
+                        oController.ToggleControls(true);
+                    }
+                );
+            }
+            
+        } else {
+            //----------------------------------------------------------------//
+            // Otherwise, we are adding a rule.
+            //----------------------------------------------------------------//
+            try {
+                IomyRe.rules.addRule({
+                    thingID     : iThingId,
+                    name        : sRuleName,
+                    ruleTypeID  : iRuleTypeId,
+                    time        : sTime,
+                    enabled     : bEnabled,
+                    
+                    onSuccess : function () {
+                        IomyRe.common.showMessage({
+                            text : "'"+ sRuleName + "' successfully created."
+                        });
+                        
+                        oController.GoToRulesList();
+                    },
+                    
+                    onWarning : function (sErrorMessage) {
+                        // This will likely execute if the rules could not be reloaded
+                        // from the database.
+                        IomyRe.common.showWarning(sErrorMessage, "Warning",
+                            function () {
+                                oController.ToggleControls(true);
+                            }
+                        );
+                    },
+                    
+                    onFail : function (sErrorMessage) {
+                        IomyRe.common.showError(sErrorMessage, "Error",
+                            function () {
+                                oController.ToggleControls(true);
+                            }
+                        );
+                    }
+                });
+                
+            } catch (e) {
+                $.sap.log.error("Error adding a rule ("+e.name+"): " + e.message);
+                IomyRe.common.showError(e.message, "Error",
+                    function () {
+                        oController.ToggleControls(true);
+                    }
+                );
+            }
+        }
+    }
+    
 });

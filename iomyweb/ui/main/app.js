@@ -49,9 +49,6 @@ $.sap.require("IomyRe.time");
 $.sap.registerModulePath('IomyRe.rules', sModuleInitialBuildLocation+'libraries/rules');
 $.sap.require("IomyRe.rules");
 
-$.sap.registerModulePath('IomyRe.dbrules', sModuleInitialBuildLocation+'libraries/dbrules');
-$.sap.require("IomyRe.dbrules");
-
 $.sap.registerModulePath('IomyRe.validation', sModuleInitialBuildLocation+'libraries/validation');
 $.sap.require("IomyRe.validation");
 
@@ -248,18 +245,6 @@ var aPages = [
 		"Location":		"pages.staging.FFMPEG",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.FFMPEG\" Page!\n"
-	},
-	{
-		"Id":			"pNewAddRule",
-		"Location":		"pages.staging.Development.NewRulesForm",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.NewRulesForm\" Page!\n"
-	},
-	{
-		"Id":			"pNewRules",
-		"Location":		"pages.staging.Development.NewRulesList",
-		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.NewRulesList\" Page!\n"
 	},
 	{
 		"Id":			"pServerInfo",
