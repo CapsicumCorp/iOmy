@@ -66,11 +66,13 @@ sap.ui.controller("pages.staging.Development.NewRulesForm", {
 
             oController.bControlsEnabled = bEnabled;
 
+            //-- Boolean evaluation. --//
             oData.FormControlsEnabled   = oController.bControlsEnabled;
-            oData.DeviceSBoxEnabled     = oController.bDevicesAvailable && !oController.bEditing && oController.bControlsEnabled;
-            oData.UpdateEnabled         = oController.bDevicesAvailable && oController.bControlsEnabled;
+            oData.UpdateEnabled         = oController.bControlsEnabled && oController.bDevicesAvailable;
+            oData.DeviceSBoxEnabled     = oController.bControlsEnabled && oController.bDevicesAvailable && !oController.bEditing;
 
             oView.setModel(new sap.ui.model.json.JSONModel(oData));
+            
         } catch (e) {
             $.sap.log.error("Failed to toggle form controls ("+e.name+"): " + e.message);
         }
@@ -148,6 +150,9 @@ sap.ui.controller("pages.staging.Development.NewRulesForm", {
         oModel = new sap.ui.model.json.JSONModel(oData);
         
         oView.setModel(oModel);
+
+        //-- Refresh Controls --//
+        oController.ToggleControls(true);
     },
     
     GoToRulesList : function () {
