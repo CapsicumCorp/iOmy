@@ -215,6 +215,10 @@ $.extend(IomyRe.common,{
         return sReturn;
     },
     
+    ComposeDBServerVersion : function (mDBInfo) {
+        IomyRe.common.DatabaseVersion = mDBInfo.Version1 + "." + mDBInfo.Version2 + "." + mDBInfo.Version3;
+    },
+    
     //============================================//
     //== Initialisation Variable                ==//
     //============================================//
@@ -238,9 +242,7 @@ $.extend(IomyRe.common,{
                 //== 2.A - User is currently logged in          ==//
                 //================================================//
                 if (response.login===true) {
-                    var mServerDB = response.ServerDBVer;
-                    
-                    IomyRe.common.DatabaseVersion = mServerDB.Version1 + "." + mServerDB.Version2 + "." + mServerDB.Version3;
+                    IomyRe.common.ComposeDBServerVersion(response.ServerDBVer);
                     
                     aConfig.OnUserSessionActive(response);
                     

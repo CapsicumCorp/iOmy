@@ -202,6 +202,7 @@ sap.ui.controller("pages.staging.Login", {
                             //----------------------------------------------------------------------------//
                             // Go to the home page.
                             //----------------------------------------------------------------------------//
+                            IomyRe.common.ComposeDBServerVersion(oResponseData.ServerDBVer);
                             oController.goToHomePage();
     
                         } else {

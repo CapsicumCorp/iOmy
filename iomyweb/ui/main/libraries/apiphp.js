@@ -149,6 +149,10 @@ $.extend(IomyRe.apiphp,{
             case "hubrules":
 				sReturn = sUrlRestricted+'/php/api_hubrules.php';
 				break;
+                
+            case "serveradmin":
+				sReturn = sUrlRestricted+'/php/api_serveradmin.php';
+				break;
 		}
 		
 		//--------------------------------------------------------//

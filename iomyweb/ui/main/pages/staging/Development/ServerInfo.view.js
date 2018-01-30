@@ -82,7 +82,7 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                 content : [
                                                     new sap.m.Title (oView.createId("ServerToolbarTitle"),{
                                                         text:"iOmy Server Information"
-                                                    }),
+                                                    })
                                                 ]
                                             }).addStyleClass("MarBottom1d0Rem"),
                                             formContainers : [
@@ -91,7 +91,7 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                     content : [
                                                         new sap.m.Title (oView.createId("VersionInfoToolbar"),{
                                                             text:"Verison Information"
-                                                        }),
+                                                        })
                                                     ]
                                                 }).addStyleClass("MarBottom1d0Rem"),
                                                     formElements : [
@@ -118,7 +118,7 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                                     text: "{/dbVersion}"
                                                                 })
                                                             ]
-                                                        }),
+                                                        })
                                                     ]
                                                 }),
                                                 new sap.ui.layout.form.FormContainer({
@@ -126,7 +126,7 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                         content : [
                                                             new sap.m.Title (oView.createId("DatabaseTitle"),{
                                                                 text:"Database Indexing"
-                                                            }),
+                                                            })
                                                         ]
                                                     }).addStyleClass("MarBottom1d0Rem"),
                                                     formElements : [
@@ -134,98 +134,138 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATABIGINT",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATABIGINT}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATABIGINT");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATABLOB",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATABLOB}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATABLOB");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATAINT",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATAINT}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATAINT");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATALONGSTRING",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATALONGSTRING}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATALONGSTRING");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATAMEDSTRING",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATAMEDSTRING}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATAMEDSTRING");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
-                                                        new sap.ui.layout.form.FormElement({
-                                                            fields: [
-                                                                new sap.m.CheckBox({
-                                                                    text: "DATAMEDSTRING",
-                                                                    selected: "true",
-                                                                }),
-                                                            ]
-                                                        }),
+//                                                        new sap.ui.layout.form.FormElement({
+//                                                            fields: [
+//                                                                new sap.m.CheckBox({
+//                                                                    text: "DATAMEDSTRING",
+//                                                                    selected: "{/indices/}"
+//                                                                })
+//                                                            ]
+//                                                        }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATASHORTSTRING",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATASHORTSTRING}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATASHORTSTRING");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATASTRING255",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATASTRING255}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATASTRING255");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATATINYINT",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATATINYINT}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATATINYINT");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATATINYSTRING",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATATINYSTRING}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATATINYSTRING");
+                                                                    }
+                                                                })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
                                                                     text: "DATATYPE",
-                                                                    selected: "true",
-                                                                }),
+                                                                    selected: "{/indices/DATATYPE}",
+                                                                    
+                                                                    select : function () {
+                                                                        oController.ModifyDBIndex("DATATYPE");
+                                                                    }
+                                                                })
                                                             ]
-                                                        }),
+                                                        })
                                                     ]
-                                                }),
+                                                })
                                             ]
-                                        }),
+                                        })
                                     ]                                    
                                 })
                             ]
-                        }),
+                        })
                     ]
                     
                 }).addStyleClass("")

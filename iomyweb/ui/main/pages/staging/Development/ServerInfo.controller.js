@@ -27,6 +27,9 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
     bEditing: false,
     iThingId: null,
     
+    oDBIndexingQueue : new AjaxRequestQueue({
+        executeNow : false
+    }),
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -40,12 +43,6 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
         
         oView.addEventDelegate({
             onBeforeShow : function (evt) {
-                //----------------------------------------------------//
-                //-- Enable/Disable Navigational Forward Button        --//
-                //----------------------------------------------------//
-                
-                //-- Refresh the Navigational buttons --//
-                //-- IOMy.common.NavigationRefreshButtons( oController ); --//
                 
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -68,11 +65,57 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
             "dbVersion"         : IomyRe.common.DatabaseVersion,
             "interfaceVersion"  : "0.4.11",
             
-            "indices" : {}
+            "indices" : {
+                "DATABIGINT"        : true,
+                "DATABLOB"          : true,
+                "DATAINT"           : true,
+                "DATALONGSTRING"    : true,
+                "DATAMEDSTRING"     : true,
+                "DATASHORTSTRING"   : true,
+                "DATASTRING255"     : true,
+                "DATATINYINT"       : true,
+                "DATATINYSTRING"    : true,
+                "DATATYPE"          : true
+            }
         };
         
         oModel = new sap.ui.model.json.JSONModel(oData);
         
         oView.setModel(oModel);
+    },
+    
+    ModifyDBIndex : function (sDBTable) {
+        var oController         = this;
+        var oView               = this.getView();
+        var bEnabled            = oView.getModel().getProperty("/indices/"+sDBTable);
+        var sCommand;
+        
+        if (bEnabled !== undefined) {
+            try {
+                if (bEnabled) {
+                    sCommand = sDBTable + "_Add";
+                } else {
+                    sCommand = sDBTable + "_Remove";
+                }
+                
+                oController.oDBIndexingQueue.addRequest({
+                    library : "php",
+                    url : IomyRe.apiphp.APILocation("serveradmin"),
+                    data : {
+                        Mode : "ChangeOptionalDBIndices",
+                        Command : sCommand
+                    }
+                });
+                
+                oController.oDBIndexingQueue.execute();
+                
+            } catch (e) {
+                $.sap.log.error("Error attempting to add and execute a request.");
+            }
+            
+        } else {
+            $.sap.log.error("Database table specified was incorrect.");
+        }
     }
+    
 });
