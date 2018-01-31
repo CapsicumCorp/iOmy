@@ -54,7 +54,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 				$("#GraphPage_Main").html("");
 				$("#GraphPage_Main_Info").html("");
 				
-                oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), "Week" );
+                oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), IomyRe.graph_jqplot.PeriodWeek );
+                //oController.GetBarDataAndDrawGraph( oController.iIOId, 1501545599, IomyRe.graph_jqplot.PeriodYear );
 			}
 		});
 	},
@@ -74,80 +75,6 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 * @memberOf pages.staging.graphs.BarGraph
 */
 	onAfterRendering: function() {
-		var oController    = this;
-		var oView          = this.getView();
-		
-		//============================================================================================//
-		//-- 4.1 - BAR GRAPH API DATA                                                               ==//
-		//============================================================================================//
-		
-		
-		
-		
-		//============================================================================================//
-		//-- 4.2 - BAR GRAPH STATIC DATA                                                            ==//
-		//============================================================================================//
-		/*
-		
-		var aTicks = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ];
-		
-		var oVarTest = IomyRe.graph_jqplot.CreateBarGraph( 
-			oController,
-			'GraphPage_Main',
-			[
-				{
-					"Label": "Fake Data 1",
-					"Color": "crimson",
-					"Data":  [ 20.34, 66.8, 70.2, 100, 89.9, 75, 60 ]
-				},
-				{
-					"Label": "Fake Data 2",
-					"Color": "forestgreen",
-					"Data":  [ 100, 89.9, 75, 60, 20.34, 66.8, 70.2 ]
-				},
-				{
-					"Label": "Fake Data 3",
-					"Color": "blue",
-					"Data":  [ 70, 65, 60, 55, 50, 45, 40 ]
-				},
-				{
-					"Label": "Fake Data 4",
-					"Color": "orange",
-					"Data":  [ 10, 20, 30, 40, 50, 60, 70 ]
-				}
-			],
-			{
-				"sTitle":       "Fake Data Bar Test",
-				"sType":        "Basic",
-				"UseLegend":    true,
-				"LegendPreset": 2,
-				"AxisX_Label":  "Week",
-				"AxisY_Label":  "Fake UoM",
-				"AxisX_TickCategories": aTicks
-			}
-		);
-		
-		
-		$('#GraphPage_Main').bind('jqplotDataHighlight', 
-			function( ev, seriesIndex, iPointIndex, aData ) {
-				//$('#GraphPage_Main_Info').html('series: '+seriesIndex+', point: '+pointIndex+', data: '+data);
-				try {
-					$('#GraphPage_Main_Info').html(' '+aTicks[iPointIndex]+': '+aData[1]+' ');
-					
-				} catch( e1 ) {
-					$('#GraphPage_Main_Info').html( e1.message );
-				}
-			}
-		);
-		
-		
-		$('#GraphPage_Main').bind('jqplotDataUnhighlight', 
-			function (ev) {
-				$('#GraphPage_Main_Info').html('');
-			}
-		);
-		
-		*/
 
 	},
 
@@ -159,18 +86,291 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         
 	},
     
+    generateTicks : function (mUTSData, sPeriod) {
+        var aTicks      = [];
+        
+        $.each(mUTSData, function (sI, mUTS) {
+            
+            switch (sPeriod) {
+                case IomyRe.graph_jqplot.PeriodWeek:
+                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(sPeriod, mUTS.start * 1000));
+                    
+                    if (date.getDay() === 0) {
+                        aTicks.push('Sun');
+                        
+                    } else if (date.getDay() === 1) {
+                        aTicks.push('Mon');
+                        
+                    } else if (date.getDay() === 2) {
+                        aTicks.push('Tue');
+                        
+                    } else if (date.getDay() === 3) {
+                        aTicks.push('Wed');
+                        
+                    } else if (date.getDay() === 4) {
+                        aTicks.push('Thu');
+                        
+                    } else if (date.getDay() === 5) {
+                        aTicks.push('Fri');
+                        
+                    } else if (date.getDay() === 6) {
+                        aTicks.push('Sat');
+                        
+                    }
+                    
+                    break;
+                    
+                case IomyRe.graph_jqplot.PeriodYear:
+                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(sPeriod, mUTS.start * 1000));
+                    
+                    if (date.getMonth() === 0) {
+                        aTicks.push('Jan');
+                        
+                    } else if (date.getMonth() === 1) {
+                        aTicks.push('Feb');
+                        
+                    } else if (date.getMonth() === 2) {
+                        aTicks.push('Mar');
+                        
+                    } else if (date.getMonth() === 3) {
+                        aTicks.push('Apr');
+                        
+                    } else if (date.getMonth() === 4) {
+                        aTicks.push('May');
+                        
+                    } else if (date.getMonth() === 5) {
+                        aTicks.push('Jun');
+                        
+                    } else if (date.getMonth() === 6) {
+                        aTicks.push('Jul');
+                        
+                    } else if (date.getMonth() === 7) {
+                        aTicks.push('Aug');
+                        
+                    } else if (date.getMonth() === 8) {
+                        aTicks.push('Sep');
+                        
+                    } else if (date.getMonth() === 9) {
+                        aTicks.push('Oct');
+                        
+                    } else if (date.getMonth() === 10) {
+                        aTicks.push('Nov');
+                        
+                    } else if (date.getMonth() === 11) {
+                        aTicks.push('Dec');
+                        
+                    }
+                    
+                    break;
+            }
+        });
+        console.log(aTicks);
+        
+        return aTicks;
+    },
+    
     GetBarDataAndDrawGraph : function ( iIOId, iEndUTS, sPeriodType ) {
         //----------------------------------------------------//
         //-- 1.0 - Declare Variables                        --//
         //----------------------------------------------------//
-        var oController    = this;
-		var oView          = this.getView();
+        var oController     = this;
+		var oView           = this.getView();
+        var mUTSData        = {};
+        var aGraphData      = [];
+        var iTempData       = 0;
+        var aRequests       = [];
+        var sUOM            = null;
+        var oGraphRequests  = null;
+        var aTicks          = [];
+        
+        //--------------------------------------------------------------------//
+        // Create the map of UTS timestamps calculated for each period
+        //--------------------------------------------------------------------//
+        switch (sPeriodType) {
+            case IomyRe.graph_jqplot.PeriodWeek:
+                //aTicks = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
+                
+                for (var i = 7; i > 0; i--) {
+                    mUTSData["period"+(7 - (i - 1))] = {
+                        start : iEndUTS - ( 86400 * i ),
+                        end : iEndUTS - ( 86400 * (i - 1) )
+                    };
+                }
+                
+                break;
+                
+            case IomyRe.graph_jqplot.PeriodYear:
+                //aTicks = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
+                
+                for (var i = 12; i > 0; i--) {
+                    mUTSData["period"+(12 - (i - 1))] = {
+                        start : iEndUTS - ( 86400 * (31 * i) ),
+                        end : iEndUTS - ( 86400 * (31 * (i - 1)) )
+                    };
+                }
+                
+                break;
+                
+            default :
+                $.sap.log.error("Invalid period type");
+                return;
+        }
+        
+        aTicks = oController.generateTicks(mUTSData, sPeriodType);
+        
+        //--------------------------------------------------------------------//
+        // Create the Min aggregation request for the first period.
+        //--------------------------------------------------------------------//
+        try {
+            aRequests.push({
+                library : "php",
+                url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                data: {
+                    Id:        iIOId,
+                    Mode:      "Min",
+                    StartUTS:  mUTSData.period1.start,
+                    EndUTS:    mUTSData.period1.end
+                },
 
+                onSuccess : function (sType, mData) {
+                    iTempData = mData.Value;
+                },
+                
+                onFail : function (response) {
+                    $.sap.log.error( "Error retrieving bar graph data (period1 - min aggregation): " + response.responseText );
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Fatal error creating the minimum aggregation request ("+e.name+"): " + e.message);
+            return;
+        }
+        
+        try {
+            //--------------------------------------------------------------------//
+            // Create Max aggregation requests for the other periods.
+            //--------------------------------------------------------------------//
+            $.each(mUTSData, function(sI, mUTS) {
+                aRequests.push({
+                    library : "php",
+                    url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                    data: {
+                        Id:        iIOId,
+                        Mode:      "Max",
+                        StartUTS:  mUTS.start,
+                        EndUTS:    mUTS.end
+                    },
+
+                    onSuccess : function (sType, mData) {
+                        //-- If the UOM hasn't been captured, do so now. --//
+                        if (sUOM === null) {
+                            sUOM = mData.UOM_NAME;
+                        }
+
+                        //-- Calculate, then store the value for the next request. --//
+                        aGraphData.push( mData.Value - iTempData );
+                        iTempData = mData.Value;
+                    },
+
+                    onFail : function (response) {
+                        $.sap.log.error( "Error retrieving bar graph data ("+sI+"): " + response.responseText );
+                    }
+                });
+
+            });
+        } catch (e) {
+            $.sap.log.error("Fatal error creating the maximum aggregation requests ("+e.name+"): " + e.message);
+            return;
+        }
+        
+        //--------------------------------------------------------------------//
+        // Run all requests in a request queue, and draw the graph afterwards.
+        //--------------------------------------------------------------------//
+        try {
+            oGraphRequests = new AjaxRequestQueue({
+                requests : aRequests,
+
+                onSuccess : function () {
+                    try {
+                        var sDeviceName		= IomyRe.common.ThingList["_"+oController.iThingId].DisplayName;
+
+                        var aSeriesData = {
+                            "Label": sDeviceName,
+                            "Color": "lightslategrey",
+                            "Data":  aGraphData
+                        };
+
+                        try {
+                            IomyRe.graph_jqplot.CreateBarGraph( 
+                                oController,
+                                'GraphPage_Main',
+                                [
+                                    aSeriesData
+                                ],
+                                {
+                                    "sTitle":       "Weekly Usage for "+sDeviceName,
+                                    "sType":        "Basic",
+                                    "UseLegend":    false,
+                                    "LegendPreset": 2,
+                                    "AxisX_Label":  "Week",
+                                    "AxisY_Label":  sUOM,
+                                    "AxisX_TickCategories": aTicks
+                                }
+                            );
+
+                            $('#GraphPage_Main').bind('jqplotDataHighlight', 
+                                function( ev, seriesIndex, iPointIndex, aData ) {
+                                    //$('#GraphPage_Main_Info').html('series: '+seriesIndex+', point: '+pointIndex+', data: '+data);
+                                    try {
+                                        $('#GraphPage_Main_Info').html(' '+aTicks[iPointIndex]+': '+aData[1]+' ');
+
+                                    } catch( e1 ) {
+                                        $('#GraphPage_Main_Info').html( e1.message );
+                                    }
+                                }
+                            );
+
+
+                            $('#GraphPage_Main').bind('jqplotDataUnhighlight', 
+                                function (ev) {
+                                    $('#GraphPage_Main_Info').html('');
+                                }
+                            );
+
+                        } catch (e) {
+                            $.sap.log.error("An error occurred drawing the bar graph ("+e.name+"): " + e.message);
+                        }
+
+                    } catch( e20 ) {
+    //                    $.sap.log.error( "Data1Min = "+JSON.stringify( aData1Max ) );
+    //                    $.sap.log.error( "Data1Max = "+JSON.stringify( aData1Max ) );
+    //                    $.sap.log.error( "Data2Max = "+JSON.stringify( aData2Max ) );
+    //                    $.sap.log.error( "Data3Max = "+JSON.stringify( aData3Max ) );
+    //                    $.sap.log.error( "Data4Max = "+JSON.stringify( aData4Max ) );
+    //                    $.sap.log.error( "Data5Max = "+JSON.stringify( aData5Max ) );
+    //                    $.sap.log.error( "Data6Max = "+JSON.stringify( aData6Max ) );
+    //                    $.sap.log.error( "Data7Max = "+JSON.stringify( aData7Max ) );
+
+                        $.sap.log.error("Critical Error! Bar Graph: "+e20.message );
+                    }
+                },
+
+                onWarning : function () {
+                    $.sap.log.error("Failed to load some data for the bar graph.");
+                },
+
+                onFail : function () {
+                    $.sap.log.error("Failed to load any data for the bar graph.");
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Fatal error running the bar graph request queue ("+e.name+"): " + e.message);
+            return;
+        }
 
         //----------------------------------------------------//
         //-- 4.0 - Get the data for the appropriate Period  --//
         //----------------------------------------------------//
-        switch( sPeriodType ) {
+        /*switch( sPeriodType ) {
             case "Week":
                 //--------------------------------//
                 //-- WORKOUT THE TIMESTAMPS     --//
@@ -421,7 +621,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     }
                 });		//-- END of this Data1Min Ajax request --//
                 break;
-        }
+        }*/
     }
 	
 });
