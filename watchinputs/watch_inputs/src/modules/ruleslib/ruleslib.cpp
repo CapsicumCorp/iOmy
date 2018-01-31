@@ -491,12 +491,8 @@ static void process_rules() {
       rulesit.second.lastModified=currenttime;
       rulesit.second.lastRuntime=currenttime;
       if (!rulesit.second.isRecurring()) {
-        if (rulesit.second.localOnlyRule) {
-          rulesit.second.needToRemove=true;
-        } else {
-          rulesit.second.needToRemoveInDb=true;
-        }
-        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule has now been scheduled to be deleted\n", __PRETTY_FUNCTION__);
+        rulesit.second.enabled=false;
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule has now been disabled\n", __PRETTY_FUNCTION__);
       }
     }
   }
