@@ -66,18 +66,29 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <arpa/inet.h>
 #include <array>
 #include <list>
+#include <vector>
 #include <map>
+#include <string>
+#include <sstream>
+#include <boost/algorithm/string.hpp>
 #ifdef __ANDROID__
 #include <jni.h>
 #include <android/log.h>
 #endif
 #include "moduleinterface.h"
 #include "ruleslibpriv.hpp"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/dblib/dblib.h"
 #include "modules/commonlib/commonlib.h"
+#include "modules/zigbeelib/zigbeelib.h"
+
+//From cmdserverlib.h
+//These lines will be needed at the top of your C or C++ file below the includes
+//  if using interface version >= 2 until interface 1 is removed from this file
+#undef CMDLISTENER_NOERROR
+#undef CMDLISTENER_NOTHANDLED
+#undef CMDLISTENER_CMDINVALID
 
 //Quick hack to work around problem where Android implements le16toh as letoh16
 //NOTE: Newer versions of Android correctly define le16toh
@@ -88,6 +99,31 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 namespace ruleslib {
+
+//NOTE: Currently we rely on the webapi to provide nextRuntime updates
+class Rule {
+public:
+  int32_t ruleId=0; //The id of the rule normally matching the database PK value, use negative values for local rules
+  std::string deviceId=""; //Normally the mac address of a device
+  int16_t portId=0; //A port value to indicate which slot on the device to apply the rule to (Not all device types use the port)
+  int32_t deviceType=DEVICETYPES::NO_TYPE; //The type of device this rule applies to
+  int32_t ruleType=RULETYPES::NO_TYPE; //The type of rule this is
+  bool needToRemove=false; //Set to true when this rule has been scheduled for removal and it should be ignored
+  bool needToRemoveInDb=false; //Set to true when this rule is a run once rule and should now be removed from the database as it has run
+                               //  Once confirmed removed from the db, needToRemove can be set
+  std::string ruleName="";
+  bool enabled=true; //Whether this rule is enabled or not
+  bool localOnlyRule=false; //If true, this is a locally generated test rule that shouldn't sync to the database
+  time_t lastModified=-1; //When this rule was last modified (For syncing to the database)
+  time_t lastRuntime=-1; //Stores the UnixTS of the last time the rile has been run. -1 is used to indicate the Rule hasn ever been run.
+  time_t nextRuntime=-1; //Used to indicate the next time this rule should be run in UnixTS format.
+  time_t lastRuntimeDb=-1; //The last run time that we have from the database, if local lastruntime is higher we should update the database
+  time_t nextRuntimeDb=-1; //The next run time that we have from the database, if local nextruntime is lower we should update the database
+  Rule();
+  Rule(int32_t ruleId, std::string ruleName, std::string deviceId, int16_t portId, int32_t deviceType, int32_t ruleType, bool enabled, bool localOnlyRule, time_t lastModified, time_t lastRuntime, time_t nextRuntime, time_t lastRuntimeDb, time_t nextRuntimeDb);
+  ~Rule();
+  bool isRecurring(); //Returns true if this rule is recurring
+};
 
 #ifdef DEBUG
 static pthread_mutexattr_t gerrorcheckmutexattr;
@@ -100,6 +136,9 @@ static pthread_mutex_t gmutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t gmutex_waitforresponse = PTHREAD_MUTEX_INITIALIZER; //Locked when we are waiting for a response from a device
 static pthread_mutex_t gmutex_detectingdevice = PTHREAD_MUTEX_INITIALIZER; //Locked when we are detecting an device
 #endif
+
+//ruleid, rule class
+static std::map<uint32_t, Rule> grules;
 
 static sem_t gmainthreadsleepsem; //Used for main thread sleeping
 
@@ -114,10 +153,10 @@ static bool gneedmoreinfo=false; //Set to false when a device needs more info to
 
 //global iface pointers set once for improved performance compared to for every function that uses it,
 //  as the pointer value shouldn't change apart from during init/shutdown stage
-const cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr;
-const commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr;
-const dblib_ifaceptrs_ver_1_t *dblibifaceptr;
-const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr;
+static const cmdserverlib_ifaceptrs_ver_2_t *cmdserverlibifaceptr;
+static const dblib_ifaceptrs_ver_1_t *dblibifaceptr;
+static const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr;
+static const zigbeelib_ifaceptrs_ver_2_t *zigbeelibifaceptr;
 
 //Static Function Declarations
 
@@ -148,13 +187,7 @@ static moduledep_ver_1_t gdeps[]={
   {
     "cmdserverlib",
     nullptr,
-    CMDSERVERLIBINTERFACE_VER_1,
-    0
-  },
-  {
-    "commonserverlib",
-    nullptr,
-    COMMONSERVERLIBINTERFACE_VER_1,
+    CMDSERVERLIBINTERFACE_VER_2,
     0
   },
   {
@@ -168,6 +201,12 @@ static moduledep_ver_1_t gdeps[]={
     nullptr,
     COMMONLIBINTERFACE_VER_1,
     1
+  },
+  {
+    "zigbeelib",
+    nullptr,
+    ZIGBEELIBINTERFACE_VER_2,
+    0,
   },
   {
     nullptr, nullptr, 0, 0
@@ -363,6 +402,129 @@ static void setneedmoreinfo(bool needmoreinfo) {
 }
 
 
+//----------------------
+//Class/Struct functions
+//----------------------
+
+Rule::Rule() {
+  //Do nothing at the moment
+}
+
+Rule::Rule(int32_t ruleId, std::string ruleName, std::string deviceId, int16_t portId, int32_t deviceType, int32_t ruleType, bool enabled, bool localOnlyRule, time_t lastModified=-1, time_t lastRuntime=-1, time_t nextRuntime=-1, time_t lastRuntimeDb=-1, time_t nextRuntimeDb=-1) {
+  this->ruleId=ruleId;
+  this->ruleName=ruleName;
+  this->deviceId=deviceId;
+  this->portId=portId;
+  this->deviceType=deviceType;
+  this->ruleType=ruleType;
+  this->enabled=enabled;
+  this->localOnlyRule=localOnlyRule;
+  this->lastModified=lastModified;
+  this->lastRuntime=lastRuntime;
+  this->nextRuntime=nextRuntime;
+  this->lastRuntimeDb=lastRuntimeDb;
+  this->nextRuntimeDb=nextRuntimeDb;
+}
+
+Rule::~Rule() {
+  //Do nothing at the moment
+}
+bool Rule::isRecurring() {
+  switch (this->ruleType) {
+    case RULETYPES::TURN_ON_RECURRING:
+    case RULETYPES::TURN_OFF_RECURRING:
+      return true;
+  }
+  return false;
+}
+
+//----------------------
+
+/*
+ * Process the rules one by one
+ */
+static void process_rules() {
+  time_t currenttime;
+  struct timespec curtime;
+  struct tm curtimelocaltm, *curtimelocaltmptr;
+
+  // Get the current time
+  clock_gettime(CLOCK_REALTIME, &curtime);
+  currenttime=curtime.tv_sec;
+
+  // Get the current local time split out into individual fields
+  curtimelocaltmptr=localtime_r(&currenttime, &curtimelocaltm);
+  if (curtimelocaltmptr==nullptr) {
+    debuglibifaceptr->debuglib_printf(1, "%s: WARNING: Unable to get current local time\n", __PRETTY_FUNCTION__);
+    return;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Current time: %02d:%02d:%02d\n", __PRETTY_FUNCTION__, curtimelocaltm.tm_hour, curtimelocaltm.tm_min, curtimelocaltm.tm_sec);
+
+  //Process the rules all within a lock so retrieval of new rules doesn't corrupt the list
+  lockthislib();
+  for (auto &rulesit : grules) {
+    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Checking rule: %s(%d)\n", __PRETTY_FUNCTION__, rulesit.second.ruleName.c_str(), rulesit.second.ruleId);
+    if (!rulesit.second.enabled || rulesit.second.needToRemove || rulesit.second.needToRemoveInDb) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Not enabled or need to remove so ignoring\n", __PRETTY_FUNCTION__);
+      continue;
+    }
+    if (currenttime<rulesit.second.nextRuntime) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running in %d seconds\n", __PRETTY_FUNCTION__, rulesit.second.nextRuntime-currenttime);
+    } else {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running\n", __PRETTY_FUNCTION__);
+      if (rulesit.second.deviceType==DEVICETYPES::ZIGBEE_DEVICE) {
+        //Apply the rule to a zigbee device
+        if (!zigbeelibifaceptr) {
+          debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Zigbee Library currently not available\n", __PRETTY_FUNCTION__);
+          continue;
+        }
+        uint64_t addr;
+        int result=0;
+        sscanf(rulesit.second.deviceId.c_str(), "%" SCNx64, &addr);
+        if (rulesit.second.ruleType==RULETYPES::TURN_OFF_ONCE_ONLY || rulesit.second.ruleType==RULETYPES::TURN_OFF_RECURRING) {
+          result=zigbeelibifaceptr->highlevel_set_onoff_zigbee_device(addr, rulesit.second.portId, *zigbeelibifaceptr->HIGH_LEVEL_OFF);
+        } else {
+          result=zigbeelibifaceptr->highlevel_set_onoff_zigbee_device(addr, rulesit.second.portId, *zigbeelibifaceptr->HIGH_LEVEL_ON);
+        }
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Result=%d\n", __PRETTY_FUNCTION__, result);
+      }
+      rulesit.second.lastModified=currenttime;
+      rulesit.second.lastRuntime=currenttime;
+      if (!rulesit.second.isRecurring()) {
+        if (rulesit.second.localOnlyRule) {
+          rulesit.second.needToRemove=true;
+        } else {
+          rulesit.second.needToRemoveInDb=true;
+        }
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule has now been scheduled to be deleted\n", __PRETTY_FUNCTION__);
+      }
+    }
+  }
+  unlockthislib();
+}
+
+/*
+ * Remove rules that have been scheduled to be deleted
+ */
+static void remove_scheduled_to_delete_rules() {
+  lockthislib();
+
+  //NOTE: We need to use a list to remove the rules as otherwise the main for loop may get confused if we remove items from underneath it
+  auto rulesitbegin=grules.begin();
+  auto rulesitend=grules.end();
+  std::list< std::map<uint32_t, Rule>::iterator > rules_to_remove;
+  for (auto &it=rulesitbegin; it!=rulesitend; it++) {
+    if (it->second.needToRemove) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Removing rule: %s\n", __PRETTY_FUNCTION__, it->second.ruleName.c_str());
+      rules_to_remove.push_back(it);
+    }
+  }
+  for (auto const &it : rules_to_remove) {
+    grules.erase(it);
+  }
+  unlockthislib();
+}
+
 /*
   Process a command sent by the user using the cmd network interface
   Input: buffer The command buffer containing the command
@@ -370,19 +532,70 @@ static void setneedmoreinfo(bool needmoreinfo) {
   Returns: A CMDLISTENER definition depending on the result
 */
 static int processcommand(const char *buffer, int clientsock) {
-  char tmpstrbuf[100];
-  int i, len, found;
-  uint64_t addr;
+  std::string bufferstring;
+  std::vector<std::string> buffertokens;
 
-  if (!commonserverlibifaceptr) {
-    return CMDLISTENER_NOTHANDLED;
+  if (!cmdserverlibifaceptr) {
+    return *cmdserverlibifaceptr->CMDLISTENER_NOTHANDLED;
   }
   MOREDEBUG_ENTERINGFUNC();
-  len=strlen(buffer);
 
-  return CMDLISTENER_NOTHANDLED;
+  //Convert the string to tokens using C++ Boost algorithms for easier access
+  bufferstring=buffer;
+  boost::algorithm::trim(bufferstring);
+  boost::algorithm::split(buffertokens, bufferstring, boost::algorithm::is_any_of(" "), boost::algorithm::token_compress_on);
+  if (buffertokens.size()==0) {
+    //No valid tokens found
+    return *cmdserverlibifaceptr->CMDLISTENER_NOTHANDLED;
+  }
+  //rule::rule(int32_t ruleId, std::string ruleName, std::string deviceId, int32_t deviceType, int32_t ruleType, bool enabled, bool localOnlyRule, time_t lastModified=-1, time_t lastRuntime=-1, time_t nextRuntime=-1, time_t lastRuntimeDb=-1, time_t nextRuntimeDb=-1) {
+  if (buffertokens[0]=="addlocaltestrule") {
+    if (buffertokens.size()==7) {
+      //Format: addrule ruleName deviceId portId deviceType ruleType numberOfSecondsUntilRun
+      //Adds a local only non-recurring test rule
+      //ruleName shouldn't have spaces
+      //deviceType can currently be the following values: zigbee
+      //ruleType can currently be the following values: on, off
+      int32_t ruleId=-1; //Hard coded to -1 for now as this is just a test command
+      std::string ruleName=buffertokens[1];
+      std::string deviceId=buffertokens[2];
+      int16_t portId;
+      int32_t deviceType;
+      int32_t ruleType;
+      time_t nextRuntime;
+      struct timespec curtime;
 
+      sscanf(buffertokens[3].c_str(), "%" SCNd16, &portId);
+      clock_gettime(CLOCK_REALTIME, &curtime);
+      if (buffertokens[4]=="zigbee") {
+        deviceType=DEVICETYPES::ZIGBEE_DEVICE;
+      }
+      if (buffertokens[5]=="on") {
+        ruleType=RULETYPES::TURN_ON_ONCE_ONLY;
+      } else if (buffertokens[5]=="off") {
+        ruleType=RULETYPES::TURN_OFF_ONCE_ONLY;
+      }
+      sscanf(buffertokens[6].c_str(), "%ld", &nextRuntime);
+      nextRuntime+=curtime.tv_sec;
+
+      std::ostringstream ostream;
+      ostream << "Adding local rule: " << buffertokens[1] << " for type: " << buffertokens[3] << " to set device: " << buffertokens[2] << " " << " port: " << buffertokens[3] << " " << buffertokens[5] << " and to enable in " << buffertokens[6] << " seconds" << std::endl;
+      cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+      Rule localrule(ruleId, ruleName, deviceId, portId, deviceType, ruleType, true, true, curtime.tv_sec, -1, nextRuntime);
+      lockthislib();
+      grules[ruleId]=localrule;
+      unlockthislib();
+      return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+    } else {
+      cmdserverlibifaceptr->netputs("Incorrect number arguments to addlocaltestrule\n", clientsock, NULL);
+      return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+    }
+  } else {
+    return *cmdserverlibifaceptr->CMDLISTENER_NOTHANDLED;
+  }
   MOREDEBUG_EXITINGFUNC();
+
+  return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
 }
 
 /*
@@ -400,6 +613,9 @@ static void *mainloop(void *UNUSED(val)) {
     if (getneedtoquit()) {
       break;
     }
+    process_rules();
+    remove_scheduled_to_delete_rules();
+
     //Only sleep for one second as we need to handle timeouts ourselves
     semwaittime.tv_sec+=1;
     semwaittime.tv_nsec=0;
@@ -456,7 +672,6 @@ static int start(void) {
 //  this library's shutdown function is called.
 static void stop(void) {
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
-  cmdserverlibifaceptr=reinterpret_cast<const cmdserverlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("cmdserverlib", CMDSERVERLIBINTERFACE_VER_1));
 
   if (gmainthread!=0) {
     //Cancel the main thread and wait for it to exit
@@ -471,10 +686,10 @@ static void stop(void) {
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
 static int init(void) {
-  cmdserverlibifaceptr=reinterpret_cast<const cmdserverlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("cmdserverlib", CMDSERVERLIBINTERFACE_VER_2));
-  commonserverlibifaceptr=reinterpret_cast<const commonserverlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("commonserverlib", DEBUGLIBINTERFACE_VER_1));
+  cmdserverlibifaceptr=reinterpret_cast<const cmdserverlib_ifaceptrs_ver_2_t *>(getmoduledepifaceptr("cmdserverlib", CMDSERVERLIBINTERFACE_VER_2));
   dblibifaceptr=reinterpret_cast<const dblib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dblib", DBLIBINTERFACE_VER_1));;
   debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
+  zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_2_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_2));
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
 
@@ -529,6 +744,8 @@ static void shutdown(void) {
   gshuttingdown=0;
 
   //Free allocated memory
+  grules.clear();
+
   sem_destroy(&gmainthreadsleepsem);
 
 #ifdef DEBUG
@@ -548,9 +765,8 @@ static void shutdown(void) {
 */
 static void register_listeners(void) {
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
-
   if (cmdserverlibifaceptr) {
-    cmdserverlibifaceptr->cmdserverlib_register_cmd_listener(processcommand);
+    cmdserverlibifaceptr->register_cmd_listener(processcommand);
   }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 }
@@ -561,9 +777,8 @@ static void register_listeners(void) {
 */
 static void unregister_listeners(void) {
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
-
   if (cmdserverlibifaceptr) {
-    cmdserverlibifaceptr->cmdserverlib_unregister_cmd_listener(processcommand);
+    cmdserverlibifaceptr->unregister_cmd_listener(processcommand);
   }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 }

@@ -27,7 +27,20 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/commonlib/commonlib.h"
 
 namespace ruleslib {
-
+  //Used to indicate what api to use to apply the rule
+  namespace DEVICETYPES {
+    static const int32_t NO_TYPE=0;
+    static const int32_t ZIGBEE_DEVICE=1;
+    static const int32_t CSRMESH_DEVICE=2;
+  }
+  //These values need to stay in sync with the database rule type values
+  namespace RULETYPES {
+    static const int32_t NO_TYPE=0;
+    static const int32_t TURN_ON_ONCE_ONLY=1;
+    static const int32_t TURN_OFF_ONCE_ONLY=2;
+    static const int32_t TURN_ON_RECURRING=3;
+    static const int32_t TURN_OFF_RECURRING=4;
+  }
 } //End of namespace
 
 #endif
