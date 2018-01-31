@@ -35,9 +35,6 @@ sap.ui.controller("pages.staging.device.MotionSensor", {
 		oView.addEventDelegate({
 			onBeforeShow : function (oEvent) {
 				
-				//-- Set Static parameters --//
-				//-- (#ToDo# - Pull from the DB) --//
-				
 				//-- Defines the Screen Type --//
 				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 				
