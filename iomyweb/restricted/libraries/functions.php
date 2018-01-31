@@ -90,7 +90,7 @@ function LookupFunctionConstant( $sValue ) {
 		//----------------//
 		case "GenericZigbeeHALinkTypeId":
 			return 2;
-			
+		
 		case "HueBridgeLinkTypeId":
 			return 7;
 			
@@ -4685,15 +4685,12 @@ function CreateUnixTSFromTimeData( $aTimeData, $sTimezone ) {
 		$iUnixTS = 0;
 	}
 	
-
-	
 	return $iUnixTS;
-	
 }
 
 
 
-function FindNextUTSFromTime( $sTimezone, $sTime ) {
+function FindNextUTSFromTime( $sTimezone, $sTime, $iMinSecsFromNow=0 ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Declare Variables                                --//
 	//------------------------------------------------------------//
@@ -4702,7 +4699,7 @@ function FindNextUTSFromTime( $sTimezone, $sTime ) {
 	$bTimePassed  = false;
 	
 	//------------------------------------------------------------//
-	//-- 2.0 - ???                                              --//
+	//-- 2.0 - Prepare                                          --//
 	//------------------------------------------------------------//
 	
 	//-- Extract the desired time values from string --//
@@ -4722,7 +4719,8 @@ function FindNextUTSFromTime( $sTimezone, $sTime ) {
 	
 	
 	//------------------------------------------------------------//
-	//-- Check if the Time has passed for the current day       --//
+	//-- 4.0 - Check if the Time has passed for the current day --//
+	//------------------------------------------------------------//
 	if( $bError===false ) {
 		//--------------------//
 		//-- Hour Check     --//
@@ -4747,7 +4745,8 @@ function FindNextUTSFromTime( $sTimezone, $sTime ) {
 	}
 	
 	//------------------------------------------------------------//
-	//-- Create the new UTS                                     --//
+	//-- 5.0 - Create the new UTS                               --//
+	//------------------------------------------------------------//
 	if( $bError===false ) {
 		$aNewDateTimeData = array(
 			"Year"  => $aCurrentDateTimeData['Year'],
@@ -4758,16 +4757,31 @@ function FindNextUTSFromTime( $sTimezone, $sTime ) {
 			"Sec"   => $aTime['Data']['Sec']
 		);
 		
-		
 		$iUnixTS = CreateUnixTSFromTimeData( $aNewDateTimeData, $sTimezone );
 		
 		if( $bTimePassed===true ) {
+			//-- TODO: Replace this with a better way --//
 			$iUnixTS += 86400;
 		}
 	}
 	
 	//------------------------------------------------------------//
-	//-- 9.0 - 
+	//-- 7.0 - Check UTS is above minimum from now              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- Calculate the Timestamp that is too early --//
+		$iEarliestAllowed = time()+$iMinSecsFromNow;
+		
+		//-- Check to make sure that the UnixTS is passed the minimum --//
+		if( $iUnixTS < $iEarliestAllowed ) {
+			//-- Increment the UnixTS to the next day --//
+			//-- TODO: Replace this with a better way --//
+			$iUnixTS += 86400;
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results                               --//
 	//------------------------------------------------------------//
 	if( $bError===false ) {
 		return array(
@@ -4869,7 +4883,6 @@ function GetAllRules( $bActiveRulesOnly=false ) {
 		//-- 2.1 - Check if the User has permission         --//
 		if( $bError===false ) {
 			$bPermission = CheckUserPermissionsForRules( null );
-			
 			
 			if( $bPermission===false ) {
 				return array(
@@ -5239,7 +5252,7 @@ function AddNewRuleToDatabase( $iRuleTypeId, $iHubId, $sName, $sTime, $aParamete
 		);
 	} else {
 		//-- 9.B - FAILURE --//
-		return array( "Error"=>true, "ErrCode"=>2, "ErrMesg"=>$sErrMesg );
+		return array( "Error"=>true, "ErrCode"=>0, "ErrMesg"=>$sErrMesg );
 	}
 }
 
@@ -5282,7 +5295,7 @@ function ChangeRule( $iRuleId, $iHubId, $iRuleTypeId, $sName, $sTime, $iEnabled,
 				
 				
 			} else {
-				$sErrMesg  = "Error: Problem occurred when checking the prerequisites for adding a new Rule!\n";
+				$sErrMesg  = "Error: Problem occurred when checking the prerequisites for editing a Rule!\n";
 				$sErrMesg .= "There is an issue with looking up the User Details!\n";
 				$sErrMesg .= $aUserDetails['ErrMesg'];
 				
@@ -5304,7 +5317,7 @@ function ChangeRule( $iRuleId, $iHubId, $iRuleTypeId, $sName, $sTime, $iEnabled,
 		}
 		
 	} catch( Exception $e2 ) {
-		$sErrMesg  = "Critical Error: Problem occurred when checking the prerequisites for adding a new Rule!\n";
+		$sErrMesg  = "Critical Error: Problem occurred when checking the prerequisites for editing Rule!\n";
 		$sErrMesg .= $e2->getMessage();
 		$sErrMesg .= "\n";
 		
@@ -5342,7 +5355,7 @@ function ChangeRule( $iRuleId, $iHubId, $iRuleTypeId, $sName, $sTime, $iEnabled,
 		return $aResult;
 	} else {
 		//-- 9.B - FAILURE --//
-		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		return array( "Error"=>true, "ErrCode"=>0, "ErrMesg"=>$sErrMesg );
 	}
 }
 
@@ -5415,9 +5428,83 @@ function DeleteExistingRule( $iRuleId ) {
 		return $aResult;
 	} else {
 		//-- 9.B - FAILURE  --//
-		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+		return array( "Error"=>true, "ErrCode"=>0, "ErrMesg"=>$sErrMesg );
 	}
 }
+
+
+function RuleNextRunUpdate( $iRuleId, $iNextRun ) {
+	//----------------------------------------------------------------//
+	//-- 1.0 - Initialise                                           --//
+	//----------------------------------------------------------------//
+	$bError         = false;
+	$sErrMesg       = "";
+	$aResult        = array();
+	$aTempRestult   = array();
+	
+	
+	//----------------------------------------------------------------//
+	//-- 2.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	try {
+		//----------------------------------------------------//
+		//-- 2.1 - Check if the User has permission         --//
+		if( $bError===false ) {
+			$bPermission = CheckUserPermissionsForRules( null );
+			
+			if( $bPermission===false ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+				);
+			}
+		}
+		
+		
+	} catch( Exception $e2 ) {
+		$sErrMesg  = "Critical Error: Problem occurred when checking the prerequisites for updating a Rule's next run timestamp!\n";
+		$sErrMesg .= $e2->getMessage();
+		$sErrMesg .= "\n";
+		
+		return array(
+			"Error"   => true,
+			"ErrCode" => 2,
+			"ErrMesg" => $sErrMesg
+		);
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 5.0 - Begin                                                --//
+	//----------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			$aResult = dbRuleNextRunUpdate( $iRuleId, $iNextRun );
+			
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg .= "Error occurred when attempting to delete Rule! \n";
+				$sErrMesg .= $aResult["ErrMesg"];
+			}
+		} catch( Exception $e1 ) {
+			$bError = true;
+			$sErrMesg .= "Critical Error occurred when attempting to delete Rule! \n";
+			$sErrMesg .= $e1->getMessage();
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if($bError===false) {
+		//-- 9.A - SUCCESS  --//
+		return $aResult;
+	} else {
+		//-- 9.B - FAILURE  --//
+		return array( "Error"=>true, "ErrCode"=>0, "ErrMesg"=>$sErrMesg );
+	}
+}
+
 
 
 //========================================================================================================================//

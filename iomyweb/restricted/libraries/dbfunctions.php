@@ -7096,7 +7096,7 @@ function dbGetThingsFromLinkId( $iLinkId ) {
 					//-- TODO: Write error message for when Database Library returns an unexpected result --//
 				}
 			}
-	
+			
 		} catch(Exception $e2) {
 			$bError   = true;
 			$sErrMesg = $e2->getMessage();
@@ -10185,6 +10185,79 @@ function dbRuleMarkAsRan( $iRuleId, $iNextRun, $iLastRun ) {
 		);
 	}
 }
+
+
+
+function dbRuleNextRunUpdate( $iRuleId, $iNextRun ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "UPDATE `".$sSchema."`.`RULE1` ";
+			$sSQL .= "SET ";
+			$sSQL .= "    `RULE1_NEXTRUN`          = :NextRun ";
+			$sSQL .= "WHERE `RULE1_PK` = :RuleId; ";
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"NextRun",           "type"=>"INT",      "value"=>$iNextRun       ),
+				array( "Name"=>"RuleId",            "type"=>"INT",      "value"=>$iRuleId        )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array( 
+			"Error"   => true,
+			"ErrMesg" => "RuleNextRunUpdate: ".$sErrMesg 
+		);
+	}
+}
+
 
 //========================================================================================================================//
 //== #??.0# - Other Functions                                                                                           ==//

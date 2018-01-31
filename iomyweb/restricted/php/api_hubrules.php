@@ -48,7 +48,7 @@ $iPostHubId                 = 0;            //-- INTEGER:       This is used to 
 //------------------------------------------------------------//
 //-- 1.3 - IMPORT REQUIRED LIBRARIES                        --//
 //------------------------------------------------------------//
-require_once SITE_BASE.'/restricted/libraries/telnet.php';
+//require_once SITE_BASE.'/restricted/libraries/telnet.php';
 require_once SITE_BASE.'/restricted/php/core.php';      //-- This should call all the additional libraries needed --//
 
 //------------------------------------------------------------//
@@ -67,6 +67,7 @@ require_once SITE_BASE.'/restricted/php/core.php';      //-- This should call al
 //----------------------------------------------------//
 if($bError===false) {
 	$RequiredParmaters = array(
+		array( "Name"=>'Format',                    "DataType"=>'STR' ),
 		array( "Name"=>'Mode',                      "DataType"=>'STR' ),
 		array( "Name"=>'Data',                      "DataType"=>'STR' ),
 		array( "Name"=>'Id',                        "DataType"=>'INT' ),
@@ -81,6 +82,22 @@ if($bError===false) {
 //-- 2.2 - Retrieve the API "Mode"                  --//
 //----------------------------------------------------//
 if($bError===false) {
+	
+	//----------------------------------------------------//
+	//-- Extract the output "Format"                    --//
+	//----------------------------------------------------//
+	try {
+		$sPostFormat = $aHTTPData["Format"];
+		//-- Check if JSON --//
+		if( $sPostFormat==="JSON" || $sPostFormat==="Json" || $sPostFormat==="json" ) {
+			$sPostFormat = "json";
+		} 
+	} catch( Exception $e0100 ) {
+		$sPostFormat = "Normal";
+	}
+	
+	
+	
 	//----------------------------------------------------//
 	//-- 2.2.1 - Retrieve the API "Mode"                --//
 	//----------------------------------------------------//
@@ -119,7 +136,7 @@ if($bError===false) {
 	//-- 2.2.2 - Retrieve "Id"                          --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditRule" || $sPostMode==="SetRuleEnabled" || $sPostMode==="DeleteRule" || $sPostMode==="MarkRuleAsJustRan" ) {
+		if( $sPostMode==="EditRule" || $sPostMode==="SetRuleEnabled" || $sPostMode==="DeleteRule" || $sPostMode==="MarkRuleAsJustRan" || $sPostMode==="UpdateRuleNextTS" ) {
 			try {
 				//-- Retrieve the "RuleId" --//
 				$iPostId = $aHTTPData["Id"];
@@ -365,7 +382,8 @@ if( $bError===false ) {
 								$iPostRuleTypeId!==3    && $iPostRuleTypeId!=="3"    && 
 								$iPostRuleTypeId!==4    && $iPostRuleTypeId!=="4"    
 							) {
-								//-- Error: Unsupported RuleType status --//
+								//----------------------------------------//
+								//-- ERROR: Unsupported RuleType status --//
 								$bError    = true;
 								$iErrCode  = 208;
 								$sErrMesg .= "Error Code:'0208' \n";
@@ -406,8 +424,15 @@ if( $bError===false ) {
 							if( isset( $aPostParameter['ThingId'] ) ) {
 								if( is_numeric( $aPostParameter['ThingId'] ) ) {
 									$iPostDataParamThingId = $aPostParameter['ThingId'];
+									
 								} else {
-									//-- TODO: Error Message --//
+									//------------------------------------//
+									//-- ERROR: Non-numeric ThingId     --//
+									$bError    = true;
+									$iErrCode  = 210;
+									$sErrMesg .= "Error Code:'0210' \n";
+									$sErrMesg .= "Error: The 'Parameter' array in the 'Data' JSON parameter is not supported!\n";
+									$sErrMesg .= "!\n";
 								}
 								
 							//------------------------//
@@ -415,7 +440,7 @@ if( $bError===false ) {
 							//------------------------//
 							} else {
 								//------------------------------------//
-								//-- Error: Missing ThingId         --//
+								//-- ERROR: Missing ThingId         --//
 								$bError    = true;
 								$iErrCode  = 210;
 								$sErrMesg .= "Error Code:'0210' \n";
@@ -423,7 +448,7 @@ if( $bError===false ) {
 							}
 						} else {
 							//------------------------------------//
-							//-- Error: Missing Parameter       --//
+							//-- ERROR: Missing Parameter       --//
 							$bError    = true;
 							$iErrCode  = 210;
 							$sErrMesg .= "Error Code:'0210' \n";
@@ -443,33 +468,58 @@ if( $bError===false ) {
 		//-- 4.2 - Lookup the Rule Data                             --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="MarkRuleAsJustRan" || $sPostMode==="EditRule" || $sPostMode==="DeleteRule" ) {
+			if( $sPostMode==="MarkRuleAsJustRan" || $sPostMode==="EditRule" || $sPostMode==="DeleteRule" || $sPostMode==="UpdateRuleNextTS" ) {
+				//-- Lookup Rule --//
 				$aRuleTemp = GetRuleFromRuleId( $iPostId );
 				
 				if( $aRuleTemp['Error']===false ) {
 					$iPostHubId = $aRuleTemp['Data']['HubId'];
 					
+					
+					//--------------------------------------------//
+					//-- IF Edit Mode                           --//
+					//--------------------------------------------//
 					if( $sPostMode==="EditRule" ) {
 						$aFunctionTemp5        = json_decode( $aRuleTemp['Data']['Parameter'], true );
+						
+						//--------------------------------------------//
+						//-- IF The ThingId is present              --//
+						//--------------------------------------------//
 						if( isset( $aFunctionTemp5['ThingId'] ) ) {
 							$iPostDataParamThingId = $aFunctionTemp5['ThingId'];
+							
+						//--------------------------------------------//
+						//-- ELSE Unsupported Parameter             --//
+						//--------------------------------------------//
+						} else {
+							$bError    = true;
+							$iErrCode  = 220;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Failed to extract the required values from the existing Rule's parameter!\n";
 						}
+					} else if( $sPostMode==="UpdateRuleNextTS" ) {
+						//-- Extract values --//
+						$iPlannedNextRunUnixTS = $aRuleTemp['Data']['NextRunUTS'];
+						$sPostTime = $aRuleTemp['Data']['Time'];
+						
 					}
 				} else {
+					//-- ERROR: Problem with the results of the desired rule --//
 					$bError    = true;
-					$iErrCode  = 220+$aRuleTemp['ErrCode'];
+					$iErrCode  = 221+$aRuleTemp['ErrCode'];
 					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-					$sErrMesg .= " \n";
+					$sErrMesg .= "Issue with looking up the desired Rule!\n";
 					$sErrMesg .= $aRuleTemp['ErrMesg'];
 				}
 			}
 		}
 		
+		
 		//------------------------------------------------------------//
 		//-- 4.3 - Lookup the timezone from HubId                   --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="AddRule" || $sPostMode==="EditRule" ) {
+			if( $sPostMode==="AddRule" || $sPostMode==="EditRule" || $sPostMode==="UpdateRuleNextTS" ) {
 				//------------------------------------------------//
 				//-- 4.2.1 - Lookup Hub Data for Rule           --//
 				//------------------------------------------------//
@@ -480,7 +530,7 @@ if( $bError===false ) {
 						$bError    = true;
 						$iErrCode  = 240+$aHubTemp['ErrCode'];
 						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-						$sErrMesg .= " \n";
+						$sErrMesg .= "Problem looking up the Hub information for the HubId parameter.\n";
 						$sErrMesg .= $aHubTemp['ErrMesg'];
 					}
 				}
@@ -498,7 +548,7 @@ if( $bError===false ) {
 						$bError    = true;
 						$iErrCode  = 250+$aPremiseAddressTemp['ErrCode'];
 						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-						$sErrMesg .= " \n";
+						$sErrMesg .= "Problem looking up the Timezone information for the Rule!\n";
 						$sErrMesg .= $aPremiseAddressTemp['ErrMesg'];
 					}
 				}
@@ -509,8 +559,8 @@ if( $bError===false ) {
 		//-- 4.4 - Lookup the Calculate Next RunTime                --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="AddRule" || $sPostMode==="EditRule" ) {
-				$aNextUnixTS = FindNextUTSFromTime( $sTimezone, $sPostTime );
+			if( $sPostMode==="AddRule" || $sPostMode==="EditRule" || $sPostMode==="UpdateRuleNextTS" ) {
+				$aNextUnixTS = FindNextUTSFromTime( $sTimezone, $sPostTime, 60 );
 				
 				if( $aNextUnixTS['Error']===false ) {
 					$iNextRun = $aNextUnixTS['UnixTS']; 
@@ -520,7 +570,7 @@ if( $bError===false ) {
 					$bError    = true;
 					$iErrCode  = 260+$aNextUnixTS['ErrCode'];
 					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-					$sErrMesg .= " \n";
+					$sErrMesg .= "Problem when calculating the next timestamp to run the rule at.\n";
 					$sErrMesg .= $aNextUnixTS['ErrMesg'];
 				}
 			}
@@ -541,7 +591,6 @@ if( $bError===false ) {
 						$iTempRuleId    = $aRule['Id'];
 						$aTempParamData = json_decode( $aRule['Parameter'], true );
 						$iTempThingId   = null;
-						
 						
 						if( $aTempParamData!==null && $aTempParamData!==false && isset( $aTempParamData['ThingId'] )) {
 							$iTempThingId = $aTempParamData['ThingId'];
@@ -580,7 +629,7 @@ if( $bError===false ) {
 									}
 								}
 							}
-						
+							
 						} else {
 							//-- ERROR: Abort --//
 							$bError    = true;
@@ -739,6 +788,13 @@ if( $bError===false ) {
 			try {
 				$aResult = DeleteExistingRule( $iPostId );
 				
+				if( $aResult['Error']===true ) {
+					$bError     = true;
+					$iErrCode   = 6401;
+					$sErrMesg  .= "Error Code:'6401' \n";
+					$sErrMesg  .= "Error: Problem in the main section of the \"".$sPostMode."\" Mode!\n";
+					$sErrMesg  .= $aResult['ErrMesg'];
+				}
 				
 			} catch( Exception $e5400 ) {
 				//-- Display an Error Message --//
@@ -753,18 +809,30 @@ if( $bError===false ) {
 		//== 5.6 - MODE: Refresh All Rules Next Update                  ==//
 		//================================================================//
 		} else if( $sPostMode==="UpdateRuleNextTS" ) {
-			
-			
-			
-			
-			
+			try {
+				$aResult = RuleNextRunUpdate( $iPostId, $iNextRun );
+					
+				if( $aResult['Error']===true ) {
+					$bError     = true;
+					$iErrCode   = 6401;
+					$sErrMesg  .= "Error Code:'6401' \n";
+					$sErrMesg  .= "Error: Problem in the main section of the \"".$sPostMode."\" Mode!\n";
+					$sErrMesg  .= $aResult['ErrMesg'];
+				}
+			} catch( Exception $e6400 ) {
+				//-- Display an Error Message --//
+				$bError     = true;
+				$iErrCode   = 6400;
+				$sErrMesg  .= "Error Code:'6400' \n";
+				$sErrMesg  .= "Critical Error in the main section of the \"".$sPostMode."\" Mode!\n";
+				$sErrMesg  .= $e6400->getMessage();
+			}
 			
 		//================================================================//
 		//== 5.7 - MODE: Mark Rule as just executed                     ==//
 		//================================================================//
 		} else if( $sPostMode==="MarkRuleAsJustRan" ) {
 			try {
-				
 				//--------------------------------------------------------//
 				//-- 5.7.1 - Prepare                                    --//
 				//--------------------------------------------------------//
@@ -821,12 +889,19 @@ if( $bError===false ) {
 							//------------------------------------------------//
 							$aResult = RuleMarkAsRan( $iPostId, $aNextUnixTS['UnixTS'], $iCurrentUnixTS, $aRuleTemp['Data']['HubId'] );
 							
-							//-- TODO: Error checking --//
+							if( $aResult['Error']===true ) {
+								$bError    = true;
+								$iErrCode  = 7430;
+								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+								$sErrMesg .= "Problem marking that the rule has been executed and calculating the next timestamp that it will run at!\n";
+								$sErrMesg .= $aResult['ErrMesg'];
+							}
+							
 						} else {
 							$bError    = true;
 							$iErrCode  = 7420+$aNextUnixTS['ErrCode'];
 							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-							$sErrMesg .= " \n";
+							$sErrMesg .= "Problem calculating the next timestamp that the rule will run at.\n";
 							$sErrMesg .= $aNextUnixTS['ErrMesg'];
 						}
 						
@@ -838,6 +913,14 @@ if( $bError===false ) {
 						//-- Update the Rule                            --//
 						//------------------------------------------------//
 						$aResult = RuleMarkAsRan( $iPostId, $aRuleTemp['Data']['NextRunUTS'], $iCurrentUnixTS, $aRuleTemp['Data']['HubId'] );
+						
+						if( $aResult['Error']===true ) {
+							$bError    = true;
+							$iErrCode  = 7440;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Problem marking that the rule has been executed!\n";
+							$sErrMesg .= $aResult['ErrMesg'];
+						}
 						
 						//------------------------------------------------//
 						//-- Disable the Rule                           --//
@@ -883,7 +966,9 @@ if( $bError===false ) {
 //== 9.0 - Finalise                                                 ==//
 //====================================================================//
 
-//-- API didn't encounter an Error --//
+//----------------------------------------------------//
+//-- IF API didn't encounter an Error               --//
+//----------------------------------------------------//
 if( $bError===false && $aResult!=false ) {
 	try {
 		//-- Force the page to JSON --//
@@ -894,41 +979,144 @@ if( $bError===false && $aResult!=false ) {
 		
 		//-- Output results --//
 		echo $sOutput;
-	
+		
 	} catch( Exception $e0001 ) {
-		header('Content-Type: text/plain');
-		//-- The aResult array cannot be turned into a string due to corruption of the array --//
-		echo "Error Code:'0001'! \n ".$e0001->getMessage()."\" ";
+		//-- Check the Preferred Output Type --//
+		
+		//--------------------------------------------//
+		//-- IF Format is set to JSON               --//
+		//--------------------------------------------//
+		if( $sPostFormat==="json" ) {
+			header('Content-Type: application/json');
+			echo "{\"Error\":true, \"ErrCode\":1, \"ErrMesg\":\"Error Code:'0001'! \n ".$e0001->getMessage()."\" }";
+			
+		//--------------------------------------------//
+		//-- ELSE Assume Format is plain text       --//
+		//--------------------------------------------//
+		} else {
+			header('Content-Type: text/plain');
+			//-- The aResult array cannot be turned into a string due to corruption of the array --//
+			echo "Error Code:'0001'! \n ".$e0001->getMessage()."\" ";
+		
+		}
 	}
 	
-//-- API Error has occurred --//
+//----------------------------------------------------//
+//-- ELSE API Error has occurred                    --//
+//----------------------------------------------------//
 } else {
-	//-- Set the Page to Plain Text on Error. Note this can be changed to "text/html" or "application/json" --//
-	header('Content-Type: text/plain');
-	if( $bError===false ) {
-		//-- The aResult array has become undefined due to corruption of the array --//
-		$sOutput = "Error Code:'0002'!\n No Result";
+	//--------------------------------------------//
+	//-- IF Format is set to JSON               --//
+	//--------------------------------------------//
+	if( $sPostFormat==="json" ) {
+		try {
+			//-- Force the page to JSON --//
+			header('Content-Type: application/json');
+			
+			//--------------------------------------------//
+			//-- PREPARE THE CORRECT ERROR MESSAGE      --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				//-- The aResult array has become undefined due to corruption of the array --//
+				$aResult = array(
+					"Error"   => true,
+					"ErrCode" => 2,
+					"ErrMesg" => "Error Code:'0002' \n No Result!"
+				);
+				$sOutput = json_encode( $aResult );
+				
+			} else if( $sErrMesg===null || $sErrMesg===false || $sErrMesg==="" ) {
+				//-- The Error Message has been corrupted --//
+				$aResult = array(
+					"Error"   => true,
+					"ErrCode" => 3,
+					"ErrMesg" => "Error Code:'0003' \n Critical Error has occured!\n Undefinable Error Message"
+				);
+				$sOutput = json_encode( $aResult );
+				
+				
+			} else if( $sErrMesg!=false ) {
+				//-- Output the Error Message --//
+				$aResult = array(
+					"Error"   => true,
+					"ErrCode" => $iErrCode,
+					"ErrMesg" => $sErrMesg
+				);
+				$sOutput = json_encode( $aResult );
+				
+				
+			} else {
+				//-- Error Message is blank --//
+				$sOutput  = "Error Code:'0004' \n Critical Error has occured!";
+				$aResult = array(
+					"Error"   => true,
+					"ErrCode" => 4,
+					"ErrMesg" => "Error Code:'0004' \n Critical Error has occured!"
+				);
+				$sOutput = json_encode( $aResult );
+			}
+			
+			//--------------------------------------------//
+			//-- OUTPUT THE ERROR MESSAGE               --//
+			//--------------------------------------------//
+			try {
+				//-- Text Error Message --//
+				echo $sOutput;
+				
+			} catch( Exception $e0005 ) {
+				//-- Failsafe Error Message --//
+				$aResult = array(
+					"Error"   => true,
+					"ErrCode" => 5,
+					"ErrMesg" => "Error Code:'0005' \n Critical Error has occured!"
+				);
+				
+				echo json_encode( $aResult );
+			}
+		} catch( Exception $e0001 ) {
+			//-- Failsafe Error Message --//
+			$aResult = array(
+				"Error"   => true,
+				"ErrCode" => 5,
+				"ErrMesg" => "Error Code:'0005' \n Critical Error has occured!"
+			);
+			
+			echo json_encode( $aResult );
+		}
 		
-	} else if( $sErrMesg===null || $sErrMesg===false || $sErrMesg==="" ) {
-		//-- The Error Message has been corrupted --//
-		$sOutput  = "Error Code:'0003'!\n Critical Error has occured!\n Undefinable Error Message\n";
 		
-	} else if( $sErrMesg!=false ) {
-		//-- Output the Error Message --//
-		$sOutput  = $sErrMesg;
-		
+	//--------------------------------------------//
+	//-- ELSE Assume Format is plain text       --//
+	//--------------------------------------------//
 	} else {
-		//-- Error Message is blank --//
-		$sOutput  = "Error Code:'0004'!\n Critical Error has occured!\n";
-	}
-	
-	try {
-		//-- Text Error Message --//
-		echo $sOutput;
+		//-- Set the Page to Plain Text on Error. Note this can be changed to "text/html" or "application/json" --//
+		header('Content-Type: text/plain');
+		if( $bError===false ) {
+			//-- The aResult array has become undefined due to corruption of the array --//
+			$sOutput = "Error Code:'0002'!\n No Result";
+			
+		} else if( $sErrMesg===null || $sErrMesg===false || $sErrMesg==="" ) {
+			//-- The Error Message has been corrupted --//
+			$sOutput  = "Error Code:'0003'!\n Critical Error has occured!\n Undefinable Error Message\n";
+			
+		} else if( $sErrMesg!=false ) {
+			//-- Output the Error Message --//
+			$sOutput  = $sErrMesg;
+			
+		} else {
+			//-- Error Message is blank --//
+			$sOutput  = "Error Code:'0004'!\n Critical Error has occured!\n";
+		}
 		
-	} catch( Exception $e0005 ) {
-		//-- Failsafe Error Message --//
-		echo "Error Code:'0005'!\n Critical Error has occured!\n";
+		try {
+			//-- Text Error Message --//
+			echo $sOutput;
+			
+		} catch( Exception $e0005 ) {
+			//-- Failsafe Error Message --//
+			echo "Error Code:'0005'!\n Critical Error has occured!\n";
+		}
+		
 	}
 }
 
