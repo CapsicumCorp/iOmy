@@ -675,13 +675,13 @@ if( $bError===false ) {
 				//-- 5.1.A - IF All Rules                           --//
 				//----------------------------------------------------//
 				if( $sPostMode==="ListAllRules" ) {
-					$aResult = GetAllRules( false );
+					$aResult = GetAllRules( false, true );
 					
 				//----------------------------------------------------//
 				//-- 5.1.B - ELSEIF Active Only Rules               --//
 				//----------------------------------------------------//
 				} else if( $sPostMode==="ListAllActiveRules" ) {
-					$aResult = GetAllRules( true );
+					$aResult = GetAllRules( true, true );
 					
 				//----------------------------------------------------//
 				//-- 5.1.C - ELSEIF All Hub Rules                   --//

@@ -4863,7 +4863,7 @@ function CheckUserPermissionsForRules( $iHubId=null ) {
 }
 
 
-function GetAllRules( $bActiveRulesOnly=false ) {
+function GetAllRules( $bActiveRulesOnly=false, $bLookupExtraData=false ) {
 	//----------------------------------------------------------------//
 	//-- This is for fetching all the rules                         --//
 	//-- ErrCode Range: 0-3                                         --//
@@ -4874,6 +4874,7 @@ function GetAllRules( $bActiveRulesOnly=false ) {
 	//----------------------------------------------------------------//
 	$bError   = false;
 	$sErrMesg = "";
+	
 	
 	//----------------------------------------------------------------//
 	//-- 2.0 - Begin                                                --//
@@ -4904,16 +4905,102 @@ function GetAllRules( $bActiveRulesOnly=false ) {
 	//----------------------------------------------------------------//
 	//-- 5.0 - Get all Rules                                        --//
 	//----------------------------------------------------------------//
-	try {
-		$aResult = dbGetAllRules( $bActiveRulesOnly );
-		
-		
-	} catch( exception $e50 ) {
-		return array(
-			"Error"   => true,
-			"ErrCode" => 2,
-			"ErrMesg" => "Critical Error: Problem getting the list of all the Rules!\n"
-		);
+	if( $bError===false ) {
+		try {
+			$aAllRules = dbGetAllRules( $bActiveRulesOnly );
+			
+			if( $aAllRules['Error']===true ) {
+				$sErrMesg  = "Error: Problem getting the list of all the Rules!\n";
+				$sErrMesg .= $e50->getMessage()."\n";
+				
+				return array(
+					"Error"   => true,
+					"ErrCode" => 2,
+					"ErrMesg" => $sErrMesg
+				);
+			}
+			
+		} catch( exception $e50 ) {
+			return array(
+				"Error"   => true,
+				"ErrCode" => 3,
+				"ErrMesg" => "Critical Error: Problem getting the list of all the Rules!\n"
+			);
+		}
+	}
+	
+	//----------------------------------------------------------------//
+	//-- 6.0 - Lookup data for each Rule                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false ) {
+		if( $bLookupExtraData===true ) {
+			try {
+				//------------------------------------------------//
+				//-- Preapre                                    --//
+				//------------------------------------------------//
+				$aResult  = array(
+					"Error"   => false,
+					"Data"    => array()
+				);
+				
+				//------------------------------------------------//
+				//-- FOREACH Rule                               --//
+				//------------------------------------------------//
+				foreach( $aAllRules['Data'] as $Key => $aRule ) {
+					//-- Lookup Data --//
+					$aParamData = json_decode( $aRule['Parameter'], true );
+					
+					//------------------------------------------------//
+					//-- IF ThingId                                 --//
+					//------------------------------------------------//
+					if( isset( $aParamData['ThingId'] ) ) {
+						//-- TODO: Next iteration of this should probably have the LinkId and ThingHWID stored in the parameter --//
+						$aTemp = $aRule;
+						
+						//------------------------------------//
+						//-- Lookup the Thing Data          --//
+						//------------------------------------//
+						$aTempFunction1 = dbGetThingInfo( $aParamData['ThingId'] ); 
+						
+						
+						//------------------------------------//
+						//--  --//
+						//------------------------------------//
+						if( $aTempFunction1['Error']===false ) {
+							
+							$aTemp['ParamData'] = array(
+								"LinkId"    => $aTempFunction1['Data']['LinkId'],
+								"ThingId"   => $aParamData['ThingId'],
+								"ThingHWID" => $aTempFunction1['Data']['ThingHWId']
+							);
+						} 
+						
+						//------------------------------------//
+						//-- Store the Results              --//
+						//------------------------------------//
+						$aResult['Data'][] = $aTemp;
+						
+						
+					//------------------------------------------------//
+					//-- ELSE Unsupported                           --//
+					//------------------------------------------------//
+					}
+				}
+			} catch( exception $e60 ) {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 4,
+					"ErrMesg" => "Critical Error: Problem getting the list of all the Rules!\n"
+				);
+				
+			}
+		} else {
+			//----------------------------------------------------//
+			//-- Return the AllRulesResult as the main result   --//
+			//----------------------------------------------------//
+			$aResult = $aAllRules;
+			
+		}
 	}
 	
 	//----------------------------------------------------//
