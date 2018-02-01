@@ -516,8 +516,8 @@ if( $bError===false ) {
 							$bError    = true;
 							$iErrCode  = 221;
 							$sErrMesg .= "Error Code:'0221' \n";
-							$sErrMesg .= "Critical Error Occurred! \n";
-							$sErrMesg .= "Problem occurred when preparing for the main function. \n";
+							$sErrMesg .= "Error! Problem occurred when preparing for the main function.\n";
+							$sErrMesg .= "The command passed is not recognised. \n";
 						
 					}
 					
