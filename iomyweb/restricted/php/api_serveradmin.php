@@ -130,7 +130,7 @@ if($bError===false) {
 				//-- Retrieve the "Command" --//
 				$sPostCommand = $aHTTPData["Command"];
 				
-				if( $sPostCommand===false ) {
+				if( $sPostCommand===false || $sPostCommand==="" || !is_string( $sPostCommand) ) {
 					$bError = true;
 					$iErrCode  = 103;
 					$sErrMesg .= "Error Code:'0103' \n";
