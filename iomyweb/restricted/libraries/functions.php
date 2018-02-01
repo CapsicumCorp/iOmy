@@ -4558,7 +4558,7 @@ function DeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
 	//------------------------------------------------------------//
 	if($bError===false) {
 		//-- 9.A - SUCCESS --//
-		return $aResult['Data'];
+		return $aResult;
 	} else {
 		//-- 9.B - FAILURE --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );

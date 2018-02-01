@@ -173,22 +173,22 @@ if($bError===false) {
 						$bError    = true;
 						$iErrCode  = 145;
 						$sErrMesg .= "Error Code:'0145' \n";
-						$sErrMesg .= "Invalid POST \"Data\"! \n";
-						$sErrMesg .= "Couldn't extract JSON values from the \"Data\" parameter \n";
+						$sErrMesg .= "Invalid POST \"Access\"! \n";
+						$sErrMesg .= "Couldn't extract JSON values from the \"Access\" parameter \n";
 					}
 					
 				} else {
 					$bError    = true;
 					$iErrCode  = 145;
 					$sErrMesg .= "Error Code:'0145' \n";
-					$sErrMesg .= "Invalid POST \"Data\" parameter! \n";
-					$sErrMesg .= "Please use a valid data in the \"Data\" parameter \n";
+					$sErrMesg .= "Invalid POST \"Acess\" parameter! \n";
+					$sErrMesg .= "Please use a valid data in the \"Access\" parameter \n";
 				}
 			} catch( Exception $e0146 ) {
 				$bError = true;
 				$sErrMesg .= "Error Code:'0146' \n";
-				$sErrMesg .= "Incorrect \"Data\" parameter!\n";
-				$sErrMesg .= "Please use a valid \"Data\" parameter\n";
+				$sErrMesg .= "Incorrect \"Access\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"Access\" parameter\n";
 			}
 		}
 	}
