@@ -2,6 +2,9 @@ apply plugin: 'com.android.model.native'
 
 final local_APP_ABIS=APP_ABIS
 
+//NOTE: Only list boost libraries that this library uses here
+final local_BOOST_SHARED_LIBS=["boost_system", "boost_thread", "boost_chrono"]
+
 model {
     android {
         compileSdkVersion NDKCOMPILESDKVERSION
@@ -17,6 +20,7 @@ model {
         CFlags.addAll(COMMON_CFLAGS)
         cppFlags.addAll(COMMON_CPPFLAGS)
         cppFlags.add("-I" + getBoostIncDir())
+        ldLibs.addAll(local_BOOST_SHARED_LIBS)
         if (rootProject.ext.has('NDKSTL')) {
             stl NDKSTL
         }

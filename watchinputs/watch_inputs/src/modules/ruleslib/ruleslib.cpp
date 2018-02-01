@@ -34,6 +34,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //Needed for endian.h functions
 #define _BSD_SOURCE
 
+//Use Boost Chrono instead of C++11 chrono
+#define BOOST_ASIO_DISABLE_STD_CHRONO
+
 //These definitions will be picked up by commonlib.h
 #ifdef DEBUG
 #define ENABLE_PTHREAD_DEBUG_V2
@@ -71,6 +74,20 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <boost/chrono.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/recursive_mutex.hpp>
+#include <boost/atomic/atomic.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/system_timer.hpp>
+#include <boost/bind.hpp>
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
+#include <boost/archive/iterators/remove_whitespace.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #ifdef __ANDROID__
 #include <jni.h>
 #include <android/log.h>
@@ -82,6 +99,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/dblib/dblib.h"
 #include "modules/commonlib/commonlib.h"
 #include "modules/zigbeelib/zigbeelib.h"
+#include "modules/configlib/configlib.hpp"
 
 //From cmdserverlib.h
 //These lines will be needed at the top of your C or C++ file below the includes
@@ -99,6 +117,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 namespace ruleslib {
+
+using boost::asio::ip::tcp;
 
 //NOTE: Currently we rely on the webapi to provide nextRuntime updates
 class Rule {
@@ -125,17 +145,7 @@ public:
   bool isRecurring(); //Returns true if this rule is recurring
 };
 
-#ifdef DEBUG
-static pthread_mutexattr_t gerrorcheckmutexattr;
-
-static pthread_mutex_t gmutex;
-static pthread_mutex_t gmutex_waitforresponse;
-static pthread_mutex_t gmutex_detectingdevice;
-#else
-static pthread_mutex_t gmutex = PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t gmutex_waitforresponse = PTHREAD_MUTEX_INITIALIZER; //Locked when we are waiting for a response from a device
-static pthread_mutex_t gmutex_detectingdevice = PTHREAD_MUTEX_INITIALIZER; //Locked when we are detecting an device
-#endif
+static boost::recursive_mutex thislibmutex;
 
 //ruleid, rule class
 static std::map<uint32_t, Rule> grules;
@@ -157,6 +167,7 @@ static const cmdserverlib_ifaceptrs_ver_2_t *cmdserverlibifaceptr;
 static const dblib_ifaceptrs_ver_1_t *dblibifaceptr;
 static const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr;
 static const zigbeelib_ifaceptrs_ver_2_t *zigbeelibifaceptr;
+static const configlib_ifaceptrs_ver_2_cpp_t *configlibifaceptr;
 
 //Static Function Declarations
 
@@ -207,6 +218,12 @@ static moduledep_ver_1_t gdeps[]={
     nullptr,
     ZIGBEELIBINTERFACE_VER_2,
     0,
+  },
+  {
+    "configlib",
+    nullptr,
+    CONFIGLIBINTERFACECPP_VER_2,
+    1
   },
   {
     nullptr, nullptr, 0, 0
@@ -275,96 +292,6 @@ static void thislib_backtrace(void) {
 }
 #endif
 
-static pthread_key_t lockkey;
-static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
-static int havelockkey;
-
-//Initialise a thread local store for the lock counter
-static void makelockkey(void) {
-  int result;
-
-  result=pthread_key_create(&lockkey, nullptr);
-  if (result!=0) {
-    debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu Failed to create lockkey: %d\n", __PRETTY_FUNCTION__, pthread_self(), result);
-  } else {
-    havelockkey=1;
-  }
-}
-
-/*
-  Apply the mutex lock if not already applied otherwise increment the lock count
-*/
-static void lockthislib(void) {
-  LOCKDEBUG_ADDDEBUGLIBIFACEPTR();
-  long *lockcnt;
-
-  LOCKDEBUG_ENTERINGFUNC();
-  (void) pthread_once(&lockkey_onceinit, makelockkey);
-  if (!havelockkey) {
-    debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lockkey not created\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__);
-    return;
-  }
-  //Get the lock counter from thread local store
-  lockcnt = (long *) pthread_getspecific(lockkey);
-  if (lockcnt==nullptr) {
-    //Allocate storage for the lock counter and set to 0
-    try {
-      lockcnt=new long[1];
-    } catch (std::bad_alloc& e) {
-      debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Unable to allocate ram for lockcnt\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__);
-      return;
-    }
-    *lockcnt=0;
-    (void) pthread_setspecific(lockkey, lockcnt);
-  }
-  if ((*lockcnt)==0) {
-    //Lock the thread if not already locked
-    PTHREAD_LOCK(&gmutex);
-  }
-  //Increment the lock count
-  ++(*lockcnt);
-#ifdef LOCKDEBUG
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__, *lockcnt);
-#endif
-}
-
-/*
-  Decrement the lock count and if 0, release the mutex lock
-*/
-static void unlockthislib(void) {
-  long *lockcnt;
-
-  LOCKDEBUG_ENTERINGFUNC();
-
-  (void) pthread_once(&lockkey_onceinit, makelockkey);
-  if (!havelockkey) {
-    debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lockkey not created\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__);
-    return;
-  }
-  //Get the lock counter from thread local store
-  lockcnt = (long *) pthread_getspecific(lockkey);
-  if (lockcnt==nullptr) {
-    debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu LOCKING MISMATCH TRIED TO UNLOCK WHEN LOCK COUNT IS 0 AND ALREADY UNLOCKED\n", __PRETTY_FUNCTION__, pthread_self());
-    thislib_backtrace();
-    return;
-  }
-  --(*lockcnt);
-  if ((*lockcnt)==0) {
-    //Lock the thread if not already locked
-    PTHREAD_UNLOCK(&gmutex);
-  }
-#ifdef LOCKDEBUG
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __PRETTY_FUNCTION__, pthread_self(), __LINE__, *lockcnt);
-#endif
-
-  if ((*lockcnt)==0) {
-    //Deallocate storage for the lock counter so don't have to free it at thread exit
-    delete[] lockcnt;
-    lockcnt=nullptr;
-    (void) pthread_setspecific(lockkey, lockcnt);
-  }
-}
-
 /*
   Thread unsafe get need more info value
 */
@@ -378,9 +305,9 @@ static bool _getneedmoreinfo(void) {
 static bool getneedmoreinfo() {
   int val;
 
-  lockthislib();
+  thislibmutex.lock();
   val=_getneedmoreinfo();
-  unlockthislib();
+  thislibmutex.unlock();
 
   return val;
 }
@@ -396,9 +323,9 @@ static void _setneedmoreinfo(bool needmoreinfo) {
   Thread safe set need more info value
 */
 static void setneedmoreinfo(bool needmoreinfo) {
-  lockthislib();
+  thislibmutex.lock();
   _setneedmoreinfo(needmoreinfo);
-  unlockthislib();
+  thislibmutex.unlock();
 }
 
 
@@ -440,6 +367,668 @@ bool Rule::isRecurring() {
 
 //----------------------
 
+//Returns an encoded string from a unencoded string
+//Based on http://stackoverflow.com/questions/10521581/base64-encode-using-boost-throw-exception/10973348#10973348
+//The line break inserting at character 76 has been removed
+static std::string base64_encode(const std::string& s) {
+  typedef boost::archive::iterators::base64_from_binary<boost::archive::iterators::transform_width<std::string::const_iterator,6,8> > it_base64_t;
+
+  unsigned int writePaddChars = (3-s.length()%3)%3;
+  std::string base64(it_base64_t(s.begin()),it_base64_t(s.end()));
+  base64.append(writePaddChars,'=');
+
+  return base64;
+}
+
+//Returns a decoded string from a base64 encoded string
+//Based on http://stackoverflow.com/questions/10521581/base64-encode-using-boost-throw-exception/10973348#10973348
+static std::string base64_decode(const std::string& base64) {
+  typedef boost::archive::iterators::transform_width< boost::archive::iterators::binary_from_base64<boost::archive::iterators::remove_whitespace<std::string::const_iterator> >, 8, 6 > it_binary_t;
+  std::string tmps=base64;
+
+  unsigned int paddChars = count(tmps.begin(), tmps.end(), '=');
+  std::replace(tmps.begin(),tmps.end(),'=','A'); // replace '=' by base64 encoding of '\0'
+  std::string result(it_binary_t(tmps.begin()), it_binary_t(tmps.end())); // decode
+  result.erase(result.end()-paddChars,result.end());  // erase padding '\0' characters
+
+  return result;
+}
+
+//From http://stackoverflow.com/questions/154536/encode-decode-urls-in-c
+static std::string url_encode(const std::string &value) {
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (auto const& it : value) {
+        std::string::value_type c = it;
+
+        // Keep alphanumeric and other accepted characters intact
+        if (std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            escaped << c;
+            continue;
+        }
+
+        // Any other characters are percent-encoded
+        escaped << std::uppercase;
+        escaped << '%' << std::setw(2) << int((unsigned char) c);
+        escaped << std::nouppercase;
+    }
+
+    return escaped.str();
+}
+
+//Setup a http request
+//Only POST is supported at the moment
+class httpclient {
+private:
+  //Name, Value pair
+  std::map<std::string, std::string> headers;
+
+  //Name, Value pair
+  std::map<std::string, std::string> formfields;
+  std::string httppath;
+  bool haveHttpAuth=false;
+  std::string httpusername;
+  std::string httppassword;
+public:
+  httpclient() {
+    addHeader("Accept", "*/*");
+    addHeader("User-Agent", "HTTP-Client 1.0");
+    addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+  }
+
+  void addHeader(const std::string& name, const std::string& value) {
+    headers[name]=value;
+  }
+
+  //Added an entire string as a header
+  //Example: Host: www.example.com
+  void addHeader(const std::string& str) {
+    std::istringstream ss(str);
+    std::string name, value;
+
+    ss >> name;
+    ss >> value;
+    name.erase(name.end()-1); //Remove : at the end of the name
+    addHeader(name, value);
+  }
+
+  void addFormField(const std::string& name, const std::string& value) {
+    formfields[name]=value;
+  }
+
+  void addFormField(const std::string& name, const long int value) {
+    std::ostringstream ss;
+
+    ss << value;
+    formfields[name]=ss.str();
+  }
+
+  void setPath(std::string path) {
+    this->httppath=path;
+  }
+
+  void addHttpAuth(const std::string& username, const std::string& password) {
+    this->httpusername=username;
+    this->httppassword=password;
+    haveHttpAuth=true;
+  }
+
+  std::string toString() {
+    std::ostringstream stream;
+    std::ostringstream body;
+
+    //Generate the body from the form data
+    bool firstfield=true;
+    for (auto const& formfieldit : formfields) {
+      if (!firstfield) {
+        body << "&";
+      }
+      body << url_encode(formfieldit.first) << '=' << url_encode(formfieldit.second);
+      firstfield=false;
+    }
+    stream << "POST " << httppath << " HTTP/1.0\r\n";
+    if (haveHttpAuth) {
+      std::ostringstream authstring;
+      authstring << httpusername << ':' << httppassword;
+      stream << "Authorization: Basic " << base64_encode(authstring.str()) << "\r\n";
+    }
+    for (auto const& headerit : headers) {
+      stream << headerit.first << ": " << headerit.second << "\r\n";
+    }
+    stream << "Content-Length: " << body.str().size() << "\r\n";
+    stream << "\r\n";
+    stream << body.str();
+
+    return stream.str();
+  }
+};
+
+
+//Based on http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/example/cpp03/http/client/async_client.cpp
+//  and http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/example/cpp03/timeouts/async_tcp_client.cpp
+//NOTE: Android doesn't know about service: "http" so have to use 80 for the port
+class asioclient {
+private:
+  boost::atomic<bool> stopped_;
+  tcp::resolver resolver_;
+  tcp::socket socket_;
+  boost::asio::streambuf response_;
+  boost::asio::system_timer deadline_;
+  std::string httpserver;
+  std::string httppath;
+  std::string webapiport;
+  std::string apiusername, apipassword;
+  std::string httpusername;
+  std::string httppassword;
+  std::string http_version;
+  unsigned httpstatuscode;
+  long httpbodylen;
+  int requestmode; //1=Adding Link, 2=Adding Comm, 3=Adding Thing
+
+  //See http://stackoverflow.com/questions/21120361/boostasioasync-write-and-buffers-over-65536-bytes
+  //These variables need to stay allocated while the asio request is active so can't be local to a single function
+  httpclient hc;
+  boost::asio::streambuf listAllActiveRulesRequest_;
+
+public:
+  asioclient(boost::asio::io_service& io_service)
+    : stopped_(true), resolver_(io_service), socket_(io_service), deadline_(io_service) {
+      //NOTE: When initialised globally, debuglibifaceptr won't be initialised yet
+    }
+
+  // Called by the user of the client class to initiate the connection process.
+  // The endpoint iterator will have been obtained using a tcp::resolver.
+  void start(const std::string& server, const std::string& webapiport, const std::string& path, const std::string& username, const std::string& password, const std::string &httpusername, const std::string &httppassword) {
+    // Form the request. We specify the "Connection: close" header so that the
+    // server will close the socket after transmitting the response. This will
+    // allow us to treat all data up until the EOF as the content.
+    if (!stopped_) {
+      return;
+    }
+    stopped_=false;
+    httpserver=server;
+    httppath=path;
+    this->webapiport=webapiport;
+    apiusername=username;
+    apipassword=password;
+    this->httpusername=httpusername;
+    this->httppassword=httppassword;
+
+    //NOTE: We set the Mode and Data later on when submitting the request
+    hc.setPath(httppath);
+    if (httpusername != "") {
+      //Send the http password straight away to reduce the number of packets
+      hc.addHttpAuth(httpusername, httppassword);
+    }
+    hc.addHeader("Host", httpserver);
+    if (apiusername != "") {
+      hc.addFormField("AttemptLogin", "1");
+      hc.addFormField("username", apiusername);
+      hc.addFormField("password", apipassword);
+    }
+    //Loop through the zigbee comms and links queues adding each one at a time
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+    }
+    // Start an asynchronous resolve to translate the server and service names
+    // into a list of endpoints.
+    tcp::resolver::query query(httpserver, this->webapiport);
+    resolver_.async_resolve(query,
+      boost::bind(&asioclient::handle_resolve, this,
+        boost::asio::placeholders::error,
+        boost::asio::placeholders::iterator));
+
+    //Set a starting deadline timer for 10 seconds (Queries shouldn't take longer than that
+    deadline_.expires_from_now(boost::chrono::seconds(10));
+
+    // Start the deadline actor
+    deadline_.async_wait(boost::bind(&asioclient::check_deadline, this));
+  }
+
+  // This function terminates all the actors to shut down the connection. It
+  // may be called by the user of the client class, or by the class itself in
+  // response to graceful termination or an unrecoverable error.
+  void stop() {
+    if (stopped_) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Connection Aborted\n", __PRETTY_FUNCTION__);
+      return;
+    }
+    debuglibifaceptr->debuglib_printf(1, "%s: Stopping connection\n", __PRETTY_FUNCTION__);
+    stopped_ = true;
+    boost::system::error_code ignored_ec;
+    try {
+      socket_.shutdown(tcp::socket::shutdown_both, ignored_ec);
+    } catch (std::exception& e) {
+      //Ignore errors from this function for now
+    }
+    socket_.close(ignored_ec);
+    deadline_.cancel();
+    response_.consume(response_.size());
+  }
+private:
+  void handle_resolve(const boost::system::error_code& err, tcp::resolver::iterator endpoint_iterator) {
+    if (stopped_) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Connection Aborted\n", __PRETTY_FUNCTION__);
+      return;
+    }
+    if (!err)
+    {
+      std::stringstream tmps;
+      tmps << endpoint_iterator->endpoint();
+      debuglibifaceptr->debuglib_printf(1, "%s: Trying %s...\n", __PRETTY_FUNCTION__, tmps.str().c_str());
+
+      // Set a deadline for the connect operation.
+      deadline_.expires_from_now(boost::chrono::seconds(10));
+
+      // Attempt a connection to each endpoint in the list until we
+      // successfully establish a connection.
+      boost::asio::async_connect(socket_, endpoint_iterator,
+          boost::bind(&asioclient::handle_connect, this,
+            boost::asio::placeholders::error));
+    }
+    else
+    {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: %s, Hostname: %s, Port: %s\n", __PRETTY_FUNCTION__, err.message().c_str(), this->httpserver.c_str(), this->webapiport.c_str());
+      stop();
+    }
+  }
+
+  void reset_http_body() {
+    http_version="";
+    httpstatuscode=0;
+    httpbodylen=0;
+  }
+
+  void handle_connect(const boost::system::error_code& err) {
+    if (stopped_) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Connection Aborted\n", __PRETTY_FUNCTION__);
+      return;
+    }
+    if (!err)
+    {
+      // The connection was successful. Get a full list of rules
+      get_all_rules();
+    }
+    else
+    {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: %s\n", __PRETTY_FUNCTION__, err.message().c_str());
+      stop();
+    }
+  }
+
+
+  void get_all_rules(void) {
+    //Get all the rules on every connect
+    if (!getneedtoquit()) {
+      reset_http_body();
+
+      hc.addFormField("Mode", "ListAllActiveRules");
+      hc.addFormField("Format", "json");
+      std::ostream request_stream(&listAllActiveRulesRequest_);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending request for all active rules: %s\n", __PRETTY_FUNCTION__, hc.toString().c_str());
+      request_stream << hc.toString();
+
+      requestmode=1;
+      boost::asio::async_write(socket_, listAllActiveRulesRequest_,
+          boost::bind(&asioclient::handle_write_request, this,
+            boost::asio::placeholders::error));
+    } else {
+      stop();
+    }
+  }
+
+  void handle_write_request(const boost::system::error_code& err) {
+    //if (stopped_) {
+    //  debuglibifaceptr->debuglib_printf(1, "%s: Connection Aborted\n", __PRETTY_FUNCTION__);
+    //  return;
+    //}
+    if (!err)
+    {
+      // Set a deadline for the read operation.
+      deadline_.expires_from_now(boost::chrono::seconds(10));
+
+      // Read the response status line. The response_ streambuf will
+      // automatically grow to accommodate the entire line. The growth may be
+      // limited by passing a maximum size to the streambuf constructor.
+      boost::asio::async_read_until(socket_, response_, "\r\n",
+          boost::bind(&asioclient::handle_read_status_line, this,
+            boost::asio::placeholders::error));
+    }
+    else
+    {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: %s\n", __PRETTY_FUNCTION__, err.message().c_str());
+      stop();
+    }
+  }
+
+  void handle_read_status_line(const boost::system::error_code& err) {
+    if (stopped_) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Connection Aborted\n", __PRETTY_FUNCTION__);
+      return;
+    }
+    if (!err) {
+      // Check that response is OK.
+      std::istream response_stream(&response_);
+      response_stream >> http_version;
+      response_stream >> httpstatuscode;
+      std::string status_message;
+      std::getline(response_stream, status_message);
+      if (!response_stream || http_version.substr(0, 5) != "HTTP/") {
+        debuglibifaceptr->debuglib_printf(1, "%s: Invalid response: %s\n", __PRETTY_FUNCTION__, http_version.c_str());
+        stop();
+        return;
+      } else if (httpstatuscode == 401 || httpstatuscode == 403) {
+        //Abort as the password was incorrect
+        debuglibifaceptr->debuglib_printf(1, "%s: Authentication Failure\n", __PRETTY_FUNCTION__);
+        stop();
+        return;
+      } else if (httpstatuscode != 200) {
+        debuglibifaceptr->debuglib_printf(1, "%s: Response returned with status code: %u\n", __PRETTY_FUNCTION__, httpstatuscode);
+        stop();
+        return;
+      }
+      // Set a deadline for the read operation.
+      deadline_.expires_from_now(boost::chrono::seconds(10));
+
+      // Read the response headers, which are terminated by a blank line.
+      boost::asio::async_read_until(socket_, response_, "\r\n\r\n",
+          boost::bind(&asioclient::handle_read_headers, this,
+            boost::asio::placeholders::error));
+    }
+    else
+    {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: %s\n", __PRETTY_FUNCTION__, err.message().c_str());
+      stop();
+    }
+  }
+
+  void handle_read_headers(const boost::system::error_code& err) {
+    if (stopped_) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Connection Aborted\n", __PRETTY_FUNCTION__);
+      return;
+    }
+    if (!err)
+    {
+      // Process the response headers.
+      std::istream response_stream(&response_);
+      std::string header;
+      bool havebodylen=false;
+      while (std::getline(response_stream, header) && header != "\r") {
+        if (header.substr(0, 15) == "Content-Length:") {
+          std::stringstream contentlengthstr(header.substr(15));
+          contentlengthstr >> httpbodylen;
+          havebodylen=true;
+          debuglibifaceptr->debuglib_printf(1, "%s: Content-Length=%ld\n", __PRETTY_FUNCTION__, httpbodylen);
+        }
+        debuglibifaceptr->debuglib_printf(1, "%s: Header: %s\n", __PRETTY_FUNCTION__, header.c_str());
+      }
+      if (!havebodylen) {
+        //Can't continue without proper body length so abort
+        debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to retrieve Content-Length\n", __PRETTY_FUNCTION__);
+        stop();
+        return;
+      }
+      // Set a deadline for the read operation.
+      deadline_.expires_from_now(boost::chrono::seconds(60));
+
+      if (httpstatuscode == 401 || httpstatuscode==403) {
+        //Abort as the password was incorrect
+        debuglibifaceptr->debuglib_printf(1, "%s: Authentication Failure\n", __PRETTY_FUNCTION__);
+        stop();
+        return;
+      } else if (httpstatuscode != 200) {
+        debuglibifaceptr->debuglib_printf(1, "%s: Response returned with status code: %u\n", __PRETTY_FUNCTION__, httpstatuscode);
+
+        // Dummy read the body
+        boost::asio::async_read(socket_, response_,
+            boost::asio::transfer_exactly(httpbodylen-response_.size()),
+            boost::bind(&asioclient::dummy_read_content, this,
+              boost::asio::placeholders::error));
+        stop();
+        return;
+      } else {
+        // Read the body
+        boost::asio::async_read(socket_, response_,
+            boost::asio::transfer_exactly(httpbodylen-response_.size()),
+            boost::bind(&asioclient::handle_read_content, this,
+              boost::asio::placeholders::error));
+      }
+    }
+    else
+    {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: %s\n", __PRETTY_FUNCTION__, err.message().c_str());
+      stop();
+    }
+  }
+
+  int process_response(std::string body) {
+    int errcode=0;
+
+    try {
+      boost::property_tree::ptree pt;
+      std::istringstream streamstr(body);
+
+      read_json(streamstr, pt);
+      bool iserror=pt.get<bool>("Error");
+      if (iserror) {
+        errcode=pt.get<int>("ErrCode");
+        std::string errorstr=pt.get<std::string>("ErrMesg");
+        debuglibifaceptr->debuglib_printf(1, "%s: Webapi server returned error code: %d, error message: %s\n", __PRETTY_FUNCTION__, errcode, errorstr.c_str());
+        if (errcode==0) {
+          //Error code 0 normally means success so if there was an error adjust to -1 for the return
+          errcode=-1;
+        }
+      }
+    } catch (boost::property_tree::ptree_error &e) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Webapi server returned an unknown result\n", __PRETTY_FUNCTION__);
+      return -1;
+    }
+    return errcode;
+  }
+
+  void dummy_read_content(const boost::system::error_code& err) {
+    response_.consume(httpbodylen);
+  }
+
+  void handle_read_content(const boost::system::error_code& err) {
+    if (!err || err == boost::asio::error::eof) {
+      // Write all of the data that has been read so far.
+      std::string httpbody;
+      int c;
+      while ( (c=response_.sbumpc())!=EOF ) {
+        httpbody+=(char) c;
+      }
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Body: \"%s\"\n", __PRETTY_FUNCTION__, httpbody.c_str());
+
+      int result=process_response(httpbody);
+
+      if (result==0) {
+        successful_send();
+      } else {
+        failed_send();
+      }
+    }
+    else if (err != boost::asio::error::eof)
+    {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: %s\n", __PRETTY_FUNCTION__, err.message().c_str());
+      stop();
+    }
+  }
+
+  //Do processing after the request has been sent and then send the next request
+  void successful_send() {
+    if (requestmode==1) {
+      //std::list<webapiclient_link_t *>::iterator linksprevit=linksit;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing Link from add queue due to success\n", __PRETTY_FUNCTION__);
+
+      //Step to next link before erasing the one that just got added
+      //++linksit;
+
+      //Erase the link that just got added
+      //delete (*linksprevit);
+      //webapi_links_queue.erase(linksprevit);
+
+      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
+      stop();
+      //Send next request
+      //send_link_request();
+    } else if (requestmode==3) {
+      //std::list<webapiclient_thing_t *>::iterator thingsprevit=thingsit;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing Thing from add queue due to success\n", __PRETTY_FUNCTION__);
+
+      //Step to next thing before erasing the one that just got added
+      //++thingsit;
+
+      //Erase the thing that just got added
+      //delete (*thingsprevit);
+      //webapi_things_queue.erase(thingsprevit);
+
+      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
+      stop();
+      //Send next request
+      //send_link_request();
+    } else if (requestmode==2) {
+      //std::list<webapiclient_comm_t *>::iterator commsprevit=commsit;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing Comm from add queue due to success\n", __PRETTY_FUNCTION__);
+
+      //Step to next comm before erasing the one that just got added
+      //++commsit;
+
+      //Erase the comm that just got added
+      //delete (*commsprevit);
+      //webapi_comms_queue.erase(commsprevit);
+
+      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
+      stop();
+      //Send next request
+      //send_comm_request();
+    }
+  }
+
+  //Do processing after the request has been sent and then send the next request
+  void failed_send() {
+    if (requestmode==1) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Link for now due to error\n", __PRETTY_FUNCTION__);
+
+      //Skip the current link for now and step to next link
+      //++linksit;
+
+      //Send next request
+      //send_link_request();
+    } else if (requestmode==3) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Thing for now due to error\n", __PRETTY_FUNCTION__);
+
+      //Skip the current thing for now and step to next link
+      //++thingsit;
+
+      //Send next request
+      //send_thing_request();
+    } else if (requestmode==2) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Comm for now due to error\n", __PRETTY_FUNCTION__);
+
+      //Skip the current comm link for now and step to next comm link
+      //++commsit;
+
+      //Send next request
+      //send_comm_request();
+    }
+  }
+
+  void check_deadline() {
+    if (stopped_)
+      return;
+
+    // Check whether the deadline has passed. We compare the deadline against
+    // the current time since a new asynchronous operation may have moved the
+    // deadline before this actor had a chance to run.
+    if (deadline_.expires_at() <= boost::chrono::system_clock::now())
+    {
+      debuglibifaceptr->debuglib_printf(1, "%s: Server took too long to respond\n", __PRETTY_FUNCTION__);
+
+      //Shutdown first as per Boost header file portability recommendation
+      try {
+        socket_.shutdown(tcp::socket::shutdown_both);
+      } catch (std::exception& e) {
+        //Ignore errors from this function for now
+      }
+      // The deadline has passed. The socket is closed so that any outstanding
+      // asynchronous operations are cancelled.
+      socket_.close();
+    } else {
+      // Put the actor back to sleep.
+      deadline_.async_wait(boost::bind(&asioclient::check_deadline, this));
+    }
+  }
+};
+
+class asyncloop {
+private:
+  boost::mutex mtx_;
+  boost::asio::io_service io_service;
+  boost::asio::system_timer timer;
+  asioclient client;
+
+public:
+  asyncloop()
+    : timer(io_service), client(io_service) {
+    }
+
+  void start() {
+    update_timer_loop();
+    try {
+      io_service.run();
+      io_service.reset();
+    } catch (std::exception& e) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error while running service: %s\n", __PRETTY_FUNCTION__, e.what());
+    }
+  }
+
+  void stop() {
+    boost::lock_guard<boost::mutex> guard(mtx_);
+    client.stop();
+    timer.expires_from_now(boost::chrono::seconds(0));
+  }
+private:
+  void update_timer_loop() {
+  boost::lock_guard<boost::mutex> guard(mtx_);
+    timer.expires_from_now(boost::chrono::seconds(5)); //Restart every 5 seconds
+    timer.async_wait(boost::bind(&asyncloop::timer_handler, this, boost::asio::placeholders::error));
+
+    std::string webapihostname="", webapiport="80", webapiurl="", webapihttpuser="", webapihttppass="", webapiuser="", webapipass="";
+    bool result, missingval=false;
+
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hostname", webapihostname);
+    if (!result) {
+      missingval=true;
+    }
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "port", webapiport);
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hubrulesurl", webapiurl);
+    if (!result) {
+      missingval=true;
+    }
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httpusername", webapihttpuser);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httppassword", webapihttppass);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apiusername", webapiuser);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apipassword", webapipass);
+    if (!missingval) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Starting client connection\n", __PRETTY_FUNCTION__);
+      client.start(webapihostname, webapiport, webapiurl, webapiuser, webapipass, webapihttpuser, webapihttppass);
+    }
+  }
+
+  //Called every time the main timer triggers
+  void timer_handler(const boost::system::error_code& error) {
+    if (!getneedtoquit()) {
+      update_timer_loop();
+    }
+  }
+};
+
 /*
  * Process the rules one by one
  */
@@ -461,7 +1050,7 @@ static void process_rules() {
   debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Current time: %02d:%02d:%02d\n", __PRETTY_FUNCTION__, curtimelocaltm.tm_hour, curtimelocaltm.tm_min, curtimelocaltm.tm_sec);
 
   //Process the rules all within a lock so retrieval of new rules doesn't corrupt the list
-  lockthislib();
+  thislibmutex.lock();
   for (auto &rulesit : grules) {
     debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Checking rule: %s(%d)\n", __PRETTY_FUNCTION__, rulesit.second.ruleName.c_str(), rulesit.second.ruleId);
     if (!rulesit.second.enabled || rulesit.second.needToRemove || rulesit.second.needToRemoveInDb) {
@@ -496,14 +1085,14 @@ static void process_rules() {
       }
     }
   }
-  unlockthislib();
+  thislibmutex.unlock();
 }
 
 /*
  * Remove rules that have been scheduled to be deleted
  */
 static void remove_scheduled_to_delete_rules() {
-  lockthislib();
+  thislibmutex.lock();
 
   //NOTE: We need to use a list to remove the rules as otherwise the main for loop may get confused if we remove items from underneath it
   auto rulesitbegin=grules.begin();
@@ -518,7 +1107,7 @@ static void remove_scheduled_to_delete_rules() {
   for (auto const &it : rules_to_remove) {
     grules.erase(it);
   }
-  unlockthislib();
+  thislibmutex.unlock();
 }
 
 /*
@@ -578,9 +1167,9 @@ static int processcommand(const char *buffer, int clientsock) {
       ostream << "Adding local rule: " << buffertokens[1] << " for type: " << buffertokens[3] << " to set device: " << buffertokens[2] << " " << " port: " << buffertokens[3] << " " << buffertokens[5] << " and to enable in " << buffertokens[6] << " seconds" << std::endl;
       cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
       Rule localrule(ruleId, ruleName, deviceId, portId, deviceType, ruleType, true, true, curtime.tv_sec, -1, nextRuntime);
-      lockthislib();
+      thislibmutex.lock();
       grules[ruleId]=localrule;
-      unlockthislib();
+      thislibmutex.unlock();
       return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
     } else {
       cmdserverlibifaceptr->netputs("Incorrect number arguments to addlocaltestrule\n", clientsock, NULL);
@@ -593,6 +1182,8 @@ static int processcommand(const char *buffer, int clientsock) {
 
   return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
 }
+
+asyncloop gasyncloop;
 
 /*
   Main thread loop that manages operation of rules
@@ -609,6 +1200,9 @@ static void *mainloop(void *UNUSED(val)) {
     if (getneedtoquit()) {
       break;
     }
+    //Auto restart the loop if it crashes before we are ready to quit
+    gasyncloop.start();
+
     process_rules();
     remove_scheduled_to_delete_rules();
 
@@ -627,21 +1221,14 @@ static void *mainloop(void *UNUSED(val)) {
   return (void *) 0;
 }
 
+static boost::atomic<bool> webapiclientlib_needtoquit(false);
+
 static void setneedtoquit(bool val) {
-  lockthislib();
-  gneedtoquit=val;
-  sem_post(&gmainthreadsleepsem);
-  unlockthislib();
+  webapiclientlib_needtoquit.store(val);
 }
 
-static bool getneedtoquit(void) {
-  int val;
-
-  lockthislib();
-  val=gneedtoquit;
-  unlockthislib();
-
-  return val;
+static bool getneedtoquit() {
+  return webapiclientlib_needtoquit.load();
 }
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
@@ -686,6 +1273,7 @@ static int init(void) {
   dblibifaceptr=reinterpret_cast<const dblib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dblib", DBLIBINTERFACE_VER_1));;
   debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_2_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_2));
+  configlibifaceptr=reinterpret_cast<const configlib_ifaceptrs_ver_2_cpp_t *>(getmoduledepifaceptr("configlib", CONFIGLIBINTERFACECPP_VER_2));
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
 
@@ -705,16 +1293,6 @@ static int init(void) {
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Can't initialise main thread sleep semaphore\n", __PRETTY_FUNCTION__);
     return -2;
   }
-#ifdef DEBUG
-  //Enable error checking on mutexes if debugging is enabled
-  pthread_mutexattr_init(&gerrorcheckmutexattr);
-  pthread_mutexattr_settype(&gerrorcheckmutexattr, PTHREAD_MUTEX_ERRORCHECK);
-
-  pthread_mutex_init(&gmutex, &gerrorcheckmutexattr);
-  pthread_mutex_init(&gmutex_waitforresponse, &gerrorcheckmutexattr);
-  pthread_mutex_init(&gmutex_detectingdevice, &gerrorcheckmutexattr);
-#endif
-
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 
   return 0;
@@ -744,14 +1322,6 @@ static void shutdown(void) {
 
   sem_destroy(&gmainthreadsleepsem);
 
-#ifdef DEBUG
-  //Destroy main mutexes
-  pthread_mutex_destroy(&gmutex);
-  pthread_mutex_destroy(&gmutex_waitforresponse);
-  pthread_mutex_destroy(&gmutex_detectingdevice);
-
-  pthread_mutexattr_destroy(&gerrorcheckmutexattr);
-#endif
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 }
 
