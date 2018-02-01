@@ -666,12 +666,21 @@ if( $bError===false ) {
 						$sErrMesg  .= "Failed to lookup the status of the optional indicies. \n";
 						
 						
+					//-- ELSE IF The status is "not-present" and the command is "remove" --//
+					} else if( $aTemp3['Data'][$sTableName]['Status']===0 && $sCommand==="Remove" ) {
+						$bError     = true;
+						$iErrCode   = 2442;
+						$sErrMesg  .= "Error Code:'2442' \n";
+						$sErrMesg  .= "The desired change was already in effect! \n";
+						$sErrMesg  .= "Can not remove an index that does not exist! \n";
+						
 					//-- ELSE --//
 					} else {
 						$bError     = true;
 						$iErrCode   = 2442;
 						$sErrMesg  .= "Error Code:'2442' \n";
 						$sErrMesg  .= "The desired change was already in effect! \n";
+						$sErrMesg  .= "The index may already exist! \n";
 					}
 					
 				} else {
