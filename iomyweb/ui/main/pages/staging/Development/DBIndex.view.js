@@ -22,7 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("pages.staging.Development.ServerInfo", {
+sap.ui.jsview("pages.staging.Development.DBIndex", {
     
     /*************************************************************************************************** 
     ** 1.0 - Controller Declaration
@@ -32,7 +32,7 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
     * @memberOf pages.staging.UserSettings
     ****************************************************************************************************/ 
     getControllerName : function() {
-        return "pages.staging.Development.ServerInfo";
+        return "pages.staging.Development.DBIndex";
     },
 
     /*************************************************************************************************** 
@@ -55,82 +55,41 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                     enableLazyLoading: true,
                     showTitleinHeaderContent: true,
                     sections : [
-                        new sap.uxap.ObjectPageSection(oView.createId("Server"), {
+                        new sap.uxap.ObjectPageSection(oView.createId("DB"), {
                             showTitle: false,
                             subSections : [
-                                new sap.uxap.ObjectPageSubSection(oView.createId("ServerBlock"), {
+                                new sap.uxap.ObjectPageSubSection(oView.createId("DBBlock"), {
                                     blocks : [
-                                        new sap.ui.layout.form.Form( oView.createId("ServerBlock_Form"),{
+                                        new sap.ui.layout.form.Form( oView.createId("DBBlock_Form"),{
                                             editable: true,
-                                            layout : new sap.ui.layout.form.ResponsiveGridLayout ({
-                                                labelSpanXL: 3,
-                                                labelSpanL: 3,
-                                                labelSpanM: 3,
-                                                labelSpanS: 12,
-                                                adjustLabelSpan: false,
-                                                emptySpanXL: 3,
-                                                emptySpanL: 2,
-                                                emptySpanM: 0,
-                                                emptySpanS: 0,
-                                                columnsXL: 2,
-                                                columnsL: 2,
-                                                columnsM: 2,
-                                                columnsS: 2,
-                                                singleContainerFullSize: false
-                                            }),
+                                           layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+												labelSpanXL: 3,
+												labelSpanL: 3,
+												labelSpanM: 3,
+												labelSpanS: 12,
+												adjustLabelSpan: false,
+												emptySpanXL: 3,
+												emptySpanL: 2,
+												emptySpanM: 0,
+												emptySpanS: 0,
+												columnsXL: 1,
+												columnsL: 1,
+												columnsM: 1,
+												columnsS: 1,
+												singleContainerFullSize: false
+											}),
                                             toolbar : new sap.m.Toolbar({
                                                 content : [
-                                                    new sap.m.Title (oView.createId("ServerToolbarTitle"),{
-                                                        text:"iOmy Server Information"
+                                                    new sap.m.Title (oView.createId("DBTitle"),{
+                                                        text:"Database Indexing"
                                                     })
                                                 ]
                                             }).addStyleClass("MarBottom1d0Rem"),
                                             formContainers : [
                                                 new sap.ui.layout.form.FormContainer({
-                                                    toolbar : new sap.m.Toolbar({
-                                                    content : [
-                                                        new sap.m.Title (oView.createId("VersionInfoToolbar"),{
-                                                            text:"Verison Information"
-                                                        })
-                                                    ]
-                                                }).addStyleClass("MarBottom1d0Rem"),
                                                     formElements : [
                                                         new sap.ui.layout.form.FormElement({
-                                                            label : "OpenUI5 Distribution",
-                                                            fields: [
-                                                                new sap.m.Text ({
-                                                                    text: "{/ui5Version}"
-                                                                })
-                                                            ]
-                                                        }),
-                                                        new sap.ui.layout.form.FormElement({
-                                                            label : "Interface Iteration",
-                                                            fields: [
-                                                                new sap.m.Text ({
-                                                                    text: "{/interfaceVersion}"
-                                                                })
-                                                            ]
-                                                        }),
-                                                        new sap.ui.layout.form.FormElement({
-                                                            label : "Database Iteration",
-                                                            fields: [
-                                                                new sap.m.Text ({
-                                                                    text: "{/dbVersion}"
-                                                                })
-                                                            ]
-                                                        })
-                                                    ]
-                                                }),
-                                                new sap.ui.layout.form.FormContainer({
-                                                    toolbar : new sap.m.Toolbar({
-                                                        content : [
-                                                            new sap.m.Title (oView.createId("DatabaseTitle"),{
-                                                                text:"Database Index"
-                                                            })
-                                                        ]
-                                                    }).addStyleClass("MarBottom1d0Rem"),
-                                                    formElements : [
-                                                        new sap.ui.layout.form.FormElement({
+                                                            label : "Warning",
                                                             fields: [
                                                                 new sap.m.Text({
                                                                     text: "If the database indices are enabled the load time of the application with be faster but uses significantly more storage.",
@@ -138,22 +97,47 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
-                                                            fields: [
-                                                                new sap.m.CheckBox({
-                                                                    text: "Database Indexed",
-                                                                    selected: "{/indices/DATABIGINT}",
-                                                                    editable: false,
+                                                            label : "Index State",
+                                                            fields: [ 
+                                                                new sap.m.CheckBox ({
+                                                                    text: "Database Indexed"
                                                                 })
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
-                                                            fields: [
-                                                                new sap.m.Button({
-                                                                    text: "Edit Indexing",
-                                                                    press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pDBIndex" , {} , false);
-                                                                    }
+                                                            label : "DB Root User",
+                                                            fields: [ 
+                                                                new sap.m.Input ({
+                                                                    value:""
                                                                 })
+                                                            ]
+                                                        }),
+                                                        new sap.ui.layout.form.FormElement({
+                                                            label : "DB Root Password",
+                                                            fields: [ 
+                                                                new sap.m.Input ({
+                                                                    value:""
+                                                                })
+                                                            ]
+                                                        }),
+                                                        new sap.ui.layout.form.FormElement({
+                                                            label: "",
+                                                            fields: [
+                                                                new sap.m.Button (oView.createId("ButtonSubmit"), {
+                                                                    text: "Save",
+                                                                    type: sap.m.ButtonType.Accept,
+                                                                    press:   function( oEvent ) {
+                                                                    //    oController.InsertRoomInfoValues( oController );
+                                                                    IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+                                                                    }
+                                                                }),
+                                                                new sap.m.Button (oView.createId("ButtonCancel"), {
+                                                                    text: "Cancel",
+                                                                    type: sap.m.ButtonType.Reject,
+                                                                    press:   function( oEvent ) {
+                                                                        IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+                                                                    }
+                                                                }),
                                                             ]
                                                         }),
                                                     ]

@@ -251,6 +251,12 @@ var aPages = [
 		"Location":		"pages.staging.Development.ServerInfo",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.ServerInfo\" Page!\n"
+	},
+	{
+		"Id":			"pDBIndex",
+		"Location":		"pages.staging.Development.DBIndex",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.DBIndex\" Page!\n"
 	}
 
 ];
