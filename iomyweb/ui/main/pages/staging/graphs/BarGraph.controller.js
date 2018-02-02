@@ -54,8 +54,9 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 				$("#GraphPage_Main").html("");
 				$("#GraphPage_Main_Info").html("");
 				
+                //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), IomyRe.graph_jqplot.PeriodWeek );
                 oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), IomyRe.graph_jqplot.PeriodWeek );
-                //oController.GetBarDataAndDrawGraph( oController.iIOId, 1501545599, IomyRe.graph_jqplot.PeriodYear );
+                //oController.GetBarDataAndDrawGraph( oController.iIOId, 1501545539, IomyRe.graph_jqplot.PeriodYear );
 			}
 		});
 	},
@@ -93,27 +94,27 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
             
             switch (sPeriod) {
                 case IomyRe.graph_jqplot.PeriodWeek:
-                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(sPeriod, mUTS.start * 1000));
+                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(sPeriod, Math.floor(mUTS.start) * 1000));
                     
-                    if (date.getDay() === 0) {
+                    if (date.getUTCDay() === 0) {
                         aTicks.push('Sun');
                         
-                    } else if (date.getDay() === 1) {
+                    } else if (date.getUTCDay() === 1) {
                         aTicks.push('Mon');
                         
-                    } else if (date.getDay() === 2) {
+                    } else if (date.getUTCDay() === 2) {
                         aTicks.push('Tue');
                         
-                    } else if (date.getDay() === 3) {
+                    } else if (date.getUTCDay() === 3) {
                         aTicks.push('Wed');
                         
-                    } else if (date.getDay() === 4) {
+                    } else if (date.getUTCDay() === 4) {
                         aTicks.push('Thu');
                         
-                    } else if (date.getDay() === 5) {
+                    } else if (date.getUTCDay() === 5) {
                         aTicks.push('Fri');
                         
-                    } else if (date.getDay() === 6) {
+                    } else if (date.getUTCDay() === 6) {
                         aTicks.push('Sat');
                         
                     }
@@ -121,42 +122,42 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     break;
                     
                 case IomyRe.graph_jqplot.PeriodYear:
-                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(sPeriod, mUTS.start * 1000));
+                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(sPeriod, Math.floor(mUTS.start) * 1000));
                     
-                    if (date.getMonth() === 0) {
+                    if (date.getUTCMonth() === 0) {
                         aTicks.push('Jan');
                         
-                    } else if (date.getMonth() === 1) {
+                    } else if (date.getUTCMonth() === 1) {
                         aTicks.push('Feb');
                         
-                    } else if (date.getMonth() === 2) {
+                    } else if (date.getUTCMonth() === 2) {
                         aTicks.push('Mar');
                         
-                    } else if (date.getMonth() === 3) {
+                    } else if (date.getUTCMonth() === 3) {
                         aTicks.push('Apr');
                         
-                    } else if (date.getMonth() === 4) {
+                    } else if (date.getUTCMonth() === 4) {
                         aTicks.push('May');
                         
-                    } else if (date.getMonth() === 5) {
+                    } else if (date.getUTCMonth() === 5) {
                         aTicks.push('Jun');
                         
-                    } else if (date.getMonth() === 6) {
+                    } else if (date.getUTCMonth() === 6) {
                         aTicks.push('Jul');
                         
-                    } else if (date.getMonth() === 7) {
+                    } else if (date.getUTCMonth() === 7) {
                         aTicks.push('Aug');
                         
-                    } else if (date.getMonth() === 8) {
+                    } else if (date.getUTCMonth() === 8) {
                         aTicks.push('Sep');
                         
-                    } else if (date.getMonth() === 9) {
+                    } else if (date.getUTCMonth() === 9) {
                         aTicks.push('Oct');
                         
-                    } else if (date.getMonth() === 10) {
+                    } else if (date.getUTCMonth() === 10) {
                         aTicks.push('Nov');
                         
-                    } else if (date.getMonth() === 11) {
+                    } else if (date.getUTCMonth() === 11) {
                         aTicks.push('Dec');
                         
                     }
