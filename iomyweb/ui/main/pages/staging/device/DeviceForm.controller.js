@@ -949,45 +949,64 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         
         oController.ToggleZigbeeControls(false);
         
-        oLogContents += "Running "+sCommand+"...\n";
-        oView.byId("TelnetOutput").setValue(oLogContents);
-        
-        IomyRe.telnet.RunCommand({
-            command : sCommand,
-            hubID : iHubId,
+        try {
+            if (sCommand.startsWith("rapidha_form_network") || sCommand.startsWith("rapidha_form_network_netvoxchan")) {
+                var sUUIDRequired = "RapidHA UUID is required. Run 'get_rapidha_info' to find it.";
 
-            onSuccess : function (result) {
-                //console.log(JSON.stringify(result));
-
-                oLogContents = oView.byId("TelnetOutput").getValue();
-
-                oLogContents += result+"\n-------------------------------------\n";
-                oView.byId("TelnetOutput").setValue(oLogContents);
-
-                // Force it to scroll down to the bottom.
-                document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
-
-                IomyRe.common.RefreshCoreVariables({
-                    onSuccess : function () {
+                IomyRe.common.showInformation(sUUIDRequired, "UUID Required.",
+                    function () {
                         oController.ToggleZigbeeControls(true);
-                        
-                        IomyRe.common.showMessage({
-                            text : sCommand+" executed successfully",
-                            view : oView
-                        });
                     }
-                });
-            },
+                );
 
-            onFail : function (sError) {
-                var oLogContents = oView.byId("TelnetOutput").getValue();
-
-                oLogContents += sError+"\n-------------------------------------\n";
+            } else {
+                oLogContents += "Running "+sCommand+"...\n";
                 oView.byId("TelnetOutput").setValue(oLogContents);
                 
-                oController.ToggleZigbeeControls(true);
+                IomyRe.telnet.RunCommand({
+                    command : sCommand,
+                    hubID : iHubId,
+
+                    onSuccess : function (result) {
+
+                        try {
+                            oLogContents = oView.byId("TelnetOutput").getValue();
+                            oLogContents += result+"\n-------------------------------------\n";
+                            oView.byId("TelnetOutput").setValue(oLogContents);
+
+                            // Force it to scroll down to the bottom.
+                            document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+
+                            IomyRe.common.showMessage({
+                                text : sCommand+" executed successfully"
+                            });
+                        } catch (e) {
+                            oLogContents += e.name + ": " + e.message +"\n-------------------------------------\n";
+                            oView.byId("TelnetOutput").setValue(oLogContents);
+                            
+                        } finally {
+                            oController.ToggleZigbeeControls(true);
+                        }
+                    },
+
+                    onFail : function (sError) {
+                        var oLogContents = oView.byId("TelnetOutput").getValue();
+
+                        oLogContents += sError+"\n-------------------------------------\n";
+                        oView.byId("TelnetOutput").setValue(oLogContents);
+
+                        oController.ToggleZigbeeControls(true);
+                    }
+                });
             }
-        });
+        } catch (e) {
+            oLogContents = oView.byId("TelnetOutput").getValue();
+            
+            oLogContents += e.name + ": " + e.message +"\n-------------------------------------\n";
+            oView.byId("TelnetOutput").setValue(oLogContents);
+
+            oController.ToggleZigbeeControls(true);
+        }
     },
     
     OpenZigbeeMenu : function (oControlEvent) {
@@ -1001,50 +1020,56 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             "debug output show",
             "debug output hide",
             "get_rapidha_info",
-            "get_zigbee_info"
+            "get_zigbee_info",
+            "rapidha_form_network",
+            "rapidha_form_network_netvoxchan"
         ];
         
-        //------------------------------------------------------------//
-        // Insert each of the telnet commands to the menu.            //
-        //------------------------------------------------------------//
-		$.each(aCommands, function (iIndex, sCommand) {
-			oNavList.addItem(
-                new sap.tnt.NavigationListItem({
-                    text : sCommand,
-                    select : function() {
-                        oView.byId("CustomTelnetInput").setValue(sCommand);
-                        
-                        oController.RunZigbeeCommand()
-                        
-                        sap.ui.getCore().byId(sMenuID).close();
-                    }
-                })
-            );
-		});
-        
-        if (oController.bZigbeeCommandMenuOpen !== true) {
-            // Get or create a new extra menu
-            var oButton = oControlEvent.getSource();
-            var oMenu;
-            if (sap.ui.getCore().byId(sMenuID) === undefined) {
-                oMenu = new sap.m.Popover(sMenuID, {
-                    placement: sap.m.PlacementType.Bottom,
-                    showHeader : false,
-                    content: [oNavList]
-                }).addStyleClass("IOMYNavMenuContainer");
-            } else {
-                oMenu = sap.ui.getCore().byId(sMenuID);
-            }
+        try {
+            //------------------------------------------------------------//
+            // Insert each of the telnet commands to the menu.            //
+            //------------------------------------------------------------//
+            $.each(aCommands, function (iIndex, sCommand) {
+                oNavList.addItem(
+                    new sap.tnt.NavigationListItem({
+                        text : sCommand,
+                        select : function() {
+                            oView.byId("CustomTelnetInput").setValue(sCommand);
 
-            oMenu.attachAfterClose(function () {
-                oController.bZigbeeCommandMenuOpen = false;
+                            oController.RunZigbeeCommand();
+                        
+                            sap.ui.getCore().byId(sMenuID).close();
+                        }
+                    })
+                );
             });
 
-            oMenu.openBy(oButton);
-            oController.bZigbeeCommandMenuOpen = true;
+            if (oController.bZigbeeCommandMenuOpen !== true) {
+                // Get or create a new extra menu
+                var oButton = oControlEvent.getSource();
+                var oMenu;
+                if (sap.ui.getCore().byId(sMenuID) === undefined) {
+                    oMenu = new sap.m.Popover(sMenuID, {
+                        placement: sap.m.PlacementType.Bottom,
+                        showHeader : false,
+                        content: [oNavList]
+                    }).addStyleClass("IOMYNavMenuContainer");
+                } else {
+                    oMenu = sap.ui.getCore().byId(sMenuID);
+                }
 
-        } else {
-            sap.ui.getCore().byId(sMenuID).close();
+                oMenu.attachAfterClose(function () {
+                    oController.bZigbeeCommandMenuOpen = false;
+                });
+
+                oMenu.openBy(oButton);
+                oController.bZigbeeCommandMenuOpen = true;
+
+            } else {
+                sap.ui.getCore().byId(sMenuID).close();
+            }
+        } catch (e) {
+            $.sap.log.error("Failure in the zigbee menu function in the device form ("+e.name+"): " + e.message);
         }
     },
     
@@ -1055,90 +1080,126 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         
         oController.ToggleZigbeeControls(false);
         
-        IomyRe.devices.zigbeesmartplug.TurnOnZigbeeJoinMode({
-            modemID : iCommId,
-            
-            onSuccess : function (result) {
-                
-                //console.log(JSON.stringify(result));
-                
-                var oLogContents = oView.byId("TelnetOutput").getValue();
-                
-                oLogContents += result+"\n-------------------------------------\n";
-                oView.byId("TelnetOutput").setValue(oLogContents);
-                
-                // Force it to scroll down to the bottom.
-                document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
-                
-                IomyRe.devices.zigbeesmartplug.GetRapidHAInfo({
-                    modemID : iCommId,
-                    
-                    onSuccess : function (result) {
-                        
-                        //console.log(JSON.stringify(result));
-                        
+        try {
+            IomyRe.devices.zigbeesmartplug.TurnOnZigbeeJoinMode({
+                modemID : iCommId,
+
+                onSuccess : function (result) {
+
+                    try {
                         var oLogContents = oView.byId("TelnetOutput").getValue();
-                
-                        oLogContents += JSON.stringify(result)+"\n-------------------------------------\n\nWaiting 30 seconds for devices to join.";
-                        oView.byId("TelnetOutput").setValue(oLogContents);
-                
-                        // Force it to scroll down to the bottom.
-                        document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
-                        
-                        setTimeout(
-                            function () {
-                                IomyRe.common.RefreshCoreVariables({
-                                    onSuccess : function () {
-                                        oController.ToggleZigbeeControls(true);
-                                        
-                                        IomyRe.common.showMessage({
-                                            text : "Join completed."
-                                        });
-                                    },
-                                    
-                                    onFail : function () {
-                                        oController.ToggleZigbeeControls(true);
-                                        
-                                        IomyRe.common.showMessage({
-                                            text : "Join completed. But unable to refresh the device list."
-                                        });
-                                    }
-                                });
-                            },
-                        30000);
-                    },
-                    
-                    onFail : function (sError) {
-                        var oLogContents = oView.byId("TelnetOutput").getValue();
-                
+
                         oLogContents += result+"\n-------------------------------------\n";
                         oView.byId("TelnetOutput").setValue(oLogContents);
+
+                        // Force it to scroll down to the bottom.
+                        document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+
+                        IomyRe.devices.zigbeesmartplug.GetRapidHAInfo({
+                            modemID : iCommId,
+
+                            onSuccess : function (result) {
+
+                                try {
+                                    var oLogContents = oView.byId("TelnetOutput").getValue();
+
+                                    oLogContents += JSON.stringify(result)+"\n-------------------------------------\n\nWaiting 30 seconds for devices to join.";
+                                    oView.byId("TelnetOutput").setValue(oLogContents);
+
+                                    // Force it to scroll down to the bottom.
+                                    document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+
+                                    setTimeout(
+                                        function () {
+                                            oController.ToggleZigbeeControls(true);
+
+                                            IomyRe.common.showMessage({
+                                                text : "Join completed."
+                                            });
+            //                                IomyRe.common.RefreshCoreVariables({
+            //                                    onSuccess : function () {
+            //                                        oController.ToggleZigbeeControls(true);
+            //
+            //                                        IomyRe.common.showMessage({
+            //                                            text : "Join completed."
+            //                                        });
+            //                                    },
+            //                                    
+            //                                    onFail : function () {
+            //                                        oController.ToggleZigbeeControls(true);
+            //                                        
+            //                                        IomyRe.common.showMessage({
+            //                                            text : "Join completed. But unable to refresh the device list."
+            //                                        });
+            //                                    }
+            //                                });
+                                        },
+                                    30000);
+                                } catch (e) {
+                                    $.sap.log.error("Error with the success callback after retrieving RapidHA info ("+e.name+"): " + e.message);
+                                    IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
+                                        oController.ToggleZigbeeControls(true);
+                                    });
+                                }
+                            },
+
+                            onFail : function (sError) {
+                                try {
+                                    var oLogContents = oView.byId("TelnetOutput").getValue();
+
+                                    oLogContents += result+"\n-------------------------------------\n";
+                                    oView.byId("TelnetOutput").setValue(oLogContents);
+
+                                    // Force it to scroll down to the bottom.
+                                    document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+
+                                    IomyRe.common.showError(sError, "Error", function () {
+                                        oController.ToggleZigbeeControls(true);
+                                    });
+                                } catch (e) {
+                                    $.sap.log.error("Error with the failure callback after retrieving RapidHA info ("+e.name+"): " + e.message);
+                                    IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
+                                        oController.ToggleZigbeeControls(true);
+                                    });
+                                }
+                            }
+                        });
                         
-                        IomyRe.common.showError(sError, "Failed to load RapidHA Information.", function () {
+                    } catch (e) {
+                        $.sap.log.error("Error with the success callback after turning on join mode ("+e.name+"): " + e.message);
+                        IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
                             oController.ToggleZigbeeControls(true);
                         });
                     }
-                });
-                
-                
-            },
-            
-            onFail : function (sError) {
-                var oLogContents = oView.byId("TelnetOutput").getValue();
-                oLogContents += sError+"\n-------------------------------------\n";
-                
-                oView.byId("TelnetOutput").setValue(oLogContents);
-                
-                // Force it to scroll down to the bottom.
-                document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
-                
+
+                },
+
+                onFail : function (sError) {
+                    try {
+                        var oLogContents = oView.byId("TelnetOutput").getValue();
+                        oLogContents += sError+"\n-------------------------------------\n";
+
+                        oView.byId("TelnetOutput").setValue(oLogContents);
+
+                        // Force it to scroll down to the bottom.
+                        document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
+
+                        IomyRe.common.showError(sError, "Failed to join devices.", function () {
+                            oController.ToggleZigbeeControls(true);
+                        });
+                    } catch (e) {
+                        $.sap.log.error("Error with the failure callback after after turning on join mode ("+e.name+"): " + e.message);
+                        IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
+                            oController.ToggleZigbeeControls(true);
+                        });
+                    }
+                }
+            });
+        } catch (e) {
+            IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
                 oController.ToggleZigbeeControls(true);
-                
-                IomyRe.common.showError(sError, "Failed to join devices.", function () {
-                    oController.ToggleZigbeeControls(true);
-                });
-            }
-        });
+            });
+        }
     }
     
 });

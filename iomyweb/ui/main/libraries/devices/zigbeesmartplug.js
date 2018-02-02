@@ -126,7 +126,13 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
 
                 onSuccess : function (dataType, data) {
                     if (data.Error === false || data.Error === undefined) {
-                        fnSuccess(data.Data.JoinMode.join("\n"));
+                        if (data.Data.RapidHAInfo.findIndex("Network State=Network Down") !== -1 && data.Data.RapidHAInfo instanceof "Array") {
+                            fnFail("RapidHA network is down. Try running 'rapidha_form_network <rapidhauuid>' in the command input "+
+                                "or 'rapidha_form_network_netvoxchan <rapidhauuid>' for netvox compatible channels.\n\nTo obtain the "+
+                                "rapidhauuid, run 'get_rapidha_info' to copy it down.");
+                        } else {
+                            fnSuccess(data.Data.JoinMode.join("\n"));
+                        }
                     } else {
                         fnFail(data.ErrMesg);
                     }
