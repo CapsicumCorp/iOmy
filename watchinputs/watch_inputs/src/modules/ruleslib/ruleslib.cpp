@@ -118,6 +118,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace ruleslib {
 
+static const int WEBAPI_ACCESS_INTERVAL=5; //Number of seconds between web api accesses
+static const int WEBAPI_REFRESH_ALL_RULES_INTERVAL=5; //Number of seconds between refreshing all rules
+
 using boost::asio::ip::tcp;
 
 //NOTE: Currently we rely on the webapi to provide nextRuntime updates
@@ -139,8 +142,10 @@ public:
   time_t nextRuntime=-1; //Used to indicate the next time this rule should be run in UnixTS format.
   time_t lastRuntimeDb=-1; //The last run time that we have from the database, if local lastruntime is higher we should update the database
   time_t nextRuntimeDb=-1; //The next run time that we have from the database, if local nextruntime is lower we should update the database
+  int64_t dbLinkPK=0;
+  int64_t dbThingPK=0;
   Rule();
-  Rule(int32_t ruleId, std::string ruleName, std::string deviceId, int16_t portId, int32_t deviceType, int32_t ruleType, bool enabled, bool localOnlyRule, time_t lastModified, time_t lastRuntime, time_t nextRuntime, time_t lastRuntimeDb, time_t nextRuntimeDb);
+  Rule(int32_t ruleId, std::string ruleName, std::string deviceId, int16_t portId, int32_t deviceType, int32_t ruleType, bool enabled, bool localOnlyRule, time_t lastModified, time_t lastRuntime, time_t nextRuntime, time_t lastRuntimeDb, time_t nextRuntimeDb, int64_t dbLinkPK, int64_t dbThingPK);
   ~Rule();
   bool isRecurring(); //Returns true if this rule is recurring
 };
@@ -160,6 +165,9 @@ static char gneedtoquit=0; //Set to 1 when ruleslib should exit
 static pthread_t gmainthread=0;
 
 static bool gneedmoreinfo=false; //Set to false when a device needs more info to indicate that we shouldn't sleep for very long
+
+std::int64_t ghubpk;
+time_t lastAllRuleRefreshTime=0;
 
 //global iface pointers set once for improved performance compared to for every function that uses it,
 //  as the pointer value shouldn't change apart from during init/shutdown stage
@@ -337,7 +345,7 @@ Rule::Rule() {
   //Do nothing at the moment
 }
 
-Rule::Rule(int32_t ruleId, std::string ruleName, std::string deviceId, int16_t portId, int32_t deviceType, int32_t ruleType, bool enabled, bool localOnlyRule, time_t lastModified=-1, time_t lastRuntime=-1, time_t nextRuntime=-1, time_t lastRuntimeDb=-1, time_t nextRuntimeDb=-1) {
+Rule::Rule(int32_t ruleId, std::string ruleName, std::string deviceId, int16_t portId, int32_t deviceType, int32_t ruleType, bool enabled, bool localOnlyRule, time_t lastModified=-1, time_t lastRuntime=-1, time_t nextRuntime=-1, time_t lastRuntimeDb=-1, time_t nextRuntimeDb=-1, int64_t dbLinkPK=0, int64_t dbThingPK=0) {
   this->ruleId=ruleId;
   this->ruleName=ruleName;
   this->deviceId=deviceId;
@@ -351,6 +359,8 @@ Rule::Rule(int32_t ruleId, std::string ruleName, std::string deviceId, int16_t p
   this->nextRuntime=nextRuntime;
   this->lastRuntimeDb=lastRuntimeDb;
   this->nextRuntimeDb=nextRuntimeDb;
+  this->dbLinkPK=dbLinkPK;
+  this->dbThingPK=dbThingPK;
 }
 
 Rule::~Rule() {
@@ -366,6 +376,50 @@ bool Rule::isRecurring() {
 }
 
 //----------------------
+
+//Process rules that were received from the Web API
+void processReceivedRules(const boost::property_tree::ptree& pt) {
+  try {
+    //Iterate over data
+    for (auto const &data : pt.get_child("Data")) {
+      int32_t ruleId=data.second.get<int32_t>("Id");
+      int32_t typeId=data.second.get<int32_t>("TypeId");
+      int64_t hubId=data.second.get<int64_t>("HubId");
+      std::string ruleName=data.second.get<std::string>("Name");
+      int ruleEnabled=data.second.get<bool>("Enabled");
+      time_t lastModified=data.second.get<time_t>("LastModified");
+      time_t lastRuntime=data.second.get<time_t>("LastRunUTS");
+      time_t nextRuntime=data.second.get<time_t>("NextRunUTS");
+      int64_t linkId=data.second.get<int64_t>("ParamData.LinkId");
+      int64_t thingId=data.second.get<int64_t>("ParamData.ThingId");
+      int64_t thingHwid=data.second.get<int64_t>("ParamData.ThingHWID");
+      std::string deviceId=data.second.get<std::string>("ParamData.LinkSerialCode");
+      int32_t deviceType=data.second.get<int32_t>("ParamData.LinkTypeId");
+      {
+        boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+        //TODO: Implement editing of existing rules
+
+        //Only import rules for this hub
+        if (hubId==ghubpk) {
+          //Convert database deviceType to ruleslib deviceType
+          switch (deviceType) {
+            case 2:
+              deviceType=DEVICETYPES::ZIGBEE_DEVICE;
+              break;
+            case 15:
+              deviceType=DEVICETYPES::CSRMESH_DEVICE;
+              break;
+            default:
+              deviceType=DEVICETYPES::NO_TYPE;
+          }
+          grules[ruleId]=Rule(ruleId, ruleName, deviceId, thingHwid, deviceType, typeId, ruleEnabled, false, lastModified, lastRuntime, nextRuntime, lastRuntime, nextRuntime, linkId, thingId);
+        }
+      }
+    }
+  } catch (boost::property_tree::ptree_bad_path& e) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to parse Json result for received rules request\n", __PRETTY_FUNCTION__);
+  }
+}
 
 //Returns an encoded string from a unencoded string
 //Based on http://stackoverflow.com/questions/10521581/base64-encode-using-boost-throw-exception/10973348#10973348
@@ -505,7 +559,6 @@ public:
   }
 };
 
-
 //Based on http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/example/cpp03/http/client/async_client.cpp
 //  and http://www.boost.org/doc/libs/1_61_0/doc/html/boost_asio/example/cpp03/timeouts/async_tcp_client.cpp
 //NOTE: Android doesn't know about service: "http" so have to use 80 for the port
@@ -525,7 +578,7 @@ private:
   std::string http_version;
   unsigned httpstatuscode;
   long httpbodylen;
-  int requestmode; //1=Adding Link, 2=Adding Comm, 3=Adding Thing
+  WEBAPI_REQUEST_MODES requestmode;
 
   //See http://stackoverflow.com/questions/21120361/boostasioasync-write-and-buffers-over-65536-bytes
   //These variables need to stay allocated while the asio request is active so can't be local to a single function
@@ -567,10 +620,6 @@ public:
       hc.addFormField("AttemptLogin", "1");
       hc.addFormField("username", apiusername);
       hc.addFormField("password", apipassword);
-    }
-    //Loop through the zigbee comms and links queues adding each one at a time
-    {
-      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
     }
     // Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
@@ -660,8 +709,20 @@ private:
 
 
   void get_all_rules(void) {
-    //Get all the rules on every connect
-    if (!getneedtoquit()) {
+    struct timespec curtime;
+    clock_gettime(CLOCK_REALTIME, &curtime);
+    bool skipGetAllRules=false;
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      if (WEBAPI_REFRESH_ALL_RULES_INTERVAL+lastAllRuleRefreshTime>curtime.tv_sec) {
+        //Skip this check at this time
+        skipGetAllRules=true;
+      } else {
+        lastAllRuleRefreshTime=curtime.tv_sec;
+      }
+    }
+    if (!getneedtoquit() && !skipGetAllRules) {
+      //Get all the rules
       reset_http_body();
 
       hc.addFormField("Mode", "ListAllActiveRules");
@@ -670,7 +731,7 @@ private:
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending request for all active rules: %s\n", __PRETTY_FUNCTION__, hc.toString().c_str());
       request_stream << hc.toString();
 
-      requestmode=1;
+      requestmode=GET_ALL_RULES;
       boost::asio::async_write(socket_, listAllActiveRulesRequest_,
           boost::bind(&asioclient::handle_write_request, this,
             boost::asio::placeholders::error));
@@ -680,10 +741,10 @@ private:
   }
 
   void handle_write_request(const boost::system::error_code& err) {
-    //if (stopped_) {
-    //  debuglibifaceptr->debuglib_printf(1, "%s: Connection Aborted\n", __PRETTY_FUNCTION__);
-    //  return;
-    //}
+    if (stopped_) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Connection Aborted\n", __PRETTY_FUNCTION__);
+      return;
+    }
     if (!err)
     {
       // Set a deadline for the read operation.
@@ -821,6 +882,10 @@ private:
           errcode=-1;
         }
       }
+      if (requestmode==GET_ALL_RULES && errcode==0) {
+        //Process the rules that were received
+        processReceivedRules(pt);
+      }
     } catch (boost::property_tree::ptree_error &e) {
       debuglibifaceptr->debuglib_printf(1, "%s: Webapi server returned an unknown result\n", __PRETTY_FUNCTION__);
       return -1;
@@ -859,84 +924,21 @@ private:
 
   //Do processing after the request has been sent and then send the next request
   void successful_send() {
-    if (requestmode==1) {
-      //std::list<webapiclient_link_t *>::iterator linksprevit=linksit;
-
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing Link from add queue due to success\n", __PRETTY_FUNCTION__);
-
-      //Step to next link before erasing the one that just got added
-      //++linksit;
-
-      //Erase the link that just got added
-      //delete (*linksprevit);
-      //webapi_links_queue.erase(linksprevit);
+    if (requestmode==GET_ALL_RULES) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Got a list of all the rules\n", __PRETTY_FUNCTION__);
 
       //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
       stop();
+    }
+    if (stopped_) {
       //Send next request
-      //send_link_request();
-    } else if (requestmode==3) {
-      //std::list<webapiclient_thing_t *>::iterator thingsprevit=thingsit;
-
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing Thing from add queue due to success\n", __PRETTY_FUNCTION__);
-
-      //Step to next thing before erasing the one that just got added
-      //++thingsit;
-
-      //Erase the thing that just got added
-      //delete (*thingsprevit);
-      //webapi_things_queue.erase(thingsprevit);
-
-      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
-      stop();
-      //Send next request
-      //send_link_request();
-    } else if (requestmode==2) {
-      //std::list<webapiclient_comm_t *>::iterator commsprevit=commsit;
-
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing Comm from add queue due to success\n", __PRETTY_FUNCTION__);
-
-      //Step to next comm before erasing the one that just got added
-      //++commsit;
-
-      //Erase the comm that just got added
-      //delete (*commsprevit);
-      //webapi_comms_queue.erase(commsprevit);
-
-      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
-      stop();
-      //Send next request
-      //send_comm_request();
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending next request\n", __PRETTY_FUNCTION__);
+      start(httpserver, webapiport, httppath, apiusername, apipassword, httpusername, httppassword);
     }
   }
 
-  //Do processing after the request has been sent and then send the next request
+  //Do nothing if failed to send
   void failed_send() {
-    if (requestmode==1) {
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Link for now due to error\n", __PRETTY_FUNCTION__);
-
-      //Skip the current link for now and step to next link
-      //++linksit;
-
-      //Send next request
-      //send_link_request();
-    } else if (requestmode==3) {
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Thing for now due to error\n", __PRETTY_FUNCTION__);
-
-      //Skip the current thing for now and step to next link
-      //++thingsit;
-
-      //Send next request
-      //send_thing_request();
-    } else if (requestmode==2) {
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Skipping adding Comm for now due to error\n", __PRETTY_FUNCTION__);
-
-      //Skip the current comm link for now and step to next comm link
-      //++commsit;
-
-      //Send next request
-      //send_comm_request();
-    }
   }
 
   void check_deadline() {
@@ -966,69 +968,6 @@ private:
   }
 };
 
-class asyncloop {
-private:
-  boost::mutex mtx_;
-  boost::asio::io_service io_service;
-  boost::asio::system_timer timer;
-  asioclient client;
-
-public:
-  asyncloop()
-    : timer(io_service), client(io_service) {
-    }
-
-  void start() {
-    update_timer_loop();
-    try {
-      io_service.run();
-      io_service.reset();
-    } catch (std::exception& e) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Error while running service: %s\n", __PRETTY_FUNCTION__, e.what());
-    }
-  }
-
-  void stop() {
-    boost::lock_guard<boost::mutex> guard(mtx_);
-    client.stop();
-    timer.expires_from_now(boost::chrono::seconds(0));
-  }
-private:
-  void update_timer_loop() {
-  boost::lock_guard<boost::mutex> guard(mtx_);
-    timer.expires_from_now(boost::chrono::seconds(5)); //Restart every 5 seconds
-    timer.async_wait(boost::bind(&asyncloop::timer_handler, this, boost::asio::placeholders::error));
-
-    std::string webapihostname="", webapiport="80", webapiurl="", webapihttpuser="", webapihttppass="", webapiuser="", webapipass="";
-    bool result, missingval=false;
-
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hostname", webapihostname);
-    if (!result) {
-      missingval=true;
-    }
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "port", webapiport);
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hubrulesurl", webapiurl);
-    if (!result) {
-      missingval=true;
-    }
-    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httpusername", webapihttpuser);
-    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httppassword", webapihttppass);
-    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apiusername", webapiuser);
-    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apipassword", webapipass);
-    if (!missingval) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Starting client connection\n", __PRETTY_FUNCTION__);
-      client.start(webapihostname, webapiport, webapiurl, webapiuser, webapipass, webapihttpuser, webapihttppass);
-    }
-  }
-
-  //Called every time the main timer triggers
-  void timer_handler(const boost::system::error_code& error) {
-    if (!getneedtoquit()) {
-      update_timer_loop();
-    }
-  }
-};
-
 /*
  * Process the rules one by one
  */
@@ -1050,49 +989,54 @@ static void process_rules() {
   debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Current time: %02d:%02d:%02d\n", __PRETTY_FUNCTION__, curtimelocaltm.tm_hour, curtimelocaltm.tm_min, curtimelocaltm.tm_sec);
 
   //Process the rules all within a lock so retrieval of new rules doesn't corrupt the list
-  thislibmutex.lock();
-  for (auto &rulesit : grules) {
-    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Checking rule: %s(%d)\n", __PRETTY_FUNCTION__, rulesit.second.ruleName.c_str(), rulesit.second.ruleId);
-    if (!rulesit.second.enabled || rulesit.second.needToRemove || rulesit.second.needToRemoveInDb) {
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Not enabled or need to remove so ignoring\n", __PRETTY_FUNCTION__);
-      continue;
-    }
-    if (currenttime<rulesit.second.nextRuntime) {
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running in %d seconds\n", __PRETTY_FUNCTION__, rulesit.second.nextRuntime-currenttime);
-    } else {
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running\n", __PRETTY_FUNCTION__);
-      if (rulesit.second.deviceType==DEVICETYPES::ZIGBEE_DEVICE) {
-        //Apply the rule to a zigbee device
-        if (!zigbeelibifaceptr) {
-          debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Zigbee Library currently not available\n", __PRETTY_FUNCTION__);
-          continue;
-        }
-        uint64_t addr;
-        int result=0;
-        sscanf(rulesit.second.deviceId.c_str(), "%" SCNx64, &addr);
-        if (rulesit.second.ruleType==RULETYPES::TURN_OFF_ONCE_ONLY || rulesit.second.ruleType==RULETYPES::TURN_OFF_RECURRING) {
-          result=zigbeelibifaceptr->highlevel_set_onoff_zigbee_device(addr, rulesit.second.portId, *zigbeelibifaceptr->HIGH_LEVEL_OFF);
-        } else {
-          result=zigbeelibifaceptr->highlevel_set_onoff_zigbee_device(addr, rulesit.second.portId, *zigbeelibifaceptr->HIGH_LEVEL_ON);
-        }
-        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Result=%d\n", __PRETTY_FUNCTION__, result);
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+    for (auto &rulesit : grules) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Checking rule: %s(%d)\n", __PRETTY_FUNCTION__, rulesit.second.ruleName.c_str(), rulesit.second.ruleId);
+      if (!rulesit.second.enabled || rulesit.second.needToRemove || rulesit.second.needToRemoveInDb) {
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Not enabled or need to remove so ignoring\n", __PRETTY_FUNCTION__);
+        continue;
       }
-      rulesit.second.lastModified=currenttime;
-      rulesit.second.lastRuntime=currenttime;
-      if (!rulesit.second.isRecurring()) {
-        rulesit.second.enabled=false;
-        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule has now been disabled\n", __PRETTY_FUNCTION__);
+      if (currenttime<rulesit.second.nextRuntime) {
+        char timestr[100];
+        ctime_r(&rulesit.second.nextRuntime, timestr);
+        //Remove newline at end of timestr
+        timestr[strlen(timestr)-1]='\0';
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running in %d seconds at %s\n", __PRETTY_FUNCTION__, rulesit.second.nextRuntime-currenttime, timestr);
+      } else {
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running\n", __PRETTY_FUNCTION__);
+        if (rulesit.second.deviceType==DEVICETYPES::ZIGBEE_DEVICE) {
+          //Apply the rule to a zigbee device
+          if (!zigbeelibifaceptr) {
+            debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Zigbee Library currently not available\n", __PRETTY_FUNCTION__);
+            continue;
+          }
+          uint64_t addr;
+          int result=0;
+          sscanf(rulesit.second.deviceId.c_str(), "%" SCNx64, &addr);
+          if (rulesit.second.ruleType==RULETYPES::TURN_OFF_ONCE_ONLY || rulesit.second.ruleType==RULETYPES::TURN_OFF_RECURRING) {
+            result=zigbeelibifaceptr->highlevel_set_onoff_zigbee_device(addr, rulesit.second.portId, *zigbeelibifaceptr->HIGH_LEVEL_OFF);
+          } else {
+            result=zigbeelibifaceptr->highlevel_set_onoff_zigbee_device(addr, rulesit.second.portId, *zigbeelibifaceptr->HIGH_LEVEL_ON);
+          }
+          debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Result=%d\n", __PRETTY_FUNCTION__, result);
+        }
+        rulesit.second.lastModified=currenttime;
+        rulesit.second.lastRuntime=currenttime;
+        if (!rulesit.second.isRecurring()) {
+          rulesit.second.enabled=false;
+          debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule has now been disabled\n", __PRETTY_FUNCTION__);
+        }
       }
     }
   }
-  thislibmutex.unlock();
 }
 
 /*
  * Remove rules that have been scheduled to be deleted
  */
 static void remove_scheduled_to_delete_rules() {
-  thislibmutex.lock();
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   //NOTE: We need to use a list to remove the rules as otherwise the main for loop may get confused if we remove items from underneath it
   auto rulesitbegin=grules.begin();
@@ -1107,8 +1051,100 @@ static void remove_scheduled_to_delete_rules() {
   for (auto const &it : rules_to_remove) {
     grules.erase(it);
   }
-  thislibmutex.unlock();
 }
+
+class asyncloop {
+private:
+  boost::mutex mtx_;
+  boost::asio::io_service io_service;
+  boost::asio::system_timer mainTimer;
+  boost::asio::system_timer webapiTimer;
+  asioclient client;
+
+public:
+  asyncloop()
+    : mainTimer(io_service), webapiTimer(io_service), client(io_service) {
+    }
+
+  void start() {
+    webapi_timer_loop();
+    main_timer_loop();
+    try {
+      io_service.run();
+      io_service.reset();
+    } catch (std::exception& e) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error while running service: %s\n", __PRETTY_FUNCTION__, e.what());
+    }
+  }
+
+  void stop() {
+    boost::lock_guard<boost::mutex> guard(mtx_);
+    client.stop();
+    mainTimer.expires_from_now(boost::chrono::seconds(0));
+    webapiTimer.expires_from_now(boost::chrono::seconds(0));
+  }
+private:
+  void main_timer_loop() {
+    mainTimer.expires_from_now(boost::chrono::seconds(1)); //Process rules every second
+    mainTimer.async_wait(boost::bind(&asyncloop::main_timer_handler, this, boost::asio::placeholders::error));
+
+    process_rules();
+    remove_scheduled_to_delete_rules();
+  }
+
+  void webapi_timer_loop() {
+    boost::lock_guard<boost::mutex> guard(mtx_);
+    std::string webapihostname="", webapiport="80", webapiurl="", webapihttpuser="", webapihttppass="", webapiuser="", webapipass="";
+    bool result, missingval=false;
+    std::string hubpkstr;
+
+    result=configlibifaceptr->getnamevalue_cpp("general", "hubpk", hubpkstr);
+    if (!result) {
+      missingval=true;
+    }
+    ghubpk=std::atol(hubpkstr.c_str());
+
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hostname", webapihostname);
+    if (!result) {
+      missingval=true;
+    }
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "port", webapiport);
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hubrulesurl", webapiurl);
+    if (!result) {
+      missingval=true;
+    }
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httpusername", webapihttpuser);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httppassword", webapihttppass);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apiusername", webapiuser);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apipassword", webapipass);
+    if (!missingval) {
+      webapiTimer.expires_from_now(boost::chrono::seconds(WEBAPI_ACCESS_INTERVAL)); //Restart every WEBAPI_ACCESS_INTERVAL seconds
+      webapiTimer.async_wait(boost::bind(&asyncloop::webapi_timer_handler, this, boost::asio::placeholders::error));
+
+      debuglibifaceptr->debuglib_printf(1, "%s: Starting client connection\n", __PRETTY_FUNCTION__);
+      client.start(webapihostname, webapiport, webapiurl, webapiuser, webapipass, webapihttpuser, webapihttppass);
+    } else {
+      webapiTimer.expires_from_now(boost::chrono::seconds(1)); //Restart every second when config isn't ready
+      webapiTimer.async_wait(boost::bind(&asyncloop::webapi_timer_handler, this, boost::asio::placeholders::error));
+
+      debuglibifaceptr->debuglib_printf(1, "%s: Configuration not yet ready\n", __PRETTY_FUNCTION__);
+    }
+  }
+
+  //Called every time the main timer triggers
+  void main_timer_handler(const boost::system::error_code& error) {
+    if (!getneedtoquit()) {
+      main_timer_loop();
+    }
+  }
+
+  //Called every time the webapi timer triggers
+  void webapi_timer_handler(const boost::system::error_code& error) {
+    if (!getneedtoquit()) {
+      webapi_timer_loop();
+    }
+  }
+};
 
 /*
   Process a command sent by the user using the cmd network interface
@@ -1175,6 +1211,92 @@ static int processcommand(const char *buffer, int clientsock) {
       cmdserverlibifaceptr->netputs("Incorrect number arguments to addlocaltestrule\n", clientsock, NULL);
       return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
     }
+  } else if (buffertokens[0]=="getallrules") {
+    //Display a list of all the rules
+    std::ostringstream ostream;
+
+    boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+    if (grules.size()==0) {
+      ostream << "No rules defined" << std::endl;
+      cmdserverlibifaceptr->netputs("Incorrect number arguments to addlocaltestrule\n", clientsock, NULL);
+      return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+    } else {
+      for (auto const &rulesit : grules) {
+        ostream << "Rule " << rulesit.second.ruleName << "(" << rulesit.second.ruleId << ")\n";
+        ostream << "  Device ID: " << rulesit.second.deviceId << " Port ID: " << rulesit.second.portId << "\n";
+        ostream << "  Device Type: ";
+        switch (rulesit.second.deviceType) {
+          case DEVICETYPES::NO_TYPE:
+            ostream << "Unknown";
+            break;
+          case DEVICETYPES::ZIGBEE_DEVICE:
+            ostream << "Zigbee Device";
+            break;
+          case DEVICETYPES::CSRMESH_DEVICE:
+            ostream << "CSRMesh Device";
+            break;
+          default:
+            ostream << "Unknown";
+            break;
+        }
+        ostream << "\n  Rule Type: ";
+        switch (rulesit.second.ruleType) {
+          case RULETYPES::TURN_ON_ONCE_ONLY:
+            ostream << "On, Once Only";
+            break;
+          case RULETYPES::TURN_OFF_ONCE_ONLY:
+            ostream << "Off, Once Only";
+            break;
+          case RULETYPES::TURN_ON_RECURRING:
+            ostream << "On, Recurring";
+            break;
+          case RULETYPES::TURN_OFF_RECURRING:
+            ostream << "Off, Recurring";
+            break;
+          default:
+            ostream << "Unknown";
+        }
+        char timestr[100];
+        ctime_r(&rulesit.second.lastModified, timestr);
+        //Remove newline at end of timestr
+        timestr[strlen(timestr)-1]='\0';
+        ostream << "\n  Last Modified: " << timestr << std::endl;
+        ctime_r(&rulesit.second.lastRuntime, timestr);
+        //Remove newline at end of timestr
+        timestr[strlen(timestr)-1]='\0';
+        ostream << "  Last Runtime: " << timestr << std::endl;
+        ctime_r(&rulesit.second.nextRuntime, timestr);
+        //Remove newline at end of timestr
+        timestr[strlen(timestr)-1]='\0';
+        ostream << "  Next Runtime: " << timestr << std::endl;
+        ctime_r(&rulesit.second.lastRuntimeDb, timestr);
+        //Remove newline at end of timestr
+        timestr[strlen(timestr)-1]='\0';
+        ostream << "  Last Runtime Db: " << timestr << std::endl;
+        ctime_r(&rulesit.second.nextRuntimeDb, timestr);
+        //Remove newline at end of timestr
+        timestr[strlen(timestr)-1]='\0';
+        ostream << "  Next Runtime Db: " << timestr << std::endl;
+        ostream << "  DbLinkPK: " << rulesit.second.dbLinkPK << std::endl;
+        ostream << "  DbThingPK: " << rulesit.second.dbThingPK << std::endl;
+        ostream << "  This rule is ";
+        if (!rulesit.second.enabled) {
+          ostream << "not ";
+        }
+        ostream << "enabled\n";
+        if (rulesit.second.localOnlyRule) {
+          ostream << "  This rule is local only\n";
+        }
+        if (rulesit.second.needToRemove) {
+          ostream << "  This rule is scheduled to be removed\n";
+        }
+        if (rulesit.second.needToRemoveInDb) {
+          ostream << "  This rule is scheduled to be removed from the database\n";
+        }
+      }
+      cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+      return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+    }
   } else {
     return *cmdserverlibifaceptr->CMDLISTENER_NOTHANDLED;
   }
@@ -1202,9 +1324,6 @@ static void *mainloop(void *UNUSED(val)) {
     }
     //Auto restart the loop if it crashes before we are ready to quit
     gasyncloop.start();
-
-    process_rules();
-    remove_scheduled_to_delete_rules();
 
     //Only sleep for one second as we need to handle timeouts ourselves
     semwaittime.tv_sec+=1;
@@ -1318,6 +1437,7 @@ static void shutdown(void) {
   gshuttingdown=0;
 
   //Free allocated memory
+  ghubpk=0;
   grules.clear();
 
   sem_destroy(&gmainthreadsleepsem);
