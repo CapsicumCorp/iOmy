@@ -2313,6 +2313,87 @@ $.extend(IomyRe.functions, {
             }
         }
         
+    },
+    
+    server : {
+        getDBIndexingState : function (mSettings) {
+            var sUrl            = IomyRe.apiphp.APILocation("serveradmin");
+            var fnSuccess       = function () {};
+            var fnFail          = function () {};
+            var mSuccessMissing = "Success callback is missing. There is no way to return the data to the user.";
+            
+            try {
+                if (IomyRe.validation.isValueGiven(mSettings)) {
+
+                    if (IomyRe.validation.isValueGiven(mSettings.onSuccess)) {
+                        fnSuccess = mSettings.onSuccess;
+                    } else {
+                        $.sap.log.error(mSuccessMissing);
+                    }
+
+                    if (IomyRe.validation.isValueGiven(mSettings.onFail)) {
+                        fnFail = mSettings.onFail;
+                    }
+                } else {
+                    $.sap.log.error(mSuccessMissing);
+                }
+            } catch (e) {
+                fnFail("Error checking the settings map ("+e.name+"): " + e.message);
+                return;
+            }
+
+            try {
+                IomyRe.apiphp.AjaxRequest({
+                    url : sUrl,
+                    data : {
+                        "Mode" : "CheckOptionalDBIndices"
+                    },
+
+                    onSuccess : function (sType, mData) {
+                        try {
+                            if (sType !== "JSON") {
+                                if (mData.Error !== true) {
+                                    var aStates     = [];
+                                    var iMax        = null;
+
+                                    $.each(mData.Data, function (sTableName, mInfo) {
+                                        aStates.push(mInfo.Status);
+
+                                    });
+
+                                    for (var i = 0; i < aStates.length; i++) {
+                                        if (iMax === null) {
+                                            iMax = aStates[i];
+                                        }
+
+                                        if (aStates[i] > iMax) {
+                                            iMax = aStates[i];
+                                        }
+                                    }
+
+                                    fnSuccess(iMax === 1);
+                                } else {
+                                    fnFail(mData.ErrMesg);
+                                }
+                            } else {
+                                var sErrorMessage = "Success response type is supposed to be 'JSON'. Received "+sType+".";
+                                $.sap.log.error(sErrorMessage + "\n\nResponse received: " + mData);
+                                fnFail(sErrorMessage);
+                            }
+                        } catch (e) {
+                            fnFail("Error processing the success function of the request ("+e.name+"): " + e.message);
+                        }
+                    },
+                    
+                    onFail : function (response) {
+                        fnFail(response.responseText);
+                    }
+                });
+            } catch (e) {
+                fnFail("Error attempting to run the request to check the database indexing state ("+e.name+"): " + e.message);
+            }
+
+        },
     }
     
 });

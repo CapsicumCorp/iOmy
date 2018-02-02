@@ -23,12 +23,26 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.staging.Development.DBIndex", {
-    aFormFragments:     {},
-    bEditing: false,
-    iThingId: null,
+    aFormFragments  : {},
+    
+    //bEditing    : false,
+    bIndexingOn : false,
+    iThingId    : null,
     
     oDBIndexingQueue : new AjaxRequestQueue({
-        executeNow : false
+        executeNow : false,
+        
+        onSuccess : function () {
+            IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+        },
+        
+        onWarning : function () {
+            
+        },
+        
+        onFail : function () {
+            
+        }
     }),
     
 /**
@@ -47,35 +61,52 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
-                oController.RefreshModel();
+                oController.CheckDBIndexing();
             }
         });
     },
     
+    CheckDBIndexing : function () {
+        var oController     = this;
+        
+        try {
+            IomyRe.functions.server.getDBIndexingState({
+                onSuccess : function (bState) {
+                    oController.bIndexingOn = bState;
+                    oController.RefreshModel();
+                },
+
+                onFail : function (sErrorMessage) {
+                    IomyRe.common.showError(sErrorMessage, "Error",
+                        function () {
+                            oController.RefreshModel();
+                        }
+                    );
+                }
+            });
+        } catch (e) {
+            IomyRe.common.showError("Error attempting to call the function to retrieve the database indexing state ("+e.name+"): " + e.message, "Error",
+                function () {
+                    oController.RefreshModel();
+                }
+            );
+        }
+        
+    },
+    
     RefreshModel : function () {
         var oController         = this;
-        var oView               = this.getView();
+        var oView               = oController.getView();
         var oData               = {};
         var oModel              = {};
-        var oConfig             = sap.ui.getCore().getConfiguration(); 
-        var oVersion            = oConfig.getVersion();
         
         oData = {
-            "ui5Version"        : oVersion.toString(),
-            "dbVersion"         : IomyRe.common.DatabaseVersion,
-            "interfaceVersion"  : "0.4.11",
+            "DBAdminUsername"   : "root",
+            "DBAdminPassword"   : "",
+            "DBIndexingOn"      : oController.bIndexingOn,
             
-            "indices" : {
-                "DATABIGINT"        : true,
-                "DATABLOB"          : true,
-                "DATAINT"           : true,
-                "DATALONGSTRING"    : true,
-                "DATAMEDSTRING"     : true,
-                "DATASHORTSTRING"   : true,
-                "DATASTRING255"     : true,
-                "DATATINYINT"       : true,
-                "DATATINYSTRING"    : true,
-                "DATATYPE"          : true
+            "controls" : {
+                
             }
         };
         
@@ -84,37 +115,55 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
         oView.setModel(oModel);
     },
     
-    ModifyDBIndex : function (sDBTable) {
+    ToggleDBIndexing : function () {
         var oController         = this;
-        var oView               = this.getView();
-        var bEnabled            = oView.getModel().getProperty("/indices/"+sDBTable);
+        var oView               = oController.getView();
+        var bEnabled            = oView.getModel().getProperty("/DBIndexingOn");
+        var sDBUsername         = oView.getModel().getProperty("/DBAdminUsername");
+        var sDBPassword         = oView.getModel().getProperty("/DBAdminPassword");
+        var sDBTable;
         var sCommand;
+        var aDataTables = [
+            "DATABIGINT",
+            "DATAINT",
+            "DATALONGSTRING",
+            "DATAMEDSTRING",
+            "DATASHORTSTRING",
+            "DATASTRING255",
+            "DATATINYINT",
+            "DATATINYSTRING"
+        ];
         
-        if (bEnabled !== undefined) {
-            try {
+        try {
+            for (var i = 0; i < aDataTables.length; i++) {
+                sDBTable = aDataTables[i];
+                
                 if (bEnabled) {
                     sCommand = sDBTable + "_Add";
                 } else {
                     sCommand = sDBTable + "_Remove";
                 }
-                
+
                 oController.oDBIndexingQueue.addRequest({
                     library : "php",
                     url : IomyRe.apiphp.APILocation("serveradmin"),
                     data : {
                         Mode : "ChangeOptionalDBIndices",
-                        Command : sCommand
+                        Command : sCommand,
+                        Access : JSON.stringify({
+                            URI         : "localhost",
+                            Port        : 3306,
+                            Username    : sDBUsername,
+                            Password    : sDBPassword
+                        })
                     }
                 });
-                
-                oController.oDBIndexingQueue.execute();
-                
-            } catch (e) {
-                $.sap.log.error("Error attempting to add and execute a request.");
             }
-            
-        } else {
-            $.sap.log.error("Database table specified was incorrect.");
+
+            oController.oDBIndexingQueue.execute();
+
+        } catch (e) {
+            $.sap.log.error("Error attempting to add and execute requests ("+e.name+"): " + e.message);
         }
     }
     

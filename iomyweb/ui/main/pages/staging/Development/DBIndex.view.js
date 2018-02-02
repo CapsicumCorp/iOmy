@@ -100,7 +100,8 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                             label : "Index State",
                                                             fields: [ 
                                                                 new sap.m.CheckBox ({
-                                                                    text: "Database Indexed"
+                                                                    text: "Database Indexed",
+                                                                    selected : "{/DBIndexingOn}"
                                                                 })
                                                             ]
                                                         }),
@@ -108,7 +109,8 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                             label : "DB Root User",
                                                             fields: [ 
                                                                 new sap.m.Input ({
-                                                                    value:""
+                                                                    enable : "{/controls/ControlsEnabled}",
+                                                                    value:"{/DBAdminUsername}"
                                                                 })
                                                             ]
                                                         }),
@@ -116,7 +118,9 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                             label : "DB Root Password",
                                                             fields: [ 
                                                                 new sap.m.Input ({
-                                                                    value:""
+                                                                    enable : "{/controls/ControlsEnabled}",
+                                                                    type : sap.m.InputType.Password,
+                                                                    value:"{/DBAdminPassword}"
                                                                 })
                                                             ]
                                                         }),
@@ -126,14 +130,15 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                                 new sap.m.Button (oView.createId("ButtonSubmit"), {
                                                                     text: "Save",
                                                                     type: sap.m.ButtonType.Accept,
+                                                                    enable : "{/controls/ControlsEnabled}",
                                                                     press:   function( oEvent ) {
-                                                                    //    oController.InsertRoomInfoValues( oController );
-                                                                    IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+                                                                        oController.ToggleDBIndexing();
                                                                     }
                                                                 }),
                                                                 new sap.m.Button (oView.createId("ButtonCancel"), {
                                                                     text: "Cancel",
                                                                     type: sap.m.ButtonType.Reject,
+                                                                    enable : "{/controls/CancelEnabled}",
                                                                     press:   function( oEvent ) {
                                                                         IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
                                                                     }

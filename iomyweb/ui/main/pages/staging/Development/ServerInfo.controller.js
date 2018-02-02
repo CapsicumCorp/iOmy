@@ -63,59 +63,12 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
         oData = {
             "ui5Version"        : oVersion.toString(),
             "dbVersion"         : IomyRe.common.DatabaseVersion,
-            "interfaceVersion"  : "0.4.11",
-            
-            "indices" : {
-                "DATABIGINT"        : true,
-                "DATABLOB"          : true,
-                "DATAINT"           : true,
-                "DATALONGSTRING"    : true,
-                "DATAMEDSTRING"     : true,
-                "DATASHORTSTRING"   : true,
-                "DATASTRING255"     : true,
-                "DATATINYINT"       : true,
-                "DATATINYSTRING"    : true,
-                "DATATYPE"          : true
-            }
+            "interfaceVersion"  : "0.4.11"              // TODO: Interface version is hardcoded. Each time a release is done, this will need to be updated.
         };
         
         oModel = new sap.ui.model.json.JSONModel(oData);
         
         oView.setModel(oModel);
-    },
-    
-    ModifyDBIndex : function (sDBTable) {
-        var oController         = this;
-        var oView               = this.getView();
-        var bEnabled            = oView.getModel().getProperty("/indices/"+sDBTable);
-        var sCommand;
-        
-        if (bEnabled !== undefined) {
-            try {
-                if (bEnabled) {
-                    sCommand = sDBTable + "_Add";
-                } else {
-                    sCommand = sDBTable + "_Remove";
-                }
-                
-                oController.oDBIndexingQueue.addRequest({
-                    library : "php",
-                    url : IomyRe.apiphp.APILocation("serveradmin"),
-                    data : {
-                        Mode : "ChangeOptionalDBIndices",
-                        Command : sCommand
-                    }
-                });
-                
-                oController.oDBIndexingQueue.execute();
-                
-            } catch (e) {
-                $.sap.log.error("Error attempting to add and execute a request.");
-            }
-            
-        } else {
-            $.sap.log.error("Database table specified was incorrect.");
-        }
     }
     
 });

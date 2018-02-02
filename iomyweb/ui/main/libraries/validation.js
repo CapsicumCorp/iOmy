@@ -409,7 +409,7 @@ $.extend(IomyRe.validation, {
     },
     
     isValueGiven : function (vValue) {
-        return vValue !== undefined && vValue !== null;
+        return typeof vValue !== "undefined" && vValue !== null;
     },
     
 //    isReValueGiven : function (vValue, vValueReturnedIfTrue, vValueReturnedIfFalse) {
