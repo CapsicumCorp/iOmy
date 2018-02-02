@@ -23,10 +23,12 @@ package com.hoho.android.usbserial.driver;
 
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.os.RemoteException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -66,7 +68,19 @@ public class UsbSerialProber {
     public List<UsbSerialDriver> findAllDrivers(final UsbManager usbManager) {
         final List<UsbSerialDriver> result = new ArrayList<UsbSerialDriver>();
 
-        for (final UsbDevice usbDevice : usbManager.getDeviceList().values()) {
+        //Sometimes usbManager.getDeviceList() will get a RemoteException and return null if no
+        // devices are attached, or if USB host mode is inactive or unsupported so check for that
+        // before getting values() of the returned HashMap
+        HashMap<String, UsbDevice> availableUsbDevices=null;
+        try {
+            availableUsbDevices=usbManager.getDeviceList();
+        } catch (Exception e) {
+            return result;
+        }
+        if (availableUsbDevices==null) {
+            return result;
+        }
+        for (final UsbDevice usbDevice : availableUsbDevices.values()) {
             final UsbSerialDriver driver = probeDevice(usbDevice);
             if (driver != null) {
                 result.add(driver);
