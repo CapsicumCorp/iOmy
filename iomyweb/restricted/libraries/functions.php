@@ -4969,9 +4969,11 @@ function GetAllRules( $bActiveRulesOnly=false, $bLookupExtraData=false ) {
 						if( $aTempFunction1['Error']===false ) {
 							
 							$aTemp['ParamData'] = array(
-								"LinkId"    => $aTempFunction1['Data']['LinkId'],
-								"ThingId"   => $aParamData['ThingId'],
-								"ThingHWID" => $aTempFunction1['Data']['ThingHWId']
+								"LinkId"         => $aTempFunction1['Data']['LinkId'],
+								"LinkSerialCode" => $aTempFunction1['Data']['LinkSerialCode'],
+								"LinkTypeId"     => $aTempFunction1['Data']['LinkTypeId'],
+								"ThingId"        => $aParamData['ThingId'],
+								"ThingHWID"      => $aTempFunction1['Data']['ThingHWId']
 							);
 						} 
 						
