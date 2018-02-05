@@ -474,6 +474,7 @@ public class InstallWizard {
             watchInputsTempFile.println("hostname=" + dbURI);
             watchInputsTempFile.println("port=8080");
             watchInputsTempFile.println("url=/restricted/php/special/watchinputs.php");
+            watchInputsTempFile.println("hubrulesurl=/restricted/php/api_hubrules.php");
             watchInputsTempFile.println("apiusername=" + watchInputsUsername);
             watchInputsTempFile.println("apipassword=" + watchInputsPassword);
             watchInputsTempFile.println("[zigbeeconfig]");
