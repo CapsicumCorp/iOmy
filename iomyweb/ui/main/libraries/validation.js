@@ -138,7 +138,7 @@ $.extend(IomyRe.validation, {
                 }
 
                 if (bLambdaError === false) {
-                    iMaxDay = IomyRe.functions.getMaximumDateInMonth(sYear, sMonth);
+                    iMaxDay = IomyRe.time.getMaximumDateInMonth(sYear, sMonth);
                     iDate = parseInt(sDay);
 
                     if (iDate < 1 || sDay > iMaxDay) {

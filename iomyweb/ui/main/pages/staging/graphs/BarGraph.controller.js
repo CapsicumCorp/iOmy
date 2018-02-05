@@ -50,13 +50,16 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                 oController.iIOId	= evt.data.IO_ID;
 				oController.iThingId	= evt.data.ThingId;
                 
+                //oController.sPeriod = evt.data.TimePeriod;
+                oController.sPeriod = IomyRe.graph_jqplot.PeriodWeek;
+                
 				var dateCurrentTime = new Date();
 				$("#GraphPage_Main").html("");
 				$("#GraphPage_Main_Info").html("");
 				
-                //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), IomyRe.graph_jqplot.PeriodWeek );
                 oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), IomyRe.graph_jqplot.PeriodWeek );
-                //oController.GetBarDataAndDrawGraph( oController.iIOId, 1501545539, IomyRe.graph_jqplot.PeriodYear );
+                //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), sPeriod );
+                //oController.GetBarDataAndDrawGraph( oController.iIOId, 1517380677, IomyRe.graph_jqplot.PeriodYear );
 			}
 		});
 	},
@@ -87,34 +90,77 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         
 	},
     
-    generateTicks : function (mUTSData, sPeriod) {
+    generateStartOfMonth : function (iUTS) {
+        var iTmpStartOfMonth;
+        
+        try {
+            var date = new Date(iUTS);
+            var iDay = date.getDay();
+            
+            iTmpStartOfMonth = iUTS - ((86400 * iDay) - 1000);
+
+        } catch (e) {
+            iTmpStartOfMonth = -1;
+            $.sap.log.error("Error generating the UTS of the start of the month ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iTmpStartOfMonth;
+        }
+    },
+    
+    generateMonthlyTicks : function (iUTS) {
+        var oController = this;
+        var mData       = {};
+        var mUTSData    = {};
+        var dateTmp1;
+        var dateTmp2;
+        
+        for (var i = 0; i < 12; i++) {
+            dateTmp1 = new Date(oController.generateStartOfMonth(iUTS) * 1000);
+            dateTmp2 = new Date(oController.generateStartOfMonth(iUTS) * 1000);
+            dateTmp2.setMonth( dateTmp1.getMonth() - (i + 1) );
+            
+            mUTSData["period"+(i+1)] = {
+                start : iUTS - ( 86400 * (IomyRe.time.getMaximumDateInMonth( dateTmp1.getFullYear(), dateTmp1.getMonth() + 1 )) * i),
+                end : iUTS - ( 86400 * ((IomyRe.time.getMaximumDateInMonth( dateTmp2.getFullYear(), dateTmp2.getMonth() + 1 )) * (i + 1)) )
+            };
+        }
+        
+        mData.ticks = oController.generateTicks(mUTSData);
+        mData.utsData = mUTSData;
+        
+        return mData;
+    },
+    
+    generateTicks : function (mUTSData) {
+        var oController = this;
         var aTicks      = [];
         
         $.each(mUTSData, function (sI, mUTS) {
             
-            switch (sPeriod) {
+            switch (oController.sPeriod) {
                 case IomyRe.graph_jqplot.PeriodWeek:
-                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(sPeriod, Math.floor(mUTS.start) * 1000));
+                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(oController.sPeriod, Math.floor(mUTS.start) * 1000));
                     
-                    if (date.getUTCDay() === 0) {
+                    if (date.getDay() === 0) {
                         aTicks.push('Sun');
                         
-                    } else if (date.getUTCDay() === 1) {
+                    } else if (date.getDay() === 1) {
                         aTicks.push('Mon');
                         
-                    } else if (date.getUTCDay() === 2) {
+                    } else if (date.getDay() === 2) {
                         aTicks.push('Tue');
                         
-                    } else if (date.getUTCDay() === 3) {
+                    } else if (date.getDay() === 3) {
                         aTicks.push('Wed');
                         
-                    } else if (date.getUTCDay() === 4) {
+                    } else if (date.getDay() === 4) {
                         aTicks.push('Thu');
                         
-                    } else if (date.getUTCDay() === 5) {
+                    } else if (date.getDay() === 5) {
                         aTicks.push('Fri');
                         
-                    } else if (date.getUTCDay() === 6) {
+                    } else if (date.getDay() === 6) {
                         aTicks.push('Sat');
                         
                     }
@@ -122,42 +168,43 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     break;
                     
                 case IomyRe.graph_jqplot.PeriodYear:
-                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(sPeriod, Math.floor(mUTS.start) * 1000));
+                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod("month", Math.floor(mUTS.start) * 1000));
+                    //var date = new Date(Math.floor(mUTS.start) * 1000);
                     
-                    if (date.getUTCMonth() === 0) {
+                    if (date.getMonth() === 0) {
                         aTicks.push('Jan');
                         
-                    } else if (date.getUTCMonth() === 1) {
+                    } else if (date.getMonth() === 1) {
                         aTicks.push('Feb');
                         
-                    } else if (date.getUTCMonth() === 2) {
+                    } else if (date.getMonth() === 2) {
                         aTicks.push('Mar');
                         
-                    } else if (date.getUTCMonth() === 3) {
+                    } else if (date.getMonth() === 3) {
                         aTicks.push('Apr');
                         
-                    } else if (date.getUTCMonth() === 4) {
+                    } else if (date.getMonth() === 4) {
                         aTicks.push('May');
                         
-                    } else if (date.getUTCMonth() === 5) {
+                    } else if (date.getMonth() === 5) {
                         aTicks.push('Jun');
                         
-                    } else if (date.getUTCMonth() === 6) {
+                    } else if (date.getMonth() === 6) {
                         aTicks.push('Jul');
                         
-                    } else if (date.getUTCMonth() === 7) {
+                    } else if (date.getMonth() === 7) {
                         aTicks.push('Aug');
                         
-                    } else if (date.getUTCMonth() === 8) {
+                    } else if (date.getMonth() === 8) {
                         aTicks.push('Sep');
                         
-                    } else if (date.getUTCMonth() === 9) {
+                    } else if (date.getMonth() === 9) {
                         aTicks.push('Oct');
                         
-                    } else if (date.getUTCMonth() === 10) {
+                    } else if (date.getMonth() === 10) {
                         aTicks.push('Nov');
                         
-                    } else if (date.getUTCMonth() === 11) {
+                    } else if (date.getMonth() === 11) {
                         aTicks.push('Dec');
                         
                     }
@@ -189,8 +236,6 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         //--------------------------------------------------------------------//
         switch (sPeriodType) {
             case IomyRe.graph_jqplot.PeriodWeek:
-                //aTicks = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
-                
                 for (var i = 7; i > 0; i--) {
                     mUTSData["period"+(7 - (i - 1))] = {
                         start : iEndUTS - ( 86400 * i ),
@@ -198,17 +243,15 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     };
                 }
                 
+                aTicks = oController.generateTicks(mUTSData, sPeriodType);
+                
                 break;
                 
             case IomyRe.graph_jqplot.PeriodYear:
-                //aTicks = [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
+                var mData = oController.generateMonthlyTicks(iEndUTS);
                 
-                for (var i = 12; i > 0; i--) {
-                    mUTSData["period"+(12 - (i - 1))] = {
-                        start : iEndUTS - ( 86400 * (31 * i) ),
-                        end : iEndUTS - ( 86400 * (31 * (i - 1)) )
-                    };
-                }
+                mUTSData = mData.utsData;
+                aTicks   = mData.ticks;
                 
                 break;
                 
@@ -217,7 +260,6 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                 return;
         }
         
-        aTicks = oController.generateTicks(mUTSData, sPeriodType);
         
         //--------------------------------------------------------------------//
         // Create the Min aggregation request for the first period.

@@ -153,9 +153,139 @@ $.extend(IomyRe.time,{
         }
 		
 	},
+    
+    /**
+     * Determines whether a year is a leap year.
+     * 
+     * @param {mixed} vYear             Year as either an integer or a string
+     * @returns {boolean}               Whether it's a leap year or not.
+     */
+    isLeapYear : function(vYear) {
+        //--------------------------------------------------------------------//
+        // Initialise Variables.
+        //--------------------------------------------------------------------//
+        var iYear;
+        
+        //--------------------------------------------------------------------//
+        // Check that the month was given
+        //--------------------------------------------------------------------//
+        if (vYear === undefined) {
+            throw new MissingArgumentException("Year is not given!");
+        } else {
+            //-- Is it a number? --//
+            if (isNaN(vYear)) {
+                throw new IllegalArgumentException("Year is not a valid number!");
+            }
+        }
+        
+        //--------------------------------------------------------------------//
+        // Determine whether this is a leap year.
+        //--------------------------------------------------------------------//
+        iYear = parseInt(vYear);
+        
+        //-- Is the year divisible by 4? --//
+        if (iYear % 4 === 0) {
+            //-- If so, is it divisible by 100? --//
+            if (iYear % 100) {
+                //-- Alright, is it divisible by 400? --//
+                if (iYear % 400) {
+                    //-- It is a leap year. The year is a multiple of 100 and 400 (1600, 2000). --//
+                    return true;
+                } else {
+                    //-- It is not a leap year as it's a multiple of 100 but not a multiple of 400. --//
+                    return false;
+                }
+            }
+            //-- Ok not divisible by 100. Nothing more to check. It's a leap year. --//
+            else {
+                return true;
+            }
+        }
+        //-- The year is not divisible by 4! Not a leap year. --//
+        else {
+            return false;
+        }
+        
+    },
 	
-	
-	
+	/**
+     * Returns the number of days in a given month.
+     * 
+     * It takes into account the year so that if the given month is February, it
+     * can determine if it's a leap year and return 29 if it is or 28 if it is
+     * not.
+     * 
+     * Returns 28, 29, 30 (Apr, Jun, Sep, Nov), or 31 (Jan, Mar, May, Jul, Aug,
+     * Oct, Dec).
+     * 
+     * @param {mixed} vYear             Year as either an integer or a string
+     * @param {mixed} vMonth            Month as either an integer or a string
+     * @returns {integer}               Number of days in a month.
+     */
+    getMaximumDateInMonth : function(vYear, vMonth) {
+        //--------------------------------------------------------------------//
+        // Initialise Variables.
+        //--------------------------------------------------------------------//
+        var oModule = this;
+        var iMonth;
+        var iMaxDate = null;
+        
+        //--------------------------------------------------------------------//
+        // Check that the month was given
+        //--------------------------------------------------------------------//
+        if (vYear === undefined) {
+            throw new MissingArgumentException("Year is not given!");
+        } else {
+            //-- Is it a number? --//
+            if (isNaN(vYear)) {
+                throw new IllegalArgumentException("Year is not a valid number!");
+            }
+        }
+        
+        //--------------------------------------------------------------------//
+        // Check that the month was given.
+        //--------------------------------------------------------------------//
+        if (vMonth === undefined) {
+            throw new MissingArgumentException("Month is not given!");
+        } else {
+            //-- Is it a number? --//
+            if (isNaN(vMonth)) {
+                throw new IllegalArgumentException("Month is not a valid number!");
+            }
+            
+            //-- Is the month correct? --//
+            iMonth = parseInt(vMonth);
+            
+            if (iMonth < 1 || iMonth > 12) {
+                throw new IllegalArgumentException("Month must be given as a number between 1 and 12!");
+            }
+        }
+        
+        //--------------------------------------------------------------------//
+        // Determine what the maximum date is.
+        //--------------------------------------------------------------------//
+        
+        //-- If it's February, check that the given year is a leap year. --//
+        if (iMonth === 2) {
+            if (oModule.isLeapYear(vYear)) {
+                iMaxDate = 29;
+            } else {
+                iMaxDate = 28;
+            }
+        }
+        //-- Some months have 31 days. --//
+        else if (iMonth === 1 || iMonth === 3 || iMonth === 5 || iMonth === 7 ||
+                iMonth === 8 || iMonth === 10 || iMonth === 12)
+        {
+            iMaxDate = 31;
+        }
+        //-- Some months have 30 days. --//
+        else if (iMonth === 4 || iMonth === 6 || iMonth === 9 || iMonth === 11) {
+            iMaxDate = 30;
+        }
+        
+        return iMaxDate;
+    },
 	
 	/**
      * Returns the time in UTS format of a certain period before the current or
@@ -174,6 +304,7 @@ $.extend(IomyRe.time,{
 		//------------------------------------------------------------//
 		//-- 1.0 - Declare Variables                                --//
 		//------------------------------------------------------------//
+        var oModule             = this;
 		var iStartStamp			= 0;			//-- INTEGER:			Used to store the result of this function call (UnixTS startstamp) --//
 		var sPeriodToLowercase	= "";			//-- STRING:			Used to store the TimePeriod in lower case for the condition checks --//
 		
@@ -188,7 +319,8 @@ $.extend(IomyRe.time,{
 		}
 		
         try {
-            sPeriodToLowercase = sPeriod.toLowerCase();
+            var thisDate        = new Date(iEndStamp);
+            sPeriodToLowercase  = sPeriod.toLowerCase();
 
             //------------------------------------------------------------//
             //-- 2.0 - Calculate Timestamp                              --//
@@ -204,27 +336,30 @@ $.extend(IomyRe.time,{
 
 
                 case "day":
-                    iStartStamp = ( iEndStamp - (86400) );
+                    iStartStamp = ( iEndStamp - (86400000) );
                     break;
 
                 case "week":
-                    iStartStamp = ( iEndStamp - (86400 * 7) );
+                    iStartStamp = ( iEndStamp - (86400000 * 7) );
                     break;
 
                 case "fortnight":
-                    iStartStamp = ( iEndStamp - (86400 * 14) );
+                    iStartStamp = ( iEndStamp - (86400000 * 14) );
                     break;
 
                 case "month":
-                    iStartStamp = ( iEndStamp - (86400 * 31) );
+                    iStartStamp = ( iEndStamp - (86400000 * oModule.getMaximumDateInMonth(thisDate.getFullYear(), (thisDate.getMonth() + 1))) );
+                    console.log(iStartStamp);
+                    console.log(oModule.getMaximumDateInMonth(thisDate.getFullYear(), (thisDate.getMonth() + 1)));
+                    console.log(iEndStamp);
                     break;
 
                 case "quarter":
-                    iStartStamp = ( iEndStamp - (86400 * 91) );
+                    iStartStamp = ( iEndStamp - (86400000 * 91) );
                     break;
 
                 case "year":
-                    iStartStamp = ( iEndStamp - (86400 * 365) );
+                    iStartStamp = ( iEndStamp - (86400000 * 365) );
                     break;
 
                 case "epoch":
