@@ -138,7 +138,7 @@ public:
   bool enabled=true; //Whether this rule is enabled or not
   bool localOnlyRule=false; //If true, this is a locally generated test rule that shouldn't sync to the database
   time_t lastModified=-1; //When this rule was last modified (For syncing to the database)
-  time_t lastRuntime=-1; //Stores the UnixTS of the last time the rile has been run. -1 is used to indicate the Rule hasn ever been run.
+  time_t lastRuntime=-1; //Stores the UnixTS of the last time the rile has been run. -1 is used to indicate the Rule has never been run.
   time_t nextRuntime=-1; //Used to indicate the next time this rule should be run in UnixTS format.
   time_t lastRuntimeDb=-1; //The last run time that we have from the database, if local lastruntime is higher we should update the database
   time_t nextRuntimeDb=-1; //The next run time that we have from the database, if local nextruntime is lower we should update the database
@@ -150,10 +150,20 @@ public:
   bool isRecurring(); //Returns true if this rule is recurring
 };
 
+//Store information about a rule that has just been triggered and should be passed on to the webapi
+class RuleTriggered {
+public:
+  int32_t ruleId=0; //The id of the rule normally matching the database PK value, use negative values for local rules
+  time_t lastRuntime=-1; //Stores the UnixTS of the last time the rile has been run. -1 is used to indicate the Rule has never been run.
+  RuleTriggered(int32_t ruleId, time_t lastRuntime);
+  ~RuleTriggered();
+};
+
 static boost::recursive_mutex thislibmutex;
 
 //ruleid, rule class
 static std::map<uint32_t, Rule> grules;
+static std::list<RuleTriggered> gRulesTriggered;
 
 static sem_t gmainthreadsleepsem; //Used for main thread sleeping
 
@@ -373,6 +383,16 @@ bool Rule::isRecurring() {
       return true;
   }
   return false;
+}
+
+RuleTriggered::RuleTriggered(int32_t ruleId, time_t lastRuntime) {
+  debuglibifaceptr->debuglib_printf(1, "%s: Adding rule as triggered: %d at time: %ld\n", __PRETTY_FUNCTION__, ruleId, lastRuntime);
+  this->ruleId=ruleId;
+  this->lastRuntime=lastRuntime;
+}
+
+RuleTriggered::~RuleTriggered() {
+  //Do nothing at the moment
 }
 
 //----------------------
@@ -1003,8 +1023,17 @@ static void process_rules() {
         //Remove newline at end of timestr
         timestr[strlen(timestr)-1]='\0';
         debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running in %d seconds at %s\n", __PRETTY_FUNCTION__, rulesit.second.nextRuntime-currenttime, timestr);
-      } else {
-        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running\n", __PRETTY_FUNCTION__);
+      } else if (currenttime>=rulesit.second.nextRuntime && currenttime<=rulesit.second.nextRuntime+30) {
+        //Allow 30 seconds in case we only miss the rule due to slow processing
+        {
+          char timestr[100], timestr2[100];
+          ctime_r(&rulesit.second.nextRuntime, timestr);
+          ctime_r(&currenttime, timestr2);
+          //Remove newline at end of timestr
+          timestr[strlen(timestr)-1]='\0';
+          timestr2[strlen(timestr2)-1]='\0';
+          debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Running: nextRuntime=%s, Current Time=%s\n", __PRETTY_FUNCTION__, timestr, timestr2);
+        }
         if (rulesit.second.deviceType==DEVICETYPES::ZIGBEE_DEVICE) {
           //Apply the rule to a zigbee device
           if (!zigbeelibifaceptr) {
@@ -1027,6 +1056,13 @@ static void process_rules() {
           rulesit.second.enabled=false;
           debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule has now been disabled\n", __PRETTY_FUNCTION__);
         }
+        if (!rulesit.second.localOnlyRule) {
+          gRulesTriggered.push_back( RuleTriggered(rulesit.first, rulesit.second.lastRuntime) );
+          rulesit.second.enabled=false; //For now disable the rule until we get an update via the webapi with new nextruntime
+        }
+      } else {
+        //TODO: Call the webapi to update the next runtime for this rule
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule needs new nextruntime\n", __PRETTY_FUNCTION__);
       }
     }
   }
@@ -1439,6 +1475,7 @@ static void shutdown(void) {
   //Free allocated memory
   ghubpk=0;
   grules.clear();
+  gRulesTriggered.clear();
 
   sem_destroy(&gmainthreadsleepsem);
 
