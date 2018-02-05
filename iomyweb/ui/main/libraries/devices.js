@@ -847,7 +847,7 @@ $.extend(IomyRe.devices,{
     },
     
     getSerialCodeOfDevice : function (iThingId) {
-        var sSerialCode = null;
+        var sSerialCode = "N/A";
         try {
             $.each(IomyRe.common.ThingList, function (sI, mThing) {
                 if (mThing.Id == iThingId) {
@@ -855,10 +855,15 @@ $.extend(IomyRe.devices,{
                     return false;
                 }
             });
+            
+            if (sSerialCode === null) {
+                sSerialCode = "N/A";
+            }
+            
             return sSerialCode;
         } catch (e1) {
             jQuery.sap.log.error("Error: Getting Serial Code of Device:"+e1.message);
-            return null;
+            return "N/A";
         }
     },
     
@@ -1356,3 +1361,4 @@ $.sap.require("IomyRe.devices.onvif");
 $.sap.require("IomyRe.devices.ipcamera");
 $.sap.require("IomyRe.devices.motionsensor");
 $.sap.require("IomyRe.devices.weatherfeed");
+$.sap.require("IomyRe.devices.temperature");

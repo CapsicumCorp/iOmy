@@ -48,23 +48,27 @@ sap.ui.controller("pages.staging.device.MotionSensor", {
 	LoadCurrentData : function (iThingId) {
         var oView = this.getView();
         
-        IomyRe.devices.motionsensor.FetchAllCurrentData({
-            thingID : iThingId,
-            
-            onSuccess : function (mData) {
-                
-                $.each (mData, function (sI, vField) {
-                    
-                    oView.byId(sI).setText(vField);
-                    
-                });
-                
-            },
-            
-            onFail : function (sErrMessage) {
-                $.sap.log.error(sErrMessage);
-            }
-        });
+        try {
+            IomyRe.devices.motionsensor.FetchAllCurrentData({
+                thingID : iThingId,
+
+                onSuccess : function (mData) {
+
+                    $.each (mData, function (sI, vField) {
+
+                        oView.byId(sI).setText(vField);
+
+                    });
+
+                },
+
+                onFail : function (sErrMessage) {
+                    $.sap.log.error(sErrMessage);
+                }
+            });
+        } catch (e) {
+            $.sap.log.error(e.name + ": " + e.message);
+        }
     }
 		
 });

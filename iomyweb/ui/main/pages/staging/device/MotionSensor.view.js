@@ -58,7 +58,7 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
                         IomyRe.widgets.DeviceToolbar(oController, "Motion Sensor"),
 						new sap.m.List({
 							items :[
-								//-- Weather Outside --//
+								//-- Status --//
 								new sap.m.InputListItem ({
 									label : "Status:",
 									content : [
@@ -68,18 +68,18 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Temperature Outside --//
-								new sap.m.InputListItem ({
-									label : "Temperature:",
-									content : [
-										//-- Column 2 for Temperature Row --//
-										new sap.m.Text (oView.createId("Temperature"), {
-											text : ""
-										})
-										
-									]
-								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Sunrise --//
+//								//-- Temperature Outside --//
+//								new sap.m.InputListItem ({
+//									label : "Temperature:",
+//									content : [
+//										//-- Column 2 for Temperature Row --//
+//										new sap.m.Text (oView.createId("Temperature"), {
+//											text : ""
+//										})
+//										
+//									]
+//								}).addStyleClass("maxlabelwidth50Percent"),
+								//-- Last Motion --//
 								new sap.m.InputListItem ({
 									label : "Last Motion:",
 									content : [
@@ -89,7 +89,7 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Sunset --//
+								//-- Battery --//
 								new sap.m.InputListItem ({
 									label : "Battery:",
 									content : [
@@ -99,7 +99,7 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 										})
 									]
 								}).addStyleClass("maxlabelwidth50Percent"),
-								//-- Humidity --//
+								//-- Tamper --//
 								new sap.m.InputListItem ({
 									label : "Tamper:",
 									content : [

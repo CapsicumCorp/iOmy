@@ -1,8 +1,8 @@
 /*
-Title: Motion Sensor Module
+Title: Temperature Module
 Author: Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
-Description: Provides the functions pertaining to motion sensor support.
-Copyright: Capsicum Corporation 2016, 2017
+Description: Provides the functions pertaining to temperature reading support.
+Copyright: Capsicum Corporation 2016, 2017, 2018
 
 This file is part of iOmy.
 
@@ -21,146 +21,18 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.devices.motionsensor",true);
-IomyRe.devices.motionsensor = new sap.ui.base.Object();
+$.sap.declare("IomyRe.devices.temperature",true);
+IomyRe.devices.temperature = new sap.ui.base.Object();
 
-$.extend(IomyRe.devices.motionsensor,{
-    ThingTypeId : 3,
+$.extend(IomyRe.devices.temperature,{
+    ThingTypeId : 4,
     
     //---------------------------------------------------//
     // Module properties
     //---------------------------------------------------//
-    
-    uiIDs : {
-        TemperatureField : "TemperatureField",
-        BatteryLevelField : "BatteryLevelField"
-    },
-    
-    // -- INTEGERS
-    iODataFieldsToFetch         : 2,
-    iODataFieldsFailedToFetch   : 0,
-    bWaitingToLoadAPI           : false,
-    bLoadingFieldsFromAPI       : false,
-    bLoadingMotionSensorFields  : false,
-    
-    // -- Resource Types for the Motion Sensor IOs
-    RSBattery       : 2111,
-    RSMisc          : 4000,
-    RSBitwiseStatus : 3909,
     RSTemperature   : 1701,
     
-    CallAPI : function (mSettings) {
-        //--------------------------------------------------------------------//
-        // Declare variables and import modules
-        //--------------------------------------------------------------------//
-        var sUrl = IomyRe.apiphp.APILocation("motionsensor");
-        var mThingIdInfo;
-        var iThingId;
-        var fnSuccess;
-        var fnFail;
-        
-        if (mSettings !== undefined) {
-            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
-                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
-                
-                if (!mThingIdInfo.bIsValid) {
-                    throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
-                } else {
-                    iThingId = mSettings.thingID;
-                }
-                
-            } else {
-                throw new MissingArgumentException("Thing ID must be given.");
-            }
-            
-            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
-                fnSuccess = mSettings.onSuccess;
-            } else {
-                fnSuccess = function () {};
-            }
-            
-            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
-                fnFail = mSettings.onFail;
-            } else {
-                fnFail = function () {};
-            }
-            
-        } else {
-            throw new MissingSettingsMapException("Thing ID must be given.");
-        }
-        
-        try {
-            //--------------------------------------------------------------------//
-            // Indicate that the API is being loaded and send the AJAX request
-            //--------------------------------------------------------------------//
-    //        oModule.bWaitingToLoadAPI        = false;
-    //        oModule.bLoadingFieldsFromAPI    = true;
-
-            IomyRe.apiphp.AjaxRequest({
-                "url" : sUrl,
-                "data" : {
-                    "Mode" : "GetMotionData",
-                    "ThingId" : iThingId
-                },
-
-                "onSuccess" : function (responseType, data) {
-
-                    try {
-                        if (responseType === "JSON") {
-                            if (data.Error !== true) {
-
-                                try {
-                                    //--------------------------------------------------------//
-                                    // If no error has been reported, get the data and display
-                                    // it.
-                                    //--------------------------------------------------------//
-                                    var mResponseData = data.Data;
-
-                                    var iUTS    = mResponseData.MostRecentMotion;
-
-
-                                    var mHumanReadable = {
-                                        "UTS" : IomyRe.functions.getLengthOfTimePassed({
-                                            "UTS" : iUTS
-                                        })
-                                    };
-
-                                    mResponseData.HumanReadable = mHumanReadable;
-
-                                    fnSuccess(mResponseData);
-
-                                } catch (e) {
-                                    fnFail("An error in the success function for IomyRe.devices.motionsensor.CallAPI():\n\n" + e.name + ": " + e.message);
-                                }
-
-                            } else {
-                                fnFail(data.ErrMesg);
-                            }
-                        } else {
-                            fnFail("Response data type received was not in a valid JSON format. Type Received: "+responseType);
-                        }
-                    } catch (e) {
-                        fnFail("An error in the fail function for IomyRe.devices.motionsensor.CallAPI():\n\n" + e.name + ": " + e.message);
-                    }
-                },
-
-                "onFail" : function (response) {
-                    // Log errors
-                    jQuery.sap.log.error("There was an error fetching information about the tamper status and how long since the last motion was detected:\n\n" + response.responseText);
-
-                    // Conclude the request callback
-                    fnFail(response.responseText);
-                }
-            });
-        } catch (e) {
-            fnFail("Error in IomyRe.devices.motionsensor.CallAPI ("+e.name+"):\n" + e.message);
-//            e.message = "Error in IomyRe.devices.motionsensor.CallAPI ("+e.name+"):\n" + e.message;
-//            $.sap.log.error(e.message);
-//            throw e;
-        }
-    },
-    
-    FetchODataFields : function (mSettings) {
+    FetchTemperature : function (mSettings) {
         //--------------------------------------------------------------------//
         // Declare variables and import modules
         //--------------------------------------------------------------------//
@@ -211,15 +83,13 @@ $.extend(IomyRe.devices.motionsensor,{
             //--------------------------------------------------------------------//
             var aRequests       = [];
             var aErrorMessages  = [];
-            var mResult         = {
-                "BatteryVoltage"    : null
-            };
+            var sTemperature    = null;
 
             aaIOs               = IomyRe.common.ThingList["_"+iThingId].IO;
             
             $.each(aaIOs, function (sI, mIO) {
                 if (sI !== undefined && sI !== null && mIO !== undefined && mIO !== null) {
-                    if (mIO.RSTypeId == oModule.RSBattery) {
+                    if (mIO.RSTypeId == oModule.RSTemperature ) {
                         
                         aRequests.push({
                             "library"         : "odata",
@@ -234,6 +104,9 @@ $.extend(IomyRe.devices.motionsensor,{
                                         if (data.Error !== true) {
 
                                             try {
+                                                //------------------------------------------------------------//
+                                                // Variables
+                                                //------------------------------------------------------------//
 
                                                 for (var i = 0; i < data.length; i++) {
                                                     //--------------------------------------------------------//
@@ -243,8 +116,9 @@ $.extend(IomyRe.devices.motionsensor,{
                                                     //--------------------------------------------------------//
                                                     data[i].UOM_NAME = data[i].UOM_NAME.replace("Â", "");
 
-                                                    if (data[i].RSTYPE_PK === oModule.RSBattery) {
-                                                        mResult.BatteryVoltage = data[i].CALCEDVALUE + data[i].UOM_NAME;
+                                                    if (data[i].RSTYPE_PK === oModule.RSTemperature) {
+                                                        sTemperature = data[i].CALCEDVALUE.toFixed(1) + data[i].UOM_NAME;
+
                                                     }
                                                 }
 
@@ -284,16 +158,16 @@ $.extend(IomyRe.devices.motionsensor,{
                     // If the data was retrieved, run the success callback parsing
                     // the result data. Otherwise, run these requests again.
                     //------------------------------------------------------------//
-                    if (mResult.BatteryVoltage !== null) {
-                        fnSuccess(mResult);
+                    if (sTemperature !== null) {
+                        fnSuccess(sTemperature);
                         
                     } else {
                         //-- Stop retrying after 3 attempts. --//
-                        if (mResult.BatteryVoltage === null) {
-                            mResult.BatteryVoltage = "N/A";
+                        if (sTemperature === null) {
+                            sTemperature = "N/A";
                         }
 
-                        fnSuccess(mResult);
+                        fnSuccess(sTemperature);
                     }
                 },
                 
@@ -377,136 +251,6 @@ $.extend(IomyRe.devices.motionsensor,{
         }
     },
     
-    FetchAllCurrentData : function (mSettings) {
-        //--------------------------------------------------------------------//
-        // Declare variables and import modules and global variables.
-        //--------------------------------------------------------------------//
-        var oModule             = this; // Capture the scope of the current device module.
-        var sUnavailableString  = "N/A";
-        var mThingIdInfo;
-        var iThingId;
-        var fnSuccess;
-        var fnFail;
-        
-        var mData   = {
-            Status              : sUnavailableString,
-            TimeSinceLastMotion : sUnavailableString,
-            TamperStatus        : sUnavailableString,
-            BatteryVoltage      : sUnavailableString,
-        };
-        
-        //--------------------------------------------------------------------//
-        // Find and fetch the device ID from the parameter map. Report if
-        // it is missing.
-        //--------------------------------------------------------------------//
-        if (mSettings !== undefined) {
-            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
-                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
-                
-                if (!mThingIdInfo.bIsValid) {
-                    throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
-                } else {
-                    iThingId = mSettings.thingID;
-                }
-                
-            } else {
-                throw new MissingArgumentException("Thing ID must be given.");
-            }
-            
-            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
-                fnSuccess = mSettings.onSuccess;
-            } else {
-                fnSuccess = function () {};
-            }
-            
-            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
-                fnFail = mSettings.onFail;
-            } else {
-                fnFail = function () {};
-            }
-            
-        } else {
-            throw new MissingSettingsMapException("Thing ID must be given.");
-        }
-        
-        try {
-            //--------------------------------------------------------------------//
-            // Fetch the status.
-            //--------------------------------------------------------------------//
-            mData.Status = IomyRe.devices.GetDeviceStatus(iThingId);
-
-            //--------------------------------------------------------------------//
-            // Fetch the time since the last detected motion and the tamper status.
-            //--------------------------------------------------------------------//
-            oModule.CallAPI({
-                thingID : iThingId,
-
-                onSuccess : function (mResult) {
-                    try {
-                        mData.TimeSinceLastMotion   = mResult.HumanReadable.UTS;
-                        mData.TamperStatus          = mResult.CurrentStatus.Tamper === false ? "Secure" : "Not Secure";
-
-                        //------------------------------------------------------------//
-                        // Fetch the battery and temperature values.
-                        //------------------------------------------------------------//
-                        oModule.FetchODataFields({
-                            thingID : iThingId,
-
-                            onSuccess : function (mResult) {
-                                mData.BatteryVoltage    = mResult.BatteryVoltage;
-
-                                fnSuccess(mData);
-                            },
-                            
-                            onWarning : function (sErrorMessage, mResult) {
-                                mData.BatteryVoltage    = mResult.BatteryVoltage;
-                                
-                                $.sap.log.error(sErrorMessage);
-                                fnSuccess(mData);
-                            }
-                        });
-                    } catch (e) {
-                        fnFail("Error retrieving motion sensor battery and temperature data ("+e.name+"):\n" + e.message);
-                    }
-                },
-
-                onFail : function (sErrorMessage) {
-                    try {
-                        //------------------------------------------------------------//
-                        // Fetch the battery and temperature values.
-                        //------------------------------------------------------------//
-                        oModule.FetchODataFields({
-                            thingID : iThingId,
-
-                            onSuccess : function (mResult) {
-                                mData.BatteryVoltage    = mResult.BatteryVoltage;
-
-                                fnSuccess(mData);
-                            },
-                            
-                            onWarning : function (sErrorMessage, mResult) {
-                                mData.BatteryVoltage    = mResult.BatteryVoltage;
-                                
-                                $.sap.log.error(sErrorMessage);
-                                fnSuccess(mData);
-                            }
-                        });
-
-                        fnFail(sErrorMessage);
-                    } catch (e) {
-                        fnFail("Error retrieving motion sensor battery and temperature data after failure ("+e.name+"):\n" + e.message);
-                    }
-                }
-            });
-            
-        } catch (e) {
-            fnFail("Error in IomyRe.devices.motionsensor.FetchAllCurrentData ("+e.name+"):\n" + e.message);
-//            e.message = "Error in IomyRe.devices.motionsensor.FetchAllCurrentData ("+e.name+"):\n" + e.message;
-//            $.sap.log.error(e.message);
-//            throw e;
-        }
-    },
-    
     GetUITaskList: function( mSettings ) {
         //------------------------------------//
         //-- 1.0 - Initialise Variables        --//
@@ -524,7 +268,7 @@ $.extend(IomyRe.devices.motionsensor,{
                 "Type":"Function", 
                 "Execute": function () {
                     try {
-                        oModule.CallAPI({
+                        oModule.FetchTemperature({
                             thingID     : mSettings.deviceData.DeviceId,
                             onSuccess   : mSettings.onSuccess,
                             onFail      : mSettings.onFail

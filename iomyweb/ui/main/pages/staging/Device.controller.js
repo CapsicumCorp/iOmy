@@ -533,6 +533,9 @@ sap.ui.controller("pages.staging.Device", {
                                 attributes : [
                                     new sap.m.ObjectAttribute ({
                                         text: "{/MotionSensorInstructions}"
+                                    }),
+                                    new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
+                                        text: "Serial: " + IomyRe.devices.getSerialCodeOfDevice(mDevice.DeviceId)
                                     })
 //                                    new sap.m.ObjectAttribute ({
 //                                        text: "link",
@@ -552,6 +555,36 @@ sap.ui.controller("pages.staging.Device", {
                                         sPageId = "pDeviceForm";
                                     } else {
                                         sPageId = "pMotionSensor";
+                                    }
+                                    
+                                    IomyRe.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
+                                }
+                            })
+                        );
+
+                        break;
+                        
+                    //--------------------------------------------------------//
+                    // Temperature UI Entry
+                    //--------------------------------------------------------//
+                    case IomyRe.devices.temperature.ThingTypeId:
+                        
+                        wList.addItem(
+                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                title: mDevice.DeviceName,
+                                type: "Active",
+                                number: "Loading...",
+                                numberUnit: "",
+                                attributes : [
+                                    new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
+                                        text: "Serial: " + IomyRe.devices.getSerialCodeOfDevice(mDevice.DeviceId)
+                                    })
+                                ],
+                                press : function () {
+                                    if (oController.bEditing) {
+                                        sPageId = "pDeviceForm";
+                                    } else {
+                                        sPageId = "pTile";
                                     }
                                     
                                     IomyRe.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
@@ -779,6 +812,36 @@ sap.ui.controller("pages.staging.Device", {
                                 
                                 if (oView.byId(sPrefix) !== undefined) {
                                     oView.byId(sPrefix).setNumberUnit("N/A");
+    
+                                    //-- Recursively check for more Tasks --//
+                                    oController.RecursiveLoadAjaxData();
+                                }
+                            };
+                        }
+                    }
+                    
+                    if (IomyRe.devices.temperature !== undefined) {
+                        //--------------------------------------------------------//
+                        // For temperature sensors, create functions to display
+                        // information on the device entry.
+                        //--------------------------------------------------------//
+                        if (aDevice.DeviceTypeId == IomyRe.devices.temperature.ThingTypeId) {
+                            mTaskListSettings.onSuccess = function (sTemperature) {
+                                if (oView.byId(sPrefix) !== undefined) {
+                                    oView.byId(sPrefix).setNumber(sTemperature);
+    
+                                    //-- Update the Last Ajax Request Date --//
+                                    oController.dLastAjaxUpdate    = new Date();
+                                    //-- Recursively check for more Tasks --//
+                                    oController.RecursiveLoadAjaxData();
+                                }
+                            };
+                            
+                            mTaskListSettings.onFail = function (sErrMessage) {
+                                $.sap.log.error(sErrMessage);
+                                
+                                if (oView.byId(sPrefix) !== undefined) {
+                                    oView.byId(sPrefix).setNumber("N/A");
     
                                     //-- Recursively check for more Tasks --//
                                     oController.RecursiveLoadAjaxData();

@@ -906,7 +906,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                                 oController.ToggleEditIPWebcamControls(true);
                                 oController.CancelInput();
                             }
-                        })
+                        });
                     },
 
                     onFail : function (sErrorMessage) {
