@@ -57,6 +57,7 @@ public class MainLib {
     private TimeRulesLib mTimeRulesLib;
     private BluetoothHWAndroidLib mBluetoothHWAndroidLib;
     private TIZigBeeLib mTIZigBeeLib;
+    private RulesLib mRulesLib;
 
     public native int jniinit();
     public native int jniloadModule(long module);
@@ -103,6 +104,7 @@ public class MainLib {
             mBluetoothHWAndroidLib = new BluetoothHWAndroidLib(context);
         }
         mTIZigBeeLib=new TIZigBeeLib(AppName);
+        mRulesLib=new RulesLib(AppName);
     }
 
     public int init() {
@@ -261,6 +263,13 @@ public class MainLib {
         result=jniloadModule(modulesinfo);
         if (result!=0) {
             Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: tizigbeelib");
+            return -1;
+        }
+        //Add Rules library
+        modulesinfo=mRulesLib.jnigetmodulesinfo();
+        result=jniloadModule(modulesinfo);
+        if (result!=0) {
+            Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: ruleslib");
             return -1;
         }
         return 0;

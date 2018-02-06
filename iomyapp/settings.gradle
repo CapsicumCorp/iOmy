@@ -21,6 +21,7 @@ include ':ndklocklib'
 include ':ndktimeruleslib'
 include ':ndkbluetoothhwandroidlib'
 include ':ndktizigbeelib'
+include ':ndkruleslib'
 include ':ndkwatchinputs'
 
 include ':app'
@@ -50,4 +51,5 @@ project(":ndklocklib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules
 project(":ndktimeruleslib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/timeruleslib")
 project(":ndkbluetoothhwandroidlib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/bluetoothhwandroidlib")
 project(":ndktizigbeelib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/tizigbeelib")
+project(":ndkruleslib").projectDir=file(watchinputsdir+"/watch_inputs/src/modules/ruleslib")
 project(":ndkwatchinputs").projectDir=file(watchinputsdir+"/watch_inputs/src/main")
