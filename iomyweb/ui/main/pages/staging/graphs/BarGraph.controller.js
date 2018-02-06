@@ -51,15 +51,15 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 				oController.iThingId	= evt.data.ThingId;
                 
                 //oController.sPeriod = evt.data.TimePeriod;
-                oController.sPeriod = IomyRe.graph_jqplot.PeriodWeek;
+                oController.sPeriod = IomyRe.graph_jqplot.PeriodYear;
                 
 				var dateCurrentTime = new Date();
 				$("#GraphPage_Main").html("");
 				$("#GraphPage_Main_Info").html("");
 				
-                oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), IomyRe.graph_jqplot.PeriodWeek );
+                //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), IomyRe.graph_jqplot.PeriodWeek );
                 //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), sPeriod );
-                //oController.GetBarDataAndDrawGraph( oController.iIOId, 1517380677, IomyRe.graph_jqplot.PeriodYear );
+                oController.GetBarDataAndDrawGraph( oController.iIOId, 1501509600, IomyRe.graph_jqplot.PeriodYear );
 			}
 		});
 	},
@@ -90,40 +90,27 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         
 	},
     
-    generateStartOfMonth : function (iUTS) {
-        var iTmpStartOfMonth;
-        
-        try {
-            var date = new Date(iUTS);
-            var iDay = date.getDay();
-            
-            iTmpStartOfMonth = iUTS - ((86400 * iDay) - 1000);
-
-        } catch (e) {
-            iTmpStartOfMonth = -1;
-            $.sap.log.error("Error generating the UTS of the start of the month ("+e.name+"): " + e.message);
-            
-        } finally {
-            return iTmpStartOfMonth;
-        }
-    },
-    
     generateMonthlyTicks : function (iUTS) {
         var oController = this;
         var mData       = {};
         var mUTSData    = {};
+        var dateTmp3    = new Date(iUTS * 1000);
         var dateTmp1;
         var dateTmp2;
         
-        for (var i = 0; i < 12; i++) {
-            dateTmp1 = new Date(oController.generateStartOfMonth(iUTS) * 1000);
-            dateTmp2 = new Date(oController.generateStartOfMonth(iUTS) * 1000);
-            dateTmp2.setMonth( dateTmp1.getMonth() - (i + 1) );
+        for (var i = 12; i > 0; i--) {
+            dateTmp1 = new Date(iUTS * 1000);
+            dateTmp2 = new Date(iUTS * 1000);
+            dateTmp1.setDate(1);
             
-            mUTSData["period"+(i+1)] = {
+            mUTSData["period"+(12 - (i - 1))] = {
                 start : iUTS - ( 86400 * (IomyRe.time.getMaximumDateInMonth( dateTmp1.getFullYear(), dateTmp1.getMonth() + 1 )) * i),
-                end : iUTS - ( 86400 * ((IomyRe.time.getMaximumDateInMonth( dateTmp2.getFullYear(), dateTmp2.getMonth() + 1 )) * (i + 1)) )
+                end : ( dateTmp3.getDate() / 1000 ) - ( 86400 * ((IomyRe.time.getMaximumDateInMonth( dateTmp2.getFullYear(), dateTmp2.getMonth() + 1 )) * i) )
             };
+            
+            dateTmp3.setDate(IomyRe.time.getMaximumDateInMonth( dateTmp3.getFullYear(), dateTmp3.getMonth() + 1 ));
+            dateTmp3.setMonth( dateTmp1.getMonth() - (12 - (i - 1)) );
+            dateTmp3.setDate(IomyRe.time.getMaximumDateInMonth( dateTmp3.getFullYear(), dateTmp3.getMonth() + 1 ));
         }
         
         mData.ticks = oController.generateTicks(mUTSData);
@@ -140,7 +127,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
             
             switch (oController.sPeriod) {
                 case IomyRe.graph_jqplot.PeriodWeek:
-                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(oController.sPeriod, Math.floor(mUTS.start) * 1000));
+                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(oController.sPeriod, Math.floor(mUTS.end) * 1000));
                     
                     if (date.getDay() === 0) {
                         aTicks.push('Sun');
@@ -168,7 +155,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     break;
                     
                 case IomyRe.graph_jqplot.PeriodYear:
-                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod("month", Math.floor(mUTS.start) * 1000));
+                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod("month", Math.floor(mUTS.end) * 1000));
                     //var date = new Date(Math.floor(mUTS.start) * 1000);
                     
                     if (date.getMonth() === 0) {

@@ -67,7 +67,7 @@ sap.ui.jsfragment("fragments.IOTileMenu", {
 						
 					// If the bar graph option was selected, draw one
 					} else if (iSelectedIndex === 3) {
-						IomyRe.common.NavigationChangePage("pGraphBar", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
+						IomyRe.common.NavigationChangePage("pGraphBar", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing, "TimePeriod" : oController.sSelectedTimePeriod });
 						
 					// If the pie graph option was selected, draw one
 					} else if (iSelectedIndex === 4) {
@@ -123,9 +123,9 @@ sap.ui.jsfragment("fragments.IOTileMenu", {
 													}
 												}),
 												new sap.m.RadioButton({
-													"tooltip":    "Create Weekly Bar Graph",
+													"tooltip":    "Create Bar Graph",
 													"enabled":	bBarGraphEnabled,
-													"text":		"Create Weekly Bar Graph",
+													"text":		"Create Bar Graph",
 													"width":	"210px",
 													"select":	function () {
 														oController.bDrawGraph = true;
