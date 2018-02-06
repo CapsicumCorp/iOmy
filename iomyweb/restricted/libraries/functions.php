@@ -4910,14 +4910,22 @@ function GetAllRules( $bActiveRulesOnly=false, $bLookupExtraData=false ) {
 			$aAllRules = dbGetAllRules( $bActiveRulesOnly );
 			
 			if( $aAllRules['Error']===true ) {
-				$sErrMesg  = "Error: Problem getting the list of all the Rules!\n";
-				$sErrMesg .= $aAllRules['ErrMesg'];
-				
-				return array(
-					"Error"   => true,
-					"ErrCode" => 2,
-					"ErrMesg" => $sErrMesg
-				);
+				if( $aAllRules['ErrMesg']==="GetAllRules: No Rows Found! Code:0" ) {
+					$aAllRules = array(
+						"Error" => false,
+						"Data"  => array()
+					);
+					
+				} else {
+					$sErrMesg  = "Error: Problem getting the list of all the Rules!\n";
+					$sErrMesg .= $aAllRules['ErrMesg'];
+					
+					return array(
+						"Error"   => true,
+						"ErrCode" => 2,
+						"ErrMesg" => $sErrMesg
+					);
+				}
 			}
 			
 		} catch( exception $e50 ) {
