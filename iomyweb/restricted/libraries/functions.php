@@ -4911,7 +4911,7 @@ function GetAllRules( $bActiveRulesOnly=false, $bLookupExtraData=false ) {
 			
 			if( $aAllRules['Error']===true ) {
 				$sErrMesg  = "Error: Problem getting the list of all the Rules!\n";
-				$sErrMesg .= $e50->getMessage()."\n";
+				$sErrMesg .= $aAllRules['ErrMesg'];
 				
 				return array(
 					"Error"   => true,

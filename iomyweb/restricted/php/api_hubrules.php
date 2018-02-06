@@ -110,7 +110,8 @@ if($bError===false) {
 			$sPostMode!=="ListAllRules"             && $sPostMode!=="ListAllActiveRules"       && 
 			$sPostMode!=="AddRule"                  && $sPostMode!=="EditRule"                 && 
 			$sPostMode!=="SetRuleEnabled"           && $sPostMode!=="DeleteRule"               && 
-			$sPostMode!=="UpdateRuleNextTS"         && $sPostMode!=="MarkRuleAsJustRan"        
+			$sPostMode!=="UpdateRuleNextTS"         && $sPostMode!=="JustTriggered"            &&
+			$sPostMode!=="TriggeredAt"              
 			
 		) {
 			$bError    = true;
@@ -118,7 +119,7 @@ if($bError===false) {
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"ListAllRules\", \"ListAllActiveRules\", \"AddRule\", \"EditRule\", \"SetRuleState\", \"DeleteRule\" or \"UpdateRuleNextTS\" \n\n";
+			$sErrMesg .= "eg. \n \"ListAllRules\", \"ListAllActiveRules\", \"AddRule\", \"EditRule\", \"SetRuleState\", \"DeleteRule\", \"JustTriggered\", \"TriggeredAt\" or \"UpdateRuleNextTS\" \n\n";
 		}
 		
 	} catch( Exception $e0102 ) {
@@ -127,7 +128,7 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"ListAllRules\", \"ListAllActiveRules\", \"AddRule\", \"EditRule\", \"SetRuleState\", \"DeleteRule\" or \"UpdateRuleNextTS\" \n\n";
+		$sErrMesg .= "eg. \n \"ListAllRules\", \"ListAllActiveRules\", \"AddRule\", \"EditRule\", \"SetRuleState\", \"DeleteRule\", \"JustTriggered\", \"TriggeredAt\" or \"UpdateRuleNextTS\" \n\n";
 		//sErrMesg .= e0102.message;
 	}
 	
@@ -136,7 +137,11 @@ if($bError===false) {
 	//-- 2.2.2 - Retrieve "Id"                          --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="EditRule" || $sPostMode==="SetRuleEnabled" || $sPostMode==="DeleteRule" || $sPostMode==="MarkRuleAsJustRan" || $sPostMode==="UpdateRuleNextTS" ) {
+		if( 
+			$sPostMode==="EditRule"         || $sPostMode==="SetRuleEnabled"   || 
+			$sPostMode==="DeleteRule"       || $sPostMode==="JustTriggered"    || 
+			$sPostMode==="UpdateRuleNextTS" || $sPostMode==="TriggeredAt"      
+		) {
 			try {
 				//-- Retrieve the "RuleId" --//
 				$iPostId = $aHTTPData["Id"];
@@ -196,9 +201,8 @@ if($bError===false) {
 		if( 
 			$sPostMode==="AddRule"             || $sPostMode==="EditRule"            || 
 			$sPostMode==="SetRuleEnabled"      || $sPostMode==="ListHubRules"        || 
-			$sPostMode==="ListHubEnabledRules" 
+			$sPostMode==="ListHubEnabledRules" || $sPostMode==="TriggeredAt"         
 		) {
-			
 			try {
 				//-- Retrieve the "Data" --//
 				$sPostData = $aHTTPData["Data"];
@@ -209,7 +213,6 @@ if($bError===false) {
 					//------------------------------------------------//
 					//var_dump( $sPostData );
 					//echo "\n";
-					
 					$aPostData = json_decode( $sPostData, true );
 					
 					//------------------------------------------------//
@@ -418,6 +421,8 @@ if( $bError===false ) {
 							//-- Perform validation             --//
 							//------------------------------------//
 							
+							
+							
 							//------------------------//
 							//-- IF ThingId         --//
 							//------------------------//
@@ -462,19 +467,58 @@ if( $bError===false ) {
 					}
 				}
 			}
+			
+			
+			//----------------------------------------------------//
+			//-- 4.1.6 - Extract Parameter                      --//
+			//----------------------------------------------------//
+			if( $bError===false ) {
+				if( $sPostMode==="TriggeredAt" ) {
+					try {
+						if( isset( $aPostData['TriggeredUnixTS'] ) ) {
+							$iPostDataLastRunUnixTS = $aPostData['TriggeredUnixTS'];
+							
+							if( $iPostDataLastRunUnixTS > time() ) {
+								//------------------------------------//
+								//-- ERROR: Invalid Timestamp       --//
+								$bError    = true;
+								$iErrCode  = 212;
+								$sErrMesg .= "Error Code:'0212' \n";
+								$sErrMesg .= "Error: The 'TriggeredUnixTS' value in the 'Data' JSON parameter is not supported!\n";
+								$sErrMesg .= "The Unix timestamp has not occurred yet.";
+							}
+						} else {
+							//------------------------------------//
+							//-- ERROR: Missing Parameter       --//
+							$bError    = true;
+							$iErrCode  = 211;
+							$sErrMesg .= "Error Code:'0211' \n";
+							$sErrMesg .= "Error: The 'TriggeredUnixTS' value in the 'Data' JSON parameter is not supported!\n";
+						}
+					} catch( Exception $e0211 ) {
+						$bError = true;
+						$iErrCode  = 211;
+						$sErrMesg .= "Error Code:'0211' \n";
+						$sErrMesg .= "Error: Problem extracting the 'TriggeredUnixTS' value in the 'Data' JSON parameter!\n";
+					}
+				}
+			}
 		}
 		
 		//------------------------------------------------------------//
 		//-- 4.2 - Lookup the Rule Data                             --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="MarkRuleAsJustRan" || $sPostMode==="EditRule" || $sPostMode==="DeleteRule" || $sPostMode==="UpdateRuleNextTS" ) {
+			if( 
+				$sPostMode==="EditRule"         || $sPostMode==="DeleteRule"       || 
+				$sPostMode==="UpdateRuleNextTS" || $sPostMode==="JustTriggered"    || 
+				$sPostMode==="TriggeredAt"      
+			) {
 				//-- Lookup Rule --//
 				$aRuleTemp = GetRuleFromRuleId( $iPostId );
 				
 				if( $aRuleTemp['Error']===false ) {
 					$iPostHubId = $aRuleTemp['Data']['HubId'];
-					
 					
 					//--------------------------------------------//
 					//-- IF Edit Mode                           --//
@@ -497,7 +541,7 @@ if( $bError===false ) {
 							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg .= "Failed to extract the required values from the existing Rule's parameter!\n";
 						}
-					} else if( $sPostMode==="UpdateRuleNextTS" ) {
+					} else if( $sPostMode==="UpdateRuleNextTS" || $sPostMode==="JustTriggered" || $sPostMode==="TriggeredAt" ) {
 						//-- Extract values --//
 						$iPlannedNextRunUnixTS = $aRuleTemp['Data']['NextRunUTS'];
 						$sPostTime = $aRuleTemp['Data']['Time'];
@@ -519,7 +563,10 @@ if( $bError===false ) {
 		//-- 4.3 - Lookup the timezone from HubId                   --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="AddRule" || $sPostMode==="EditRule" || $sPostMode==="UpdateRuleNextTS" ) {
+			if( $sPostMode==="AddRule"          || $sPostMode==="EditRule"         || 
+				$sPostMode==="UpdateRuleNextTS" || $sPostMode==="JustTriggered"    || 
+				$sPostMode==="TriggeredAt"      
+			) {
 				//------------------------------------------------//
 				//-- 4.2.1 - Lookup Hub Data for Rule           --//
 				//------------------------------------------------//
@@ -559,7 +606,11 @@ if( $bError===false ) {
 		//-- 4.4 - Lookup the Calculate Next RunTime                --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
-			if( $sPostMode==="AddRule" || $sPostMode==="EditRule" || $sPostMode==="UpdateRuleNextTS" ) {
+			if( 
+				$sPostMode==="AddRule"          || $sPostMode==="EditRule"         || 
+				$sPostMode==="UpdateRuleNextTS" || $sPostMode==="JustTriggered"    || 
+				$sPostMode==="TriggeredAt"      
+			) {
 				$aNextUnixTS = FindNextUTSFromTime( $sTimezone, $sPostTime, 60 );
 				
 				if( $aNextUnixTS['Error']===false ) {
@@ -810,15 +861,17 @@ if( $bError===false ) {
 		//================================================================//
 		} else if( $sPostMode==="UpdateRuleNextTS" ) {
 			try {
-				$aResult = RuleNextRunUpdate( $iPostId, $iNextRun );
+				$aTempFunctionResult4 = RuleNextRunUpdate( $iPostId, $iNextRun );
 					
-				if( $aResult['Error']===true ) {
+				if( $aTempFunctionResult4['Error']===false ) {
+					$aResult = GetRuleFromRuleId( $iPostId );
+				} else {
 					$bError     = true;
 					$iErrCode   = 6401;
 					$sErrMesg  .= "Error Code:'6401' \n";
 					$sErrMesg  .= "Error: Problem in the main section of the \"".$sPostMode."\" Mode!\n";
 					$sErrMesg  .= $aResult['ErrMesg'];
-				}
+				} 
 			} catch( Exception $e6400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;
@@ -831,45 +884,36 @@ if( $bError===false ) {
 		//================================================================//
 		//== 5.7 - MODE: Mark Rule as just executed                     ==//
 		//================================================================//
-		} else if( $sPostMode==="MarkRuleAsJustRan" ) {
+		} else if( $sPostMode==="JustTriggered" || $sPostMode==="TriggeredAt" ) {
 			try {
 				//--------------------------------------------------------//
 				//-- 5.7.1 - Prepare                                    --//
 				//--------------------------------------------------------//
 				
-				//------------------------------------------------//
-				//-- 5.7.1.1 - Current UnixTS                   --//
-				//------------------------------------------------//
-				$iCurrentUnixTS = time();
-				
-				
-				//------------------------------------------------//
-				//-- 5.7.1.3 - Lookup Hub Data for Rule         --//
-				//------------------------------------------------//
-				if( $bError===false ) {
-					$aHubTemp  = GetPremiseFromHubId( $iPostHubId );
+				//------------------------------------//
+				//-- IF Mode is JustTriggered       --//
+				//------------------------------------//
+				if( $sPostMode==="JustTriggered" ) {
+					//-- Set the Triggered UnixTS as the current timestamp --//
+					$iPostDataLastRunUnixTS = time();
 					
-					if( $aHubTemp['Error']===true ) {
+				//------------------------------------//
+				//-- ELSE Mode is TriggeredAt       --//
+				//------------------------------------//
+				} else {
+					//----------------------------------------//
+					//-- Validate that Triggered UnixTS     --//
+					//-- is newer than the previous         --//
+					//----------------------------------------//
+					if( $iPostDataLastRunUnixTS <= $aRuleTemp['Data']['LastRunUTS'] ) {
+						//--------------------------------//
+						//-- ERROR: Invalid UnixTS      --//
+						//--------------------------------//
 						$bError    = true;
-						$iErrCode  = 7410+$aHubTemp['ErrCode'];
+						$iErrCode  = 7401;
 						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-						$sErrMesg .= " \n";
-						$sErrMesg .= $aHubTemp['ErrMesg'];
-					}
-				}
-				
-				//------------------------------------------------//
-				//-- 5.7.1.4 - Lookup PremiseAddress            --//
-				//------------------------------------------------//
-				if( $bError===false ) {
-					$aPremiseAddressTemp = GetPremisesAddressFromPremiseId( $aHubTemp['Data']['PremiseId'] );
-					
-					if( $aPremiseAddressTemp['Error']===true ) {
-						$bError    = true;
-						$iErrCode  = 7415+$aPremiseAddressTemp['ErrCode'];
-						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-						$sErrMesg .= " \n";
-						$sErrMesg .= $aPremiseAddressTemp['ErrMesg'];
+						$sErrMesg .= "Problem with the 'TriggeredUnixTS' !\n";
+						$sErrMesg .= "The new UnixTS is not newer than the previous UnixTS.";
 					}
 				}
 				
@@ -881,28 +925,17 @@ if( $bError===false ) {
 					//-- IF The Rule is a re-occuring type          --//
 					//------------------------------------------------//
 					if( $aRuleTemp['Data']['TypeId']===3 || $aRuleTemp['Data']['TypeId']===4 ) {
-						$aNextUnixTS = FindNextUTSFromTime( $aPremiseAddressTemp['Data']['AddressTimezoneTZ'], $aRuleTemp['Data']['Time'] );
+						//------------------------------------------------//
+						//-- Update the Rule                            --//
+						//------------------------------------------------//
+						$aResult = RuleMarkAsRan( $iPostId, $iNextRun, $iPostDataLastRunUnixTS, $aRuleTemp['Data']['HubId'] );
 						
-						if( $aNextUnixTS['Error']===false ) {
-							//------------------------------------------------//
-							//-- Update the Rule                            --//
-							//------------------------------------------------//
-							$aResult = RuleMarkAsRan( $iPostId, $aNextUnixTS['UnixTS'], $iCurrentUnixTS, $aRuleTemp['Data']['HubId'] );
-							
-							if( $aResult['Error']===true ) {
-								$bError    = true;
-								$iErrCode  = 7430;
-								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-								$sErrMesg .= "Problem marking that the rule has been executed and calculating the next timestamp that it will run at!\n";
-								$sErrMesg .= $aResult['ErrMesg'];
-							}
-							
-						} else {
+						if( $aResult['Error']===true ) {
 							$bError    = true;
-							$iErrCode  = 7420+$aNextUnixTS['ErrCode'];
+							$iErrCode  = 7430;
 							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-							$sErrMesg .= "Problem calculating the next timestamp that the rule will run at.\n";
-							$sErrMesg .= $aNextUnixTS['ErrMesg'];
+							$sErrMesg .= "Problem marking that the rule has been executed and calculating the next timestamp that it will run at!\n";
+							$sErrMesg .= $aResult['ErrMesg'];
 						}
 						
 					//------------------------------------------------//
@@ -912,7 +945,7 @@ if( $bError===false ) {
 						//------------------------------------------------//
 						//-- Update the Rule                            --//
 						//------------------------------------------------//
-						$aResult = RuleMarkAsRan( $iPostId, $aRuleTemp['Data']['NextRunUTS'], $iCurrentUnixTS, $aRuleTemp['Data']['HubId'] );
+						$aResult = RuleMarkAsRan( $iPostId, $aRuleTemp['Data']['NextRunUTS'], $iPostDataLastRunUnixTS, $aRuleTemp['Data']['HubId'] );
 						
 						if( $aResult['Error']===true ) {
 							$bError    = true;
