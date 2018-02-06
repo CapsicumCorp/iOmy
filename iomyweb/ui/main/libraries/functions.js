@@ -2351,7 +2351,7 @@ $.extend(IomyRe.functions, {
 
                     onSuccess : function (sType, mData) {
                         try {
-                            if (sType !== "JSON") {
+                            if (sType === "JSON") {
                                 if (mData.Error !== true) {
                                     var aStates     = [];
                                     var iMax        = null;
