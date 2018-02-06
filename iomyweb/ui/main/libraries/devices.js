@@ -934,6 +934,10 @@ $.extend(IomyRe.devices,{
                     aTasks = IomyRe.devices.csrmesh.GetUITaskList(mSettings);
                 }
 
+                if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.temperature.ThingTypeId ) {
+                    aTasks = IomyRe.devices.temperature.GetUITaskList(mSettings);
+                }
+
     //            if( mSettings.deviceData.DeviceTypeId===IomyRe.devices.ipcamera.ThingTypeId ) {
     //                aTasks = IomyRe.devices.ipcamera.GetUITaskList(mSettings);
     //            }
