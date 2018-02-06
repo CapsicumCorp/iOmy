@@ -2322,6 +2322,9 @@ $.extend(IomyRe.functions, {
             var fnFail          = function () {};
             var mSuccessMissing = "Success callback is missing. There is no way to return the data to the user.";
             
+            //----------------------------------------------------------------//
+            // Process the settings map.
+            //----------------------------------------------------------------//
             try {
                 if (IomyRe.validation.isValueGiven(mSettings)) {
 
@@ -2336,12 +2339,16 @@ $.extend(IomyRe.functions, {
                     }
                 } else {
                     $.sap.log.error(mSuccessMissing);
+                    return;
                 }
             } catch (e) {
                 fnFail("Error checking the settings map ("+e.name+"): " + e.message);
                 return;
             }
 
+            //----------------------------------------------------------------//
+            // Attempt to lookup the indexing state of the data tables.
+            //----------------------------------------------------------------//
             try {
                 IomyRe.apiphp.AjaxRequest({
                     url : sUrl,
@@ -2356,11 +2363,17 @@ $.extend(IomyRe.functions, {
                                     var aStates     = [];
                                     var iMax        = null;
 
+                                    //----------------------------------------------------------------//
+                                    // Store the state of each table
+                                    //----------------------------------------------------------------//
                                     $.each(mData.Data, function (sTableName, mInfo) {
                                         aStates.push(mInfo.Status);
 
                                     });
 
+                                    //----------------------------------------------------------------//
+                                    // If any of them are indexed (Status = 1), indexing is enabled.
+                                    //----------------------------------------------------------------//
                                     for (var i = 0; i < aStates.length; i++) {
                                         if (iMax === null) {
                                             iMax = aStates[i];

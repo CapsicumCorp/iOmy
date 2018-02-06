@@ -26,24 +26,10 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
     aFormFragments  : {},
     
     //bEditing    : false,
-    bIndexingOn : false,
-    iThingId    : null,
-    
-    oDBIndexingQueue : new AjaxRequestQueue({
-        executeNow : false,
-        
-        onSuccess : function () {
-            IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
-        },
-        
-        onWarning : function () {
-            
-        },
-        
-        onFail : function () {
-            
-        }
-    }),
+    bIndexingOn         : false,
+    bControlsEnabled    : false,
+    bLoading            : false,
+    iThingId            : null,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -61,24 +47,51 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                 //-- Defines the Device Type --//
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
+                oController.RefreshModel();
                 oController.CheckDBIndexing();
             }
         });
+    },
+    
+    ToggleControls : function (bEnabled) {
+        try {
+            var oController     = this;
+            var oView           = oController.getView();
+            var oData           = JSON.parse(oView.getModel().getJSON());
+            var oModel          = {};
+            
+            oController.bControlsEnabled = bEnabled;
+            
+            oData.controls.ControlsEnabled      = oController.bControlsEnabled;
+            oData.controls.CancelEnabled        = oController.bControlsEnabled || oController.bLoading;
+            
+            oModel = new sap.ui.model.json.JSONModel(oData);
+            oView.setModel(oModel);
+            
+        } catch (e) {
+            $.sap.log.error("Error toggling controls ("+e.name+"): " + e.message);
+        }
     },
     
     CheckDBIndexing : function () {
         var oController     = this;
         
         try {
+            oController.bLoading = true;
+            oController.ToggleControls(false);
+            
             IomyRe.functions.server.getDBIndexingState({
                 onSuccess : function (bState) {
                     oController.bIndexingOn = bState;
+                    oController.bLoading = false;
+                    
                     oController.RefreshModel();
                 },
 
                 onFail : function (sErrorMessage) {
                     IomyRe.common.showError(sErrorMessage, "Error",
                         function () {
+                            oController.bLoading = false;
                             oController.RefreshModel();
                         }
                     );
@@ -87,6 +100,7 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
         } catch (e) {
             IomyRe.common.showError("Error attempting to call the function to retrieve the database indexing state ("+e.name+"): " + e.message, "Error",
                 function () {
+                    oController.bLoading = false;
                     oController.RefreshModel();
                 }
             );
@@ -106,7 +120,8 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
             "DBIndexingOn"      : oController.bIndexingOn,
             
             "controls" : {
-                
+                "ControlsEnabled"   : true,
+                "CancelEnabled"     : true
             }
         };
         
@@ -123,8 +138,10 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
         var sDBPassword         = oView.getModel().getProperty("/DBAdminPassword");
         var sDBTable;
         var sCommand;
+        var oDBIndexingQueue;
         var aDataTables = [
             "DATABIGINT",
+            "DATABLOB",
             "DATAINT",
             "DATALONGSTRING",
             "DATAMEDSTRING",
@@ -135,6 +152,55 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
         ];
         
         try {
+            oController.ToggleControls(false);
+            //----------------------------------------------------------------//
+            // Create the request queue with its callbacks.
+            //----------------------------------------------------------------//
+            oDBIndexingQueue = new AjaxRequestQueue({
+                executeNow : false,
+
+                onSuccess : function () {
+                    var sMessage = "";
+                    
+                    if (bEnabled) {
+                        sMessage = "Database indexing enabled.";
+                    } else {
+                        sMessage = "Database indexing disabled.";
+                    }
+                    
+                    IomyRe.common.showMessage({
+                        text : sMessage
+                    });
+                    
+                    IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+                },
+
+                onWarning : function () {
+
+                },
+
+                onFail : function () {
+                    var sError = "";
+                    
+                    if (bEnabled) {
+                        sError = "Failed to enable indexing.";
+                    } else {
+                        sError = "Failed to disable indexing.";
+                    }
+                    
+                    IomyRe.common.showError(sError, "Error",
+                        function () {
+                            oController.ToggleControls(true);
+                        }
+                    );
+
+                }
+            });
+            
+            //----------------------------------------------------------------//
+            // Populate the queue with requests to toggle indexing for each
+            // data table.
+            //----------------------------------------------------------------//
             for (var i = 0; i < aDataTables.length; i++) {
                 sDBTable = aDataTables[i];
                 
@@ -144,7 +210,7 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                     sCommand = sDBTable + "_Remove";
                 }
 
-                oController.oDBIndexingQueue.addRequest({
+                oDBIndexingQueue.addRequest({
                     library : "php",
                     url : IomyRe.apiphp.APILocation("serveradmin"),
                     data : {
@@ -160,7 +226,8 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                 });
             }
 
-            oController.oDBIndexingQueue.execute();
+            //-- Run the requests --//
+            oDBIndexingQueue.execute();
 
         } catch (e) {
             $.sap.log.error("Error attempting to add and execute requests ("+e.name+"): " + e.message);

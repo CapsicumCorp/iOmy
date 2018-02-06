@@ -140,8 +140,8 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                         new sap.ui.layout.form.FormElement({
                                                             fields: [
                                                                 new sap.m.CheckBox({
-                                                                    text: "Database Indexed",
-                                                                    selected: "{/indices/DATABIGINT}",
+                                                                    text: "{/editIndex/tickBoxText}",
+                                                                    selected: "{/indexingOn}",
                                                                     editable: false,
                                                                 })
                                                             ]
@@ -150,6 +150,8 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                             fields: [
                                                                 new sap.m.Button({
                                                                     text: "Edit Indexing",
+                                                                    enabled : "{/editIndex/buttonEnabled}",
+                                                                    visible : "{/editIndex/buttonVisible}",
                                                                     press : function () {
                                                                         IomyRe.common.NavigationChangePage( "pDBIndex" , {} , false);
                                                                     }

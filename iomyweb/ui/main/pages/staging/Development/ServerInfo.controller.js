@@ -23,13 +23,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.staging.Development.ServerInfo", {
-    aFormFragments:     {},
-    bEditing: false,
-    iThingId: null,
     
-    oDBIndexingQueue : new AjaxRequestQueue({
-        executeNow : false
-    }),
+    bIndexingOn         : false,
+    bCanEditIndexing    : false,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -48,6 +44,7 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
                 IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 oController.RefreshModel();
+                oController.CheckDBIndexing();
             }
         });
     },
@@ -63,12 +60,78 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
         oData = {
             "ui5Version"        : oVersion.toString(),
             "dbVersion"         : IomyRe.common.DatabaseVersion,
-            "interfaceVersion"  : "0.4.11"              // TODO: Interface version is hardcoded. Each time a release is done, this will need to be updated.
+            "interfaceVersion"  : "0.4.11",              // TODO: Interface version is hardcoded. Each time a release is done, this will need to be updated.
+            
+            "indexingOn"        : oController.bIndexingOn,
+            "editIndex"         : {
+                "tickBoxText"       : "Database Indexed",
+                "buttonVisible"     : true,
+                "buttonEnabled"     : false
+            }
         };
         
         oModel = new sap.ui.model.json.JSONModel(oData);
         
         oView.setModel(oModel);
+    },
+    
+    AllowEditIndex : function (bAllowed) {
+        var oController         = this;
+        var oView               = oController.getView();
+        var oData               = JSON.parse(oView.getModel().getJSON());
+        var oModel              = {};
+        
+        try {
+            if (bAllowed) {
+                oData.indexingOn = oController.bIndexingOn;
+                
+                oData.editIndex = {
+                    "tickBoxText"       : "Database Indexed",
+                    "buttonVisible"     : bAllowed,
+                    "buttonEnabled"     : bAllowed
+                };
+                
+            } else {
+                oData.indexingOn = false;
+                
+                oData.editIndex = {
+                    "tickBoxText"       : "Unable to check indexing",
+                    "buttonVisible"     : bAllowed,
+                    "buttonEnabled"     : bAllowed
+                };
+                
+            }
+            
+            oModel = new sap.ui.model.json.JSONModel(oData);
+            oView.setModel(oModel);
+        } catch (e) {
+            $.sap.log.error("Error when modifying the database indexing controls ("+e.name+"): " + e.message);
+        }
+    },
+    
+    CheckDBIndexing : function () {
+        var oController     = this;
+        
+        try {
+            IomyRe.functions.server.getDBIndexingState({
+                onSuccess : function (bState) {
+                    oController.bIndexingOn = bState;
+                    
+                    oController.AllowEditIndex(true);
+                },
+
+                onFail : function (sErrorMessage) {
+                    $.sap.log.error(sErrorMessage);
+                    
+                    oController.AllowEditIndex(false);
+                }
+            });
+            
+        } catch (e) {
+            $.sap.log.error("Error attempting to call the function to retrieve the database indexing state ("+e.name+"): " + e.message);
+            oController.AllowEditIndex(false);
+        }
+        
     }
     
 });

@@ -62,7 +62,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                     blocks : [
                                         new sap.ui.layout.form.Form( oView.createId("DBBlock_Form"),{
                                             editable: true,
-                                           layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+                                            layout : new sap.ui.layout.form.ResponsiveGridLayout ({
 												labelSpanXL: 3,
 												labelSpanL: 3,
 												labelSpanM: 3,
@@ -101,6 +101,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                             fields: [ 
                                                                 new sap.m.CheckBox ({
                                                                     text: "Database Indexed",
+                                                                    enabled : "{/controls/ControlsEnabled}",
                                                                     selected : "{/DBIndexingOn}"
                                                                 })
                                                             ]
@@ -109,7 +110,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                             label : "DB Root User",
                                                             fields: [ 
                                                                 new sap.m.Input ({
-                                                                    enable : "{/controls/ControlsEnabled}",
+                                                                    enabled : "{/controls/ControlsEnabled}",
                                                                     value:"{/DBAdminUsername}"
                                                                 })
                                                             ]
@@ -118,7 +119,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                             label : "DB Root Password",
                                                             fields: [ 
                                                                 new sap.m.Input ({
-                                                                    enable : "{/controls/ControlsEnabled}",
+                                                                    enabled : "{/controls/ControlsEnabled}",
                                                                     type : sap.m.InputType.Password,
                                                                     value:"{/DBAdminPassword}"
                                                                 })
@@ -130,7 +131,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                                 new sap.m.Button (oView.createId("ButtonSubmit"), {
                                                                     text: "Save",
                                                                     type: sap.m.ButtonType.Accept,
-                                                                    enable : "{/controls/ControlsEnabled}",
+                                                                    enabled : "{/controls/ControlsEnabled}",
                                                                     press:   function( oEvent ) {
                                                                         oController.ToggleDBIndexing();
                                                                     }
@@ -138,7 +139,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                                 new sap.m.Button (oView.createId("ButtonCancel"), {
                                                                     text: "Cancel",
                                                                     type: sap.m.ButtonType.Reject,
-                                                                    enable : "{/controls/CancelEnabled}",
+                                                                    enabled : "{/controls/CancelEnabled}",
                                                                     press:   function( oEvent ) {
                                                                         IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
                                                                     }
