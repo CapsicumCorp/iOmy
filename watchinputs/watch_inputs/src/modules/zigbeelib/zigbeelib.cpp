@@ -5209,6 +5209,7 @@ void zigbeelib_process_zcl_response_received(int localzigbeeindex, zigbee_zcl_co
     if ( ((frame_control >> 3) & 1)!=1) {
       debuglibifaceptr->debuglib_printf(1, "%s: Received packet with wrong direction from Zigbee device: %04hX clusterid: %04hX\n", __func__, srcnetaddr, clusterid);
     }
+    debuglibifaceptr->debuglib_printf(1, "%s: Received command: %s %02hhX from Zigbee device: %04hX clusterid: %04hX\n", __func__, zigbeelib_get_zigbee_zclcmd_string(command), command, srcnetaddr, clusterid);
     switch (command) {
       case ZIGBEE_ZCL_CMD_READ_ATTRIB_RESP:
         zigbeelib_process_api_zigbee_public_profile_read_attribute_response(localzigbeeindex, (zigbee_zcl_command_read_attributes_response_t *) &zclcmd->zigbeepayload, zclcmd->zigbeelength, srcnetaddr, srcendpoint, clusterid, manu, hasmanu, localzigbeelocked, zigbeelocked);
@@ -5229,7 +5230,7 @@ void zigbeelib_process_zcl_response_received(int localzigbeeindex, zigbee_zcl_co
         zigbeelib_process_api_zigbee_public_profile_default_response(localzigbeeindex, pos, zclcmd, localzigbeelocked, zigbeelocked);
         break;
       default:
-        debuglibifaceptr->debuglib_printf(1, "%s: Received unhandled command: %s %02hhX from Zigbee device: %04hX clusterid: %04hX\n", __func__, zigbeelib_get_zigbee_zclcmd_string(command), command, srcnetaddr, clusterid);
+        debuglibifaceptr->debuglib_printf(1, "%s:   Unhandled command: %s %02hhX from Zigbee device: %04hX clusterid: %04hX\n", __func__, zigbeelib_get_zigbee_zclcmd_string(command), command, srcnetaddr, clusterid);
         break;
     }
   } else {
