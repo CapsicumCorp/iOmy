@@ -5049,7 +5049,7 @@ function GetRuleFromRuleId( $iRuleId ) {
 		$aResult = dbGetRuleFromRuleId( $iRuleId );
 		
 		if( $aResult['Error']===false ) {
-			//-- 5.2 - Check User Permissions --//
+			//-- 5.2 - Check the User's' Permissions to that Hub --//
 			$bPermission = CheckUserPermissionsForRules( $aResult['Data']['HubId'] );
 			
 			//-- 5.3 - Check Permissions --//
@@ -5057,22 +5057,35 @@ function GetRuleFromRuleId( $iRuleId ) {
 				return array(
 					"Error"   => true,
 					"ErrCode" => 1,
-					"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
+					"ErrMesg" => "Error: Problem finding the Rule!\nRule may not exist or you don't have permission to access the Rule system!\n"
 				);
 			}
 			
 		} else {
-			return array(
-				"Error"   => true,
-				"ErrCode" => 1,
-				"ErrMesg" => "Error: Your User account doesn't seem to have permission to access the Rules system!\n"
-			);
+			//-- Perform a basic check on the first Hub to see if the User has access to it --//
+			//-- TODO: This will need to be enforced properly when multi-premise and mult-hub support become available --//
+			$bPermission = CheckUserPermissionsForRules( 1 );
+			if( $bPermission===false ) {
+				//-- NOTE: Return the same error message as if the user doesn't have permission to access the rule system --//
+				return array(
+					"Error"   => true,
+					"ErrCode" => 1,
+					"ErrMesg" => "Error: Problem finding the Rule!\nRule may not exist or you don't have permission to access the Rule system!\n"
+				);
+				
+			} else {
+				return array(
+					"Error"   => true,
+					"ErrCode" => 2,
+					"ErrMesg" => "Error: Problem finding the Rule!\nRule may not exist!\n"
+				);
+			}
 		}
 		
 	} catch( exception $e50 ) {
 		return array(
 			"Error"   => true,
-			"ErrCode" => 2,
+			"ErrCode" => 3,
 			"ErrMesg" => "Critical Error: Problem looking up the Rule!\n"
 		);
 	}
@@ -5083,7 +5096,7 @@ function GetRuleFromRuleId( $iRuleId ) {
 	if( $aResult['Error']===true ) {
 		return array(
 			"Error"   => true,
-			"ErrCode" => 3,
+			"ErrCode" => 4,
 			"ErrMesg" => $aResult['ErrMesg']
 		);
 	} else {
