@@ -42,8 +42,10 @@ namespace ruleslib {
     static const int32_t TURN_OFF_RECURRING=4;
   }
   //A list of webapi request modes
-  enum WEBAPI_REQUEST_MODES {
-    GET_ALL_RULES
+  enum class WEBAPI_REQUEST_MODES {
+    GET_ALL_RULES,
+    RULE_TRIGGERED,
+    UPDATE_NEXT_RUNTIME
   };
 } //End of namespace
 

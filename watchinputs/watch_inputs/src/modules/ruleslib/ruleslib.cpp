@@ -119,7 +119,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 namespace ruleslib {
 
 static const int WEBAPI_ACCESS_INTERVAL=5; //Number of seconds between web api accesses
-static const int WEBAPI_REFRESH_ALL_RULES_INTERVAL=5; //Number of seconds between refreshing all rules
+static const int WEBAPI_REFRESH_ALL_RULES_INTERVAL=60; //Number of seconds between refreshing all rules
 
 using boost::asio::ip::tcp;
 
@@ -134,6 +134,9 @@ public:
   bool needToRemove=false; //Set to true when this rule has been scheduled for removal and it should be ignored
   bool needToRemoveInDb=false; //Set to true when this rule is a run once rule and should now be removed from the database as it has run
                                //  Once confirmed removed from the db, needToRemove can be set
+  bool needNextRuntime=false; //Set to true when this rule needs the next runtime to be updated by the webapi so should ignore this rule until then
+                              //  Also, the webapi refresh should be ignored if this is set to true as the webapi will need to calculate the next runtime first
+  bool needWebApiRefresh=false; //Set to true when some values need updating from the webapi
   std::string ruleName="";
   bool enabled=true; //Whether this rule is enabled or not
   bool localOnlyRule=false; //If true, this is a locally generated test rule that shouldn't sync to the database
@@ -162,8 +165,9 @@ public:
 static boost::recursive_mutex thislibmutex;
 
 //ruleid, rule class
-static std::map<uint32_t, Rule> grules;
+static std::map<int32_t, Rule> grules;
 static std::list<RuleTriggered> gRulesTriggered;
+static std::list<int32_t> gRulesNeedNextRuntime; //A list of rule ids that need the next runtime to be updated by the webapi
 
 static sem_t gmainthreadsleepsem; //Used for main thread sleeping
 
@@ -321,13 +325,8 @@ static bool _getneedmoreinfo(void) {
   Thread safe get need more info value
 */
 static bool getneedmoreinfo() {
-  int val;
-
-  thislibmutex.lock();
-  val=_getneedmoreinfo();
-  thislibmutex.unlock();
-
-  return val;
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+  return _getneedmoreinfo();
 }
 
 /*
@@ -341,9 +340,8 @@ static void _setneedmoreinfo(bool needmoreinfo) {
   Thread safe set need more info value
 */
 static void setneedmoreinfo(bool needmoreinfo) {
-  thislibmutex.lock();
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
   _setneedmoreinfo(needmoreinfo);
-  thislibmutex.unlock();
 }
 
 
@@ -399,6 +397,7 @@ RuleTriggered::~RuleTriggered() {
 
 //Process rules that were received from the Web API
 void processReceivedRules(const boost::property_tree::ptree& pt) {
+  std::map<int32_t, Rule> webapiRules; //Temporary storage for the rules from the webapi
   try {
     //Iterate over data
     for (auto const &data : pt.get_child("Data")) {
@@ -432,12 +431,78 @@ void processReceivedRules(const boost::property_tree::ptree& pt) {
             default:
               deviceType=DEVICETYPES::NO_TYPE;
           }
-          grules[ruleId]=Rule(ruleId, ruleName, deviceId, thingHwid, deviceType, typeId, ruleEnabled, false, lastModified, lastRuntime, nextRuntime, lastRuntime, nextRuntime, linkId, thingId);
+          webapiRules[ruleId]=Rule(ruleId, ruleName, deviceId, thingHwid, deviceType, typeId, ruleEnabled, false, lastModified, lastRuntime, nextRuntime, lastRuntime, nextRuntime, linkId, thingId);
         }
       }
     }
   } catch (boost::property_tree::ptree_bad_path& e) {
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to parse Json result for received rules request\n", __PRETTY_FUNCTION__);
+    return;
+  }
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+    //First scan for rules that are no longer in the database and should be removed from the local list
+    for (auto &rulesit : grules) {
+      if (rulesit.first<0) {
+        //Ignore local rules
+        continue;
+      }
+      debuglibifaceptr->debuglib_printf(1, "%s: Checking if rule: %d needs to be removed\n", __PRETTY_FUNCTION__, rulesit.first);
+      try {
+        if (webapiRules.at(rulesit.first).ruleId==rulesit.first) {
+          //This rule exists
+          debuglibifaceptr->debuglib_printf(1, "%s: Rule: %d doesn't need to be removed\n", __PRETTY_FUNCTION__, rulesit.first);
+          continue;
+        }
+      } catch (std::out_of_range& e) {
+        //Schedule the rule for removal
+        debuglibifaceptr->debuglib_printf(1, "%s: Rule: %d has been scheduled for removal as it is no longer in the database\n", __PRETTY_FUNCTION__, rulesit.first);
+        rulesit.second.needToRemove=true;
+
+        //Search the queues for the rule as we need to remove from there as well
+        std::list<RuleTriggered>::iterator rulesTriggeredIt;
+        std::list<int32_t>::iterator rulesNeedNextRuntimeIt;
+        for (rulesTriggeredIt=gRulesTriggered.begin(); rulesTriggeredIt!=gRulesTriggered.end(); rulesTriggeredIt++) {
+          if (rulesTriggeredIt->ruleId==rulesit.first) {
+            break;
+          }
+        }
+        if (rulesTriggeredIt!=gRulesTriggered.end()) {
+          gRulesTriggered.erase(rulesTriggeredIt);
+        }
+        for (rulesNeedNextRuntimeIt=gRulesNeedNextRuntime.begin(); rulesNeedNextRuntimeIt!=gRulesNeedNextRuntime.end(); rulesNeedNextRuntimeIt++) {
+          if (*rulesNeedNextRuntimeIt==rulesit.first) {
+            break;
+          }
+        }
+        if (rulesNeedNextRuntimeIt!=gRulesNeedNextRuntime.end()) {
+          gRulesNeedNextRuntime.erase(rulesNeedNextRuntimeIt);
+        }
+      }
+    }
+    //Now add/update rules from webapi to local list
+    for (auto &webrulesit : webapiRules) {
+      try {
+        if (grules.at(webrulesit.first).ruleId==webrulesit.first) {
+          //This rule already exists in local list so update values that have been changed from the database
+          if (grules[webrulesit.first].needNextRuntime) {
+            //Don't update the local copy until next runtime has been updated
+            continue;
+          }
+          if (grules[webrulesit.first].needToRemove) {
+            //Just copy in the new rule since the local copy was scheduled for removal
+            grules[webrulesit.first]=webrulesit.second;
+            continue;
+          }
+          //Just replace all of the values as the database has higher priority in most cases than local storage at the moment
+          grules[webrulesit.first]=webrulesit.second;
+        }
+      } catch (std::out_of_range& e) {
+        //Rule doesn't exist in local list so can just copy the rule in
+        grules[webrulesit.first]=webrulesit.second;
+      }
+    }
   }
 }
 
@@ -490,6 +555,17 @@ static std::string url_encode(const std::string &value) {
     }
 
     return escaped.str();
+}
+
+std::string ruleTriggeredToJson(const RuleTriggered& rule) {
+  using boost::property_tree::ptree;
+  ptree rulePt;
+
+  rulePt.put("TriggeredUnixTS", rule.lastRuntime);
+  std::ostringstream streamstr;
+  write_json(streamstr, rulePt);
+
+  return streamstr.str();
 }
 
 //Setup a http request
@@ -600,10 +676,15 @@ private:
   long httpbodylen;
   WEBAPI_REQUEST_MODES requestmode;
 
+  std::list<RuleTriggered>::iterator rulesTriggeredIt;
+  std::list<int32_t>::iterator rulesNeedNextRuntimeIt;
+
   //See http://stackoverflow.com/questions/21120361/boostasioasync-write-and-buffers-over-65536-bytes
   //These variables need to stay allocated while the asio request is active so can't be local to a single function
   httpclient hc;
   boost::asio::streambuf listAllActiveRulesRequest_;
+  boost::asio::streambuf rulesTriggeredRequest_;
+  boost::asio::streambuf rulesNeedNextRuntimeRequest_;
 
 public:
   asioclient(boost::asio::io_service& io_service)
@@ -640,6 +721,33 @@ public:
       hc.addFormField("AttemptLogin", "1");
       hc.addFormField("username", apiusername);
       hc.addFormField("password", apipassword);
+    }
+    struct timespec curtime;
+    clock_gettime(CLOCK_REALTIME, &curtime);
+    bool skipGetAllRules=false, skipRulesTriggered=false, skipRulesNeedNextRuntime=false;
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      if (WEBAPI_REFRESH_ALL_RULES_INTERVAL+lastAllRuleRefreshTime>curtime.tv_sec) {
+        //Skip this check at this time
+        skipGetAllRules=true;
+      }
+      if (gRulesTriggered.empty()) {
+        skipRulesTriggered=true;
+      }
+      if (gRulesNeedNextRuntime.empty()) {
+        skipRulesNeedNextRuntime=true;
+      }
+    }
+    if (getneedtoquit() || (skipGetAllRules && skipRulesTriggered && skipRulesNeedNextRuntime)) {
+      //No need to connect if nothing to process
+      stop();
+      return;
+    }
+    //Loop through the queues processing each one at a time
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      rulesTriggeredIt=gRulesTriggered.begin();
+      rulesNeedNextRuntimeIt=gRulesNeedNextRuntime.begin();
     }
     // Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
@@ -717,8 +825,8 @@ private:
     }
     if (!err)
     {
-      // The connection was successful. Get a full list of rules
-      get_all_rules();
+      // The connection was successful. Process the rules that have been triggered
+      processRulesTriggered();
     }
     else
     {
@@ -727,6 +835,64 @@ private:
     }
   }
 
+  void processRulesTriggered() {
+    std::list<RuleTriggered>::iterator rulesTriggeredEndIt;
+    //Send the next request or go on to the next item to process
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      rulesTriggeredEndIt=gRulesTriggered.end();
+    }
+    if (!getneedtoquit() && rulesTriggeredIt!=rulesTriggeredEndIt) {
+      //Send to the webapi that a rule has been triggered
+      reset_http_body();
+
+      hc.addFormField("Mode", "JustTriggered");
+      hc.addFormField("Id", rulesTriggeredIt->ruleId);
+      hc.addFormField("Data", ruleTriggeredToJson(*rulesTriggeredIt));
+      hc.addFormField("Format", "json");
+      std::ostream request_stream(&rulesTriggeredRequest_);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending rule just triggered: %s\n", __func__, hc.toString().c_str());
+      request_stream << hc.toString();
+
+      requestmode=WEBAPI_REQUEST_MODES::RULE_TRIGGERED;
+      boost::asio::async_write(socket_, rulesTriggeredRequest_,
+          boost::bind(&asioclient::handle_write_request, this,
+            boost::asio::placeholders::error));
+    } else if (!getneedtoquit()) {
+      processRulesNeedNextRuntime();
+    } else {
+      stop();
+    }
+  }
+
+  void processRulesNeedNextRuntime() {
+    std::list<int32_t>::iterator rulesNeedNextRuntimeEndIt;
+    //Send the next request or go on to the next item to process
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      rulesNeedNextRuntimeEndIt=gRulesNeedNextRuntime.end();
+    }
+    if (!getneedtoquit() && rulesNeedNextRuntimeIt!=rulesNeedNextRuntimeEndIt) {
+      //Send to the webapi that a rule has been triggered
+      reset_http_body();
+
+      hc.addFormField("Mode", "UpdateRuleNextTS");
+      hc.addFormField("Id", *rulesNeedNextRuntimeIt);
+      hc.addFormField("Format", "json");
+      std::ostream request_stream(&rulesNeedNextRuntimeRequest_);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending rule need next runtime request: %s\n", __func__, hc.toString().c_str());
+      request_stream << hc.toString();
+
+      requestmode=WEBAPI_REQUEST_MODES::UPDATE_NEXT_RUNTIME;
+      boost::asio::async_write(socket_, rulesNeedNextRuntimeRequest_,
+          boost::bind(&asioclient::handle_write_request, this,
+            boost::asio::placeholders::error));
+    } else if (!getneedtoquit()) {
+      get_all_rules();
+    } else {
+      stop();
+    }
+  }
 
   void get_all_rules(void) {
     struct timespec curtime;
@@ -751,7 +917,7 @@ private:
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending request for all active rules: %s\n", __PRETTY_FUNCTION__, hc.toString().c_str());
       request_stream << hc.toString();
 
-      requestmode=GET_ALL_RULES;
+      requestmode=WEBAPI_REQUEST_MODES::GET_ALL_RULES;
       boost::asio::async_write(socket_, listAllActiveRulesRequest_,
           boost::bind(&asioclient::handle_write_request, this,
             boost::asio::placeholders::error));
@@ -902,7 +1068,7 @@ private:
           errcode=-1;
         }
       }
-      if (requestmode==GET_ALL_RULES && errcode==0) {
+      if (requestmode==WEBAPI_REQUEST_MODES::GET_ALL_RULES && errcode==0) {
         //Process the rules that were received
         processReceivedRules(pt);
       }
@@ -944,7 +1110,51 @@ private:
 
   //Do processing after the request has been sent and then send the next request
   void successful_send() {
-    if (requestmode==GET_ALL_RULES) {
+    if (requestmode==WEBAPI_REQUEST_MODES::RULE_TRIGGERED) {
+      std::list<RuleTriggered>::iterator rulesTriggeredPrevIt=rulesTriggeredIt;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing rule from triggered queue due to success\n", __func__);
+
+      //Step to next rule triggered entry before erasing the one that just got processed
+      ++rulesTriggeredIt;
+
+      //Erase the rule triggered entry that just got processed and set to get updated values from the webapi
+      {
+        boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+        try {
+          grules.at( rulesTriggeredPrevIt->ruleId ).needNextRuntime=false;
+          grules.at( rulesTriggeredPrevIt->ruleId ).needWebApiRefresh=true;
+        } catch (std::out_of_range& e) {
+          //Rule has been removed so do nothing
+        }
+        gRulesTriggered.erase(rulesTriggeredPrevIt);
+      }
+      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
+      stop();
+    } else if (requestmode==WEBAPI_REQUEST_MODES::UPDATE_NEXT_RUNTIME) {
+      std::list<int32_t>::iterator rulesNeedNextRuntimePrevIt=rulesNeedNextRuntimeIt;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing rule from need next runtime queue due to success\n", __func__);
+
+      //Step to next rule entry before erasing the one that just got processed
+      ++rulesNeedNextRuntimeIt;
+
+      //Erase the rule entry that just got processed and set to get updated values from the webapi
+      {
+        boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+        try {
+          grules.at( *rulesNeedNextRuntimePrevIt ).needNextRuntime=false;
+          grules.at( *rulesNeedNextRuntimePrevIt ).needWebApiRefresh=true;
+        } catch (std::out_of_range& e) {
+          //Rule has been removed so do nothing
+        }
+        gRulesNeedNextRuntime.erase(rulesNeedNextRuntimePrevIt);
+      }
+      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
+      stop();
+    } else if (requestmode==WEBAPI_REQUEST_MODES::GET_ALL_RULES) {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Got a list of all the rules\n", __PRETTY_FUNCTION__);
 
       //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
@@ -957,8 +1167,9 @@ private:
     }
   }
 
-  //Do nothing if failed to send
   void failed_send() {
+    //Stop processing and sleep until the next scheduled webapi call
+    stop();
   }
 
   void check_deadline() {
@@ -1000,21 +1211,23 @@ static void process_rules() {
   clock_gettime(CLOCK_REALTIME, &curtime);
   currenttime=curtime.tv_sec;
 
-  // Get the current local time split out into individual fields
-  curtimelocaltmptr=localtime_r(&currenttime, &curtimelocaltm);
-  if (curtimelocaltmptr==nullptr) {
-    debuglibifaceptr->debuglib_printf(1, "%s: WARNING: Unable to get current local time\n", __PRETTY_FUNCTION__);
-    return;
-  }
-  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Current time: %02d:%02d:%02d\n", __PRETTY_FUNCTION__, curtimelocaltm.tm_hour, curtimelocaltm.tm_min, curtimelocaltm.tm_sec);
+  char timestr[100];
+  ctime_r(&currenttime, timestr);
+  //Remove newline at end of timestr
+  timestr[strlen(timestr)-1]='\0';
+  debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Current time: %s\n", __PRETTY_FUNCTION__, timestr);
 
   //Process the rules all within a lock so retrieval of new rules doesn't corrupt the list
   {
     boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
     for (auto &rulesit : grules) {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Checking rule: %s(%d)\n", __PRETTY_FUNCTION__, rulesit.second.ruleName.c_str(), rulesit.second.ruleId);
-      if (!rulesit.second.enabled || rulesit.second.needToRemove || rulesit.second.needToRemoveInDb) {
-        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Not enabled or need to remove so ignoring\n", __PRETTY_FUNCTION__);
+      ctime_r(&rulesit.second.nextRuntime, timestr);
+      //Remove newline at end of timestr
+      timestr[strlen(timestr)-1]='\0';
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Next runtime: %s\n", __PRETTY_FUNCTION__, timestr);
+      if (!rulesit.second.enabled || rulesit.second.needNextRuntime || rulesit.second.needWebApiRefresh || rulesit.second.needToRemove || rulesit.second.needToRemoveInDb) {
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   Not enabled or need to remove, or need refresh from webapi so ignoring\n", __PRETTY_FUNCTION__);
         continue;
       }
       if (currenttime<rulesit.second.nextRuntime) {
@@ -1055,14 +1268,21 @@ static void process_rules() {
         if (!rulesit.second.isRecurring()) {
           rulesit.second.enabled=false;
           debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule has now been disabled\n", __PRETTY_FUNCTION__);
+          if (rulesit.second.localOnlyRule) {
+            rulesit.second.needToRemove=true;
+            debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Local rule has been scheduled for removal\n", __PRETTY_FUNCTION__);
+          }
         }
         if (!rulesit.second.localOnlyRule) {
           gRulesTriggered.push_back( RuleTriggered(rulesit.first, rulesit.second.lastRuntime) );
-          rulesit.second.enabled=false; //For now disable the rule until we get an update via the webapi with new nextruntime
+          rulesit.second.needNextRuntime=true;
         }
       } else {
-        //TODO: Call the webapi to update the next runtime for this rule
-        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule needs new nextruntime\n", __PRETTY_FUNCTION__);
+        if (!rulesit.second.needNextRuntime) {
+          debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Rule needs new nextruntime\n", __PRETTY_FUNCTION__);
+          gRulesNeedNextRuntime.push_back(rulesit.first);
+          rulesit.second.needNextRuntime=true;
+        }
       }
     }
   }
@@ -1077,7 +1297,7 @@ static void remove_scheduled_to_delete_rules() {
   //NOTE: We need to use a list to remove the rules as otherwise the main for loop may get confused if we remove items from underneath it
   auto rulesitbegin=grules.begin();
   auto rulesitend=grules.end();
-  std::list< std::map<uint32_t, Rule>::iterator > rules_to_remove;
+  std::list< std::map<int32_t, Rule>::iterator > rules_to_remove;
   for (auto &it=rulesitbegin; it!=rulesitend; it++) {
     if (it->second.needToRemove) {
       debuglibifaceptr->debuglib_printf(1, "%s: Removing rule: %s\n", __PRETTY_FUNCTION__, it->second.ruleName.c_str());
@@ -1226,11 +1446,17 @@ static int processcommand(const char *buffer, int clientsock) {
       clock_gettime(CLOCK_REALTIME, &curtime);
       if (buffertokens[4]=="zigbee") {
         deviceType=DEVICETYPES::ZIGBEE_DEVICE;
+      } else {
+        cmdserverlibifaceptr->netputs("Invalid device type for addlocaltestrule\n", clientsock, NULL);
+        return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
       }
       if (buffertokens[5]=="on") {
         ruleType=RULETYPES::TURN_ON_ONCE_ONLY;
       } else if (buffertokens[5]=="off") {
         ruleType=RULETYPES::TURN_OFF_ONCE_ONLY;
+      } else {
+        cmdserverlibifaceptr->netputs("Invalid rule type for addlocaltestrule\n", clientsock, NULL);
+        return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
       }
       sscanf(buffertokens[6].c_str(), "%ld", &nextRuntime);
       nextRuntime+=curtime.tv_sec;
@@ -1239,9 +1465,10 @@ static int processcommand(const char *buffer, int clientsock) {
       ostream << "Adding local rule: " << buffertokens[1] << " for type: " << buffertokens[3] << " to set device: " << buffertokens[2] << " " << " port: " << buffertokens[3] << " " << buffertokens[5] << " and to enable in " << buffertokens[6] << " seconds" << std::endl;
       cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
       Rule localrule(ruleId, ruleName, deviceId, portId, deviceType, ruleType, true, true, curtime.tv_sec, -1, nextRuntime);
-      thislibmutex.lock();
-      grules[ruleId]=localrule;
-      thislibmutex.unlock();
+      {
+        boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+        grules[ruleId]=localrule;
+      }
       return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
     } else {
       cmdserverlibifaceptr->netputs("Incorrect number arguments to addlocaltestrule\n", clientsock, NULL);
@@ -1376,14 +1603,14 @@ static void *mainloop(void *UNUSED(val)) {
   return (void *) 0;
 }
 
-static boost::atomic<bool> webapiclientlib_needtoquit(false);
+static boost::atomic<bool> needtoquit(false);
 
 static void setneedtoquit(bool val) {
-  webapiclientlib_needtoquit.store(val);
+  needtoquit.store(val);
 }
 
 static bool getneedtoquit() {
-  return webapiclientlib_needtoquit.load();
+  return needtoquit.load();
 }
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
@@ -1476,6 +1703,7 @@ static void shutdown(void) {
   ghubpk=0;
   grules.clear();
   gRulesTriggered.clear();
+  gRulesNeedNextRuntime.clear();
 
   sem_destroy(&gmainthreadsleepsem);
 
