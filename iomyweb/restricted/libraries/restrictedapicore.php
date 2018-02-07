@@ -134,10 +134,40 @@ class RestrictedAPICore {
 				session_start();
 				
 				
+				
+				
+				
 				//--------------------------------------------------------------------//
 				//-- 2.3.A - If the User attempting to login                        --//
 				//--------------------------------------------------------------------//
-				if( isset($_POST['AttemptLogin']) && $_POST['AttemptLogin']==true ) {
+				$bAttemptLogin = false;
+				
+				
+				if( isset($_POST['AttemptLogin'] ) ) {
+					switch( $_POST['AttemptLogin'] ) {
+						case "TRUE":
+							$bAttemptLogin = true;
+							break;
+						case "True":
+							$bAttemptLogin = true;
+							break;
+						case "true":
+							$bAttemptLogin = true;
+							break;
+						case "1":
+							$bAttemptLogin = true;
+							break;
+						case 1:
+							$bAttemptLogin = true;
+							break;
+						case true:
+							$bAttemptLogin = true;
+							break;
+							
+					}
+				}
+				
+				if( $bAttemptLogin ) {
 					$iDBId = 0;
 					
 					//--------------------------------------------------------------------//
