@@ -93,7 +93,7 @@ sap.ui.controller("pages.staging.telnet.Telnet", {
 		var oView		= oController.getView();
 		
 		oView.wTextAreaOutput.setValue(
-			IomyRe.telnet.compileLog().join("\n------------------------------------\n")
+			iomy.telnet.compileLog().join("\n------------------------------------\n")
 		);
     
 		oController.ScrollTextAreaToBottom();
@@ -108,7 +108,7 @@ sap.ui.controller("pages.staging.telnet.Telnet", {
 	ExecuteCommand : function (sCommand) {
 		var oController = this;
 
-        IomyRe.telnet.RunCommand({
+        iomy.telnet.RunCommand({
             hubID   : 1,
             command : sCommand,
 

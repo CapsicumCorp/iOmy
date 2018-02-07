@@ -47,8 +47,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
         var oView = this.getView();
         
-//        if (!IomyRe.common.bLinkTypesLoaded) {
-//            IomyRe.common.RetrieveLinkTypeList({
+//        if (!iomy.common.bLinkTypesLoaded) {
+//            iomy.common.RetrieveLinkTypeList({
 //                onSuccess : function () {
 //                    
 //                }
@@ -72,7 +72,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 oView.byId("DevSettings").setVisible( false );
                 
                 //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 //-- Are we editing an existing device? --//
                 if (oEvent.data.ThingId !== undefined && oEvent.data.ThingId !== null) {
@@ -128,19 +128,19 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 
         oController.RefreshModel();
 
-        oController.DeviceOptions = IomyRe.functions.getNewDeviceOptions();
+        oController.DeviceOptions = iomy.functions.getNewDeviceOptions();
 
         if (oController.bEditExisting) {
-            oController.iThingTypeId = IomyRe.common.ThingList["_"+oController.iThingId].TypeId;
+            oController.iThingTypeId = iomy.common.ThingList["_"+oController.iThingId].TypeId;
 
-            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                 oView.byId("DevType").setVisible( false );
                 oView.byId("DevSettings").setVisible( true );
-                IomyRe.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "DevSettingsBlock", "Block" );
+                iomy.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "DevSettingsBlock", "Block" );
             } else {
                 oView.byId("DevType").setVisible( true );
                 oView.byId("DevSettings").setVisible( false );
-                IomyRe.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
+                iomy.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
             }
 
             if (oController.bNoRooms) {
@@ -153,10 +153,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             oView.byId("DevSettings").setVisible( false );
             oController.iThingTypeId = null;
 
-            IomyRe.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
+            iomy.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
 
             //if (!oController.bDeviceOptionSelectorDrawn) {
-                var oSBox = IomyRe.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
+                var oSBox = iomy.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
                     selectedKey : "start",
                     change : function () {
                         var DevTypeSelect = this;
@@ -227,8 +227,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             switch (sDevType) {
 
                 //-- Zigbee Devices --//
-                case "linkType"+IomyRe.devices.zigbeesmartplug.LinkTypeId:
-                    IomyRe.common.ShowFormFragment( oController, "ZigbeeSmartPlug", "DevSettingsBlock", "Block" );
+                case "linkType"+iomy.devices.zigbeesmartplug.LinkTypeId:
+                    iomy.common.ShowFormFragment( oController, "ZigbeeSmartPlug", "DevSettingsBlock", "Block" );
                     
                     if (bEditing) {
                         
@@ -237,8 +237,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
                     
                 //-- Philips Hue Bridge --//
-                case "linkType"+IomyRe.devices.philipshue.LinkTypeId:
-                    IomyRe.common.ShowFormFragment( oController, "PhillipsHueBridge", "DevSettingsBlock", "Block" );
+                case "linkType"+iomy.devices.philipshue.LinkTypeId:
+                    iomy.common.ShowFormFragment( oController, "PhillipsHueBridge", "DevSettingsBlock", "Block" );
                     
                     if (bEditing) {
                         
@@ -247,8 +247,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
                     
                 //-- Onvif Server --//
-                case "linkType"+IomyRe.devices.onvif.LinkTypeId:
-                    IomyRe.common.ShowFormFragment( oController, "OnvifServer", "DevSettingsBlock", "Block" );
+                case "linkType"+iomy.devices.onvif.LinkTypeId:
+                    iomy.common.ShowFormFragment( oController, "OnvifServer", "DevSettingsBlock", "Block" );
                     
                     if (bEditing) {
                         
@@ -257,8 +257,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
                     
                 //-- Onvif Stream --//
-                case "thingType"+IomyRe.devices.onvif.ThingTypeId:
-                    IomyRe.common.ShowFormFragment( oController, "OnvifCamera", "DevSettingsBlock", "Block" );
+                case "thingType"+iomy.devices.onvif.ThingTypeId:
+                    iomy.common.ShowFormFragment( oController, "OnvifCamera", "DevSettingsBlock", "Block" );
                     
                     oController.SetHubIdOfOnvifServer();
                     oController.LoadOnvifProfilesForSelectBoxes();
@@ -270,8 +270,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
                     
                 //-- IP Webcam (MJPEG Stream) --//
-                case "linkType"+IomyRe.devices.ipcamera.LinkTypeId:
-                    IomyRe.common.ShowFormFragment( oController, "IPCamera", "DevSettingsBlock", "Block" );
+                case "linkType"+iomy.devices.ipcamera.LinkTypeId:
+                    iomy.common.ShowFormFragment( oController, "IPCamera", "DevSettingsBlock", "Block" );
                     
                     if (bEditing) {
                         
@@ -280,8 +280,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
                     
                 //-- Open Weather Map --//
-                case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId:
-                    IomyRe.common.ShowFormFragment( oController, "OpenWeatherMap", "DevSettingsBlock", "Block" );
+                case "linkType"+iomy.devices.weatherfeed.LinkTypeId:
+                    iomy.common.ShowFormFragment( oController, "OpenWeatherMap", "DevSettingsBlock", "Block" );
                     
                     if (bEditing) {
                         
@@ -290,8 +290,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
                     
                 //-- CSR Mesh (Bluetooth) --//
-//                case "linkType"+IomyRe.devices.csrmesh.LinkTypeId:
-//                    IomyRe.common.ShowFormFragment( oController, "CSRMesh", "DevSettingsBlock", "Block" );
+//                case "linkType"+iomy.devices.csrmesh.LinkTypeId:
+//                    iomy.common.ShowFormFragment( oController, "CSRMesh", "DevSettingsBlock", "Block" );
 //                    
 //                    if (bEditing) {
 //                        
@@ -323,13 +323,13 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         //------------------------------------------------//
         //-- Build and Bind Model to the View           --//
         //------------------------------------------------//
-        var oJSON = IomyRe.functions.getDeviceFormJSON({
+        var oJSON = iomy.functions.getDeviceFormJSON({
             roomID : oController.iRoomId,
             premiseID : oController.iPremiseId
         });
         
         oJSON.Rooms         = oController.PrepareRoomListForModel(1);
-        oJSON.Hubs          = IomyRe.common.HubList;
+        oJSON.Hubs          = iomy.common.HubList;
         oJSON.OnvifProfiles = {};
         oJSON.IPCamTypes    = {
             "_1" : {
@@ -351,7 +351,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         };
         
         if (oController.bEditExisting) {
-            var oCurrentDevice = JSON.parse( JSON.stringify( IomyRe.common.ThingList["_"+oController.iThingId] ) );
+            var oCurrentDevice = JSON.parse( JSON.stringify( iomy.common.ThingList["_"+oController.iThingId] ) );
             
             oJSON.CurrentDevice = {
                 "ThingName" : oCurrentDevice.DisplayName,
@@ -362,7 +362,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             // If editing an IP Webcam, load the connection information as 
             // well.
             //----------------------------------------------------------------//
-            if (oCurrentDevice.TypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+            if (oCurrentDevice.TypeId == iomy.devices.ipcamera.ThingTypeId) {
                 
                 var fnSetData = function (mData) {
                     oJSON.CurrentDevice.HubId       = mData.hubID;
@@ -378,7 +378,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 
                 fnComplete(); // Just to wipe the old data.
                 
-                IomyRe.devices.ipcamera.loadCameraInformation({
+                iomy.devices.ipcamera.loadCameraInformation({
                     thingID : oController.iThingId,
                     
                     onSuccess : function (mData) {
@@ -391,7 +391,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     onWarning : function (mData, sErrorMessage) {
                         fnSetData(mData);
                         
-                        IomyRe.common.showWarning(sErrorMessage, "Failed to load some data",
+                        iomy.common.showWarning(sErrorMessage, "Failed to load some data",
                             function () {
                                 fnComplete();
                                 oController.ToggleEditIPWebcamControls(true);
@@ -400,7 +400,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     },
                     
                     onFail : function (sErrorMessage) {
-                        IomyRe.common.showError(sErrorMessage, "Failed to load data",
+                        iomy.common.showError(sErrorMessage, "Failed to load data",
                             function () {
                                 fnComplete();
                                 oController.ToggleEditIPWebcamControls(true);
@@ -434,8 +434,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var oController         = this;
         var oView               = this.getView();
         var bEditing            = this.bEditExisting;
-        var aRoomList           = JSON.parse( JSON.stringify( IomyRe.common.RoomsList["_"+iPremiseId] ) );
-        var iRoomCount          = IomyRe.functions.getNumberOfRoomsInPremise(iPremiseId);
+        var aRoomList           = JSON.parse( JSON.stringify( iomy.common.RoomsList["_"+iPremiseId] ) );
+        var iRoomCount          = iomy.functions.getNumberOfRoomsInPremise(iPremiseId);
         var iUnassignedRoomId   = 0;
         var bUnassignedOnly     = false;
         var bHasUnassigned      = false;
@@ -480,7 +480,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     CancelInput : function () {
         var oController = this;
         
-        IomyRe.common.NavigationChangePage("pDevice", { "bEditing" : oController.iThingId !== null }, true);
+        iomy.common.NavigationChangePage("pDevice", { "bEditing" : oController.iThingId !== null }, true);
     },
     
     /**
@@ -510,7 +510,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 new sap.ui.model.json.JSONModel(oModelData)
             );
             
-            IomyRe.devices.onvif.LookupProfiles({
+            iomy.devices.onvif.LookupProfiles({
                 linkID : iLinkId,
 
                 onSuccess : function (aProfiles) {
@@ -569,9 +569,9 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 //        var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
 //        var iLinkId             = oView.getModel().getProperty("/"+sDevTypeKey+"/Server");
 //        
-//        oView.getModel().setProperty( "/"+sDevTypeKey+"/HubId", IomyRe.functions.getHubConnectedToLink(iLinkId).HubId);
+//        oView.getModel().setProperty( "/"+sDevTypeKey+"/HubId", iomy.functions.getHubConnectedToLink(iLinkId).HubId);
         
-        oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
+        oView.byId("DevTypeSelect").setSelectedKey("thingType"+iomy.devices.onvif.ThingTypeId);
     },
     
     CreateDevice : function () {
@@ -594,10 +594,10 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         // Validate input first. If everything checks out, then create the
         // device. Otherwise, show an error popup and stop.
         //--------------------------------------------------------------------//
-        var mInputInfo = IomyRe.validation.validateNewDeviceData(sDevTypeKey, oCurrentFormData);
+        var mInputInfo = iomy.validation.validateNewDeviceData(sDevTypeKey, oCurrentFormData);
         
         if (!mInputInfo.bIsValid) {
-            IomyRe.common.showError(mInputInfo.aErrorMessages.join("\n\n"), "Error",
+            iomy.common.showError(mInputInfo.aErrorMessages.join("\n\n"), "Error",
                 function () {
                     oController.ToggleSubmitCancelButtons(true);
                 }
@@ -609,9 +609,9 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             //--------------------------------------------------------------------//
             switch (sDevTypeKey) {
                 // Onvif Camera Device
-                case "linkType"+IomyRe.devices.onvif.LinkTypeId :
+                case "linkType"+iomy.devices.onvif.LinkTypeId :
                     mData = {
-                        url : IomyRe.apiphp.APILocation("onvif"),
+                        url : iomy.apiphp.APILocation("onvif"),
                         data : {
                             "Mode" : "AddNewOnvifServer",
                             "HubId" : oCurrentFormData.Hub,
@@ -626,9 +626,9 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
 
                 // Philips Hue Bridge
-                case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
+                case "linkType"+iomy.devices.philipshue.LinkTypeId :
                     mData = {
-                        url : IomyRe.apiphp.APILocation("philipshue"),
+                        url : iomy.apiphp.APILocation("philipshue"),
                         data : {
                             "Mode" : "AddNewBridge",
                             "HubId" : oCurrentFormData.Hub,
@@ -642,9 +642,9 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
 
                 // Open Weather Map
-                case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
+                case "linkType"+iomy.devices.weatherfeed.LinkTypeId :
                     mData = {
-                        url : IomyRe.apiphp.APILocation("weather"),
+                        url : iomy.apiphp.APILocation("weather"),
                         data : {
                             "Mode" : "AddWeatherStation",
                             "HubId" : oCurrentFormData.Hub,
@@ -662,9 +662,9 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
 
                 // IP Webcam Stream
-                case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
+                case "linkType"+iomy.devices.ipcamera.LinkTypeId :
                     mData = {
-                        url : IomyRe.apiphp.APILocation("ipcamera"),
+                        url : iomy.apiphp.APILocation("ipcamera"),
                         data : {
                             "Mode" : "AddNewIPCamera",
                             "HubId" : oCurrentFormData.Hub,
@@ -685,9 +685,9 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     break;
 
                 // Onvif Stream
-                case "thingType"+IomyRe.devices.onvif.ThingTypeId :
+                case "thingType"+iomy.devices.onvif.ThingTypeId :
                     mData = {
-                        url : IomyRe.apiphp.APILocation("onvif"),
+                        url : iomy.apiphp.APILocation("onvif"),
                         data : {
                             "Mode" : "NewThing",
                             "LinkId" : oCurrentFormData.OnvifServer,
@@ -726,27 +726,27 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                             }
                         }
 
-                        IomyRe.common.RefreshCoreVariables({
+                        iomy.common.RefreshCoreVariables({
                             onSuccess : function () {
                                 oController.RefreshModel({
                                     onSuccess : function () {
-                                        IomyRe.common.showMessage({
+                                        iomy.common.showMessage({
                                             text : "Device successfully created",
                                             view : oView
                                         });
 
-                                        if (IomyRe.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                            oView.byId("DevTypeSelect").setSelectedKey("thingType"+IomyRe.devices.onvif.ThingTypeId);
+                                        if (iomy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                            oView.byId("DevTypeSelect").setSelectedKey("thingType"+iomy.devices.onvif.ThingTypeId);
 
                                             //oCurrentFormData.OnvifServer = iLinkId;
-                                            oController.DevTypeToggle(oController, "thingType"+IomyRe.devices.onvif.ThingTypeId);
+                                            oController.DevTypeToggle(oController, "thingType"+iomy.devices.onvif.ThingTypeId);
 
                                         } else {
                                             oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
-                                            //IomyRe.common.NavigationChangePage("pBlock", {}, true);
+                                            //iomy.common.NavigationChangePage("pBlock", {}, true);
                                         }
 
-                                        if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+IomyRe.devices.onvif.ThingTypeId) {
+                                        if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+iomy.devices.onvif.ThingTypeId) {
                                             oController.ToggleOnvifStreamControls(false);
                                             oView.byId("SelectOnvifServer").setEnabled(true);
                                             oView.byId("ButtonCancel").setEnabled(true);
@@ -760,14 +760,14 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         });
                     } else {
                         jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
-                        IomyRe.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
+                        iomy.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
                             oController.ToggleSubmitCancelButtons(true);
                         });
                     }
                 } catch (e) {
-                    var sErrorMessage = "Error creating device:\n\n"+e.message+"\n\n"+IomyRe.common.showContactSupportMessage();
+                    var sErrorMessage = "Error creating device:\n\n"+e.message+"\n\n"+iomy.common.showContactSupportMessage();
                     jQuery.sap.log.error(sErrorMessage);
-                    IomyRe.common.showError(sErrorMessage, "", function () {
+                    iomy.common.showError(sErrorMessage, "", function () {
                         oController.ToggleSubmitCancelButtons(true);
                     });
                 }
@@ -776,7 +776,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
 
             mData.onFail = function (error) {
                 jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
-                IomyRe.common.showError("Error creating device:\n\n"+error.responseText, "", function () {
+                iomy.common.showError("Error creating device:\n\n"+error.responseText, "", function () {
                     oController.ToggleSubmitCancelButtons(true);
                 });
             };
@@ -784,7 +784,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             //--------------------------------------------------------------------//
             // Run the request to create a device.
             //--------------------------------------------------------------------//
-            IomyRe.apiphp.AjaxRequest(mData);
+            iomy.apiphp.AjaxRequest(mData);
         }
     },
     
@@ -796,7 +796,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         if (oController.areThereChanges()) {
             oController.ToggleSubmitCancelButtons(false);
             
-            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                 oController.ToggleEditIPWebcamControls(false);
             }
 
@@ -804,13 +804,13 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             // Run the request to edit an existing device.
             //--------------------------------------------------------------------//
             try {
-                IomyRe.devices.editThing({
+                iomy.devices.editThing({
                     thingID     : oController.iThingId,
                     thingName   : oCurrentFormData.ThingName,
                     roomID      : oCurrentFormData.RoomId,
 
                     onSuccess : function () {
-                        if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                        if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                             oController.SubmitIPWebcamData();
                         } else {
                             oController.ToggleSubmitCancelButtons(true);
@@ -827,18 +827,18 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     }
                 });
             } catch (e) {
-                IomyRe.common.showError(e.message, "Error",
+                iomy.common.showError(e.message, "Error",
                     function () {
                         oController.ToggleSubmitCancelButtons(true);
                         
-                        if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+                        if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                             oController.ToggleEditIPWebcamControls(true);
                         }
                     }
                 );
             }
         } else {
-            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
+            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                 oController.ToggleEditIPWebcamControls(false);
                 oController.SubmitIPWebcamData();
             } else {
@@ -851,8 +851,8 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var oController             = this;
         var oView                   = oController.getView();
         var iThingID				= oController.iThingId;
-		var sOldThingText           = IomyRe.common.ThingList["_"+iThingID].DisplayName;
-        var iOldRoomID              = IomyRe.common.ThingList["_"+iThingID].RoomId;
+		var sOldThingText           = iomy.common.ThingList["_"+iThingID].DisplayName;
+        var iOldRoomID              = iomy.common.ThingList["_"+iThingID].RoomId;
         var oCurrentFormData        = oView.getModel().getProperty( "/CurrentDevice/" );
         var iRoomId                 = oCurrentFormData.RoomId;
         var sThingText;
@@ -875,14 +875,14 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
         
         try {
-            var mInputInfo = IomyRe.validation.validateEditIPWebCamForm(oCurrentFormData);
+            var mInputInfo = iomy.validation.validateEditIPWebCamForm(oCurrentFormData);
             
             if (!mInputInfo.bIsValid) {
                 throw new IllegalArgumentException(mInputInfo.aErrorMessages.join("\n\n"));
             }
             
-            if (oController.iThingTypeId == IomyRe.devices.ipcamera.ThingTypeId) {
-                IomyRe.devices.ipcamera.submitWebcamInformation({
+            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                iomy.devices.ipcamera.submitWebcamInformation({
                     thingID             : oController.iThingId,
                     
                     hubID               : oCurrentFormData.HubId,
@@ -895,11 +895,11 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     editing : true,
 
                     onSuccess : function () {
-                        IomyRe.common.RefreshCoreVariables({
+                        iomy.common.RefreshCoreVariables({
                             onSuccess : function () {
                                 oController.RefreshModel();
                                 
-                                IomyRe.common.showMessage({
+                                iomy.common.showMessage({
                                     text : "IP Webcam updated."
                                 });
 
@@ -910,7 +910,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                     },
 
                     onFail : function (sErrorMessage) {
-                        IomyRe.common.showError(sErrorMessage, "Failed to update settings",
+                        iomy.common.showError(sErrorMessage, "Failed to update settings",
                             function () {
                                 oController.ToggleEditIPWebcamControls(true);
                             }
@@ -921,7 +921,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             }
 
         } catch (e) {
-            IomyRe.common.showError(e.message, "Failed to update settings",
+            iomy.common.showError(e.message, "Failed to update settings",
                 function () {
                     oController.ToggleEditIPWebcamControls(true);
                 }
@@ -930,7 +930,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
     },
     
     isOldRoomTheUnassigned : function () {
-        var iOldRoomID              = IomyRe.common.ThingList["_"+this.iThingId].RoomId;
+        var iOldRoomID              = iomy.common.ThingList["_"+this.iThingId].RoomId;
             
         return iOldRoomID == 1;
     },
@@ -953,7 +953,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             if (sCommand.startsWith("rapidha_form_network") || sCommand.startsWith("rapidha_form_network_netvoxchan")) {
                 var sUUIDRequired = "RapidHA UUID is required. Run 'get_rapidha_info' to find it.";
 
-                IomyRe.common.showInformation(sUUIDRequired, "UUID Required.",
+                iomy.common.showInformation(sUUIDRequired, "UUID Required.",
                     function () {
                         oController.ToggleZigbeeControls(true);
                     }
@@ -963,7 +963,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                 oLogContents += "Running "+sCommand+"...\n";
                 oView.byId("TelnetOutput").setValue(oLogContents);
                 
-                IomyRe.telnet.RunCommand({
+                iomy.telnet.RunCommand({
                     command : sCommand,
                     hubID : iHubId,
 
@@ -977,7 +977,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                             // Force it to scroll down to the bottom.
                             document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
 
-                            IomyRe.common.showMessage({
+                            iomy.common.showMessage({
                                 text : sCommand+" executed successfully"
                             });
                         } catch (e) {
@@ -1081,7 +1081,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
         oController.ToggleZigbeeControls(false);
         
         try {
-            IomyRe.devices.zigbeesmartplug.TurnOnZigbeeJoinMode({
+            iomy.devices.zigbeesmartplug.TurnOnZigbeeJoinMode({
                 modemID : iCommId,
 
                 onSuccess : function (result) {
@@ -1095,7 +1095,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         // Force it to scroll down to the bottom.
                         document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
 
-                        IomyRe.devices.zigbeesmartplug.GetRapidHAInfo({
+                        iomy.devices.zigbeesmartplug.GetRapidHAInfo({
                             modemID : iCommId,
 
                             onSuccess : function (result) {
@@ -1113,14 +1113,14 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                                         function () {
                                             oController.ToggleZigbeeControls(true);
 
-                                            IomyRe.common.showMessage({
+                                            iomy.common.showMessage({
                                                 text : "Join completed."
                                             });
-            //                                IomyRe.common.RefreshCoreVariables({
+            //                                iomy.common.RefreshCoreVariables({
             //                                    onSuccess : function () {
             //                                        oController.ToggleZigbeeControls(true);
             //
-            //                                        IomyRe.common.showMessage({
+            //                                        iomy.common.showMessage({
             //                                            text : "Join completed."
             //                                        });
             //                                    },
@@ -1128,7 +1128,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
             //                                    onFail : function () {
             //                                        oController.ToggleZigbeeControls(true);
             //                                        
-            //                                        IomyRe.common.showMessage({
+            //                                        iomy.common.showMessage({
             //                                            text : "Join completed. But unable to refresh the device list."
             //                                        });
             //                                    }
@@ -1137,7 +1137,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                                     30000);
                                 } catch (e) {
                                     $.sap.log.error("Error with the success callback after retrieving RapidHA info ("+e.name+"): " + e.message);
-                                    IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
+                                    iomy.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
                                         oController.ToggleZigbeeControls(true);
                                     });
                                 }
@@ -1153,12 +1153,12 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                                     // Force it to scroll down to the bottom.
                                     document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
 
-                                    IomyRe.common.showError(sError, "Error", function () {
+                                    iomy.common.showError(sError, "Error", function () {
                                         oController.ToggleZigbeeControls(true);
                                     });
                                 } catch (e) {
                                     $.sap.log.error("Error with the failure callback after retrieving RapidHA info ("+e.name+"): " + e.message);
-                                    IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
+                                    iomy.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
                                         oController.ToggleZigbeeControls(true);
                                     });
                                 }
@@ -1167,7 +1167,7 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         
                     } catch (e) {
                         $.sap.log.error("Error with the success callback after turning on join mode ("+e.name+"): " + e.message);
-                        IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
+                        iomy.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
                             oController.ToggleZigbeeControls(true);
                         });
                     }
@@ -1184,19 +1184,19 @@ sap.ui.controller("pages.staging.device.DeviceForm", {
                         // Force it to scroll down to the bottom.
                         document.getElementById(oView.createId("TelnetOutput-inner")).scrollTop = document.getElementById(oView.createId("TelnetOutput-inner")).scrollHeight;
 
-                        IomyRe.common.showError(sError, "Failed to join devices.", function () {
+                        iomy.common.showError(sError, "Failed to join devices.", function () {
                             oController.ToggleZigbeeControls(true);
                         });
                     } catch (e) {
                         $.sap.log.error("Error with the failure callback after after turning on join mode ("+e.name+"): " + e.message);
-                        IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
+                        iomy.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
                             oController.ToggleZigbeeControls(true);
                         });
                     }
                 }
             });
         } catch (e) {
-            IomyRe.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
+            iomy.common.showError(e.name + ": " + e.message, "Failed to join devices.", function () {
                 oController.ToggleZigbeeControls(true);
             });
         }

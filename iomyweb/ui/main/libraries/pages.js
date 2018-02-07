@@ -22,10 +22,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.pages",true);
-IomyRe.pages = new sap.ui.base.Object();
+$.sap.declare("iomy.pages",true);
+iomy.pages = new sap.ui.base.Object();
 
-$.extend(IomyRe.pages,{
+$.extend(iomy.pages,{
 	
 	/**
 	 * Retrieves the page data for a given page denoted by its ID.
@@ -111,7 +111,7 @@ $.extend(IomyRe.pages,{
 				// button.
 				//------------------------------------------------------------//
                 if (aPageData.Help !== undefined) {
-                    IomyRe.help.PageInformation[sID] = aPageData.Help;
+                    iomy.help.PageInformation[sID] = aPageData.Help;
                 }
 
 			} catch (ex) {

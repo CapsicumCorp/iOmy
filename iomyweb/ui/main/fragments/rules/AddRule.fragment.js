@@ -9,7 +9,7 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 		var oFragContent    = null;
         
         var oDeviceTemplate = new sap.ui.core.Item({
-            key : "{path: 'Id', formatter: 'IomyRe.devices.getSerialCodeOfDevice'}",
+            key : "{path: 'Id', formatter: 'iomy.devices.getSerialCodeOfDevice'}",
             text : "{DisplayName}"
         });
 		
@@ -67,7 +67,7 @@ sap.ui.jsfragment("fragments.rules.AddRule", {
 							text: "Cancel",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
-								IomyRe.common.NavigationChangePage( "pRulesList" ,  {} , false);
+								iomy.common.NavigationChangePage( "pRulesList" ,  {} , false);
 							}
 						})
 					]

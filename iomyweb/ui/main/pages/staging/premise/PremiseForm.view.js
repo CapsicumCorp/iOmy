@@ -46,8 +46,8 @@ sap.ui.jsview("pages.staging.premise.PremiseForm", {
 		var oView = this;
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
-			header : IomyRe.widgets.getToolPageHeader(oController),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader(oController),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
 				new sap.uxap.ObjectPageLayout (oView.createId("ObjectPageLayout"), {
 					isObjectIconAlwaysVisible: true,

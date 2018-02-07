@@ -21,10 +21,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.devices.temperature",true);
-IomyRe.devices.temperature = new sap.ui.base.Object();
+$.sap.declare("iomy.devices.temperature",true);
+iomy.devices.temperature = new sap.ui.base.Object();
 
-$.extend(IomyRe.devices.temperature,{
+$.extend(iomy.devices.temperature,{
     ThingTypeId : 4,
     
     //---------------------------------------------------//
@@ -49,7 +49,7 @@ $.extend(IomyRe.devices.temperature,{
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
-                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                mThingIdInfo = iomy.validation.isThingIDValid(mSettings.thingID);
                 
                 if (!mThingIdInfo.bIsValid) {
                     throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
@@ -85,7 +85,7 @@ $.extend(IomyRe.devices.temperature,{
             var aErrorMessages  = [];
             var sTemperature    = null;
 
-            aaIOs               = IomyRe.common.ThingList["_"+iThingId].IO;
+            aaIOs               = iomy.common.ThingList["_"+iThingId].IO;
             
             $.each(aaIOs, function (sI, mIO) {
                 if (sI !== undefined && sI !== null && mIO !== undefined && mIO !== null) {
@@ -93,7 +93,7 @@ $.extend(IomyRe.devices.temperature,{
                         
                         aRequests.push({
                             "library"         : "odata",
-                            "Url"             : IomyRe.apiodata.ODataLocation("dataint"),
+                            "Url"             : iomy.apiodata.ODataLocation("dataint"),
                             "Columns"         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME", "RSTYPE_PK"],
                             "WhereClause"     : ["IO_PK eq "+mIO.Id, "RSTYPE_PK eq "+mIO.RSTypeId],
                             "OrderByClause"   : ["UTS desc"],
@@ -123,7 +123,7 @@ $.extend(IomyRe.devices.temperature,{
                                                 }
 
                                             } catch (e) {
-                                                aErrorMessages.push("An error in the success function for IomyRe.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
+                                                aErrorMessages.push("An error in the success function for iomy.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
                                             }
 
                                         } else {
@@ -133,13 +133,13 @@ $.extend(IomyRe.devices.temperature,{
                                         aErrorMessages.push("Response data type received was not in a valid JSON format. Type Received: "+responseType);
                                     }
                                 } catch (e) {
-                                    aErrorMessages.push("An error in the fail function for IomyRe.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
+                                    aErrorMessages.push("An error in the fail function for iomy.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
                                 }
                             },
 
                             "onFail" : function (response) {
                                 // Log errors
-                                var sErrMessage = "There was an error fetching data using IomyRe.devices.motionsensor.FetchODataFields():\n\n" + response.responseText;
+                                var sErrMessage = "There was an error fetching data using iomy.devices.motionsensor.FetchODataFields():\n\n" + response.responseText;
 
                                 jQuery.sap.log.error(sErrMessage);
                                 aErrorMessages.push(sErrMessage);
@@ -179,8 +179,8 @@ $.extend(IomyRe.devices.temperature,{
             //--------------------------------------------------------------------//
             // Send the AJAX request
             //--------------------------------------------------------------------//
-            /*IomyRe.apiodata.AjaxRequest({
-                            "Url"             : IomyRe.apiodata.ODataLocation("dataint"),
+            /*iomy.apiodata.AjaxRequest({
+                            "Url"             : iomy.apiodata.ODataLocation("dataint"),
                             "Columns"         : ["CALCEDVALUE", "UTS", "UOM_PK", "UOM_NAME", "RSTYPE_PK"],
                             "WhereClause"     : [aIOIDs.join(" or ")],
                             "OrderByClause"   : ["UTS desc"],
@@ -219,7 +219,7 @@ $.extend(IomyRe.devices.temperature,{
                                                 fnSuccess(mResult);
 
                                             } catch (e) {
-                                                fnFail("An error in the success function for IomyRe.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
+                                                fnFail("An error in the success function for iomy.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
                                             }
 
                                         } else {
@@ -229,13 +229,13 @@ $.extend(IomyRe.devices.temperature,{
                                         fnFail("Response data type received was not in a valid JSON format. Type Received: "+responseType);
                                     }
                                 } catch (e) {
-                                    fnFail("An error in the fail function for IomyRe.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
+                                    fnFail("An error in the fail function for iomy.devices.motionsensor.FetchODataFields():\n\n" + e.name + ": " + e.message);
                                 }
                             },
 
                             "onFail" : function (response) {
                                 // Log errors
-                                var sErrMessage = "There was an error fetching data using IomyRe.devices.motionsensor.FetchODataFields():\n\n" + response.responseText;
+                                var sErrMessage = "There was an error fetching data using iomy.devices.motionsensor.FetchODataFields():\n\n" + response.responseText;
 
                                 jQuery.sap.log.error(sErrMessage);
                                 fnFail(sErrMessage);
@@ -244,8 +244,8 @@ $.extend(IomyRe.devices.temperature,{
 
             });*/
         } catch (e) {
-            fnFail("Error in IomyRe.devices.motionsensor.FetchODataFields ("+e.name+"):\n" + e.message);
-//            e.message = "Error in IomyRe.devices.motionsensor.FetchODataFields ("+e.name+"):\n" + e.message;
+            fnFail("Error in iomy.devices.motionsensor.FetchODataFields ("+e.name+"):\n" + e.message);
+//            e.message = "Error in iomy.devices.motionsensor.FetchODataFields ("+e.name+"):\n" + e.message;
 //            $.sap.log.error(e.message);
 //            throw e;
         }

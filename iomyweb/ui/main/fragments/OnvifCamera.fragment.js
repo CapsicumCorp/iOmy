@@ -42,7 +42,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 						new sap.ui.layout.form.FormElement({
 							label : "Assign to Onvif Server",
 							fields: [ 
-								IomyRe.widgets.selectBoxOnvifServer(oView.createId("SelectOnvifServer"), {
+								iomy.widgets.selectBoxOnvifServer(oView.createId("SelectOnvifServer"), {
 									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/OnvifServer}",
                                     change : function () {
                                         oController.LoadOnvifProfilesForSelectBoxes();

@@ -309,9 +309,9 @@ AjaxRequestQueue.prototype._run = function (sQueueIndex) {
 
             if (mRequestData.library !== undefined && mRequestData.library !== null) {
                 if (mRequestData.library.toLowerCase() === "php") {
-                    IomyRe.apiphp.AjaxRequest(mRequestParameters);
+                    iomy.apiphp.AjaxRequest(mRequestParameters);
                 } else if (mRequestData.library.toLowerCase() === "odata") {
-                    IomyRe.apiodata.AjaxRequest(mRequestParameters);
+                    iomy.apiodata.AjaxRequest(mRequestParameters);
                 } else {
     //                if (mRequestData.library !== undefined && mRequestData.library !== null) {
     //                    if (typeof mRequestData.library === "object") {

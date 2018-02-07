@@ -39,13 +39,13 @@ sap.ui.controller("pages.staging.device.Mjpeg", {
                 //-- Set Static parameters --//
                 
                 //-- Defines the Screen Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 //-- Updates Paramaters & ID's on Load --//
                 oView.byId("MJPEG_Img").setSrc("");
                 oController.LoadStream(oEvent.data.ThingId);
                 
-                oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
+                oView.byId("ToolbarTitle").setText( iomy.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
             }
         });
     },
@@ -63,7 +63,7 @@ sap.ui.controller("pages.staging.device.Mjpeg", {
         //--------------------------------------------------------------------//
         // Load the URL and use it.
         //--------------------------------------------------------------------//
-        IomyRe.devices.ipcamera.loadStreamUrl({
+        iomy.devices.ipcamera.loadStreamUrl({
             thingID : iThingId,
 
             onSuccess : function (sUrl) {
@@ -72,7 +72,7 @@ sap.ui.controller("pages.staging.device.Mjpeg", {
 
             onFail : function (sErrorMessage) {
                 if (oApp.getCurrentPage().getId() === oView.getId()) {
-                    IomyRe.common.showError(sErrorMessage, "Stream Not Available");
+                    iomy.common.showError(sErrorMessage, "Stream Not Available");
                 }
             }
         });

@@ -48,7 +48,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
                     oController.iPremiseId = oEvent.data.PremiseId;
                     
                 } else {
-                    IomyRe.common.showError("Premise has not been specified.", "");
+                    iomy.common.showError("Premise has not been specified.", "");
                 }
                 
                 //-- Refresh Nav Buttons --//
@@ -61,7 +61,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
                 oController.ToggleButtonsAndView( oController, "ShowAddress");
                 
                 //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 oController.loadLocaleInfo();
             }
@@ -110,8 +110,8 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             }
         }
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("premiselocation"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("premiselocation"),
             Columns : ["REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
                         "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
                         "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
@@ -141,7 +141,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             },
             
             onFail : function (response) {
-                IomyRe.common.showError(response.responseText, "Failed to load premise address",
+                iomy.common.showError(response.responseText, "Failed to load premise address",
                     function () {
                         oController.RefreshModel();
                         fnComplete();
@@ -156,19 +156,19 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
     RefreshModel : function () {
         var oController = this;
         var oView       = oController.getView();
-        var mPremise    = JSON.parse( JSON.stringify(IomyRe.common.PremiseList["_"+oController.iPremiseId]) );
+        var mPremise    = JSON.parse( JSON.stringify(iomy.common.PremiseList["_"+oController.iPremiseId]) );
         var oModel      = new sap.ui.model.json.JSONModel({
             "Information"   : mPremise,
             "Address"       : oController.mPremiseAddress,
             "Options"       : {
-                "BedroomCount"  : IomyRe.common.PremiseBedroomsOptions,
-                "FloorCount"    : IomyRe.common.PremiseFloorsOptions,
-                "OccupantCount" : IomyRe.common.PremiseOccupantsOptions,
-                "RoomCount"     : IomyRe.common.PremiseRoomsOptions,
+                "BedroomCount"  : iomy.common.PremiseBedroomsOptions,
+                "FloorCount"    : iomy.common.PremiseFloorsOptions,
+                "OccupantCount" : iomy.common.PremiseOccupantsOptions,
+                "RoomCount"     : iomy.common.PremiseRoomsOptions,
 
-                "Regions"   : IomyRe.common.Regions,
-                "Languages" : IomyRe.common.Languages,
-                "Timezones" : IomyRe.common.Timezones
+                "Regions"   : iomy.common.Regions,
+                "Languages" : iomy.common.Languages,
+                "Timezones" : iomy.common.Timezones
             }
         })
         
@@ -188,32 +188,32 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
                     oView.byId("InfoBlock_BtnEdit").setVisible( true );
                     oView.byId("InfoBlock_BtnSave").setVisible( false );
                     oView.byId("InfoBlock_BtnCancel").setVisible( false );
-                    IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", false);
-                    IomyRe.common.ShowFormFragment( oController, "premise.InfoDisplay", "InfoBlock_Form", "FormContainer" );
+                    iomy.forms.ToggleFormMode(oController, "InfoBlock_Form", false);
+                    iomy.common.ShowFormFragment( oController, "premise.InfoDisplay", "InfoBlock_Form", "FormContainer" );
                 break;
                 case "EditInfo":
                     //-- Edit Info --//
                     oView.byId("InfoBlock_BtnEdit").setVisible( false );
                     oView.byId("InfoBlock_BtnSave").setVisible( true );
                     oView.byId("InfoBlock_BtnCancel").setVisible( true );
-                    IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
-                    IomyRe.common.ShowFormFragment( oController, "premise.InfoEdit", "InfoBlock_Form", "FormContainer" );
+                    iomy.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
+                    iomy.common.ShowFormFragment( oController, "premise.InfoEdit", "InfoBlock_Form", "FormContainer" );
                 break;
                 case "ShowAddress":
                     //-- Show Address --//
                     oView.byId("AddrBlock_BtnEdit").setVisible( true );
                     oView.byId("AddrBlock_BtnSave").setVisible( false );
                     oView.byId("AddrBlock_BtnCancel").setVisible( false );
-                    IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", false);
-                    IomyRe.common.ShowFormFragment( oController, "premise.AddressDisplay", "AddrBlock_Form", "FormContainer" );
+                    iomy.forms.ToggleFormMode(oController, "AddrBlock_Form", false);
+                    iomy.common.ShowFormFragment( oController, "premise.AddressDisplay", "AddrBlock_Form", "FormContainer" );
                 break;
                 case "EditAddress":
                     //-- Edit Address --//
                     oView.byId("AddrBlock_BtnEdit").setVisible( false );
                     oView.byId("AddrBlock_BtnSave").setVisible( true );
                     oView.byId("AddrBlock_BtnCancel").setVisible( true );
-                    IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
-                    IomyRe.common.ShowFormFragment( oController, "premise.AddressEdit", "AddrBlock_Form", "FormContainer" );
+                    iomy.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
+                    iomy.common.ShowFormFragment( oController, "premise.AddressEdit", "AddrBlock_Form", "FormContainer" );
                 break;
                 default:
                     $.sap.log.error("ToggleButtonsAndView: Critcal Error. sMode set incorrectly:"+sMode);
@@ -241,10 +241,10 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             rooms           : oFormData.RoomCountId,
             
             onSuccess : function () {
-                IomyRe.common.RefreshCoreVariables({
+                iomy.common.RefreshCoreVariables({
                     
                     onSuccess : function () {
-                        IomyRe.common.showMessage({
+                        iomy.common.showMessage({
                             text : "Premise Information successfully updated."
                         });
 
@@ -256,7 +256,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             },
             
             onWarning : function (sErrMessage) {
-                IomyRe.common.showWarning(sErrMessage, "Some fields couldn't be updated",
+                iomy.common.showWarning(sErrMessage, "Some fields couldn't be updated",
                     function () {
                         oController.TogglePremiseInfoControls(true);
                     }
@@ -264,7 +264,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             },
             
             onFail : function (sErrMessage) {
-                IomyRe.common.showError(sErrMessage, "Failed to update premise",
+                iomy.common.showError(sErrMessage, "Failed to update premise",
                     function () {
                         oController.TogglePremiseInfoControls(true);
                     }
@@ -292,10 +292,10 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             languageID          : oFormData.LanguageId,
             
             onSuccess : function () {
-                IomyRe.common.RefreshCoreVariables({
+                iomy.common.RefreshCoreVariables({
                     
                     onSuccess : function () {
-                        IomyRe.common.showMessage({
+                        iomy.common.showMessage({
                             text : "Premise address successfully updated."
                         });
 
@@ -307,7 +307,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             },
             
             onFail : function (sErrMessage) {
-                IomyRe.common.showError(sErrMessage, "Failed to update premise address",
+                iomy.common.showError(sErrMessage, "Failed to update premise address",
                     function () {
                         oController.TogglePremiseAddressControls(true);
                     }
@@ -320,7 +320,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
         var bError                  = false;
         var aErrorMessages          = [];
         
-        var sUrl                    = IomyRe.apiphp.APILocation("premises");
+        var sUrl                    = iomy.apiphp.APILocation("premises");
         var iPremiseId              = 0;
         var sPremiseName            = "";
         var sPremiseDesc            = "";
@@ -367,7 +367,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
                 iPremiseId = mSettings.premiseID;
                 
-                var mPremiseIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                var mPremiseIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
                 
                 if (!mPremiseIDInfo.bIsValid) {
                     bError = true;
@@ -567,7 +567,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
         var bError                  = false;
         var aErrorMessages          = [];
         
-        var sUrl                    = IomyRe.apiphp.APILocation("premises");
+        var sUrl                    = iomy.apiphp.APILocation("premises");
         var iPremiseId              = 0;
         var sAddressLine1           = "";
         var sAddressLine2           = "";
@@ -598,7 +598,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
                 iPremiseId = mSettings.premiseID;
                 
-                var mPremiseIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                var mPremiseIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
                 
                 if (!mPremiseIDInfo.bIsValid) {
                     bError = true;
@@ -694,7 +694,7 @@ sap.ui.controller("pages.staging.premise.PremiseForm", {
             throw new MissingSettingsMapException(aErrorMessages.join('\n'));
         }
         
-        IomyRe.apiphp.AjaxRequest({
+        iomy.apiphp.AjaxRequest({
             url : sUrl,
             data : {
                 "Mode" : "EditPremiseAddress",

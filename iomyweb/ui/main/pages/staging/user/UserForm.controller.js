@@ -51,11 +51,11 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//-- Setup the Model placeholder                            --//
 					//------------------------------------------------------------//
 					oController.mModelData = {
-						"Regions":               IomyRe.common.Regions,
-						"Languages":             IomyRe.common.Languages,
-						"Timezones":             IomyRe.common.Timezones,
-						"PermLevelsPremise":     IomyRe.common.PermLevelsPremise,
-						"PermLevelsDevice":      IomyRe.common.PermLevelsDevice,
+						"Regions":               iomy.common.Regions,
+						"Languages":             iomy.common.Languages,
+						"Timezones":             iomy.common.Timezones,
+						"PermLevelsPremise":     iomy.common.PermLevelsPremise,
+						"PermLevelsDevice":      iomy.common.PermLevelsDevice,
 						"AllPremises":           {},
 						"AllRooms":              {},
 						"PremiseRooms":          {},
@@ -127,37 +127,37 @@ sap.ui.controller("pages.staging.user.UserForm", {
 																	
 																},
 																onFail: function() {
-																	IomyRe.common.showError("Problem refreshing the Model", "Edit Other User Page");
+																	iomy.common.showError("Problem refreshing the Model", "Edit Other User Page");
 																}
 															}); //-- END Refresh Model --//
 														},
 														onFail: function() {
-															IomyRe.common.showError("Problem Refreshing User Room Permissions", "Edit Other User Page");
+															iomy.common.showError("Problem Refreshing User Room Permissions", "Edit Other User Page");
 														}
 													}); //-- END Room Permissions --//
 												},
 												onFail: function() {
-													IomyRe.common.showError("Problem Refreshing User Premise Permissions", "Edit Other User Page");
+													iomy.common.showError("Problem Refreshing User Premise Permissions", "Edit Other User Page");
 												}
 											}); //-- END Premise Permissions --//
 											
 										},
 										onFail: function() {
-											IomyRe.common.showError("Problem Refreshing Room List", "Edit Other User Page");
+											iomy.common.showError("Problem Refreshing Room List", "Edit Other User Page");
 										}
 									}); //-- END Room List --//
 								},
 								onFail: function() {
-									IomyRe.common.showError("Problem Refreshing Premise List", "Edit Other User Page");
+									iomy.common.showError("Problem Refreshing Premise List", "Edit Other User Page");
 								}
 							}); //-- END Premise List --//
 						},
 						onFail: function() {
-							IomyRe.common.showError("Problem Refreshing User Information", "Edit Other User Page");
+							iomy.common.showError("Problem Refreshing User Information", "Edit Other User Page");
 						}
 					}); //-- END User Information --//
 				} catch( e001 ) {
-					IomyRe.common.showError("Critical Error: Problem setting up the \"Edit Other User\" page!", "Edit Other User Page");
+					iomy.common.showError("Critical Error: Problem setting up the \"Edit Other User\" page!", "Edit Other User Page");
 				}
 			}
 		});
@@ -172,8 +172,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
         
 		//-- Function for refreshing the desired User Info --//
 		try {
-			IomyRe.apiphp.AjaxRequest({
-				url:  IomyRe.apiphp.APILocation("users"),
+			iomy.apiphp.AjaxRequest({
+				url:  iomy.apiphp.APILocation("users"),
 				data: {
 					"Mode":      "AdminUserList",
 				},
@@ -199,11 +199,11 @@ sap.ui.controller("pages.staging.user.UserForm", {
 								oController.mModelData.UserInfo = JSON.parse( JSON.stringify( oController.mModelData.Previous.UserInfo ) );
                                 
                                 //-- If the current user was edited... --//
-                                if (oController.iUserId == IomyRe.common.UserInfo.UserId) {
-                                    IomyRe.common.RefreshUserInfoList({
+                                if (oController.iUserId == iomy.common.UserInfo.UserId) {
+                                    iomy.common.RefreshUserInfoList({
                                         
                                         onSuccess : function () {
-                                            var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+                                            var sDisplayName = iomy.common.UserInfo.Displayname || iomy.common.UserInfo.Username;
                                             oView.byId("openMenu").setText("Hi, "+sDisplayName);
                                         }
                                         
@@ -223,7 +223,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 								}
 							} else {
 								//-- ERROR: User not found --//
-								IomyRe.common.showError("Cannot find data on the desired User!", "Edit User");
+								iomy.common.showError("Cannot find data on the desired User!", "Edit User");
 								
 								//-- Perform the "onFail" function if applicable --//
 								if(oConfig.onFail) {
@@ -233,7 +233,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							
 						} else {
 							//-- ERROR: --//
-							IomyRe.common.showError("API has refused access to the UserList! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							iomy.common.showError("API has refused access to the UserList! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -249,7 +249,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					}
 				},
 				onFail: function( sResponse ) {
-					IomyRe.common.showError("API has refused access to the UserList! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					iomy.common.showError("API has refused access to the UserList! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -270,8 +270,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	//========================================================//
 	RefreshPremiseList: function( oController, oConfig ) {
 		try {
-			IomyRe.apiphp.AjaxRequest({
-				url:  IomyRe.apiphp.APILocation("premises"),
+			iomy.apiphp.AjaxRequest({
+				url:  iomy.apiphp.APILocation("premises"),
 				data: {
 					"Mode":      "AdminPremiseList"
 				},
@@ -303,7 +303,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- ERROR:     --//
 							//----------------//
-							IomyRe.common.showError("API has refused access to the Premise list! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							iomy.common.showError("API has refused access to the Premise list! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -324,7 +324,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//----------------//
 					//-- ERROR:     --//
 					//----------------//
-					IomyRe.common.showError("API has refused access to the Premise list! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					iomy.common.showError("API has refused access to the Premise list! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -348,8 +348,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	//========================================================//
 	RefreshUserPremisePerms: function( oController, oConfig ) {
 		try {
-			IomyRe.apiphp.AjaxRequest({
-				url:  IomyRe.apiphp.APILocation("permissions"),
+			iomy.apiphp.AjaxRequest({
+				url:  iomy.apiphp.APILocation("permissions"),
 				data: {
 					"Mode":      "AdminUserPremisePerms",
 					"UserId":    oController.iUserId
@@ -366,7 +366,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							
 							$.each( aAjaxData.Data, function( Key, mPremise ) {
 								//-- Convert Permissions to Permission Level --//
-								var iPermissionLevel = IomyRe.common.LookupPremisePermLevelFromPermissions( mPremise );
+								var iPermissionLevel = iomy.common.LookupPremisePermLevelFromPermissions( mPremise );
 								
 								//-- Create the array key --//
 								var sKey = "_"+mPremise.PremiseId;
@@ -396,7 +396,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- ERROR:     --//
 							//----------------//
-							IomyRe.common.showError("API has refused access to the Premise permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							iomy.common.showError("API has refused access to the Premise permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -417,7 +417,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//----------------//
 					//-- ERROR:     --//
 					//----------------//
-					IomyRe.common.showError("API has refused access to the Premise permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					iomy.common.showError("API has refused access to the Premise permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -441,8 +441,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	//========================================================//
 	RefreshUserRoomPerms: function( oController, oConfig ) {
 		try {
-			IomyRe.apiphp.AjaxRequest({
-				url:  IomyRe.apiphp.APILocation("permissions"),
+			iomy.apiphp.AjaxRequest({
+				url:  iomy.apiphp.APILocation("permissions"),
 				data: {
 					"Mode":      "AdminUserRoomPerms",
 					"UserId":    oController.iUserId
@@ -459,7 +459,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							
 							$.each( aAjaxData.Data, function( Key, mRoom ) {
 								//-- Convert Permissions to Permission Level --//
-								var iPermissionLevel = IomyRe.common.LookupRoomPermLevelFromPermissions( mRoom );
+								var iPermissionLevel = iomy.common.LookupRoomPermLevelFromPermissions( mRoom );
 								
 								//-- Create the array key --//
 								var sKey = "_"+mRoom.RoomId;
@@ -487,7 +487,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- ERROR:     --//
 							//----------------//
-							IomyRe.common.showError("API has refused access to the Room permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							iomy.common.showError("API has refused access to the Room permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -509,7 +509,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//-- ERROR:     --//
 					//----------------//
 					
-					IomyRe.common.showError("API has refused access to the Room permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					iomy.common.showError("API has refused access to the Room permissions! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -533,8 +533,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 	//========================================================//
 	RefreshRoomList: function( oController, oConfig ) {
 		try {
-			IomyRe.apiphp.AjaxRequest({
-				url:  IomyRe.apiphp.APILocation("rooms"),
+			iomy.apiphp.AjaxRequest({
+				url:  iomy.apiphp.APILocation("rooms"),
 				data: {
 					"Mode":      "AdminRoomList"
 				},
@@ -565,7 +565,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 							//----------------//
 							//-- ERROR:     --//
 							//----------------//
-							IomyRe.common.showError("API has refused access to the Room list! Please contact the administrator of your iOmy System for details", "Edit User Page");
+							iomy.common.showError("API has refused access to the Room list! Please contact the administrator of your iOmy System for details", "Edit User Page");
 							
 							if(oConfig.onFail) {
 								oConfig.onFail();
@@ -586,7 +586,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//----------------//
 					//-- ERROR:     --//
 					//----------------//
-					IomyRe.common.showError("API has refused access to the Room list! Please contact the administrator of your iOmy System for details", "Edit User Page");
+					iomy.common.showError("API has refused access to the Room list! Please contact the administrator of your iOmy System for details", "Edit User Page");
 					
 					if(oConfig.onFail) {
 						oConfig.onFail();
@@ -725,7 +725,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("UserInfoBlock_BtnSave").setVisible( false );
 					oView.byId("UserInfoBlock_BtnCancel").setVisible( false );
 					oView.byId("UserInfoBlock_Form").setEditable( false );
-					IomyRe.common.ShowFormFragment( oController, "UserEditInfoDisplay", "UserInfoBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "UserEditInfoDisplay", "UserInfoBlock_Form", "FormContainer" );
 					break;
 					
 				case "UserInfoEdit":
@@ -733,7 +733,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("UserInfoBlock_BtnSave").setVisible( true );
 					oView.byId("UserInfoBlock_BtnCancel").setVisible( true );
 					oView.byId("UserInfoBlock_Form").setEditable( true );
-					IomyRe.common.ShowFormFragment( oController, "UserEditInfoEdit", "UserInfoBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "UserEditInfoEdit", "UserInfoBlock_Form", "FormContainer" );
 					break;
 					
 				//----------------------------//
@@ -744,7 +744,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("UserAddressBlock_BtnSave").setVisible( false );
 					oView.byId("UserAddressBlock_BtnCancel").setVisible( false );
 					oView.byId("UserAddressBlock_Form").setEditable( false );
-					IomyRe.common.ShowFormFragment( oController, "UserEditAddressDisplay", "UserAddressBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "UserEditAddressDisplay", "UserAddressBlock_Form", "FormContainer" );
 					break;
 					
 				case "UserAddressEdit":
@@ -752,7 +752,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("UserAddressBlock_BtnSave").setVisible( true );
 					oView.byId("UserAddressBlock_BtnCancel").setVisible( true );
 					oView.byId("UserAddressBlock_Form").setEditable( true );
-					IomyRe.common.ShowFormFragment( oController, "UserEditAddressEdit", "UserAddressBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "UserEditAddressEdit", "UserAddressBlock_Form", "FormContainer" );
 					break;
 					
 				//----------------------------//
@@ -763,7 +763,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("PremPermBlock_BtnSave").setVisible( false );
 					oView.byId("PremPermBlock_BtnCancel").setVisible( false );
 					oView.byId("PremPermBlock_Form").setEditable( false );
-					IomyRe.common.ShowFormFragment( oController, "UserEditPremPermDisplay", "PremPermBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "UserEditPremPermDisplay", "PremPermBlock_Form", "FormContainer" );
 					break;
 					
 				case "PremPermEdit":
@@ -771,7 +771,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("PremPermBlock_BtnSave").setVisible( true );
 					oView.byId("PremPermBlock_BtnCancel").setVisible( true );
 					oView.byId("PremPermBlock_Form").setEditable( true );
-					IomyRe.common.ShowFormFragment( oController, "UserEditPremPermEdit", "PremPermBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "UserEditPremPermEdit", "PremPermBlock_Form", "FormContainer" );
 					break;
 					
 				//----------------------------//
@@ -782,7 +782,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("RoomPermBlock_BtnSave").setVisible( false );
 					oView.byId("RoomPermBlock_BtnCancel").setVisible( false );
 					oView.byId("RoomPermBlock_Form").setEditable( false );
-					IomyRe.common.ShowFormFragment( oController, "UserEditRoomPermDisplay", "RoomPermBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "UserEditRoomPermDisplay", "RoomPermBlock_Form", "FormContainer" );
 					break;
 					
 				case "RoomPermEdit":
@@ -790,7 +790,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					oView.byId("RoomPermBlock_BtnSave").setVisible( true );
 					oView.byId("RoomPermBlock_BtnCancel").setVisible( true );
 					oView.byId("RoomPermBlock_Form").setEditable( true );
-					IomyRe.common.ShowFormFragment( oController, "UserEditRoomPermEdit", "RoomPermBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "UserEditRoomPermEdit", "RoomPermBlock_Form", "FormContainer" );
 					break;
 					
 				default:
@@ -823,11 +823,11 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					
 					if( oController.mModelData.PremisePerms[sPremCode].PermLevel===4 ) {
 						oController.mModelData.PermLevelsPremise = {
-							"_4": IomyRe.common.PermLevelsPremise["_4"]
+							"_4": iomy.common.PermLevelsPremise["_4"]
 						};
 					} else {
 						oController.mModelData.PermLevelsPremise = {
-							"_5": IomyRe.common.PermLevelsPremise["_5"]
+							"_5": iomy.common.PermLevelsPremise["_5"]
 						};
 					}
 					
@@ -836,10 +836,10 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				//----------------------------------------//
 				} else {
 					oController.mModelData.PermLevelsPremise = {
-						"_0": IomyRe.common.PermLevelsPremise["_0"],
-						"_1": IomyRe.common.PermLevelsPremise["_1"],
-						"_2": IomyRe.common.PermLevelsPremise["_2"],
-						"_3": IomyRe.common.PermLevelsPremise["_3"]
+						"_0": iomy.common.PermLevelsPremise["_0"],
+						"_1": iomy.common.PermLevelsPremise["_1"],
+						"_2": iomy.common.PermLevelsPremise["_2"],
+						"_3": iomy.common.PermLevelsPremise["_3"]
 					};
 				}
 				
@@ -857,10 +857,10 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				
 				//-- Set default select box permissions --//
 				oController.mModelData.PermLevelsPremise = {
-					"_0": IomyRe.common.PermLevelsPremise["_0"],
-					"_1": IomyRe.common.PermLevelsPremise["_1"],
-					"_2": IomyRe.common.PermLevelsPremise["_2"],
-					"_3": IomyRe.common.PermLevelsPremise["_3"]
+					"_0": iomy.common.PermLevelsPremise["_0"],
+					"_1": iomy.common.PermLevelsPremise["_1"],
+					"_2": iomy.common.PermLevelsPremise["_2"],
+					"_3": iomy.common.PermLevelsPremise["_3"]
 				};
 				
 				//-- Set the Perm Level to 0 --//;
@@ -891,10 +891,10 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			if( typeof oController.mModelData.RoomPerms[sRoomCode]!=="undefined" ) {
 				
 				oController.mModelData.PermLevelsRoom = {
-					"_0": IomyRe.common.PermLevelsRoom["_0"],
-					"_1": IomyRe.common.PermLevelsRoom["_1"],
-					"_2": IomyRe.common.PermLevelsRoom["_2"],
-					"_3": IomyRe.common.PermLevelsRoom["_3"]
+					"_0": iomy.common.PermLevelsRoom["_0"],
+					"_1": iomy.common.PermLevelsRoom["_1"],
+					"_2": iomy.common.PermLevelsRoom["_2"],
+					"_3": iomy.common.PermLevelsRoom["_3"]
 				};
 				
 				oController.mModelData.Form.RoomPerm.PermLevel = oController.mModelData.RoomPerms[sRoomCode].PermLevel;
@@ -910,10 +910,10 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				
 				//-- Set default select box permissions --//
 				oController.mModelData.PermLevelsRoom = {
-					"_0": IomyRe.common.PermLevelsRoom["_0"],
-					"_1": IomyRe.common.PermLevelsRoom["_1"],
-					"_2": IomyRe.common.PermLevelsRoom["_2"],
-					"_3": IomyRe.common.PermLevelsRoom["_3"]
+					"_0": iomy.common.PermLevelsRoom["_0"],
+					"_1": iomy.common.PermLevelsRoom["_1"],
+					"_2": iomy.common.PermLevelsRoom["_2"],
+					"_3": iomy.common.PermLevelsRoom["_3"]
 				};
 				
 				//-- Set the Perm Level to 0 --//;
@@ -925,7 +925,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 				return true;
 			}
 		} catch(e1) {
-			IomyRe.common.showError("Critical Error: Problem when trying prepare a list of valid room permissions for the desired room", "Edit Other User Page");
+			iomy.common.showError("Critical Error: Problem when trying prepare a list of valid room permissions for the desired room", "Edit Other User Page");
 			$.sap.log.error("UpdateSelectableRoomPerms: Critcal Error:"+e1.message);
 			return false;
 		}
@@ -1085,7 +1085,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
                         oController.ToggleButtonsAndView( oController, "PremPermShow" );
                     },
                     onFail: function() {
-                        IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Premise Permissions!", "Edit Other User Page");
+                        iomy.common.showError( "Error has occurred when refreshing the model after updating the new User Premise Permissions!", "Edit Other User Page");
                     }
                 }); //-- END Refresh Model --//
             },
@@ -1093,7 +1093,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
                 //------------------------------------------------//
                 //-- ERROR: User Premise Permissions            --//
                 //------------------------------------------------//
-                IomyRe.common.showError( "Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
+                iomy.common.showError( "Error has occurred when refreshing the Premise Permissions after updating the new User Premise Permissions!", "Edit Other User Page");
             }
         }); //-- END Premise Permissions --//
     },
@@ -1117,7 +1117,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
                         oController.ToggleButtonsAndView( oController, "RoomPermShow" );
                     },
                     onFail: function() {
-                        IomyRe.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
+                        iomy.common.showError( "Error has occurred when refreshing the model after updating the new User Room Permissions!", "Edit Other User Page");
                     }
                 }); //-- END Refresh Model --//
             },
@@ -1125,7 +1125,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
                 //------------------------------------------------//
                 //-- ERROR: User Room Permissions               --//
                 //------------------------------------------------//
-                IomyRe.common.showError( "Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
+                iomy.common.showError( "Error has occurred when refreshing the Room Permissions after updating the new User Room Permissions!", "Edit Other User Page");
             }
         }); //-- END Room Permissions --//
     },
@@ -1177,8 +1177,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		//------------------------------------------------//
 		try {
 			if( bError===false ) {
-				IomyRe.apiphp.AjaxRequest({
-					url:       IomyRe.apiphp.APILocation("users"),
+				iomy.apiphp.AjaxRequest({
+					url:       iomy.apiphp.APILocation("users"),
 					data:      {
 						"Mode":        "EditOtherUserInfo",
 						"Title":       oCurrentFormData.Title,
@@ -1211,7 +1211,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 													oController.ToggleButtonsAndView( oController, "UserInfoShow" );
 												},
 												onFail: function() {
-													IomyRe.common.showError("Problem refreshing the model after updating the new User Information!", "Edit Other User Page");
+													iomy.common.showError("Problem refreshing the model after updating the new User Information!", "Edit Other User Page");
 												}
 											}); //-- END Refresh Model --//
 										},
@@ -1219,7 +1219,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 											//------------------------------------------------//
 											//-- ERROR: User Information                    --//
 											//------------------------------------------------//
-											IomyRe.common.showError("Problem refreshing the User Information after updating the new User Information!", "Edit Other User Page");
+											iomy.common.showError("Problem refreshing the User Information after updating the new User Information!", "Edit Other User Page");
 											
 										}
 									}); //-- END Room Permissions --//
@@ -1227,7 +1227,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 									//------------------------------------------------//
 									//-- CRITICAL ERROR: Refreshing UserData        --//
 									//------------------------------------------------//
-									IomyRe.common.showError("Critical Error has occurred when refreshing the User Information after updating the new User Information!", "Edit Other User Page");
+									iomy.common.showError("Critical Error has occurred when refreshing the User Information after updating the new User Information!", "Edit Other User Page");
 									jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' success event that was passed as a parameter in the 'UserForm' controller! "+e3.message);
 								}
 							} else {
@@ -1235,13 +1235,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
 								//-- ERROR: Invalid JSON                        --//
 								//------------------------------------------------//
 
-								IomyRe.common.showError("Problem refreshing the User Information after updating the new User Information! The API did not return valid JSON.", "Edit Other User Page");
+								iomy.common.showError("Problem refreshing the User Information after updating the new User Information! The API did not return valid JSON.", "Edit Other User Page");
 							}
 						} catch( e2 ) {
 							//------------------------------------------------//
 							//-- CRITICAL ERROR: JSON issue                 --//
 							//------------------------------------------------//
-							IomyRe.common.showError("Critical Error has occurred when updating the User Information! Problem understanding the API Success array.", "Edit Other User Page");
+							iomy.common.showError("Critical Error has occurred when updating the User Information! Problem understanding the API Success array.", "Edit Other User Page");
 							jQuery.sap.log.error("Error with the 'UpdateUserInfoValues' success in the 'UserForm' controller! "+e2.message);
 						}
 					},
@@ -1249,11 +1249,11 @@ sap.ui.controller("pages.staging.user.UserForm", {
 						//------------------------------------------------//
 						//-- ERROR: API ONFAIL Event                    --//
 						//------------------------------------------------//
-						IomyRe.common.showError("Error when updating the User Information! API has returned an error", "Edit Other User Page");
+						iomy.common.showError("Error when updating the User Information! API has returned an error", "Edit Other User Page");
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error" );
+				iomy.common.showError( sErrMesg, "Error" );
 			}
 		} catch( e1 ) {
 			
@@ -1283,8 +1283,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
 		//------------------------------------------------//
 		try {
 			if( bError===false ) {
-				IomyRe.apiphp.AjaxRequest({
-					url:       IomyRe.apiphp.APILocation("users"),
+				iomy.apiphp.AjaxRequest({
+					url:       iomy.apiphp.APILocation("users"),
 					data:      {
 						"Mode":                       "EditOtherUserAddress",
 						"AddressLine1":               oCurrentFormData.Line1,
@@ -1326,14 +1326,14 @@ sap.ui.controller("pages.staging.user.UserForm", {
 											//------------------------------------------------//
 											//-- ERROR: User Information                    --//
 											//------------------------------------------------//
-											IomyRe.common.showError("Problem refreshing the User Information after updating the new User Address!", "Edit Other User Page");
+											iomy.common.showError("Problem refreshing the User Information after updating the new User Address!", "Edit Other User Page");
 										}
 									}); //-- END Room Permissions --//
 								} catch( e3 ) {
 									//------------------------------------------------//
 									//-- CRITICAL ERROR: Refreshing UserData        --//
 									//------------------------------------------------//
-									IomyRe.common.showError("Critical Error has occurred when refreshing the User Information after updating the new User Address!", "Edit Other User Page");
+									iomy.common.showError("Critical Error has occurred when refreshing the User Information after updating the new User Address!", "Edit Other User Page");
 									jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' success event that was passed as a parameter in the 'UserForm' controller! "+e3.message);
 									
 								}
@@ -1341,14 +1341,14 @@ sap.ui.controller("pages.staging.user.UserForm", {
 								//------------------------------------------------//
 								//-- ERROR: Invalid JSON                        --//
 								//------------------------------------------------//
-								IomyRe.common.showError("Problem refreshing the User Information after updating the new User Address! The API did not return valid JSON.", "Edit Other User Page");
+								iomy.common.showError("Problem refreshing the User Information after updating the new User Address! The API did not return valid JSON.", "Edit Other User Page");
 								
 							}
 						} catch( e2 ) {
 							//------------------------------------------------//
 							//-- CRITICAL ERROR: JSON issue                 --//
 							//------------------------------------------------//
-							IomyRe.common.showError("Critical Error has occurred when updating the User Address! Problem understanding the API Success array.", "Edit Other User Page");
+							iomy.common.showError("Critical Error has occurred when updating the User Address! Problem understanding the API Success array.", "Edit Other User Page");
 							jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' success in the 'UserForm' controller! "+e2.message);
 						}
 					},
@@ -1356,13 +1356,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
 						//------------------------------------------------//
 						//-- ERROR: API ONFAIL Event                    --//
 						//------------------------------------------------//
-						IomyRe.common.showError("Error when updating the User Address! API has returned an error", "Edit Other User Page");
+						iomy.common.showError("Error when updating the User Address! API has returned an error", "Edit Other User Page");
 						jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' API Request when editing a LandPackage in the 'UserForm' controller!");
 						
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error" );
+				iomy.common.showError( sErrMesg, "Error" );
 			}
 		} catch( e1 ) {
 			jQuery.sap.log.error("Error with the 'UpdateUserAddressValues' in the 'UserForm' controller! "+e1.message);
@@ -1394,19 +1394,19 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			//------------------------------------------------//
 			if( !( iUserId>=1 ) ) {
 				//-- Invalid UserId --//
-				IomyRe.common.showError("Invalid User selected!", "Error" );
+				iomy.common.showError("Invalid User selected!", "Error" );
 				
 			} else if( !( iPremiseId>=0 ) ) {
 				//-- Invalid RoomId --//
-				IomyRe.common.showError("Invalid Premise selected! Please select a valid Premise.", "Error" );
+				iomy.common.showError("Invalid Premise selected! Please select a valid Premise.", "Error" );
 				
 			} else if( !( iPermLevel>=0 ) ) {
 				//-- Invalid PermissionLevel --//
-				IomyRe.common.showError("Invalid Permission Level selected! Please select a valid permission level.", "Error" );
+				iomy.common.showError("Invalid Permission Level selected! Please select a valid permission level.", "Error" );
 				
 			} else if( iPermLevel>=4 ) {
 				//-- Invalid PermissionLevel --//
-				IomyRe.common.showError("The desired permission level can not be changed", "Error" );
+				iomy.common.showError("The desired permission level can not be changed", "Error" );
 				
 				
 			} else {
@@ -1455,8 +1455,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
                     if (iPremiseId > 0) {
                         try {
                         
-                            IomyRe.apiphp.AjaxRequest({
-                                url:  IomyRe.apiphp.APILocation("permissions"),
+                            iomy.apiphp.AjaxRequest({
+                                url:  iomy.apiphp.APILocation("permissions"),
                                 data: {
                                     "Mode":      "UpdatePremisePerms",
                                     "UserId":    iUserId,
@@ -1469,10 +1469,10 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                         var sErrMesg = "Error editing the Premise Permissions!\n\n";
 
                                         if( sType!=="JSON" ) {
-                                            IomyRe.common.showError( sErrMesg+"API didn't return a JSON response.", "Error" );
+                                            iomy.common.showError( sErrMesg+"API didn't return a JSON response.", "Error" );
 
                                         } else if( mData.Error===true ) {
-                                            IomyRe.common.showError( sErrMesg+"Error with the 'UpdatePremisePerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
+                                            iomy.common.showError( sErrMesg+"Error with the 'UpdatePremisePerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
 
                                         } else {
                                             oController.UpdatePremisePermissionModel();
@@ -1481,18 +1481,18 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                         //------------------------------------------------//
                                         //-- CRITICAL ERROR: User Premise Permissions   --//
                                         //------------------------------------------------//
-                                        IomyRe.common.showError( sErrMesg+"Critical Error with the 'UpdatePremisePerms' success in the 'UserForm' controller!", "Error" );
+                                        iomy.common.showError( sErrMesg+"Critical Error with the 'UpdatePremisePerms' success in the 'UserForm' controller!", "Error" );
                                     }
                                 },
                                 onFail : function (response) {
                                     //------------------------------------------------//
                                     //-- ERROR: Updating the User Prem Permissions  --//
                                     //------------------------------------------------//
-                                    IomyRe.common.showError(response.responseText, "Error", function() {} );
+                                    iomy.common.showError(response.responseText, "Error", function() {} );
                                 }
                             });
                         } catch (e) {
-                            IomyRe.common.showError("Error when updating permissions for a single premise.", "Edit Other User Page");
+                            iomy.common.showError("Error when updating permissions for a single premise.", "Edit Other User Page");
                         }
                     
                     //------------------------------------------------------------//
@@ -1514,7 +1514,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 
                                 aRequests.push({
                                     library : "php",
-                                    url:  IomyRe.apiphp.APILocation("permissions"),
+                                    url:  iomy.apiphp.APILocation("permissions"),
                                     data: {
                                         "Mode":      "UpdatePremisePerms",
                                         "UserId":    iUserId,
@@ -1571,13 +1571,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                 },
 
                                 onWarning : function () {
-                                    IomyRe.common.showWarning("Failed to update permissions for some premises:\n\n" + aErrorMessages.join('\n'), "Error");
+                                    iomy.common.showWarning("Failed to update permissions for some premises:\n\n" + aErrorMessages.join('\n'), "Error");
 
                                     oController.UpdatePremisePermissionModel();
                                 },
 
                                 onFail : function () {
-                                    IomyRe.common.showError("Failed to update premise permissions:\n\n" + aErrorMessages.join('\n'), "Error");
+                                    iomy.common.showError("Failed to update premise permissions:\n\n" + aErrorMessages.join('\n'), "Error");
                                 }
                             });
 
@@ -1591,7 +1591,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
 					//------------------------------------------------//
 					//-- ERROR: Updating the User Prem Permissions  --//
 					//------------------------------------------------//
-					IomyRe.common.showError("Error when updating the User Premise Permissions! "+sErrMesg, "Edit Other User Page");
+					iomy.common.showError("Error when updating the User Premise Permissions! "+sErrMesg, "Edit Other User Page");
 				}
 			}
 		} catch( e2 ) {
@@ -1621,15 +1621,15 @@ sap.ui.controller("pages.staging.user.UserForm", {
 			//------------------------------------------------//
 			if( !( iUserId>=1 ) ) {
 				//-- Invalid UserId --//
-				IomyRe.common.showError("Invalid User selected!", "Error", function () {} );
+				iomy.common.showError("Invalid User selected!", "Error", function () {} );
 				
 			} else if( !( iRoomId>=0 ) ) {
 				//-- Invalid RoomId --//
-				IomyRe.common.showError("Invalid Room selected! Please select a valid room.", "Error", function () {} );
+				iomy.common.showError("Invalid Room selected! Please select a valid room.", "Error", function () {} );
 				
 			} else if( !( iPermLevel>=0 ) ) {
 				//-- Invalid PermissionLevel --//
-				IomyRe.common.showError("Invalid Permission Level selected! Please select a valid permission level.", "Error", function () {} );
+				iomy.common.showError("Invalid Permission Level selected! Please select a valid permission level.", "Error", function () {} );
 				
 			} else {
 				//------------------------------------------------//
@@ -1673,8 +1673,8 @@ sap.ui.controller("pages.staging.user.UserForm", {
                 //------------------------------------------------------------//
                 if (iRoomId > 0) {
                     try {
-                        IomyRe.apiphp.AjaxRequest({
-                            url:  IomyRe.apiphp.APILocation("permissions"),
+                        iomy.apiphp.AjaxRequest({
+                            url:  iomy.apiphp.APILocation("permissions"),
                             data: {
                                 "Mode":   "UpdateRoomPerms",
                                 "UserId": iUserId,
@@ -1687,10 +1687,10 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                     var sErrMesg = "Error editing the Room Permissions!\n\n";
 
                                     if( sType!=="JSON" ) {
-                                        IomyRe.common.showError( sErrMesg+"API didn't return a JSON response.", "Error"  );
+                                        iomy.common.showError( sErrMesg+"API didn't return a JSON response.", "Error"  );
 
                                     } else if( mData.Error===true ) {
-                                        IomyRe.common.showError( sErrMesg+"Error with the 'UpdateRoomPerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
+                                        iomy.common.showError( sErrMesg+"Error with the 'UpdateRoomPerms' successful API result in the 'UserForm' controller!\n"+mData.ErrMesg, "Error" );
 
                                     } else {
                                         oController.UpdateRoomPermissionModel();
@@ -1699,14 +1699,14 @@ sap.ui.controller("pages.staging.user.UserForm", {
                                     //------------------------------------------------//
                                     //-- CRITICAL ERROR: User Room permissions      --//
                                     //------------------------------------------------//
-                                    IomyRe.common.showError( sErrMesg+"Critical Error with the 'UpdateRoomPerms' success in the 'UserForm' controller!", "Error" );
+                                    iomy.common.showError( sErrMesg+"Critical Error with the 'UpdateRoomPerms' success in the 'UserForm' controller!", "Error" );
                                 }
                             },
                             onFail : function (response) {
                                 //------------------------------------------------//
                                 //-- ERROR: Updating the Room Permissions       --//
                                 //------------------------------------------------//
-                                IomyRe.common.showError(response.responseText, "Error", function () {} );
+                                iomy.common.showError(response.responseText, "Error", function () {} );
                             }
                         });
                     } catch (e) {
@@ -1732,7 +1732,7 @@ sap.ui.controller("pages.staging.user.UserForm", {
                             
                             aRequests.push({
                                 library : "php",
-                                url:  IomyRe.apiphp.APILocation("permissions"),
+                                url:  iomy.apiphp.APILocation("permissions"),
                                 data: {
                                     "Mode":   "UpdateRoomPerms",
                                     "UserId": iUserId,
@@ -1793,13 +1793,13 @@ sap.ui.controller("pages.staging.user.UserForm", {
                             },
                             
                             onWarning : function () {
-                                IomyRe.common.showWarning("Failed to update permissions for some rooms:\n\n" + aErrorMessages.join('\n'), "Error");
+                                iomy.common.showWarning("Failed to update permissions for some rooms:\n\n" + aErrorMessages.join('\n'), "Error");
                                 
                                 oController.UpdateRoomPermissionModel();
                             },
                             
                             onFail : function () {
-                                IomyRe.common.showError("Failed to update room permissions:\n\n" + aErrorMessages.join('\n'), "Error");
+                                iomy.common.showError("Failed to update room permissions:\n\n" + aErrorMessages.join('\n'), "Error");
                             }
                         });
                         

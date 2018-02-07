@@ -82,13 +82,13 @@ sap.ui.controller("pages.staging.Room", {
                     oController.IndicateWhetherInEditModeOrNot();
 
                     //-- Defines the Device Type --//
-                    IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                    iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 
                     oController.RefreshModel();
 
                     oController.BuildRoomListUI();
                 } catch (e) {
-                    IomyRe.common.showError(e.message, "Unable to load rooms");
+                    iomy.common.showError(e.message, "Unable to load rooms");
                 }
             }
         });
@@ -149,7 +149,7 @@ sap.ui.controller("pages.staging.Room", {
         wList.destroyItems();
         
         // Fetch the list from the core variables.
-        oController.aaRoomList = IomyRe.common.RoomsList;
+        oController.aaRoomList = iomy.common.RoomsList;
         
         //--------------------------------------------------------------------//
         // Construct the Room List
@@ -163,7 +163,7 @@ sap.ui.controller("pages.staging.Room", {
             //----------------------------------------------------------------//
             wList.addItem(
                 new sap.m.GroupHeaderListItem ({
-                    title: IomyRe.common.PremiseList[sI].Name
+                    title: iomy.common.PremiseList[sI].Name
                 })
             );
         
@@ -193,8 +193,8 @@ sap.ui.controller("pages.staging.Room", {
                 try {
                     if (mFirstRoom === null) {
                         mFirstRoom = mRoom;
-                        iDeviceCount = IomyRe.functions.getNumberOfDevicesInRoom(mFirstRoom.RoomId);
-                        iRoomCount = IomyRe.functions.getNumberOfRoomsInPremise(mFirstRoom.PremiseId);
+                        iDeviceCount = iomy.functions.getNumberOfDevicesInRoom(mFirstRoom.RoomId);
+                        iRoomCount = iomy.functions.getNumberOfRoomsInPremise(mFirstRoom.PremiseId);
                         
                         if (mFirstRoom.RoomName === "Unassigned" && (iDeviceCount === 0 || iRoomCount === 1) ) {
                             bOmitEntry = true;
@@ -216,7 +216,7 @@ sap.ui.controller("pages.staging.Room", {
                             new sap.m.ObjectListItem (oView.createId("entry"+mRoom.RoomId), {        
                                 title: mRoom.RoomName,
                                 type: "Active",
-                                number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
+                                number: iomy.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
                                 numberUnit: "Devices",
                                 attributes : [
     //                                new sap.m.ObjectAttribute ({
@@ -243,11 +243,11 @@ sap.ui.controller("pages.staging.Room", {
                                         // The user can edit any room except the Unassigned "room".
                                         
                                         mPageDataTemp.bEditing = true;
-                                        IomyRe.common.NavigationChangePage( "pRoomForm" , mPageDataTemp , false);
+                                        iomy.common.NavigationChangePage( "pRoomForm" , mPageDataTemp , false);
                                         
                                     } else if (!oController.bEditing) {
                                         // Otherwise, the user won't be looking to edit, so allow the user access to Unassigned.
-                                        IomyRe.common.NavigationChangePage( "pDevice" , mPageDataTemp, false);
+                                        iomy.common.NavigationChangePage( "pDevice" , mPageDataTemp, false);
                                     }
                                     
                                 }
@@ -267,7 +267,7 @@ sap.ui.controller("pages.staging.Room", {
                     new sap.m.ObjectListItem ({        
                         title: "No rooms",
                         type: "Active",
-                        //number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
+                        //number: iomy.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
                         //numberUnit: "Devices",
                         attributes : [
                             new sap.m.ObjectAttribute ({
@@ -275,7 +275,7 @@ sap.ui.controller("pages.staging.Room", {
                             })
                         ],
                         press : function () {
-                            IomyRe.common.NavigationChangePage( "pRoomForm" , {} , false);
+                            iomy.common.NavigationChangePage( "pRoomForm" , {} , false);
                         }
                     })
                 );
@@ -290,7 +290,7 @@ sap.ui.controller("pages.staging.Room", {
                 new sap.m.ObjectListItem ({
                     title: "No rooms",
                     type: "Active",
-                    //number: IomyRe.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
+                    //number: iomy.functions.getNumberOfDevicesInRoom(mRoom.RoomId),
                     //numberUnit: "Devices",
                     attributes : [
                         new sap.m.ObjectAttribute ({

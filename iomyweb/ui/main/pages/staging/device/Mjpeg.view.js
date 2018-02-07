@@ -47,21 +47,21 @@ sap.ui.jsview("pages.staging.device.Mjpeg", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "MJPEG",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents : [
                 new sap.m.ScrollContainer ({
 					width: "100%",
 					height: "100%",
 					vertical : true,
 					content : [
-                        IomyRe.widgets.DeviceToolbar(oController, "Main Office Camera"),
-                        IomyRe.widgets.MJPEGCont(oController, {
+                        iomy.widgets.DeviceToolbar(oController, "Main Office Camera"),
+                        iomy.widgets.MJPEGCont(oController, {
                             densityAware : false,
 
                             error : function () {
                                 if (this.getSrc() !== "" && oApp.getCurrentPage().getId() === oView.getId()) {
-                                    IomyRe.common.showError("Ensure that the connection settings are correct and that the device is online.", "Stream Not Available");
+                                    iomy.common.showError("Ensure that the connection settings are correct and that the device is online.", "Stream Not Available");
                                 }
                             }
                         })

@@ -22,11 +22,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.validation",true);
+$.sap.declare("iomy.validation",true);
 
-IomyRe.validation = new sap.ui.base.Object();
+iomy.validation = new sap.ui.base.Object();
 
-$.extend(IomyRe.validation, {
+$.extend(iomy.validation, {
     
     /**
      * Checks a given date to see if it's valid. It accepts date strings.
@@ -138,7 +138,7 @@ $.extend(IomyRe.validation, {
                 }
 
                 if (bLambdaError === false) {
-                    iMaxDay = IomyRe.time.getMaximumDateInMonth(sYear, sMonth);
+                    iMaxDay = iomy.time.getMaximumDateInMonth(sYear, sMonth);
                     iDate = parseInt(sDay);
 
                     if (iDate < 1 || sDay > iMaxDay) {
@@ -335,7 +335,7 @@ $.extend(IomyRe.validation, {
      * Checks a given hub ID to see if it's valid. Three things it checks for
      * are first whether it's defined, if so, then checks whether it's a valid
      * number, and checks that the corresponding hub is found in
-     * IomyRe.common.HubList.
+     * iomy.common.HubList.
      * 
      * @param {type} iHubId        ID of a Hub to check.
      * @returns {map}              Map containg error status and any error messages
@@ -376,7 +376,7 @@ $.extend(IomyRe.validation, {
             //--------------------------------------------------------------------//
             if (bError === false) {
                 try {
-                    $.each(IomyRe.common.HubList, function (sHubID, mHub) {
+                    $.each(iomy.common.HubList, function (sHubID, mHub) {
 
                         if (mHub.HubId == iHubId) {
                             bIsValid = true;
@@ -547,7 +547,7 @@ $.extend(IomyRe.validation, {
      * Checks a given Link ID to see if it's valid. Three things it checks for
      * are first whether it's defined, if so, then checks whether it's a valid
      * number, and checks that the corresponding Link is found in
-     * IomyRe.common.LinkList.
+     * iomy.common.LinkList.
      * 
      * @param {type} iLinkId       ID of a Link to check.
      * @returns {map}              Map containg error status and any error messages
@@ -588,7 +588,7 @@ $.extend(IomyRe.validation, {
             //--------------------------------------------------------------------//
             if (bError === false) {
                 try {
-                    $.each(IomyRe.common.LinkList, function (sLinkID, oLink) {
+                    $.each(iomy.common.LinkList, function (sLinkID, oLink) {
 
                         if (oLink.LinkId == iLinkId) {
                             bIsValid = true;
@@ -764,7 +764,7 @@ $.extend(IomyRe.validation, {
     /**
      * Checks a given Premise ID to see if it's valid. Three things it checks for
      * are whether it's defined, if so, then checks whether it's a valid number,
-     * and checks that the corresponding Premise is found in IomyRe.common.PremisesList.
+     * and checks that the corresponding Premise is found in iomy.common.PremisesList.
      * 
      * @param {type} iPremiseId       ID of a Premise to check.
      * @returns {map}              Map containg error status and any error messages
@@ -805,7 +805,7 @@ $.extend(IomyRe.validation, {
             // variable.
             //--------------------------------------------------------------------//
             if (bError === false) {
-                $.each(IomyRe.common.PremiseList, function (sPremiseID, oPremise) {
+                $.each(iomy.common.PremiseList, function (sPremiseID, oPremise) {
 
                     //------------------------------------------------------------//
                     // Capture the room list in the currently held premise.
@@ -843,7 +843,7 @@ $.extend(IomyRe.validation, {
     /**
      * Checks a given Room ID to see if it's valid. Three things it checks for
      * are whether it's defined, if so, then checks whether it's a valid number,
-     * and checks that the corresponding Room is found in IomyRe.common.RoomsList.
+     * and checks that the corresponding Room is found in iomy.common.RoomsList.
      * 
      * @param {type} iRoomId       ID of a Room to check.
      * @returns {map}              Map containg error status and any error messages
@@ -884,7 +884,7 @@ $.extend(IomyRe.validation, {
         //--------------------------------------------------------------------//
         try {
             if (bError === false) {
-                $.each(IomyRe.common.RoomsList, function (sPremiseID, oPremise) {
+                $.each(iomy.common.RoomsList, function (sPremiseID, oPremise) {
 
                     //------------------------------------------------------------//
                     // Capture the room list in the currently held premise.
@@ -937,7 +937,7 @@ $.extend(IomyRe.validation, {
     /**
      * Checks a given Thing ID to see if it's valid. Three things it checks for
      * are whether it's defined, if so, then checks whether it's a valid number,
-     * and checks that the corresponding Thing is found in IomyRe.common.ThingList.
+     * and checks that the corresponding Thing is found in iomy.common.ThingList.
      * 
      * @param {type} iThingId       ID of a Thing to check.
      * @returns {map}               Map containg error status and any error messages
@@ -978,7 +978,7 @@ $.extend(IomyRe.validation, {
             // variable.
             //--------------------------------------------------------------------//
             if (bError === false) {
-                $.each(IomyRe.common.ThingList, function (sThingID, oThing) {
+                $.each(iomy.common.ThingList, function (sThingID, oThing) {
 
                     try {
                         if (oThing.Id == iThingId) {
@@ -1116,7 +1116,7 @@ $.extend(IomyRe.validation, {
         try {
             switch (sDeviceType) {
                 // Onvif Camera Device
-                case "linkType"+IomyRe.devices.onvif.LinkTypeId :
+                case "linkType"+iomy.devices.onvif.LinkTypeId :
                     fnCheckDisplayName();
                     fnCheckIPAddress();
                     fnCheckIPPort();
@@ -1124,7 +1124,7 @@ $.extend(IomyRe.validation, {
                     break;
 
                 // Philips Hue Bridge
-                case "linkType"+IomyRe.devices.philipshue.LinkTypeId :
+                case "linkType"+iomy.devices.philipshue.LinkTypeId :
                     fnCheckDisplayName();
                     fnCheckIPAddress();
                     fnCheckIPPort();
@@ -1138,7 +1138,7 @@ $.extend(IomyRe.validation, {
                     break;
 
                 // Open Weather Map
-                case "linkType"+IomyRe.devices.weatherfeed.LinkTypeId :
+                case "linkType"+iomy.devices.weatherfeed.LinkTypeId :
                     fnCheckDisplayName();
 
                     if (mData.StationCode === undefined || mData.StationCode === null ||
@@ -1156,7 +1156,7 @@ $.extend(IomyRe.validation, {
                     break;
 
                 // IP Webcam Stream
-                case "linkType"+IomyRe.devices.ipcamera.LinkTypeId :
+                case "linkType"+iomy.devices.ipcamera.LinkTypeId :
                     fnCheckIPAddress();
                     fnCheckIPPort();
 
@@ -1187,7 +1187,7 @@ $.extend(IomyRe.validation, {
                     break;
 
                 // Onvif Stream
-                case "thingType"+IomyRe.devices.onvif.ThingTypeId :
+                case "thingType"+iomy.devices.onvif.ThingTypeId :
                     if (mData.CameraName === undefined || mData.CameraName === null ||
                         mData.CameraName === "")
                     {

@@ -22,10 +22,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.devices",true);
-IomyRe.devices.weatherfeed = new sap.ui.base.Object();
+$.sap.declare("iomy.devices",true);
+iomy.devices.weatherfeed = new sap.ui.base.Object();
 
-$.extend(IomyRe.devices.weatherfeed,{
+$.extend(iomy.devices.weatherfeed,{
     
     LinkTypeId        : 8,
     ThingTypeId       : 14,
@@ -131,7 +131,7 @@ $.extend(IomyRe.devices.weatherfeed,{
         } catch (e) {
             // Something pretty funky happened for an exception to be thrown.
             sDirection = null;
-            $.sap.log.error("Error in IomyRe.devices.weatherfeed.getWindDirection ("+e.name+"):\n" + e.message);
+            $.sap.log.error("Error in iomy.devices.weatherfeed.getWindDirection ("+e.name+"):\n" + e.message);
         } finally {
             return sDirection;
         }
@@ -161,7 +161,7 @@ $.extend(IomyRe.devices.weatherfeed,{
         //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
-                mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                mThingIdInfo = iomy.validation.isThingIDValid(mSettings.thingID);
                 
                 if (!mThingIdInfo.bIsValid) {
                     throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
@@ -193,8 +193,8 @@ $.extend(IomyRe.devices.weatherfeed,{
         // Attempt to fetch weather data.
         //--------------------------------------------------------------------//
         try {
-            IomyRe.apiphp.AjaxRequest({
-                url : IomyRe.apiphp.APILocation("weather"),
+            iomy.apiphp.AjaxRequest({
+                url : iomy.apiphp.APILocation("weather"),
                 data: {
                     "Mode" : "FetchCurrentWeather",
                     "ThingId" : iThingId
@@ -212,8 +212,8 @@ $.extend(IomyRe.devices.weatherfeed,{
                             var dateSunset      = new Date(sunset.Value * 1000);
                             var humanReadable   = {
                                 WindDirection   : oModule.getWindDirection( parseFloat(windDirection.Value.toString()) ),
-                                SunriseTime     : IomyRe.functions.getTimestampString(dateSunrise, ""),
-                                SunsetTime      : IomyRe.functions.getTimestampString(dateSunset, "")
+                                SunriseTime     : iomy.functions.getTimestampString(dateSunrise, ""),
+                                SunsetTime      : iomy.functions.getTimestampString(dateSunset, "")
                             };
 
                             data.Data.HumanReadable = humanReadable;
@@ -234,10 +234,10 @@ $.extend(IomyRe.devices.weatherfeed,{
 
             });
         } catch (e) {
-            var sExMesg = "Error in IomyRe.devices.weatherfeed.FetchCurrentWeather ("+e.name+"):\n" + e.message;
+            var sExMesg = "Error in iomy.devices.weatherfeed.FetchCurrentWeather ("+e.name+"):\n" + e.message;
             $.sap.log.error(sExMesg);
             fnFail(sExMesg);
-//            e.message = "Error in IomyRe.devices.weatherfeed.FetchCurrentWeather ("+e.name+"):\n" + e.message;
+//            e.message = "Error in iomy.devices.weatherfeed.FetchCurrentWeather ("+e.name+"):\n" + e.message;
 //            $.sap.log.error(e.message);
 //            throw e;
         }

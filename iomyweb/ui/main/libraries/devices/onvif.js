@@ -22,10 +22,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.devices.onvif",true);
-IomyRe.devices.onvif = new sap.ui.base.Object();
+$.sap.declare("iomy.devices.onvif",true);
+iomy.devices.onvif = new sap.ui.base.Object();
 
-$.extend(IomyRe.devices.onvif,{
+$.extend(iomy.devices.onvif,{
     
     aProfiles               : [],
     sProfileLookupErrors    : [],
@@ -61,7 +61,7 @@ $.extend(IomyRe.devices.onvif,{
             //----------------------------------------------------------------//
             // REQUIRED: Find the hub ID
             //----------------------------------------------------------------//
-            mThingIdInfo    = IomyRe.validation.isThingIDValid(mSettings.ThingId);
+            mThingIdInfo    = iomy.validation.isThingIDValid(mSettings.ThingId);
             bError            = !mThingIdInfo.bIsValid;
             aErrorMessages    = mThingIdInfo.aErrorMessages;
             
@@ -106,7 +106,7 @@ $.extend(IomyRe.devices.onvif,{
         //--------------------------------------------------------------------//
         // Fetch the IO for the stream URL
         //--------------------------------------------------------------------//
-        mThing = IomyRe.common.ThingList["_"+iThingId];
+        mThing = iomy.common.ThingList["_"+iThingId];
         
         $.each(mThing.IO, function (sIndex, mIO) {
             
@@ -125,9 +125,9 @@ $.extend(IomyRe.devices.onvif,{
         //--------------------------------------------------------------------//
         // Run a request to fetch the URL
         //--------------------------------------------------------------------//
-        sUrl = IomyRe.apiodata.ODataLocation("datamedstring");
+        sUrl = iomy.apiodata.ODataLocation("datamedstring");
         
-        IomyRe.apiodata.AjaxRequest({
+        iomy.apiodata.AjaxRequest({
             Url                : sUrl,
             Columns            : ["CALCEDVALUE"],
             WhereClause        : ["IO_PK eq " + iIOId],
@@ -200,10 +200,10 @@ $.extend(IomyRe.devices.onvif,{
             //------------------------------------------------------------//
             // Call the API to collect the profiles from an Onvif server. //
             //------------------------------------------------------------//
-            var sUrl = IomyRe.apiphp.APILocation("onvif");
+            var sUrl = iomy.apiphp.APILocation("onvif");
             var sMode = "LookupProfiles";
 
-            IomyRe.apiphp.AjaxRequest({
+            iomy.apiphp.AjaxRequest({
                 url: sUrl,
                 data: {
                     "Mode" : sMode,
@@ -248,7 +248,7 @@ $.extend(IomyRe.devices.onvif,{
         
         if (mSettings !== undefined) {
             
-            mThingIdInfo = IomyRe.validation.isThingIDValid(mSettings.thingID)
+            mThingIdInfo = iomy.validation.isThingIDValid(mSettings.thingID)
             if (mThingIdInfo.bIsValid) {
                 iThingId = mSettings.thingID;
             } else {
@@ -299,8 +299,8 @@ $.extend(IomyRe.devices.onvif,{
         }
 
         try {
-            IomyRe.apiphp.AjaxRequest({
-                url : IomyRe.apiphp.APILocation("onvif"),
+            iomy.apiphp.AjaxRequest({
+                url : iomy.apiphp.APILocation("onvif"),
                 data : {
                     Mode : "PTZTimedMove",
                     ProfileName : sProfileName,
@@ -328,9 +328,9 @@ $.extend(IomyRe.devices.onvif,{
     
     showSnapshot : function (iThingId, oCallingButton, oPage) {
         var oRPopover = new sap.m.ResponsivePopover({
-            title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
+            title : iomy.common.ThingList["_"+iThingId].DisplayName,
             content : [
-                IomyRe.common.showLoading({
+                iomy.common.showLoading({
                     "show" : true,
                     "text" : "Fetching Snapshot...",
                     "context" : oPage
@@ -339,11 +339,11 @@ $.extend(IomyRe.devices.onvif,{
                 new sap.m.Image({
                     densityAware : false,
                     alt : "Failed to acquire snapshot",
-                    src : IomyRe.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+iThingId,
+                    src : iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+iThingId,
                     width: "100%",
                     
                     load : function () {
-                        IomyRe.common.showLoading({
+                        iomy.common.showLoading({
                             "show" : false,
                             "context" : oPage
                         });
@@ -352,7 +352,7 @@ $.extend(IomyRe.devices.onvif,{
                     error : function () {
                         this.destroy();
                         
-                        IomyRe.common.showLoading({
+                        iomy.common.showLoading({
                             "show" : false,
                             "context" : oPage
                         });
@@ -391,12 +391,12 @@ $.extend(IomyRe.devices.onvif,{
                 "Type":"Function", 
                 "Execute": function () {
                     try {
-                        IomyRe.devices.pingDevice({
+                        iomy.devices.pingDevice({
                             thingID     : mSettings.deviceData.DeviceId,
                             onComplete  : mSettings.onComplete
                         });
                     } catch (e) {
-                        $.sap.log.error("Failed to run IomyRe.devices.pingDevice() ("+e.name+"): " + e.message);
+                        $.sap.log.error("Failed to run iomy.devices.pingDevice() ("+e.name+"): " + e.message);
                         mSettings.onComplete("N/A");
                     }
                 }

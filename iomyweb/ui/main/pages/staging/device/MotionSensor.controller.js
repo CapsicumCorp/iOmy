@@ -36,11 +36,11 @@ sap.ui.controller("pages.staging.device.MotionSensor", {
 			onBeforeShow : function (oEvent) {
 				
 				//-- Defines the Screen Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 				
 				//-- Updates Paramaters & ID's on Load --//
                 oController.LoadCurrentData(oEvent.data.ThingId);
-                oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
+                oView.byId("ToolbarTitle").setText( iomy.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
 			}
 		});
 	},
@@ -49,7 +49,7 @@ sap.ui.controller("pages.staging.device.MotionSensor", {
         var oView = this.getView();
         
         try {
-            IomyRe.devices.motionsensor.FetchAllCurrentData({
+            iomy.devices.motionsensor.FetchAllCurrentData({
                 thingID : iThingId,
 
                 onSuccess : function (mData) {

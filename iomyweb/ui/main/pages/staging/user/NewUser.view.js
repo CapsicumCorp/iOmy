@@ -47,20 +47,20 @@ sap.ui.jsview("pages.staging.user.NewUser", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "User Settings",
-			header : IomyRe.widgets.getToolPageHeader(oController),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader(oController),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
 				new sap.uxap.ObjectPageLayout (oView.createId("ObjectPageLayout"), {
 					isObjectIconAlwaysVisible: true,
 					enableLazyLoading: true,
 					showTitleinHeaderContent: true,
 					sections : [
-						IomyRe.widgets.UserForm(oController, "Login", "LoginBlock", "LoginBlock_Form", true , "Login Details"),
-						IomyRe.widgets.UserForm(oController, "DBAuth", "DBAuthBlock", "DBAuthBlock_Form", true , "Database Authentication"),
-						IomyRe.widgets.UserForm(oController, "Info", "InfoBlock", "InfoBlock_Form", true , "Information"),
-						IomyRe.widgets.UserForm(oController, "Address", "AddrBlock", "AddrBlock_Form", true , "Address"),					
-						IomyRe.widgets.UserForm(oController, "Premise", "PremPermBlock", "PremPermBlock_Form", true , "Premise Permissions"),					
-						IomyRe.widgets.UserForm(oController, "Room", "RoomPermBlock", "RoomPermBlock_Form", true , "Room Permissions"),					
+						iomy.widgets.UserForm(oController, "Login", "LoginBlock", "LoginBlock_Form", true , "Login Details"),
+						iomy.widgets.UserForm(oController, "DBAuth", "DBAuthBlock", "DBAuthBlock_Form", true , "Database Authentication"),
+						iomy.widgets.UserForm(oController, "Info", "InfoBlock", "InfoBlock_Form", true , "Information"),
+						iomy.widgets.UserForm(oController, "Address", "AddrBlock", "AddrBlock_Form", true , "Address"),					
+						iomy.widgets.UserForm(oController, "Premise", "PremPermBlock", "PremPermBlock_Form", true , "Premise Permissions"),					
+						iomy.widgets.UserForm(oController, "Room", "RoomPermBlock", "RoomPermBlock_Form", true , "Room Permissions"),					
 					]
 					
 				}).addStyleClass("")

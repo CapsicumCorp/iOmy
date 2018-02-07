@@ -67,7 +67,7 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 							text: "Cancel",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
-								IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , false);
+								iomy.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , false);
 							}
 						}),
 						new sap.m.Button (oView.createId("ButtonDelete"), {

@@ -12,7 +12,7 @@ sap.ui.jsfragment("fragments.UserRoomPermissionDisplay", {
 			fields: [
 				new sap.m.Text ({
 					//text:"Read/Write"
-					text: "{ path:'RoomId', formatter:'IomyRe.common.LookupRoomPermissionFromId'}"
+					text: "{ path:'RoomId', formatter:'iomy.common.LookupRoomPermissionFromId'}"
 				})
 			]
 		});

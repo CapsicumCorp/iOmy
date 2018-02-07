@@ -21,10 +21,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.devices.philipshue",true);
-IomyRe.devices.philipshue = new sap.ui.base.Object();
+$.sap.declare("iomy.devices.philipshue",true);
+iomy.devices.philipshue = new sap.ui.base.Object();
 
-$.extend(IomyRe.devices.philipshue,{
+$.extend(iomy.devices.philipshue,{
     
     LinkTypeId        : 7,
     ThingTypeId       : 13,
@@ -50,7 +50,7 @@ $.extend(IomyRe.devices.philipshue,{
                 "Type":"Function", 
                 "Execute": function () {
                     try {
-                        IomyRe.devices.getHexOfLightColour({
+                        iomy.devices.getHexOfLightColour({
                             thingID     : mSettings.deviceData.DeviceId,
                             onSuccess   : mSettings.onSuccess,
                             onFail      : mSettings.onFail

@@ -66,10 +66,10 @@ sap.ui.jsview("pages.staging.graphs.BarGraph", {
     
         var oPage = new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Line Graph",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-				IomyRe.widgets.DeviceToolbar(oController, "Bar Graph"),
+				iomy.widgets.DeviceToolbar(oController, "Bar Graph"),
 				new sap.ui.core.HTML ({
                     content: "<div id=\"GraphPage_Main\" class=\"\" style=\"min-width: 350px;\" ></div><div id=\"GraphPage_Main_Info\" class=\"PadAll5px PadLeft0px\" ></div>"
                 }).addStyleClass("")

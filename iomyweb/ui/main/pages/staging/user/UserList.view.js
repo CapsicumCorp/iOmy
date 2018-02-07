@@ -71,7 +71,7 @@ sap.ui.jsview("pages.staging.user.UserList", {
 			type: "Transparent",
 			width: "100%",
 			press : function (oEvent) {
-				IomyRe.common.NavigationChangePage( "pUserForm" , {
+				iomy.common.NavigationChangePage( "pUserForm" , {
                     "userID" : oEvent.getSource().getBindingContext().getProperty("UserId"),
                     "bPageType": true
                 } , false);
@@ -80,8 +80,8 @@ sap.ui.jsview("pages.staging.user.UserList", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "User Settings",
-			header : IomyRe.widgets.getToolPageHeader(oController),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader(oController),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [
                 new sap.m.ScrollContainer ({
 					width: "100%",

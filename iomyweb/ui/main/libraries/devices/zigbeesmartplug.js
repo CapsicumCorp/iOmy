@@ -21,10 +21,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.devices.zigbeesmartplug",true);
-IomyRe.devices.zigbeesmartplug = new sap.ui.base.Object();
+$.sap.declare("iomy.devices.zigbeesmartplug",true);
+iomy.devices.zigbeesmartplug = new sap.ui.base.Object();
 
-$.extend(IomyRe.devices.zigbeesmartplug,{
+$.extend(iomy.devices.zigbeesmartplug,{
     
     CommTypeId : 3,                         // This SHOULD NOT change!
     LinkTypeId : 2,
@@ -57,7 +57,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         var oModule         = this;
         var bError          = false;
         var aErrorMessages  = [];
-        var sUrl            = IomyRe.apiphp.APILocation("hubtelnet");
+        var sUrl            = iomy.apiphp.APILocation("hubtelnet");
         var iCommId;
         var fnSuccess;
         var fnFail;
@@ -120,7 +120,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         //document.getElementById(oScope.createId(oModule.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollTop = document.getElementById(oScope.createId(oModule.uiIDs.sTelnetOutputTextAreaID+"-inner")).scrollHeight;
         
         try {
-            IomyRe.apiphp.AjaxRequest({
+            iomy.apiphp.AjaxRequest({
                 url : sUrl,
                 data : {"Mode" : "TurnOnZigbeeJoinMode", "CommId" : iCommId},
 
@@ -159,7 +159,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         var oModule         = this;
         var bError          = false;
         var aErrorMessages  = [];
-        var sUrl            = IomyRe.apiphp.APILocation("hubtelnet");
+        var sUrl            = iomy.apiphp.APILocation("hubtelnet");
         var iCommId;
         var fnSuccess;
         var fnFail;
@@ -216,7 +216,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         oModule.bRunningCommand = true;
         
         try {
-            IomyRe.apiphp.AjaxRequest({
+            iomy.apiphp.AjaxRequest({
                 url : sUrl,
                 data : {"Mode" : "GetRapidHAInfo", "CommId" : iCommId},
 
@@ -225,9 +225,9 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
 
                         fnSuccess(data);
 
-    //                    IomyRe.common.RefreshCoreVariables({
+    //                    iomy.common.RefreshCoreVariables({
     //                        onSuccess : function () {
-    //                            IomyRe.common.showMessage({
+    //                            iomy.common.showMessage({
     //                                text : "Join completed. Your devices should appear in 5 minutes.",
     //                                view : oScope.getView()
     //                            });
@@ -275,7 +275,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         //---------------------------------------------------------//
         // OData Parameters                                        //
         //---------------------------------------------------------//
-        var sUrl                = IomyRe.apiodata.ODataLocation("comms");
+        var sUrl                = iomy.apiodata.ODataLocation("comms");
         var aColumns            = [
             // Comm Information
             "COMM_PK","COMM_NAME","COMM_JOINMODE","COMM_ADDRESS",
@@ -289,7 +289,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
         // Start the Request                                       //
         //---------------------------------------------------------//
         try {
-            IomyRe.apiodata.AjaxRequest({
+            iomy.apiodata.AjaxRequest({
                 Url             : sUrl,
                 Columns         : aColumns,
                 WhereClause     : aFilter,
@@ -420,7 +420,7 @@ $.extend(IomyRe.devices.zigbeesmartplug,{
                 }
             }
         } catch (e) {
-            $.sap.log.error("Error in IomyRe.devices.zigbeesmartplug.PopulateTelnetLogArea() ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.devices.zigbeesmartplug.PopulateTelnetLogArea() ("+e.name+"): " + e.message);
         }
     },
     

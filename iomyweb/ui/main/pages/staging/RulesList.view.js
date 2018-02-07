@@ -68,7 +68,7 @@ sap.ui.jsview("pages.staging.RulesList", {
 			width: "100%",
             enabled : "{/ControlButtonsEnabled}",
 			press : function (oEvent) {
-				IomyRe.common.NavigationChangePage( "pRulesForm" , {
+				iomy.common.NavigationChangePage( "pRulesForm" , {
                     "RuleId" : oEvent.getSource().getBindingContext().getProperty("RuleId")
                 }, false);
 			}
@@ -76,8 +76,8 @@ sap.ui.jsview("pages.staging.RulesList", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Rules List",
-			header : IomyRe.widgets.getToolPageHeader(oController),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader(oController),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [
                 new sap.m.ScrollContainer ({
 					width: "100%",
@@ -95,7 +95,7 @@ sap.ui.jsview("pages.staging.RulesList", {
                                             type: sap.m.ButtonType.Accept,
                                             enabled : "{/ControlButtonsEnabled}",
                                             press : function () {
-                                                IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
+                                                iomy.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
                                             }
                                         }),
                                         new sap.m.Button(oView.createId("ButtonDiscard"), {

@@ -21,11 +21,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.telnet",true);
+$.sap.declare("iomy.telnet",true);
 
-IomyRe.telnet = new sap.ui.base.Object();
+iomy.telnet = new sap.ui.base.Object();
 
-$.extend(IomyRe.telnet,{
+$.extend(iomy.telnet,{
     
     bRunningCommand         : false,
     TelnetLog				: {},
@@ -61,7 +61,7 @@ $.extend(IomyRe.telnet,{
         //--------------------------------------------------------------------//
         // API Parameters.
         //--------------------------------------------------------------------//
-        var sUrl            = IomyRe.apiphp.APILocation("hubtelnet");
+        var sUrl            = iomy.apiphp.APILocation("hubtelnet");
         var iHubId;
         var sCommand;
         
@@ -128,7 +128,7 @@ $.extend(IomyRe.telnet,{
 		};
         
         try {
-            IomyRe.apiphp.AjaxRequest({
+            iomy.apiphp.AjaxRequest({
                 url : sUrl,
                 data : {"Mode" : "CustomTelnetCommand", "HubId" : iHubId, "CustomCommand" : sCommand},
 
@@ -143,7 +143,7 @@ $.extend(IomyRe.telnet,{
                                     var sOutput = "\n    " + data.Data.Custom.join("\n    ");
                                     req.logOutput(sOutput, false);
 
-                                    IomyRe.rules.loadRules({
+                                    iomy.rules.loadRules({
                                         hubID : iHubId
                                     });
 

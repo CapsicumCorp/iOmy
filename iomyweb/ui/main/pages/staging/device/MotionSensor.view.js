@@ -47,15 +47,15 @@ sap.ui.jsview("pages.staging.device.MotionSensor", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "MotionSensor",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents : [
 				new sap.m.ScrollContainer ({
 					width: "100%",
 					height: "100%",
 					vertical : true,
 					content : [
-                        IomyRe.widgets.DeviceToolbar(oController, "Motion Sensor"),
+                        iomy.widgets.DeviceToolbar(oController, "Motion Sensor"),
 						new sap.m.List({
 							items :[
 								//-- Status --//

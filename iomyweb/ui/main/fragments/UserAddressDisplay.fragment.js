@@ -17,7 +17,7 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "Language",
 					fields: [
 						new sap.m.Text ({
-							text: "{ path:'/UserInfo/LanguageId', formatter:'IomyRe.common.LookupLanguageNameFromLanguageId'}"
+							text: "{ path:'/UserInfo/LanguageId', formatter:'iomy.common.LookupLanguageNameFromLanguageId'}"
 						})
 					]
 				}),
@@ -65,7 +65,7 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "Country / Region",
 					fields: [
 						new sap.m.Text({
-							text: "{ path:'/UserInfo/RegionId', formatter:'IomyRe.common.LookupRegionNameFromRegionId'}"
+							text: "{ path:'/UserInfo/RegionId', formatter:'iomy.common.LookupRegionNameFromRegionId'}"
 						})
 					]
 				}),
@@ -73,7 +73,7 @@ sap.ui.jsfragment("fragments.UserAddressDisplay", {
 					label : "Timezone",
 					fields: [
 						new sap.m.Text ({
-							text: "{ path:'/UserInfo/TimezoneId', formatter:'IomyRe.common.LookupTimezoneNameFromTimezoneId'}"
+							text: "{ path:'/UserInfo/TimezoneId', formatter:'iomy.common.LookupTimezoneNameFromTimezoneId'}"
 						}),
 					]
 				}),

@@ -22,16 +22,16 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.help",true);
+$.sap.declare("iomy.help",true);
 
-IomyRe.help = new sap.ui.base.Object();
+iomy.help = new sap.ui.base.Object();
 
-$.extend(IomyRe.help,{
+$.extend(iomy.help,{
     
     /**
      * Map containing help information pertaining to each page. Information is
      * accessible using the ID of the page currently being viewed (example,
-     * IomyRe.help.PageInformation["pLogin"] = "This page logs you in.").
+     * iomy.help.PageInformation["pLogin"] = "This page logs you in.").
      * 
      * Initially declared as an empty object and populated in app.js as each UI5
      * activity is created.

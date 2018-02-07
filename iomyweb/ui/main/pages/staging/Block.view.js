@@ -47,8 +47,8 @@ sap.ui.jsview("pages.staging.Block", {
         
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
             title: "Home",
-            header : IomyRe.widgets.getToolPageHeader( oController ),
-            sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+            header : iomy.widgets.getToolPageHeader( oController ),
+            sideContent : iomy.widgets.getToolPageSideContent(oController),
             mainContents: [ 
                 new sap.m.ScrollContainer ({
                     width: "100%",
@@ -72,7 +72,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                                     text : "Devices",
                                                                     emphasized : true,
                                                                     press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pDevice" , {} , false);
+                                                                        iomy.common.NavigationChangePage( "pDevice" , {} , false);
                                                                     }
                                                                 }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
                                                             ]
@@ -88,7 +88,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                                     text : "Premise",
                                                                     emphasized : true,
                                                                     press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pPremise" , {} , false);
+                                                                        iomy.common.NavigationChangePage( "pPremise" , {} , false);
                                                                     }
                                                                 }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
                                                             ]
@@ -109,7 +109,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                                     text : "Rooms",
                                                                     emphasized : true,
                                                                     press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , false);
+                                                                        iomy.common.NavigationChangePage( "pRoomList" , {bEditing: false} , false);
                                                                     }
                                                                 }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
                                                             ]
@@ -125,7 +125,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                                     text : "Users",
                                                                     emphasized : true,
                                                                     press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+                                                                        iomy.common.NavigationChangePage( "pUserList" , {} , false);
                                                                     }
                                                                 }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
                                                             ]
@@ -146,7 +146,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                                     text : "Rules",
                                                                     emphasized : true,
                                                                     press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pRulesList" , {} , false);
+                                                                        iomy.common.NavigationChangePage( "pRulesList" , {} , false);
                                                                     }
                                                                 }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
                                                             ]
@@ -162,7 +162,7 @@ sap.ui.jsview("pages.staging.Block", {
                                                                     text : "Advanced",
                                                                     emphasized : true,
                                                                     press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pTelnet" , {} , false);
+                                                                        iomy.common.NavigationChangePage( "pTelnet" , {} , false);
                                                                     }
                                                                 }).addStyleClass("Pointer sapMTitle sapMTitleStyleH1 sapMLnk"),
                                                             ]

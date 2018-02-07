@@ -46,7 +46,7 @@ sap.ui.jsfragment("fragments.IOTileMenu", {
 		//-------------------------------------------------------------//
 		//-- 3.0 - GET IO TYPE ENUMERATION AND ENABLE CERTAIN GRAPHS --//
 		//-------------------------------------------------------------//
-		var iIOTypeEnum = IomyRe.common.ThingList["_"+oController.iCurrentThing].IO["_"+oController.iSelectedIOId].DataTypeEnum;
+		var iIOTypeEnum = iomy.common.ThingList["_"+oController.iCurrentThing].IO["_"+oController.iSelectedIOId].DataTypeEnum;
 		var bLineGraphEnabled	= iIOTypeEnum === 0;
 		var bBarGraphEnabled	= iIOTypeEnum === 2;
 		
@@ -63,15 +63,15 @@ sap.ui.jsfragment("fragments.IOTileMenu", {
 				if (oController.bDrawGraph) {
 					// If the line graph option was selected, draw one
 					if (iSelectedIndex === 2) {
-						IomyRe.common.NavigationChangePage("pGraphLine", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing, "TimePeriod" : oController.sSelectedTimePeriod });
+						iomy.common.NavigationChangePage("pGraphLine", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing, "TimePeriod" : oController.sSelectedTimePeriod });
 						
 					// If the bar graph option was selected, draw one
 					} else if (iSelectedIndex === 3) {
-						IomyRe.common.NavigationChangePage("pGraphBar", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing, "TimePeriod" : oController.sSelectedTimePeriod });
+						iomy.common.NavigationChangePage("pGraphBar", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing, "TimePeriod" : oController.sSelectedTimePeriod });
 						
 					// If the pie graph option was selected, draw one
 					} else if (iSelectedIndex === 4) {
-						IomyRe.common.NavigationChangePage("pGraphPie", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
+						iomy.common.NavigationChangePage("pGraphPie", { "IO_ID" : oController.iSelectedIOId, "ThingId" : oController.iCurrentThing });
 						
 					}
 				}

@@ -22,7 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.require("IomyRe.graph_jqplot");
+$.sap.require("iomy.graph_jqplot");
 
 sap.ui.controller("pages.staging.device.IOTiles", {
 	
@@ -37,7 +37,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 	dUIThingLastUpdate:     null,			//-- DATE:			Stores the last time the page had the individual Thing updated.			--//
 	iCurrentThingState:		0,				//-- INTEGER:		--//
 	iSelectedIOId:			0,
-	sSelectedTimePeriod:	IomyRe.graph_jqplot.PeriodDay,
+	sSelectedTimePeriod:	iomy.graph_jqplot.PeriodDay,
 	
 	bAnalyticsTabSelected:			false,
 	bPeriodTabSelected:				false,
@@ -63,10 +63,10 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 				//----------------------------------------------------//
 				
 				//-- Refresh the Navigational buttons --//
-				//-- IomyRe.common.NavigationRefreshButtons( me ); --//
+				//-- iomy.common.NavigationRefreshButtons( me ); --//
 				
 				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 				
 				//------------------------------------------------------------//
 				//-- 2.1 - INITIALISE ONBEFORESHOW VARIABLES                --//
@@ -90,7 +90,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 							
-						} else if( oController.dLastThingListUpdate!==IomyRe.common.ThingListLastUpdate ) {
+						} else if( oController.dLastThingListUpdate!==iomy.common.ThingListLastUpdate ) {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 							
@@ -98,19 +98,19 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 						
-						} else if( oController.dUIThingLastUpdate!==IomyRe.common.ThingList['_'+oEvent.data.ThingId].UILastUpdate ) {
+						} else if( oController.dUIThingLastUpdate!==iomy.common.ThingList['_'+oEvent.data.ThingId].UILastUpdate ) {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 							
-						} else if( oController.iCurrentThingState!==IomyRe.common.ThingList['_'+oEvent.data.ThingId].Status ) {
+						} else if( oController.iCurrentThingState!==iomy.common.ThingList['_'+oEvent.data.ThingId].Status ) {
 							//-- Set redraw to true --//
 							bRedrawPageNeeded = true;
 							
 						} else {
                             //-- Check to see if the item/device name has been changed. --//
-                            if (IomyRe.common.bItemNameChangedMustRefresh === true) {
+                            if (iomy.common.bItemNameChangedMustRefresh === true) {
                                 //-- Reset the refresh flag --//
-                                IomyRe.common.bItemNameChangedMustRefresh = false;
+                                iomy.common.bItemNameChangedMustRefresh = false;
                                 //-- Set redraw to true --//
                                 bRedrawPageNeeded = true;
                             }
@@ -127,25 +127,25 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 				//------------------------------------------------------------//
 				if( bRedrawPageNeeded===true ) {
 					try {
-						//console.log(JSON.stringify(IomyRe.common.ThingList['_'+oEvent.data.ThingId]));
+						//console.log(JSON.stringify(iomy.common.ThingList['_'+oEvent.data.ThingId]));
 						//----------------------------------------------------------------------------//
 						//-- 2.4.1 - IF THE DEVICE IS ACCESSIBLE                                    --//
 						//----------------------------------------------------------------------------//
-						if( !!IomyRe.common.ThingList['_'+oEvent.data.ThingId] ) {
+						if( !!iomy.common.ThingList['_'+oEvent.data.ThingId] ) {
                             //----------------------------------------------------------------------------//
                             //-- 2.4.1.1 - Set the title if it hasn't already been created              --//
                             //----------------------------------------------------------------------------//
 //                            if (oController.byId("NavSubHead_Title") !== undefined) {
-//                                oController.byId("NavSubHead_Title").setText(IomyRe.common.ThingList['_'+oEvent.data.ThingId].DisplayName.toUpperCase());
+//                                oController.byId("NavSubHead_Title").setText(iomy.common.ThingList['_'+oEvent.data.ThingId].DisplayName.toUpperCase());
 //                            }
 
 							//----------------------------------------------------------------------------//
 							//-- 2.4.1.2 - Store the Current Event Variables and Set The Page Title     --//
 							//----------------------------------------------------------------------------//
-							oController.iCurrentThing = IomyRe.common.ThingList['_'+oEvent.data.ThingId].Id;
-							oController.sCurrentThingName = IomyRe.common.ThingList['_'+oEvent.data.ThingId].DisplayName;
+							oController.iCurrentThing = iomy.common.ThingList['_'+oEvent.data.ThingId].Id;
+							oController.sCurrentThingName = iomy.common.ThingList['_'+oEvent.data.ThingId].DisplayName;
 							
-							oController.iCurrentThingState = IomyRe.common.ThingList['_'+oEvent.data.ThingId].Status;
+							oController.iCurrentThingState = iomy.common.ThingList['_'+oEvent.data.ThingId].Status;
                             
                             oView.byId("ToolbarTitle").setText( oController.sCurrentThingName );
 							
@@ -176,8 +176,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 						//----------------------------------------------------------------------------//
 						//-- 2.4.2 - UPDATE WHEN THE DEVICE LIST WAS LAST UPDATE                    --//
 						//----------------------------------------------------------------------------//
-						oController.dLastThingListUpdate = IomyRe.common.ThingListLastUpdate;
-						oController.dUIThingLastUpdate   = IomyRe.common.ThingList['_'+oEvent.data.ThingId].UILastUpdate;
+						oController.dLastThingListUpdate = iomy.common.ThingListLastUpdate;
+						oController.dUIThingLastUpdate   = iomy.common.ThingList['_'+oEvent.data.ThingId].UILastUpdate;
 						
 					} catch( e1000 ) {
 						jQuery.sap.log.error("Device Data Page - Critical Error Occurred! "+e1000.message);
@@ -211,7 +211,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 		//----------------------------------------------------------------//
 		//-- 2.0 - FETCH THE "THING" DATA                               --//
 		//----------------------------------------------------------------//
-		aIOList = IomyRe.common.ThingList['_'+oController.iCurrentThing].IO;
+		aIOList = iomy.common.ThingList['_'+oController.iCurrentThing].IO;
 		
 		
 		//----------------------------------------------------------------//
@@ -219,13 +219,13 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 		//----------------------------------------------------------------//
 		try {
 			//-- If the User has "Toggle" Permission --//
-			if( IomyRe.common.ThingList['_'+oController.iCurrentThing].PermToggle===1 ) {
+			if( iomy.common.ThingList['_'+oController.iCurrentThing].PermToggle===1 ) {
 				//------------------------------------//
 				//-- SET TILE VALUE                 --//
 				//------------------------------------//
 				
 				//-- IF it is on --//
-				if( IomyRe.common.ThingList['_'+oController.iCurrentThing].Status===1 ) {
+				if( iomy.common.ThingList['_'+oController.iCurrentThing].Status===1 ) {
 					sTemp = "On";
 					
 				//-- ELSE assume that it is off --//
@@ -240,9 +240,9 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 					"Type":         "ThingStateToggle",
 					"Data":         {
 						"ThingId":          oController.iCurrentThing,
-						"ThingName":        IomyRe.common.ThingList['_'+oController.iCurrentThing].DisplayName,
+						"ThingName":        iomy.common.ThingList['_'+oController.iCurrentThing].DisplayName,
 						"CurrentVals": {
-							"iValue":       IomyRe.common.ThingList['_'+oController.iCurrentThing].Status,
+							"iValue":       iomy.common.ThingList['_'+oController.iCurrentThing].Status,
 							"sValue":       sTemp
 						}
 					},
@@ -267,7 +267,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 				//--  --//
 				//------------------------------------------------------------//
 				iIOId           = aIOData.Id;
-				sIOName         = IomyRe.common.ThingList['_'+oController.iCurrentThing].IO['_'+iIOId].Name;
+				sIOName         = iomy.common.ThingList['_'+oController.iCurrentThing].IO['_'+iIOId].Name;
 				//------------------------------------------------------------//
 				//-- IF IO DATA IS NOT AN ENUMERATION                       --//
 				//------------------------------------------------------------//
@@ -286,7 +286,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							"Data":		{
 								"ThingId":				oController.iCurrentThing,
 								"IOId":				iIOId,
-								"IOName":			IomyRe.common.ThingList['_'+oController.iCurrentThing].IO['_'+iIOId].Name,
+								"IOName":			iomy.common.ThingList['_'+oController.iCurrentThing].IO['_'+iIOId].Name,
 								"APIData": {
 									"Type":				"TotalableNormal"
 								},
@@ -663,8 +663,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 			oTile.setState("Loading");
 			
 			
-			IomyRe.apiphp.AjaxRequest({
-				url: IomyRe.apiphp.APILocation("statechange"),
+			iomy.apiphp.AjaxRequest({
+				url: iomy.apiphp.APILocation("statechange"),
 				type: "POST",
 				data: { 
 					"Mode":   "ThingToggleStatus", 
@@ -684,8 +684,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 						//------------------------------------//
 						//-- Update the Global variables    --//
 						//------------------------------------//
-						IomyRe.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
-						IomyRe.common.ThingList["_"+iThingId].UILastUpdate = new Date();
+						iomy.common.ThingList["_"+iThingId].Status = aAjaxData.ThingStatus;
+						iomy.common.ThingList["_"+iThingId].UILastUpdate = new Date();
 						
 						//------------------------------------//
 						//-- Generate the new Label         --//
@@ -714,7 +714,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 					
 				},
 				onFail : function(response) {
-					IomyRe.common.showError(response.message, "Error Changing Device Status");
+					iomy.common.showError(response.message, "Error Changing Device Status");
 				},
 			});
 		
@@ -750,7 +750,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 				//--------------------------------------------------------//
 				//-- SETUP THE IO NAME                                  --//
 				//--------------------------------------------------------//
-				sIOName         = IomyRe.common.ThingList['_'+iThingId].IO['_'+iIOId].Name;
+				sIOName         = iomy.common.ThingList['_'+iThingId].IO['_'+iIOId].Name;
 				sFragmentName   = "FragTileIO-"+iIOId+"";
 				
 				
@@ -849,7 +849,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							"editable": true,
 							"select": function( oControlEvent ) {
 								oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "CurV" );
-								oController.sSelectedTimePeriod = IomyRe.graph_jqplot.PeriodDay;
+								oController.sSelectedTimePeriod = iomy.graph_jqplot.PeriodDay;
 							}
 						});
 						oTempElement.addButton(oTempRadioButton);
@@ -866,7 +866,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							"editable": true,
 							"select":   function( oControlEvent ) {
 								oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Day" );
-								oController.sSelectedTimePeriod = IomyRe.graph_jqplot.PeriodDay;
+								oController.sSelectedTimePeriod = iomy.graph_jqplot.PeriodDay;
 							}
 						});
 						oTempElement.addButton(oTempRadioButton);
@@ -878,7 +878,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							"editable": true,
 							"select":   function( oControlEvent ) {
 								oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Week" );
-								oController.sSelectedTimePeriod = IomyRe.graph_jqplot.PeriodWeek;
+								oController.sSelectedTimePeriod = iomy.graph_jqplot.PeriodWeek;
 							}
 						});
 						oTempElement.addButton(oTempRadioButton);
@@ -890,7 +890,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							"editable": true,
 							"select":   function( oControlEvent ) {
 								oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Fortnight" );
-								oController.sSelectedTimePeriod = IomyRe.graph_jqplot.PeriodFortnight;
+								oController.sSelectedTimePeriod = iomy.graph_jqplot.PeriodFortnight;
 							}
 						});
 						oTempElement.addButton(oTempRadioButton);
@@ -902,7 +902,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							"editable": true,
 							"select":   function( oControlEvent ) {
 								oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Month" );
-								oController.sSelectedTimePeriod = IomyRe.graph_jqplot.PeriodMonth;
+								oController.sSelectedTimePeriod = iomy.graph_jqplot.PeriodMonth;
 							}
 						});
 						oTempElement.addButton(oTempRadioButton);
@@ -914,7 +914,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							"editable": true,
 							"select":   function( oControlEvent ) {
 								oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Quarter" );
-								oController.sSelectedTimePeriod = IomyRe.graph_jqplot.PeriodQuarter;
+								oController.sSelectedTimePeriod = iomy.graph_jqplot.PeriodQuarter;
 							}
 						});
 						oTempElement.addButton(oTempRadioButton);
@@ -926,7 +926,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							"editable": true,
 							"select":   function( oControlEvent ) {
 								oController.IOTileMenuRButtonOnSelect( oControlEvent, iArrayId, "TimeRB", "Year" );
-								oController.sSelectedTimePeriod = IomyRe.graph_jqplot.PeriodYear;
+								oController.sSelectedTimePeriod = iomy.graph_jqplot.PeriodYear;
 							}
 						});
 						oTempElement.addButton(oTempRadioButton);
@@ -1426,17 +1426,17 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 			//-- API PREP	--//
 			iThingId                = oController.aTiles[iArrayId].Data.ThingId;
 			iIOId                   = oController.aTiles[iArrayId].Data.IOId;
-			aDataThing              = IomyRe.common.ThingList['_'+iThingId];
-			aDataIO                 = IomyRe.common.ThingList['_'+iThingId].IO['_'+iIOId];
+			aDataThing              = iomy.common.ThingList['_'+iThingId];
+			aDataIO                 = iomy.common.ThingList['_'+iThingId].IO['_'+iIOId];
 			
 			
 			//----------------------------------------------------------------//
 			//-- 3.0 - SETUP VARIABLES                                      --//
 			//----------------------------------------------------------------//
-			iEndStamp               = IomyRe.time.GetCurrentUTS();
+			iEndStamp               = iomy.time.GetCurrentUTS();
 			
 			if( sTimeRBValue==="Day" || sTimeRBValue==="Week" || sTimeRBValue==="Fortnight" || sTimeRBValue==="Month" || sTimeRBValue==="Quarter" || sTimeRBValue==="Year" ) {
-				iStartStamp         = IomyRe.time.GetStartStampForTimePeriod( sTimeRBValue, iEndStamp );
+				iStartStamp         = iomy.time.GetStartStampForTimePeriod( sTimeRBValue, iEndStamp );
 				
 			} else if( sTimeRBValue==="Custom" ) {
 				
@@ -1471,15 +1471,15 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 						oTile.setState("Loading");
 						
 						
-						IomyRe.apiphp.AjaxRequest({
-							"url": IomyRe.apiphp.APILocation("mostrecent"),
+						iomy.apiphp.AjaxRequest({
+							"url": iomy.apiphp.APILocation("mostrecent"),
 							"data": {
 								"Mode":     "MostRecentTwoValues",
 								"Id":       iIOId
 							},
 							"onSuccess": function ( sResponseType, aData ) {
 								try {
-									iSampleRateLimit = IomyRe.common.ThingList["_"+oController.iCurrentThing].IO["_"+iIOId].SamplerateLimit;
+									iSampleRateLimit = iomy.common.ThingList["_"+oController.iCurrentThing].IO["_"+iIOId].SamplerateLimit;
 									
 									if( aData!==undefined && aData!==null  ) {
 										if( typeof aData['Error']==="undefined" ) {
@@ -1537,7 +1537,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 								oTile.setState("Loaded");
 							},
 							"onFail" : function (response) {
-								IomyRe.common.showError("There was an error retriving the value of IO "+iIOId);
+								iomy.common.showError("There was an error retriving the value of IO "+iIOId);
 								
 								//-- Recursively check for more Tasks --//
 								oController.RecursiveLoadAjaxData();
@@ -1550,8 +1550,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 					} else if( sFilterRBValue==="MinV" ) {
 						oTile.setState("Loading");
 						
-						IomyRe.apiphp.AjaxRequest({
-							"url":              IomyRe.apiphp.APILocation( "aggregation" ),
+						iomy.apiphp.AjaxRequest({
+							"url":              iomy.apiphp.APILocation( "aggregation" ),
 							"data": {
 								"Id":           iIOId,
 								"Mode":         "Min",
@@ -1593,8 +1593,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 					} else if( sFilterRBValue==="MaxV" ) {
 						oTile.setState("Loading");
 						
-						IomyRe.apiphp.AjaxRequest({
-							"url":              IomyRe.apiphp.APILocation( "aggregation" ),
+						iomy.apiphp.AjaxRequest({
+							"url":              iomy.apiphp.APILocation( "aggregation" ),
 							"data":	{
 								"Id":           iIOId,
 								"Mode":         "Max",
@@ -1635,8 +1635,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 					} else if( sFilterRBValue==="AvgV" ) {
 						oTile.setState("Loading");
 						
-						IomyRe.apiphp.AjaxRequest({
-							"url":				IomyRe.apiphp.APILocation( "aggregation" ),
+						iomy.apiphp.AjaxRequest({
+							"url":				iomy.apiphp.APILocation( "aggregation" ),
 							"data":	{
 								"Id":			iIOId,
 								"Mode":			"Count",
@@ -1645,8 +1645,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 							},
 							"onSuccess": function ( sResponseType, aCountData ) {
 								
-								IomyRe.apiphp.AjaxRequest({
-									"url":				IomyRe.apiphp.APILocation( "aggregation" ),
+								iomy.apiphp.AjaxRequest({
+									"url":				iomy.apiphp.APILocation( "aggregation" ),
 									"data":	{
 										"Id":			iIOId,
 										"Mode":			"Sum",
@@ -1712,8 +1712,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 					if( sFilterRBValue==="TotV" ) {
 						oTile.setState("Loading");
 						
-						IomyRe.apiphp.AjaxRequest({
-							"url":				IomyRe.apiphp.APILocation( "aggregation" ),
+						iomy.apiphp.AjaxRequest({
+							"url":				iomy.apiphp.APILocation( "aggregation" ),
 							"data":	{
 								"Id":			iIOId,
 								"Mode":			"Sum",
@@ -1769,7 +1769,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 						
 						oTile.setState("Loading");
 						
-						IomyRe.apiodata.AjaxRequest({
+						iomy.apiodata.AjaxRequest({
 							"Url":				sAPIUrl,
 							"Limit":			2,
 							"Columns":			[
@@ -1855,8 +1855,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 					} else if( sFilterRBValue==="TotSpecV" ) {
 						oTile.setState("Loading");
 						
-						IomyRe.apiphp.AjaxRequest({
-							"url":				IomyRe.apiphp.APILocation( "aggregation" ),
+						iomy.apiphp.AjaxRequest({
+							"url":				iomy.apiphp.APILocation( "aggregation" ),
 							"data":	{
 								"Id":			iIOId,
 								"Mode":			"Max",
@@ -1864,8 +1864,8 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 								"EndUTS":		iEndStamp
 							},
 							"onSuccess": function ( sResponseType, aMaxData ) {
-								IomyRe.apiphp.AjaxRequest({
-									"url":				IomyRe.apiphp.APILocation( "aggregation" ),
+								iomy.apiphp.AjaxRequest({
+									"url":				iomy.apiphp.APILocation( "aggregation" ),
 									"data":	{
 										"Id":			iIOId,
 										"Mode":			"Min",
@@ -2005,31 +2005,31 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 		//----------------------------------------------------------------//
 		switch( iDataType ) {
 			case 1:
-				sAPIUrl		= IomyRe.apiodata.ODataLocation( 'datatinyint' );
+				sAPIUrl		= iomy.apiodata.ODataLocation( 'datatinyint' );
 				break;
 				
 			case 2:
-				sAPIUrl		= IomyRe.apiodata.ODataLocation( 'dataint' );
+				sAPIUrl		= iomy.apiodata.ODataLocation( 'dataint' );
 				break;
 				
 			case 3:
-				sAPIUrl		= IomyRe.apiodata.ODataLocation( 'databigint' );
+				sAPIUrl		= iomy.apiodata.ODataLocation( 'databigint' );
 				break;
 				
 			case 4:
-				sAPIUrl		= IomyRe.apiodata.ODataLocation( 'datafloat' );
+				sAPIUrl		= iomy.apiodata.ODataLocation( 'datafloat' );
 				break;
 				
 			case 5:
-				sAPIUrl		= IomyRe.apiodata.ODataLocation( 'datatinystring' );
+				sAPIUrl		= iomy.apiodata.ODataLocation( 'datatinystring' );
 				break;
 				
 			case 6:
-				sAPIUrl		= IomyRe.apiodata.ODataLocation( 'datashortstring' );
+				sAPIUrl		= iomy.apiodata.ODataLocation( 'datashortstring' );
 				break;
 				
 			case 7:
-				sAPIUrl		= IomyRe.apiodata.ODataLocation( 'datamedstring' );
+				sAPIUrl		= iomy.apiodata.ODataLocation( 'datamedstring' );
 				break;
 				
 			default:

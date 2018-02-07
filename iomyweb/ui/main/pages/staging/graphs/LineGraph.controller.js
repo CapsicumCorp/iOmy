@@ -23,7 +23,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.require("IomyRe.graph_jqplot");
+$.sap.require("iomy.graph_jqplot");
 
 sap.ui.controller("pages.staging.graphs.LineGraph", {
 	
@@ -94,25 +94,25 @@ sap.ui.controller("pages.staging.graphs.LineGraph", {
 		var oView			= this.getView();
 		var iStartUTS		= iEndUTS;
 		
-		if (sPeriodType === IomyRe.graph_jqplot.PeriodDay) {
+		if (sPeriodType === iomy.graph_jqplot.PeriodDay) {
 			iStartUTS = iEndUTS - 86400;
-		} else if (sPeriodType === IomyRe.graph_jqplot.PeriodWeek) {
+		} else if (sPeriodType === iomy.graph_jqplot.PeriodWeek) {
 			iStartUTS = iEndUTS - (86400 * 7);
-		} else if (sPeriodType === IomyRe.graph_jqplot.PeriodFortnight) {
+		} else if (sPeriodType === iomy.graph_jqplot.PeriodFortnight) {
 			iStartUTS = iEndUTS - (86400 * 14);
-		} else if (sPeriodType === IomyRe.graph_jqplot.PeriodMonth) {
+		} else if (sPeriodType === iomy.graph_jqplot.PeriodMonth) {
 			iStartUTS = iEndUTS - (86400 * 31);
-		} else if (sPeriodType === IomyRe.graph_jqplot.PeriodQuarter) {
+		} else if (sPeriodType === iomy.graph_jqplot.PeriodQuarter) {
 			iStartUTS = iEndUTS - (86400 * 91);
-		} else if (sPeriodType === IomyRe.graph_jqplot.PeriodYear) {
+		} else if (sPeriodType === iomy.graph_jqplot.PeriodYear) {
 			iStartUTS = iEndUTS - (86400 * 365);
 		}
 		
 		//============================================================================================//
 		//--  2.1 - LINE GRAPH API DATA                                                             ==//
 		//============================================================================================//
-		IomyRe.apiphp.AjaxRequest({
-			url:       IomyRe.apiphp.APILocation("graph"),
+		iomy.apiphp.AjaxRequest({
+			url:       iomy.apiphp.APILocation("graph"),
 			data:      {
 				"Mode": "GraphLine",
 				"Data": "{\"Type\":\"Normal\",\"IOId\":"+oController.iIOId+"}",
@@ -135,12 +135,12 @@ sap.ui.controller("pages.staging.graphs.LineGraph", {
                             //----------------------------//
                             //-- GRAPH                  --//
                             //----------------------------//
-                            var sDeviceName		= IomyRe.common.ThingList["_"+oController.iThingId].DisplayName;
-                            var sIOName			= IomyRe.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].Name;
-                            var sUOM			= IomyRe.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].UoMName;
+                            var sDeviceName		= iomy.common.ThingList["_"+oController.iThingId].DisplayName;
+                            var sIOName			= iomy.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].Name;
+                            var sUOM			= iomy.common.ThingList["_"+oController.iThingId].IO["_"+oController.iIOId].UoMName;
 
                             try {
-                                IomyRe.graph_jqplot.CreateLineGraph(
+                                iomy.graph_jqplot.CreateLineGraph(
                                     oController,
                                     'LineGraphPage_Main',
                                     [

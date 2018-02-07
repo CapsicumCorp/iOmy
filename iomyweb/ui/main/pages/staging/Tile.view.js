@@ -47,10 +47,10 @@ sap.ui.jsview("pages.staging.Tile", {
 		
 		return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Device Tile View",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-			IomyRe.widgets.DeviceToolbar(oController, "Tile View"),
+			iomy.widgets.DeviceToolbar(oController, "Tile View"),
 				new sap.ui.layout.HorizontalLayout ({
 					allowWrapping : true,
 					content: [
@@ -142,7 +142,7 @@ sap.ui.jsview("pages.staging.Tile", {
 						new sap.m.Button ({
 							text: "Help",
 							press : function () {
-								IomyRe.common.NavigationChangePage( "pJobSearch", {} , false);
+								iomy.common.NavigationChangePage( "pJobSearch", {} , false);
 							}
 						}),
 

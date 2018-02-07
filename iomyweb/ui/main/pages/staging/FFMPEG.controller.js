@@ -44,7 +44,7 @@ sap.ui.controller("pages.staging.FFMPEG", {
 				//-- IOMy.common.NavigationRefreshButtons( oController ); --//
 				
 				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
 		});
 			

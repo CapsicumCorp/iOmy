@@ -86,7 +86,7 @@ sap.ui.jsfragment("fragments.AddRoomPermission", {
 							text: "Cancel",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
-								IomyRe.common.NavigationChangePage( "pBlock" ,  {} , false);
+								iomy.common.NavigationChangePage( "pBlock" ,  {} , false);
 							}
 						}),
 					]

@@ -22,10 +22,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.devices.ipcamera",true);
-IomyRe.devices.ipcamera = new sap.ui.base.Object();
+$.sap.declare("iomy.devices.ipcamera",true);
+iomy.devices.ipcamera = new sap.ui.base.Object();
 
-$.extend(IomyRe.devices.ipcamera,{
+$.extend(iomy.devices.ipcamera,{
     
     RSNetworkAddress : 3960,
     RSNetworkPort    : 3961,
@@ -83,7 +83,7 @@ $.extend(IomyRe.devices.ipcamera,{
             //----------------------------------------------------------------//
             // REQUIRED: Find the hub ID
             //----------------------------------------------------------------//
-            mThingIdInfo    = IomyRe.validation.isThingIDValid(mSettings.thingID);
+            mThingIdInfo    = iomy.validation.isThingIDValid(mSettings.thingID);
             bError          = !mThingIdInfo.bIsValid;
             aErrorMessages  = mThingIdInfo.aErrorMessages;
             
@@ -136,7 +136,7 @@ $.extend(IomyRe.devices.ipcamera,{
         
         try {
             //-- Put the hub ID into the data. --//
-            mData.hubID = IomyRe.functions.getHubConnectedToThing(iThingId).HubId;
+            mData.hubID = iomy.functions.getHubConnectedToThing(iThingId).HubId;
 
             var oAjaxRequestQueue = new AjaxRequestQueue({
                 executeNow              : false,
@@ -162,7 +162,7 @@ $.extend(IomyRe.devices.ipcamera,{
             //--------------------------------------------------------------------//
             // Fetch the IO for the stream URL
             //--------------------------------------------------------------------//
-            mThing = IomyRe.common.ThingList["_"+iThingId];
+            mThing = iomy.common.ThingList["_"+iThingId];
 
             $.each(mThing.IO, function (sIndex, mIO) {
                 //----------------------------------------------------------------//
@@ -204,7 +204,7 @@ $.extend(IomyRe.devices.ipcamera,{
             //--------------------------------------------------------------------//
             // Prepare the requests.
             //--------------------------------------------------------------------//
-            sUrl = IomyRe.apiodata.ODataLocation("datashortstring");
+            sUrl = iomy.apiodata.ODataLocation("datashortstring");
 
             aConfigs = [
                 {
@@ -304,7 +304,7 @@ $.extend(IomyRe.devices.ipcamera,{
             // REQUIRED: Valid Thing ID
             //----------------------------------------------------------------//
             if (mSettings.thingID !== undefined) {
-                mThingIDInfo = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                mThingIDInfo = iomy.validation.isThingIDValid(mSettings.thingID);
                 
                 bError            = !mThingIDInfo.bIsValid;
                 aErrorMessages    = aErrorMessages.concat(mThingIDInfo.aErrorMessages);
@@ -348,8 +348,8 @@ $.extend(IomyRe.devices.ipcamera,{
             // Attempt to load the URL and parse it to the MJPEG page and report
             // any errors.
             //--------------------------------------------------------------------//
-            IomyRe.apiphp.AjaxRequest({
-                url         : IomyRe.apiphp.APILocation("ipcamera"),
+            iomy.apiphp.AjaxRequest({
+                url         : iomy.apiphp.APILocation("ipcamera"),
                 type        : "POST",
                 data        : "Mode=FetchStreamUrl&ThingId="+iThingId,
 
@@ -455,7 +455,7 @@ $.extend(IomyRe.devices.ipcamera,{
             } else {
                 //-- Verify that the IP address format is correct. --//
                 try {
-                    mIPAddressResult = IomyRe.validation.isIPv4AddressValid(mSettings.ipAddress);
+                    mIPAddressResult = iomy.validation.isIPv4AddressValid(mSettings.ipAddress);
 
                     if (!mIPAddressResult.bValid) {
                         bError = true;
@@ -520,7 +520,7 @@ $.extend(IomyRe.devices.ipcamera,{
                 if (bEditing) {
                     if (mSettings.thingID !== null && mSettings.thingID !== undefined && mSettings.thingID !== "") {
                         
-                        mThingIdResult = IomyRe.validation.isThingIDValid(mSettings.thingID);
+                        mThingIdResult = iomy.validation.isThingIDValid(mSettings.thingID);
                         
                         if (!mThingIdResult.bIsValid) {
                             bError = true;
@@ -562,8 +562,8 @@ $.extend(IomyRe.devices.ipcamera,{
             throw new MissingSettingsMapException("* "+aErrorMessages.join("\n* "));
         }
         
-        var mThing  = IomyRe.common.ThingList["_"+iThingId];
-        iLinkName   = IomyRe.common.LinkList["_"+mThing.LinkId].LinkName;
+        var mThing  = iomy.common.ThingList["_"+iThingId];
+        iLinkName   = iomy.common.LinkList["_"+mThing.LinkId].LinkName;
         
         //----------------------------------------------------------------//
         // Prepare the 'Data' parameter string.
@@ -605,8 +605,8 @@ $.extend(IomyRe.devices.ipcamera,{
             //----------------------------------------------------------------//
             // Run the request
             //----------------------------------------------------------------//
-            IomyRe.apiphp.AjaxRequest({
-                "url"        : IomyRe.apiphp.APILocation("ipcamera"),
+            iomy.apiphp.AjaxRequest({
+                "url"        : iomy.apiphp.APILocation("ipcamera"),
                 "type"        : "POST",
                 "data"        : mAPIDataString,
 
@@ -640,7 +640,7 @@ $.extend(IomyRe.devices.ipcamera,{
         try {
             var oModule = this;
             var oRPopover = new sap.m.ResponsivePopover({
-                title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
+                title : iomy.common.ThingList["_"+iThingId].DisplayName,
             });
 
             var fnShowUnavailable = function () {
@@ -705,12 +705,12 @@ $.extend(IomyRe.devices.ipcamera,{
                 "Type":"Function", 
                 "Execute": function () {
                     try {
-                        IomyRe.devices.pingDevice({
+                        iomy.devices.pingDevice({
                             thingID     : mSettings.deviceData.DeviceId,
                             onComplete  : mSettings.onComplete
                         });
                     } catch (e) {
-                        $.sap.log.error("Failed to run IomyRe.devices.pingDevice() ("+e.name+"): " + e.message);
+                        $.sap.log.error("Failed to run iomy.devices.pingDevice() ("+e.name+"): " + e.message);
                         mSettings.onComplete("N/A");
                     }
                 }

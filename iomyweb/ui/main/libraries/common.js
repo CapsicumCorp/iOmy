@@ -9,13 +9,13 @@ Copyright: Capsicum Corporation 2015, 2016, 2017
 
 */
 
-$.sap.declare("IomyRe.common",true);
+$.sap.declare("iomy.common",true);
 
 $.sap.require("sap.m.MessageBox");
 
-IomyRe.common = new sap.ui.base.Object();
+iomy.common = new sap.ui.base.Object();
 
-$.extend(IomyRe.common,{
+$.extend(iomy.common,{
     
     //============================================//
     //== Initialisation Variable                ==//
@@ -216,7 +216,7 @@ $.extend(IomyRe.common,{
     },
     
     ComposeDBServerVersion : function (mDBInfo) {
-        IomyRe.common.DatabaseVersion = mDBInfo.Version1 + "." + mDBInfo.Version2 + "." + mDBInfo.Version3;
+        iomy.common.DatabaseVersion = mDBInfo.Version1 + "." + mDBInfo.Version2 + "." + mDBInfo.Version3;
     },
     
     //============================================//
@@ -228,7 +228,7 @@ $.extend(IomyRe.common,{
     CheckSessionInfo : function(aConfig) {
         
         $.ajax({
-            url: IomyRe.apiphp.APILocation("sessioncheck"),
+            url: iomy.apiphp.APILocation("sessioncheck"),
             type: "POST",
             //================================================//
             //== ON SUCCESS
@@ -242,7 +242,7 @@ $.extend(IomyRe.common,{
                 //== 2.A - User is currently logged in          ==//
                 //================================================//
                 if (response.login===true) {
-                    IomyRe.common.ComposeDBServerVersion(response.ServerDBVer);
+                    iomy.common.ComposeDBServerVersion(response.ServerDBVer);
                     
                     aConfig.OnUserSessionActive(response);
                     
@@ -265,7 +265,7 @@ $.extend(IomyRe.common,{
                 sErrMesg += "These are common causes for this error message. \n";
                 sErrMesg += "1.) Database Problem: \tThe iOmy Database may have stopped running! Please check with whoever manages your system. \n";
                 sErrMesg += "2.) iOmy Version Upgrade: \tThe Person that manages your iOmy system may be rolling out a new update. \n";
-                IomyRe.common.showError(sErrMesg, "Access Error",
+                iomy.common.showError(sErrMesg, "Access Error",
                     function () {
                         // Refresh the page to redirect to the login page.
                         window.location.reload(true);
@@ -278,7 +278,7 @@ $.extend(IomyRe.common,{
     
     Logout : function () {
         $.ajax({
-            url : IomyRe.apiphp.APILocation('sessioncheck'), 
+            url : iomy.apiphp.APILocation('sessioncheck'), 
             type : "POST",
             dataType : "json",
             data : {
@@ -287,8 +287,8 @@ $.extend(IomyRe.common,{
                 "AttemptLogin":    "1"
             },
             success : function( oResponseData, sHTTPCode, jqXHR ) {
-                IomyRe.common.WipeCoreVariables();
-                IomyRe.common.NavigationChangePage( "pLogin" , {});
+                iomy.common.WipeCoreVariables();
+                iomy.common.NavigationChangePage( "pLogin" , {});
             }
         });
     },
@@ -566,16 +566,16 @@ $.extend(IomyRe.common,{
         
         onSuccess: function() {
             //-- Reset the Navigation array and index after switching users --//
-            IomyRe.common.NavPagesNavigationArray = [];
-            IomyRe.common.NavPagesCurrentIndex = -1;
+            iomy.common.NavPagesNavigationArray = [];
+            iomy.common.NavPagesCurrentIndex = -1;
             //-- Load the 1ST Page --//
-            IomyRe.common.NavigationChangePage( IomyRe.common.sNavigationDefaultPage, {}, true );
+            iomy.common.NavigationChangePage( iomy.common.sNavigationDefaultPage, {}, true );
             
             //-- Load the optional variables --//
-            IomyRe.common.RefreshOptionalVariables({});
+            iomy.common.RefreshOptionalVariables({});
             
             //-- Setup the AutoRefreshCoreVariables Check --//
-            IomyRe.common.RefreshCoreVariableQueueCheck();
+            iomy.common.RefreshCoreVariableQueueCheck();
         }
     },
     
@@ -595,61 +595,61 @@ $.extend(IomyRe.common,{
             //------------------------------------------------------------------//
             //-- IF The Core variables aren't already in currently refreshing --//
             //------------------------------------------------------------------//
-            if( IomyRe.common.bCoreRefreshInProgress===false ) {
+            if( iomy.common.bCoreRefreshInProgress===false ) {
                 
                 //-- Flag that the CoreVariables are refreshing --//
-                IomyRe.common.bCoreRefreshInProgress = true;
+                iomy.common.bCoreRefreshInProgress = true;
                 
                 //-- Remove the Restart flag --//
-                IomyRe.common.bCoreVariablesRestart = false;
+                iomy.common.bCoreVariablesRestart = false;
                 
                 
                 //----------------------------------------//
                 //-- PART 1: REFRESH USERINFO LIST      --//
                 //----------------------------------------//
-                IomyRe.common.RefreshUserInfoList({
+                iomy.common.RefreshUserInfoList({
                     onSuccess: $.proxy( function() {
                         
                         //----------------------------------------//
                         //-- PART 2: REFRESH PREMISE LIST       --//
                         //----------------------------------------//
-                        IomyRe.common.RefreshPremiseList({
+                        iomy.common.RefreshPremiseList({
                             onSuccess: $.proxy( function() {
                                 
                                 //----------------------------------------//
                                 //-- PART 3: REFRESH HUB LIST           --//
                                 //----------------------------------------//
-                                IomyRe.common.RefreshHubList({
+                                iomy.common.RefreshHubList({
                                     onSuccess: $.proxy( function() {
                                         
                                         //----------------------------------------//
                                         //-- PART 4: REFRESH COMM LIST          --//
                                         //----------------------------------------//
-                                        IomyRe.common.RefreshCommList({
+                                        iomy.common.RefreshCommList({
                                             onSuccess: $.proxy( function() {
                                                 
                                                 //----------------------------------------//
                                                 //-- PART 5: REFRESH ROOM LIST          --//
                                                 //----------------------------------------//
-                                                IomyRe.common.RetreiveRoomList({
+                                                iomy.common.RetreiveRoomList({
                                                     onSuccess: $.proxy( function() {
                                                         
                                                         //----------------------------------------//
                                                         //-- PART 6: REFRESH LINK LIST          --//
                                                         //----------------------------------------//
-                                                        IomyRe.common.RetrieveLinkList({
+                                                        iomy.common.RetrieveLinkList({
                                                             onSuccess: $.proxy( function() {
                                                                 
                                                                 //----------------------------------------//
                                                                 //-- PART 7: REFRESH IO LIST            --//
                                                                 //----------------------------------------//
-                                                                IomyRe.common.RefreshThingList({
+                                                                iomy.common.RefreshThingList({
                                                                     onSuccess: $.proxy( function() {
                                                                         
                                                                         //-------------------------------------------------------//
                                                                         //-- Flag that the Core Variables have been configured --//
                                                                         //-------------------------------------------------------//
-                                                                        IomyRe.common.CoreVariablesInitialised = true;
+                                                                        iomy.common.CoreVariablesInitialised = true;
                                                                         
                                                                         
                                                                         //-------------------------------------------------------//
@@ -658,7 +658,7 @@ $.extend(IomyRe.common,{
                                                                         try {
                                                                             //-- Update when the last core variables occurred --//
                                                                             var oTemp = new Date();
-                                                                            IomyRe.common.iCoreVariablesLastRefresh = oTemp.getTime();
+                                                                            iomy.common.iCoreVariablesLastRefresh = oTemp.getTime();
                                                                             
                                                                             //------------------------------------------------------------//
                                                                             //-- Trigger the normal "onSuccess" event                   --//
@@ -672,8 +672,8 @@ $.extend(IomyRe.common,{
                                                                             
                                                                             //------------------------------------------------------------//
                                                                             //-- Run all the on Success events in the current config    --//
-                                                                            if( IomyRe.common.aCoreVariablesResConfig.length >= 1 ) {
-                                                                                $.each( IomyRe.common.aCoreVariablesResConfig, function ( iIndex, aTempConfig ) {
+                                                                            if( iomy.common.aCoreVariablesResConfig.length >= 1 ) {
+                                                                                $.each( iomy.common.aCoreVariablesResConfig, function ( iIndex, aTempConfig ) {
                                                                                     //-- Trigger any onSuccess events --//
                                                                                     if( aTempConfig.onSuccess ) {
                                                                                         try {
@@ -685,22 +685,22 @@ $.extend(IomyRe.common,{
                                                                                 });
                                                                                 
                                                                                 //-- Reset the array so this can't be accidentally triggered --//
-                                                                                IomyRe.common.aCoreVariablesResConfig = [];
+                                                                                iomy.common.aCoreVariablesResConfig = [];
                                                                             }
                                                                             
                                                                             //------------------------------------------------------------//
                                                                             //-- If the Core Variables needs to restart on completion   --// 
-                                                                            if( IomyRe.common.bCoreVariablesRestart===false ) {
+                                                                            if( iomy.common.bCoreVariablesRestart===false ) {
                                                                                 //-- Turn off the "RefreshInProgress" state as the refresh has finished --//
-                                                                                IomyRe.common.bCoreRefreshInProgress = false;
+                                                                                iomy.common.bCoreRefreshInProgress = false;
                                                                                 
                                                                             } else {
                                                                                 //-- Replace the Current Config with the next --//
-                                                                                IomyRe.common.aCoreVariablesResConfig = IomyRe.common.aCoreVariablesResNextConfig;
+                                                                                iomy.common.aCoreVariablesResConfig = iomy.common.aCoreVariablesResNextConfig;
                                                                                 
                                                                                 //-- Start the next refresh Core Variables --//
-                                                                                IomyRe.common.bCoreRefreshInProgress = false;
-                                                                                IomyRe.common.RefreshCoreVariables({});
+                                                                                iomy.common.bCoreRefreshInProgress = false;
+                                                                                iomy.common.RefreshCoreVariables({});
                                                                             }
                                                                             
                                                                         } catch( e00 ) {
@@ -709,7 +709,7 @@ $.extend(IomyRe.common,{
                                                                         
                                                                     }, oScope),
                                                                     onFail: $.proxy( function() {
-                                                                        IomyRe.common.bCoreRefreshInProgress = false;
+                                                                        iomy.common.bCoreRefreshInProgress = false;
                                                                         jQuery.sap.log.error("Error: Failed to update the ThingList for the RefreshCoreVariables function.");
                                                                         
                                                                     }, oScope)
@@ -717,7 +717,7 @@ $.extend(IomyRe.common,{
                                                                 
                                                             }, oScope),
                                                             onFail: $.proxy(function() {
-                                                                IomyRe.common.bCoreRefreshInProgress = false;
+                                                                iomy.common.bCoreRefreshInProgress = false;
                                                                 jQuery.sap.log.error("Error: Failed to update the LinkList for the RefreshCoreVariables function.");
                                                                 
                                                             }, oScope)
@@ -725,7 +725,7 @@ $.extend(IomyRe.common,{
                                                         
                                                     }, oScope),
                                                     onFail: $.proxy(function() {
-                                                        IomyRe.common.bCoreRefreshInProgress = false;
+                                                        iomy.common.bCoreRefreshInProgress = false;
                                                         jQuery.sap.log.error("Error: Failed to update the RoomList for the RefreshCoreVariables function.");
                                                         
                                                     }, oScope)
@@ -733,7 +733,7 @@ $.extend(IomyRe.common,{
                                                 
                                             }, oScope),
                                             onFail: $.proxy(function() {
-                                                IomyRe.common.bCoreRefreshInProgress = false;
+                                                iomy.common.bCoreRefreshInProgress = false;
                                                 jQuery.sap.log.error("Error: Failed to update the CommList for the RefreshCoreVariables function.");
                                                 
                                             }, oScope)
@@ -741,7 +741,7 @@ $.extend(IomyRe.common,{
                                         
                                     }, oScope),
                                     onFail: $.proxy( function() {
-                                        IomyRe.common.bCoreRefreshInProgress = false;
+                                        iomy.common.bCoreRefreshInProgress = false;
                                         jQuery.sap.log.error("Error: Failed to update the HubList for the RefreshCoreVariables function.");
                                         
                                     }, oScope)
@@ -749,24 +749,24 @@ $.extend(IomyRe.common,{
                                 
                             }, oScope),
                             onFail: $.proxy( function() {
-                                IomyRe.common.bCoreRefreshInProgress = false;
+                                iomy.common.bCoreRefreshInProgress = false;
                                 jQuery.sap.log.error("Error: Failed to update the PremiseList for the RefreshCoreVariables function.");
                                 
                             }, oScope)
                         }); //-- END PART 2 ( PREMISE LIST ) --//
                     }, oScope),
                     onFail: $.proxy( function() {
-                        IomyRe.common.bCoreRefreshInProgress = false;
+                        iomy.common.bCoreRefreshInProgress = false;
                         jQuery.sap.log.error("Error: Failed to update the UserInfoList for the RefreshCoreVariables function.");
                         
                     }, oScope)
                 }); //-- END PART 1 ( USERINFO LIST ) --//
             } else {
                 //-- Flag that the core variables will need to be refreshed again after is completes --//
-                IomyRe.common.bCoreVariablesRestart = true;
+                iomy.common.bCoreVariablesRestart = true;
                 
                 //-- Push the current config into the array of what to do next --//
-                IomyRe.common.aCoreVariablesResNextConfig.push( aConfig );
+                iomy.common.aCoreVariablesResNextConfig.push( aConfig );
                 
             }
         } catch(e1) {
@@ -783,8 +783,8 @@ $.extend(IomyRe.common,{
         //-- Clear existing timeout             --//
         //----------------------------------------//
         try {
-            if( IomyRe.common.oCoreVariableTimeout ) {
-                clearTimeout( IomyRe.common.oCoreVariableTimeout );
+            if( iomy.common.oCoreVariableTimeout ) {
+                clearTimeout( iomy.common.oCoreVariableTimeout );
             }
         } catch( e0 ) {
             //-- Do nothing --//
@@ -794,11 +794,11 @@ $.extend(IomyRe.common,{
         //-- Set new Timeout                    --//
         //----------------------------------------//
         try {
-            IomyRe.common.oCoreVariableTimeout = setTimeout(
+            iomy.common.oCoreVariableTimeout = setTimeout(
                 function() {
-                    IomyRe.common.RefreshCoreVariablesCheckEvent();
+                    iomy.common.RefreshCoreVariablesCheckEvent();
                 },
-                IomyRe.common.iCoreVariablesRefreshInterval
+                iomy.common.iCoreVariablesRefreshInterval
             );
         } catch( e1 ) {
             //-- Do nothing --//
@@ -814,25 +814,25 @@ $.extend(IomyRe.common,{
         var oScope         = this;
         var oDate          = new Date();
         var iCurrentTime   = oDate.getTime();
-        var iLastRefresh   = IomyRe.common.iCoreVariablesLastRefresh;
-        var iDurationLimit = IomyRe.common.iCoreVariablesRefreshInterval;
+        var iLastRefresh   = iomy.common.iCoreVariablesLastRefresh;
+        var iDurationLimit = iomy.common.iCoreVariablesRefreshInterval;
         //-- Check how long ago the last refresh occurred --//
         if( ( iCurrentTime - iLastRefresh ) >= iDurationLimit ) {
             //-- IF RefreshCoreVariables is not running --//
-            if( IomyRe.common.bCoreRefreshInProgress===false ) {
+            if( iomy.common.bCoreRefreshInProgress===false ) {
                 //-------------------------------------------------------------//
                 //-- OUTCOME A: Refresh                                      --//
                 //-------------------------------------------------------------//
                 
                 //-- Execute the RefreshCoreVariables --//
-                IomyRe.common.RefreshCoreVariables(
+                iomy.common.RefreshCoreVariables(
                     {
                         onSuccess: $.proxy( function() {
                             //--------------------------------------------------------//
                             //-- Queue up the next refreshcore variables check so   --//
                             //-- that it can execute at the desired time            --//
                             //--------------------------------------------------------//
-                            IomyRe.common.RefreshCoreVariableQueueCheck();
+                            iomy.common.RefreshCoreVariableQueueCheck();
                         }, oScope)
                     },
                     oScope
@@ -843,7 +843,7 @@ $.extend(IomyRe.common,{
                 //-------------------------------------------------------------//
                 
                 //-- Queue up the next AutoCheck to happen --//
-                IomyRe.common.RefreshCoreVariableQueueCheck();
+                iomy.common.RefreshCoreVariableQueueCheck();
             }
         } else {
             //-------------------------------------------------------------//
@@ -851,7 +851,7 @@ $.extend(IomyRe.common,{
             //-------------------------------------------------------------//
             
             //-- Queue up the next AutoCheck to happen --//
-            IomyRe.common.RefreshCoreVariableQueueCheck();
+            iomy.common.RefreshCoreVariableQueueCheck();
         }
     },
     
@@ -870,17 +870,17 @@ $.extend(IomyRe.common,{
             //------------------------------------------------//
             //-- PART 1A - Load the Regions                 --//
             //------------------------------------------------//
-            IomyRe.common.LoadRegions({
+            iomy.common.LoadRegions({
                 onSuccess: $.proxy( function () {
                     //------------------------------------------------//
                     //-- PART 1B - Load the Languages                --//
                     //------------------------------------------------//
-                    IomyRe.common.LoadLanguages({
+                    iomy.common.LoadLanguages({
                         onSuccess: $.proxy( function() {
                             //------------------------------------------------//
                             //-- PART 1C - Load the Timezones                --//
                             //------------------------------------------------//
-                            IomyRe.common.LoadTimezones({
+                            iomy.common.LoadTimezones({
                                 onSuccess: $.proxy( function() {
                                     
                                     
@@ -908,17 +908,17 @@ $.extend(IomyRe.common,{
             //------------------------------------------------//
             //-- PART 2A - Load the Room Types               --//
             //------------------------------------------------//
-            IomyRe.common.RetrieveLinkTypeList({
+            iomy.common.RetrieveLinkTypeList({
                 onSuccess: $.proxy( function() {
                     //------------------------------------------------//
                     //-- PART 2B - Load the Premise Bedroom Options  --//
                     //------------------------------------------------//
-                    IomyRe.common.LoadPremiseBedroomsOptions({
+                    iomy.common.LoadPremiseBedroomsOptions({
                         onSuccess: $.proxy( function() {
                             //------------------------------------------------//
                             //-- PART 2C - Load the Premise Occupant Options --//
                             //------------------------------------------------//
-                            IomyRe.common.LoadPremiseOccupantsOptions({
+                            iomy.common.LoadPremiseOccupantsOptions({
                                 onSuccess: $.proxy( function() {
 
                                 }, me),
@@ -945,17 +945,17 @@ $.extend(IomyRe.common,{
             //------------------------------------------------//
             //-- PART 3A - Load the Room Types              --//
             //------------------------------------------------//
-            IomyRe.common.LoadRoomTypes({
+            iomy.common.LoadRoomTypes({
                 onSuccess: $.proxy( function() {
                     //------------------------------------------------//
                     //-- PART 3B - Load the Premise Floor Options   --//
                     //------------------------------------------------//
-                    IomyRe.common.LoadPremiseFloorsOptions({
+                    iomy.common.LoadPremiseFloorsOptions({
                         onSuccess: $.proxy( function() {
                             //------------------------------------------------//
                             //-- PART 3C - Load the Premise Room Options    --//
                             //------------------------------------------------//
-                            IomyRe.common.LoadPremiseRoomsOptions({
+                            iomy.common.LoadPremiseRoomsOptions({
                                 onSuccess: $.proxy( function() {
                                     
                                     
@@ -992,8 +992,8 @@ $.extend(IomyRe.common,{
     RefreshUserInfoList : function (oConfig) {
         var me = this;
         
-        IomyRe.apiodata.AjaxRequest({
-            Url: IomyRe.apiodata.ODataLocation("users"),
+        iomy.apiodata.AjaxRequest({
+            Url: iomy.apiodata.ODataLocation("users"),
             Columns: [
                 "USERADDRESS_LINE1",        "USERADDRESS_LINE2",        "USERADDRESS_LINE3",        
                 "USERADDRESS_SUBREGION",    "USERADDRESS_POSTCODE",     "REGION_PK",                
@@ -1007,7 +1007,7 @@ $.extend(IomyRe.common,{
             WhereClause: [],
             OrderByClause: [],
             onSuccess : function ( sResponseType, aData ) {
-                IomyRe.common.UserInfo = {
+                iomy.common.UserInfo = {
                     "AddressLine1":       aData[0].USERADDRESS_LINE1,
                     "AddressLine2":       aData[0].USERADDRESS_LINE2,
                     "AddressLine3":       aData[0].USERADDRESS_LINE3,
@@ -1034,11 +1034,11 @@ $.extend(IomyRe.common,{
                 };
                 
                 //-- Update the Timestamp on when the UserInfo was last updated --//
-                IomyRe.common.UserInfoLastUpdate = new Date();
+                iomy.common.UserInfoLastUpdate = new Date();
                 
                 //-- Store the Username --//
-                IomyRe.common.CurrentUsername = aData[0].USERS_USERNAME;
-                IomyRe.common.UserDisplayName = aData[0].USERSINFO_DISPLAYNAME;
+                iomy.common.CurrentUsername = aData[0].USERS_USERNAME;
+                iomy.common.UserDisplayName = aData[0].USERSINFO_DISPLAYNAME;
                     
                 //-- Perform the "onSuccess" function if applicable --//
                 if(oConfig.onSuccess !== undefined) {
@@ -1064,8 +1064,8 @@ $.extend(IomyRe.common,{
     RefreshPremiseList : function (oConfig) {
         var me = this;
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("premises"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("premises"),
             Columns : [
                 "PREMISE_PK", "PREMISE_NAME", "PREMISE_DESCRIPTION", "PERMPREMISE_WRITE", "PERMPREMISE_OWNER",
                 "PREMISEFLOORS_PK", "PREMISEROOMS_PK", "PREMISEBEDROOMS_PK", "PREMISEOCCUPANTS_PK",
@@ -1124,8 +1124,8 @@ $.extend(IomyRe.common,{
     RefreshHubList : function (oConfig) {
         var me = this;
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("hubs"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("hubs"),
             Columns : [
                 "PERMPREMISE_READ",
                 "PERMPREMISE_WRITE",
@@ -1198,7 +1198,7 @@ $.extend(IomyRe.common,{
         //------------------------------------//
         //-- ODATA REQUEST PREP                --//
         //------------------------------------//
-        var sUrl            = IomyRe.apiodata.ODataLocation("rooms");
+        var sUrl            = iomy.apiodata.ODataLocation("rooms");
         var aColumns        = [ "ROOMS_PREMISE_FK", "ROOMS_PK", "ROOMS_NAME", "ROOMS_DESC", "ROOMS_FLOOR", "ROOMTYPE_PK", "ROOMTYPE_NAME", "ROOMTYPE_OUTDOORS", "PERMROOMS_READ", "PERMROOMS_WRITE", "PERMROOMS_STATETOGGLE", "PERMROOMS_DATAREAD" ];
         var aWhere            = [];
         var aOrderBy        = [ "ROOMS_PREMISE_FK", "ROOMTYPE_OUTDOORS", "ROOMS_PK" ];
@@ -1209,7 +1209,7 @@ $.extend(IomyRe.common,{
         //------------------------//
         //-- ODATA REQUEST        --//
         //------------------------//
-        IomyRe.apiodata.AjaxRequest( {
+        iomy.apiodata.AjaxRequest( {
             Url:                sUrl,
             HTTPMethod:            "GET",
             DataType:            "json",
@@ -1255,17 +1255,17 @@ $.extend(IomyRe.common,{
                                 //------------------------------------------------------------//
                                 //-- 3.B.A.1.2 - Check if the Premise Id needs to be setup    --//
                                 //------------------------------------------------------------//
-                                if( !IomyRe.common.RoomsList["_"+iPremiseId] ) {
+                                if( !iomy.common.RoomsList["_"+iPremiseId] ) {
                                     //-- Create the Premise --//
-                                    IomyRe.common.RoomsList["_"+iPremiseId] = {};
+                                    iomy.common.RoomsList["_"+iPremiseId] = {};
                                 }
                                 
                                 //------------------------------------------------------------//
                                 //-- 3.B.A.1.3 - Check if the Room needs to be setup        --//
                                 //------------------------------------------------------------//
-                                if( !IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId] ) {
+                                if( !iomy.common.RoomsList["_"+iPremiseId]["_"+iRoomId] ) {
                                     //-- Create the Room --//
-                                    IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = {};
+                                    iomy.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = {};
                                 }
                                 
                                 //-- Reset the array --//
@@ -1289,7 +1289,7 @@ $.extend(IomyRe.common,{
                                 aTemp.PermDeviceRead        = parseInt( AjaxData[i].PERMROOMS_DATAREAD );
                                 
                                 //-- Lookup the Premise Name and position in the PremiseList --//
-                                $.each( IomyRe.common.PremiseList, function( Key, aPremise ) {
+                                $.each( iomy.common.PremiseList, function( Key, aPremise ) {
                                     if( aPremise.Id===iPremiseId.toString() ) {
                                         //-- Add the Premise Name --//
                                         aTemp.PremiseName     = aPremise.Name;
@@ -1301,15 +1301,15 @@ $.extend(IomyRe.common,{
                                 //-- Array to store the Things in --//
                                 aTemp.Things    = {};
                                 
-                                if( !IomyRe.common.RoomsList["_"+iPremiseId] ) {
-                                    IomyRe.common.RoomsList["_"+iPremiseId] = {};
+                                if( !iomy.common.RoomsList["_"+iPremiseId] ) {
+                                    iomy.common.RoomsList["_"+iPremiseId] = {};
                                 }
                                 
-                                IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = {};
+                                iomy.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = {};
                                 
-                                IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = aTemp;
+                                iomy.common.RoomsList["_"+iPremiseId]["_"+iRoomId] = aTemp;
                                 
-                                IomyRe.common.AllRoomsList["_"+iRoomId] = aTemp;
+                                iomy.common.AllRoomsList["_"+iRoomId] = aTemp;
                             } else {
                                 $.sap.log.error("Invalid PremiseId or RoomId");
                             }  
@@ -1338,7 +1338,7 @@ $.extend(IomyRe.common,{
     RetrieveRoomAdminRoomList : function (mSettings) {
         var oModule         = this;
         var bError          = false;
-        var sUrl            = IomyRe.apiphp.APILocation("rooms");
+        var sUrl            = iomy.apiphp.APILocation("rooms");
         var fnSuccess       = function () {};
         var fnFail          = function () {};
         var iPremiseId      = 0;
@@ -1374,7 +1374,7 @@ $.extend(IomyRe.common,{
                     //--------------------------------------------------------//
                     // Run the request using a given premise ID.
                     //--------------------------------------------------------//
-                    IomyRe.apiphp.AjaxRequest({
+                    iomy.apiphp.AjaxRequest({
                         url     : sUrl,
                         data    : {
                             "Mode":      "RoomAdminRoomList",
@@ -1409,7 +1409,7 @@ $.extend(IomyRe.common,{
                                 fnFail(response.responseText);
 
                             } catch (e) {
-                                $.sap.log.error("Error in the failure callback of IomyRe.common.RetrieveRoomAdminRoomList ("+e.name+"): " + e.message);
+                                $.sap.log.error("Error in the failure callback of iomy.common.RetrieveRoomAdminRoomList ("+e.name+"): " + e.message);
                             }
                         }
 
@@ -1428,7 +1428,7 @@ $.extend(IomyRe.common,{
                         executeNow          : false
                     });
 
-                    $.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+                    $.each(iomy.common.PremiseList, function (sI, mPremise) {
 
                         try {
                             oQueue.addRequest({
@@ -1467,7 +1467,7 @@ $.extend(IomyRe.common,{
                                         fnFail(response.responseText);
 
                                     } catch (e) {
-                                        $.sap.log.error("Error in the failure callback of IomyRe.common.RetrieveRoomAdminRoomList ("+e.name+"): " + e.message);
+                                        $.sap.log.error("Error in the failure callback of iomy.common.RetrieveRoomAdminRoomList ("+e.name+"): " + e.message);
                                     }
                                 }
 
@@ -1500,7 +1500,7 @@ $.extend(IomyRe.common,{
         //------------------------------------//
         //-- ODATA REQUEST PREP                --//
         //------------------------------------//
-        var sUrl            = IomyRe.apiodata.ODataLocation("comms");
+        var sUrl            = iomy.apiodata.ODataLocation("comms");
         var aColumns        = [ "COMM_PK", "COMM_NAME", "COMM_JOINMODE", "COMM_ADDRESS", "COMMTYPE_PK", "COMMTYPE_NAME", "HUB_PK", "HUB_NAME", "PREMISE_PK", "PREMISE_NAME" ];
         var aWhere          = [];
         var aOrderBy        = [ "COMM_PK", "HUB_PK" ];
@@ -1509,7 +1509,7 @@ $.extend(IomyRe.common,{
         //------------------------//
         //-- ODATA REQUEST        --//
         //------------------------//
-        IomyRe.apiodata.AjaxRequest( {
+        iomy.apiodata.AjaxRequest( {
             Url:                sUrl,
             HTTPMethod:            "GET",
             DataType:            "json",
@@ -1572,7 +1572,7 @@ $.extend(IomyRe.common,{
                             aTemp.PremiseId                = iPremiseId;
                             aTemp.PremiseName            = mData.PREMISE_NAME;
 
-                            IomyRe.common.CommList["_"+iCommId] = aTemp;
+                            iomy.common.CommList["_"+iCommId] = aTemp;
                             
                         }
                     } 
@@ -1603,8 +1603,8 @@ $.extend(IomyRe.common,{
     RetrieveLinkList : function (oConfig) {
         var me = this;
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("link"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("link"),
             Columns : [
                 "ROOMS_PREMISE_FK","LINK_PK","LINK_SERIALCODE","LINK_NAME","LINK_CONNECTED",
                 "LINK_STATE","LINKTYPE_PK","LINKTYPE_NAME","ROOMS_PK",
@@ -1642,8 +1642,8 @@ $.extend(IomyRe.common,{
                 // ONLY add these hard-coded devices if user is 'demo',
                 // our debug user.
                 //--------------------------------------------------------//
-//                if (IomyRe.common.CurrentUsername === "demo") {
-//                    IomyRe.experimental.addDemoDataToLinkList();
+//                if (iomy.common.CurrentUsername === "demo") {
+//                    iomy.experimental.addDemoDataToLinkList();
 //                }
                 
                 //-- Perform the "onSuccess" function if applicable --//
@@ -1693,9 +1693,9 @@ $.extend(IomyRe.common,{
         //-- 2.0 - Start the Ajax Request               --//
         //------------------------------------------------//
         try {
-            IomyRe.apiphp.AjaxRequest({
+            iomy.apiphp.AjaxRequest({
                 //-- Set the URL to the IODetection --//
-                url: IomyRe.apiphp.APILocation("iodetection"),
+                url: iomy.apiphp.APILocation("iodetection"),
                 //-- The Data and MimeTypes can be left on the default values --//
                 //-- On Success --//
                 onSuccess:$.proxy(function(sDataType, data) {
@@ -1769,25 +1769,25 @@ $.extend(IomyRe.common,{
                                     //--------------------------------------------------------//
                                     //-- Check that the Premise is setup in the Rooms List  --//
                                     //--------------------------------------------------------//
-                                    if( !!IomyRe.common.RoomsList["_"+aIO.PremiseId] ) {
+                                    if( !!iomy.common.RoomsList["_"+aIO.PremiseId] ) {
                                         //-- Do nothing --//
                                         
                                     } else {
                                         //-- Setup the PremiseId in the RoomsList global variable --//
-                                        IomyRe.common.RoomsList["_"+aIO.PremiseId] = {};
+                                        iomy.common.RoomsList["_"+aIO.PremiseId] = {};
                                     }
                                     
                                     
                                     //--------------------------------------------------------//
                                     //-- Check if the Room isn't valid                      --//
                                     //--------------------------------------------------------//
-                                    if( !(aIO.RoomId >= 1) || !IomyRe.common.RoomsList["_"+aIO.PremiseId]["_"+aIO.RoomId] ) {
+                                    if( !(aIO.RoomId >= 1) || !iomy.common.RoomsList["_"+aIO.PremiseId]["_"+aIO.RoomId] ) {
                                         //--------------------------------------------------------//
                                         //-- CHECK IF THE "Unassigned" ROOM DOESN'T EXIST       --//
                                         //--------------------------------------------------------//
-                                        if( !IomyRe.common.RoomsList["_"+aIO.PremiseId].Unassigned ) {
+                                        if( !iomy.common.RoomsList["_"+aIO.PremiseId].Unassigned ) {
                                             //-- CREATE THE "UNASSIGNED" ROOM --//
-                                            IomyRe.common.RoomsList["_"+aIO.PremiseId].Unassigned = { 
+                                            iomy.common.RoomsList["_"+aIO.PremiseId].Unassigned = { 
                                                 "PremiseId":        aIO.PremiseId,
                                                 "PremiseName":      aIO.PremiseName,
                                                 "RoomId":           null,
@@ -1798,7 +1798,7 @@ $.extend(IomyRe.common,{
                                         //--------------------------------------------------------//
                                         //-- STORE THE THING IN THE "UNASSIGNED"                --//
                                         //--------------------------------------------------------//
-                                        IomyRe.common.RoomsList["_"+aIO.PremiseId].Unassigned.Things["_"+iTempThingId] = {
+                                        iomy.common.RoomsList["_"+aIO.PremiseId].Unassigned.Things["_"+iTempThingId] = {
                                             "Link":     iTempLinkId,
                                             "Thing":    iTempThingId
                                         }
@@ -1807,7 +1807,7 @@ $.extend(IomyRe.common,{
                                         //--------------------------------------------------------//
                                         //-- STORE THE THING IN THE ROOM                        --//
                                         //--------------------------------------------------------//
-                                        IomyRe.common.RoomsList["_"+aIO.PremiseId]["_"+aIO.RoomId].Things["_"+iTempThingId] = {
+                                        iomy.common.RoomsList["_"+aIO.PremiseId]["_"+aIO.RoomId].Things["_"+iTempThingId] = {
                                             "Link":     iTempLinkId,
                                             "Thing":    iTempThingId
                                         }
@@ -1906,7 +1906,7 @@ $.extend(IomyRe.common,{
                     //-- other UI components can use them.                          --//
                     //----------------------------------------------------------------//
                     try {
-                        IomyRe.common.ThingList = aThingList;
+                        iomy.common.ThingList = aThingList;
                     } catch(e1234) {
                         jQuery.sap.log.error("Problem Mapping ThingList: "+e1234.message, "", "IO Detection");
                     }
@@ -1914,25 +1914,25 @@ $.extend(IomyRe.common,{
                     //--------------------------------------------------------//
                     // ONLY add these hard-coded devices if user is 'demo'.
                     //--------------------------------------------------------//
-//                    if (IomyRe.common.CurrentUsername === "demo") {
-//                        IomyRe.experimental.addDemoDataToThingList();
+//                    if (iomy.common.CurrentUsername === "demo") {
+//                        iomy.experimental.addDemoDataToThingList();
 //                    }
                     
                     //----------------------------------------------------------------//
                     //-- 8.0 - DEBUGGING                                            --//
                     //----------------------------------------------------------------//
                     var sTemp = "=================================\n";
-                    jQuery.sap.log.debug( sTemp+"== common.ThingList           ==\n"+JSON.stringify(IomyRe.common.ThingList), "", "IO Detection");
+                    jQuery.sap.log.debug( sTemp+"== common.ThingList           ==\n"+JSON.stringify(iomy.common.ThingList), "", "IO Detection");
                     
                     //-- Update the Timestamp on when the ThingList was last updated --//
-                    IomyRe.common.ThingListLastUpdate = new Date();
+                    iomy.common.ThingListLastUpdate = new Date();
                     
                     //----------------------------------------------------------------//
                     //-- 9.0 - FINALISE BY TRIGGERING THE NEXT TASK                 --//
                     //----------------------------------------------------------------//
                     if(oConfig.onSuccess) {
                         
-                        IomyRe.common.bCoreRefreshInProgress = false;
+                        iomy.common.bCoreRefreshInProgress = false;
                         
                         oConfig.onSuccess();
                     }
@@ -1950,7 +1950,7 @@ $.extend(IomyRe.common,{
             //
             
         } catch(e1) {
-            IomyRe.common.bCoreRefreshInProgress = false;
+            iomy.common.bCoreRefreshInProgress = false;
             jQuery.sap.log.error( "RefreshThingList: "+e1.message, "", "IO Detection");
             
             //-- Perform the "onFail" function if applicable --//
@@ -1987,8 +1987,8 @@ $.extend(IomyRe.common,{
             fnFail      = function () {};
         }
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("regions"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("regions"),
             Columns : ["REGION_NAME", "REGION_PK", "REGION_NAME2"],
             WhereClause : [],
             OrderByClause : ["REGION_NAME asc"],
@@ -2051,8 +2051,8 @@ $.extend(IomyRe.common,{
             fnFail      = function () {};
         }
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("language"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("language"),
             Columns : ["LANGUAGE_PK","LANGUAGE_NAME"],
             WhereClause : [],
             OrderByClause : ["LANGUAGE_NAME asc"],
@@ -2113,8 +2113,8 @@ $.extend(IomyRe.common,{
             fnFail      = function () {};
         }
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("timezones"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("timezones"),
             Columns : ["TIMEZONE_PK","TIMEZONE_TZ","TIMEZONE_CC"],
             WhereClause : [],
             OrderByClause : ["TIMEZONE_TZ asc"],
@@ -2183,8 +2183,8 @@ $.extend(IomyRe.common,{
         //--------------------------------------------------------------------//
         // Call the OData that returns a list of room types.
         //--------------------------------------------------------------------//
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("room_types"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("room_types"),
             Columns : ["ROOMTYPE_PK", "ROOMTYPE_NAME", "ROOMTYPE_OUTDOORS"],
             WhereClause : [],
             OrderByClause : [],
@@ -2262,8 +2262,8 @@ $.extend(IomyRe.common,{
         // Call the OData that returns a list of options for the number of
         // occupants in a premise.
         //--------------------------------------------------------------------//
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("premise_occupants"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("premise_occupants"),
             Columns : ["PREMISEOCCUPANTS_PK", "PREMISEOCCUPANTS_NAME"],
             WhereClause : [],
             OrderByClause : [],
@@ -2337,8 +2337,8 @@ $.extend(IomyRe.common,{
         // Call the OData that returns a list of options for the number of rooms
         // in a premise.
         //--------------------------------------------------------------------//
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("premise_rooms"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("premise_rooms"),
             Columns : ["PREMISEROOMS_PK", "PREMISEROOMS_NAME"],
             WhereClause : [],
             OrderByClause : [],
@@ -2411,8 +2411,8 @@ $.extend(IomyRe.common,{
         // Call the OData that returns a list of options for the number of
         // floors in a premise.
         //--------------------------------------------------------------------//
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("premise_floors"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("premise_floors"),
             Columns : ["PREMISEFLOORS_PK", "PREMISEFLOORS_NAME"],
             WhereClause : [],
             OrderByClause : [],
@@ -2486,8 +2486,8 @@ $.extend(IomyRe.common,{
         // Call the OData that returns a list of options for the number of
         // floors in a premise.
         //--------------------------------------------------------------------//
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("premise_bedrooms"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("premise_bedrooms"),
             Columns : ["PREMISEBEDROOMS_PK", "PREMISEBEDROOMS_COUNT"],
             WhereClause : [],
             OrderByClause : [],
@@ -2533,8 +2533,8 @@ $.extend(IomyRe.common,{
     RetrieveLinkTypeList : function(oConfig) {
         var me = this;
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("link_types"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("link_types"),
             Columns : [
                 "LINKTYPE_PK","LINKTYPE_NAME"
             ],
@@ -2586,7 +2586,7 @@ $.extend(IomyRe.common,{
     LookupPremisePermissionFromId: function( iPremiseId ) {
         if( iPremiseId>=1 ) {
             var sPremiseCode = "_"+iPremiseId;
-            var aPremise     = IomyRe.common.PremiseList[sPremiseCode];
+            var aPremise     = iomy.common.PremiseList[sPremiseCode];
             
             var iPremiseWrite         = aPremise.PermWrite;
             var iPremiseOwner         = aPremise.PermOwner;
@@ -2612,7 +2612,7 @@ $.extend(IomyRe.common,{
     LookupRoomPermissionFromId: function( iRoomId ) {
         if( iRoomId>=1 ) {
             var sRoomCode = "_"+iRoomId;
-            var aRoom     = IomyRe.common.AllRoomsList[sRoomCode];
+            var aRoom     = iomy.common.AllRoomsList[sRoomCode];
             
             var iRoomRead              = aRoom.PermDeviceRead;             
             var iRoomWrite             = aRoom.PermWrite;            
@@ -2640,7 +2640,7 @@ $.extend(IomyRe.common,{
     LookupRegionNameFromRegionId: function( iRegionId ) {
         if( iRegionId>=1 ) {
             var sRegionCode = "_"+iRegionId;
-            var aRegion     = IomyRe.common.Regions[sRegionCode];
+            var aRegion     = iomy.common.Regions[sRegionCode];
             
             var sRegionName     = aRegion.RegionName;
             return sRegionName;
@@ -2652,7 +2652,7 @@ $.extend(IomyRe.common,{
     LookupTimezoneNameFromTimezoneId: function( iTimezoneId ) {
         if( iTimezoneId>=1 ) {
             var sTimezoneCode = "_"+iTimezoneId;
-            var aTimezone     = IomyRe.common.Timezones[sTimezoneCode];
+            var aTimezone     = iomy.common.Timezones[sTimezoneCode];
             
             var sTimezoneName     = aTimezone.TimezoneName;
             return sTimezoneName;
@@ -2664,7 +2664,7 @@ $.extend(IomyRe.common,{
     LookupLanguageNameFromLanguageId: function( iLanguageId ) {
         if( iLanguageId>=1 ) {
             var sLanguageCode = "_"+iLanguageId;
-            var aLanguage     = IomyRe.common.Languages[sLanguageCode];
+            var aLanguage     = iomy.common.Languages[sLanguageCode];
             
             var sLanguageName     = aLanguage.LanguageName;
             return sLanguageName;
@@ -2680,8 +2680,8 @@ $.extend(IomyRe.common,{
     LookupPremPermLevelName: function ( iPermLevel ) {
         var sKey = "_"+iPermLevel;
         
-        if( typeof IomyRe.common.PermLevelsPremise[sKey]!=="undefined" ) {
-            return IomyRe.common.PermLevelsPremise[sKey].Name;
+        if( typeof iomy.common.PermLevelsPremise[sKey]!=="undefined" ) {
+            return iomy.common.PermLevelsPremise[sKey].Name;
         } else {
             return "Error has occurred!";
         }
@@ -2746,8 +2746,8 @@ $.extend(IomyRe.common,{
     LookupRoomPermLevelName: function ( iPermLevel ) {
         var sKey = "_"+iPermLevel;
         
-        if( typeof IomyRe.common.PermLevelsRoom[sKey]!=="undefined" ) {
-            return IomyRe.common.PermLevelsRoom[sKey].Name;
+        if( typeof iomy.common.PermLevelsRoom[sKey]!=="undefined" ) {
+            return iomy.common.PermLevelsRoom[sKey].Name;
         } else {
             return "Error has occurred!";
         }
@@ -2796,7 +2796,7 @@ $.extend(IomyRe.common,{
         var iPremiseId = 0;
         
         try {
-            $.each(IomyRe.common.HubList, function (sI, mHub) {
+            $.each(iomy.common.HubList, function (sI, mHub) {
                 
                 if (mHub.PermTelnet === 1) {
                     iPremiseId = mHub.PremiseId;
@@ -2848,43 +2848,43 @@ $.extend(IomyRe.common,{
         //-- If Reset needed --//
         if( bResetNavArray===true) {
             
-            if( sPageName!==IomyRe.common.sNavigationDefaultPage ) {
-                IomyRe.common.NavPagesNavigationArray = [
+            if( sPageName!==iomy.common.sNavigationDefaultPage ) {
+                iomy.common.NavPagesNavigationArray = [
                     {
-                        "Name": IomyRe.common.sNavigationDefaultPage,
+                        "Name": iomy.common.sNavigationDefaultPage,
                         "Data": {}
                     }
                 ];
                 
                 //-- Empty the Navigation Array Index --//
-                IomyRe.common.NavPagesCurrentIndex = 0;
+                iomy.common.NavPagesCurrentIndex = 0;
             } else {
                 //-- Empty the array --//
-                IomyRe.common.NavPagesNavigationArray = [];
-                IomyRe.common.NavPagesCurrentIndex = -1;
+                iomy.common.NavPagesNavigationArray = [];
+                iomy.common.NavPagesCurrentIndex = -1;
             } 
             
-        } else if( IomyRe.common.NavPagesCurrentIndex<=-1 ) {
+        } else if( iomy.common.NavPagesCurrentIndex<=-1 ) {
             
             //-- If on the Default Page then always reset the Navigation Array --//
-            IomyRe.common.NavPagesNavigationArray = [
+            iomy.common.NavPagesNavigationArray = [
                 {
-                    "Name": IomyRe.common.sNavigationDefaultPage,
+                    "Name": iomy.common.sNavigationDefaultPage,
                     "Data": {}
                 }
             ];
             //-- Set the index back to normal --//
-            IomyRe.common.NavPagesCurrentIndex = 0;
+            iomy.common.NavPagesCurrentIndex = 0;
             
             //$.sap.log.debug("Empty Navigation");
             
         } else {
             //-- Setup the Index to current
-            //if( IomyRe.common.NavPagesCurrentIndex<=-1 ) {
-            //    IomyRe.common.NavPagesCurrentIndex = 0;
+            //if( iomy.common.NavPagesCurrentIndex<=-1 ) {
+            //    iomy.common.NavPagesCurrentIndex = 0;
             //}
             
-            if( IomyRe.common.NavPagesNavigationArray.length >= IomyRe.common.NavPagesCurrentIndex ) {
+            if( iomy.common.NavPagesNavigationArray.length >= iomy.common.NavPagesCurrentIndex ) {
                 //-- If there is more Pages stored in the forward side of the array then the array can have those forward pages removed --//
                 var iIteration            = this.NavPagesCurrentIndex;
                 var iMaxIterations        = this.NavPagesNavigationArray.length;
@@ -2914,19 +2914,19 @@ $.extend(IomyRe.common,{
         try {
             //-- User List --//
             if (sPageName === "pUserList" || sPageName === "pUserForm" || sPageName === "pNewUser") {
-                if (IomyRe.common.UserInfo.PermUserAdmin != 1) {
+                if (iomy.common.UserInfo.PermUserAdmin != 1) {
                     aErrorMessages.push("You don't have sufficient privileges to manage users.");
                 }
                 
             //-- Rules List --//
             } else if (sPageName === "pRulesList" || sPageName === "pRulesForm") {
-                if (IomyRe.common.LookupFirstHubToUseWithTelnet() == 0) {
+                if (iomy.common.LookupFirstHubToUseWithTelnet() == 0) {
                     aErrorMessages.push("Only the owner of a premise can manage rules.");
                 }
                 
             //-- Telnet Console --//
             } else if (sPageName === "pTelnet") {
-                if (IomyRe.common.LookupFirstHubToUseWithTelnet() == 0) {
+                if (iomy.common.LookupFirstHubToUseWithTelnet() == 0) {
                     aErrorMessages.push("Only the owner of a premise can use the telnet console.");
                 }
             }
@@ -2944,14 +2944,14 @@ $.extend(IomyRe.common,{
         try {
             if (bCreatingPage) {
                 if (oApp.getPage(sPageName) === null) {
-                    IomyRe.pages.createPage(sPageName);
+                    iomy.pages.createPage(sPageName);
                 } else {
                     if (oApp.getPage(sPageName).byId("openMenu") !== undefined) {
-                        var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+                        var sDisplayName = iomy.common.UserInfo.Displayname || iomy.common.UserInfo.Username;
                         oApp.getPage(sPageName).byId("openMenu").setText("Hi, "+sDisplayName);
                     }
 
-                    IomyRe.help.addHelpMessage(sPageName);
+                    iomy.help.addHelpMessage(sPageName);
                 }
 
                 //--------------------------------------------------------------------//
@@ -2964,12 +2964,12 @@ $.extend(IomyRe.common,{
                     if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === true &&
                         sap.ui.Device.system.phone) 
                     {
-                        IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+                        iomy.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
 
                     } else if (oApp.getCurrentPage().byId("toolPage").getSideExpanded() === false &&
                         sap.ui.Device.system.desktop && oApp.getCurrentPage().getId() !== sPageName )
                     {
-                        IomyRe.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
+                        iomy.navigation.onSideNavButtonPress(null, oApp.getCurrentPage());
                     }
                 }
 
@@ -2980,7 +2980,7 @@ $.extend(IomyRe.common,{
                 // There were conditions that were not met for a particular page.
                 // Show an error popup.
                 //----------------------------------------------------------------//
-                IomyRe.common.showError(aErrorMessages.join("\n\n"), "Cannot access page");
+                iomy.common.showError(aErrorMessages.join("\n\n"), "Cannot access page");
             }
         } catch (e) {
             $.sap.log.error("There was an error creating and switching the page ("+e.name+"): " + e.message);
@@ -2994,7 +2994,7 @@ $.extend(IomyRe.common,{
     //----------------------------------------------------------------------------------------//
     NavigationTriggerBackForward: function( bForwardTriggered ) {
         //-- Restart the status of the extras menu      --//
-        IomyRe.widgets.extrasMenuOpen = false;
+        iomy.widgets.extrasMenuOpen = false;
         
         // Declare variables
         var sName        = "";
@@ -3002,14 +3002,14 @@ $.extend(IomyRe.common,{
         
         //-- IF the app requested to go forward a page --//
         if( bForwardTriggered===true ) {
-            if( IomyRe.common.NavPagesNavigationArray.length > (IomyRe.common.NavPagesCurrentIndex+1) ) {
+            if( iomy.common.NavPagesNavigationArray.length > (iomy.common.NavPagesCurrentIndex+1) ) {
                 //-- Increase the Current Index back to the next value --//
-                //jQuery.sap.log.debug("NavForward CurrentLength="+IomyRe.common.NavPagesNavigationArray.length);
-                //jQuery.sap.log.debug("NavForward CurrentIndex="+IomyRe.common.NavPagesCurrentIndex);
-                IomyRe.common.NavPagesCurrentIndex++;
-                //jQuery.sap.log.debug("NavForward NewIndex="+IomyRe.common.NavPagesCurrentIndex);
-                sName = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Name;
-                aData = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Data;
+                //jQuery.sap.log.debug("NavForward CurrentLength="+iomy.common.NavPagesNavigationArray.length);
+                //jQuery.sap.log.debug("NavForward CurrentIndex="+iomy.common.NavPagesCurrentIndex);
+                iomy.common.NavPagesCurrentIndex++;
+                //jQuery.sap.log.debug("NavForward NewIndex="+iomy.common.NavPagesCurrentIndex);
+                sName = iomy.common.NavPagesNavigationArray[iomy.common.NavPagesCurrentIndex].Name;
+                aData = iomy.common.NavPagesNavigationArray[iomy.common.NavPagesCurrentIndex].Data;
                 //-- Navigate to the next Page --//
                 oApp.to( sName, "Slide", aData );
                 //-- Return Success --//
@@ -3022,23 +3022,23 @@ $.extend(IomyRe.common,{
         //-- ELSE assume going back a page is what is requested --//
         } else {
             //-- If the Page is on the Default Page or Glitched and a back rquest is requested --//
-            if( IomyRe.common.NavPagesCurrentIndex<=0) {
+            if( iomy.common.NavPagesCurrentIndex<=0) {
                 //-- Set the index to zero (aka Default Page) --//
-                IomyRe.common.NavPagesCurrentIndex = -1;
+                iomy.common.NavPagesCurrentIndex = -1;
                 //-- Navigate back to the Default Page --//
-                oApp.to( IomyRe.common.sNavigationDefaultPage, "slide", {} );
+                oApp.to( iomy.common.sNavigationDefaultPage, "slide", {} );
                 
             } else {
                 //-- Decrease the Current Index back to the previous value --//
-                //jQuery.sap.log.debug("NavBack CurrentIndex="+IomyRe.common.NavPagesCurrentIndex);
-                IomyRe.common.NavPagesCurrentIndex--;
-                //jQuery.sap.log.debug("NavBack NewIndex="+IomyRe.common.NavPagesCurrentIndex);
+                //jQuery.sap.log.debug("NavBack CurrentIndex="+iomy.common.NavPagesCurrentIndex);
+                iomy.common.NavPagesCurrentIndex--;
+                //jQuery.sap.log.debug("NavBack NewIndex="+iomy.common.NavPagesCurrentIndex);
                 
-                sName = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Name;
-                aData = IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex].Data;
+                sName = iomy.common.NavPagesNavigationArray[iomy.common.NavPagesCurrentIndex].Name;
+                aData = iomy.common.NavPagesNavigationArray[iomy.common.NavPagesCurrentIndex].Data;
                 
-                //jQuery.sap.log.debug("NavBack NavArray="+JSON.stringify(IomyRe.common.NavPagesNavigationArray) );
-                //jQuery.sap.log.debug("NavBack BackPage="+JSON.stringify(IomyRe.common.NavPagesNavigationArray[IomyRe.common.NavPagesCurrentIndex]) );
+                //jQuery.sap.log.debug("NavBack NavArray="+JSON.stringify(iomy.common.NavPagesNavigationArray) );
+                //jQuery.sap.log.debug("NavBack BackPage="+JSON.stringify(iomy.common.NavPagesNavigationArray[iomy.common.NavPagesCurrentIndex]) );
                 //-- Navigate back to the previous Page --//
                 oApp.to( sName, "slide", aData );
             }
@@ -3049,19 +3049,19 @@ $.extend(IomyRe.common,{
     
     NavigationReturnToHome: function() {
         //-- Restart the status of the extras menu      --//
-        IomyRe.widgets.extrasMenuOpen = false;
+        iomy.widgets.extrasMenuOpen = false;
 
         // Purge the navigation history.
-        IomyRe.common.NavPagesNavigationArray = [
+        iomy.common.NavPagesNavigationArray = [
             {
-                "Name": IomyRe.common.sNavigationDefaultPage,
+                "Name": iomy.common.sNavigationDefaultPage,
                 "Data": {}
             }
         ];
         //-- Set the index to zero (aka Navigation Main Page) --//
-        IomyRe.common.NavPagesCurrentIndex = -1;
+        iomy.common.NavPagesCurrentIndex = -1;
         //-- Navigate back to the "Navigation Main" Page --//
-        oApp.to( IomyRe.common.sNavigationDefaultPage, "slide", {} );
+        oApp.to( iomy.common.sNavigationDefaultPage, "slide", {} );
         
         return true;
     },
@@ -3108,27 +3108,27 @@ $.extend(IomyRe.common,{
                 case "FormContainer":
                     //console.log("Add FormContainer");
                     oTarget.destroyFormContainers();
-                    oTarget.addFormContainer( IomyRe.common.GetFormFragment( oController, sFragmentName) );
+                    oTarget.addFormContainer( iomy.common.GetFormFragment( oController, sFragmentName) );
                 break;
                 //case "FormElement":
                 //    //console.log("Add FormElement");
                 //    oTarget.destroyFormElements();
-                //    oTarget.addFormElement( IomyRe.common.GetFormFragment( oController, sFragmentName) );
+                //    oTarget.addFormElement( iomy.common.GetFormFragment( oController, sFragmentName) );
                 //break;
                 case "Item":
                     //console.log("Add Item");
                     oTarget.destroyItems();
-                    oTarget.addItem( IomyRe.common.GetFormFragment( oController, sFragmentName) );
+                    oTarget.addItem( iomy.common.GetFormFragment( oController, sFragmentName) );
                 break;
                 case "Block":
                     //console.log("Add Block");
                     oTarget.destroyBlocks();
-                    oTarget.addBlock( IomyRe.common.GetFormFragment( oController, sFragmentName) );
+                    oTarget.addBlock( iomy.common.GetFormFragment( oController, sFragmentName) );
                 break;
                 default: 
                     //console.log("Add Content");
                     oTarget.removeAllContent();
-                    oTarget.addContent( IomyRe.common.GetFormFragment( oController, sFragmentName) );
+                    oTarget.addContent( iomy.common.GetFormFragment( oController, sFragmentName) );
                 break;
             }
             return oTarget;

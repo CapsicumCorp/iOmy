@@ -69,7 +69,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
             if (oController.bEditing === true) {
                 var sRoomCode = "_"+oController.mPageData.RoomId;
                 var sPremiseCode = "_"+oController.mPageData.PremiseId;
-                oController.mRoomData = IomyRe.common.RoomsList[sPremiseCode][sRoomCode];
+                oController.mRoomData = iomy.common.RoomsList[sPremiseCode][sRoomCode];
 
             } else {
                 oController.mRoomData = {
@@ -90,7 +90,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
         oController.ToggleButtonsAndView( oController, oController.bEditing );
 
         //-- Defines the Device Type --//
-        IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+        iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
     },
     
     ToggleSubmitCancelButtons : function (bEnabled) {
@@ -115,8 +115,8 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		//------------------------------------------------//
 		oView.setModel( 
 			new sap.ui.model.json.JSONModel({
-				"Premises":           JSON.parse(JSON.stringify(IomyRe.common.PremiseList)),
-				"RoomTypes":          JSON.parse(JSON.stringify(IomyRe.common.RoomTypes)),
+				"Premises":           JSON.parse(JSON.stringify(iomy.common.PremiseList)),
+				"RoomTypes":          JSON.parse(JSON.stringify(iomy.common.RoomTypes)),
 				"CurrentRoom":        JSON.parse(JSON.stringify(oController.mRoomData))
 			})
 		);	
@@ -153,8 +153,8 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		//------------------------------------------------//
 		try {
 			if( bError===false ) {
-				IomyRe.apiphp.AjaxRequest({
-					url:       IomyRe.apiphp.APILocation("rooms"),
+				iomy.apiphp.AjaxRequest({
+					url:       iomy.apiphp.APILocation("rooms"),
 					data:      {
 						"Mode":             "EditInfo",
 						"Id":               oCurrentFormData.RoomId,
@@ -170,20 +170,20 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 									//------------------------------------------------//
 									//-- STEP 5 - Update Room List                  --//
 									//------------------------------------------------//
-									IomyRe.common.RetreiveRoomList({
+									iomy.common.RetreiveRoomList({
 										onSuccess: $.proxy( function() {
 											//------------------------------------------------//
 											//-- STEP 6 - Update the Controller Model       --//
 											//------------------------------------------------//
 											oController.RefreshModel( oController, {
 												onSuccess: $.proxy( function() {
-                                                    IomyRe.common.showMessage({
+                                                    iomy.common.showMessage({
                                                         text : oCurrentFormData.RoomName + " successfully updated."
                                                     });
                                                     
                                                     oController.ToggleSubmitCancelButtons(true);
                                                     
-													IomyRe.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
+													iomy.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
 												}, oController )
 											});    //-- END RefreshControllerModel (STEP 6) --//
 										}, oController )
@@ -211,14 +211,14 @@ sap.ui.controller("pages.staging.room.RoomForm", {
                         
 						jQuery.sap.log.error(sErrorMessage);
                         
-                        IomyRe.common.showError( sErrorMessage, "Error", function () {
+                        iomy.common.showError( sErrorMessage, "Error", function () {
                             oController.ToggleSubmitCancelButtons(true);
                         });
                         
 					}
 				});
 			} else {
-				IomyRe.common.showError(aErrorMessages.join("\n"), "No name", function () {
+				iomy.common.showError(aErrorMessages.join("\n"), "No name", function () {
                     oController.ToggleSubmitCancelButtons(true);
                 });
 			}
@@ -251,8 +251,8 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		//------------------------------------------------//
 		try {
 			if( bError===false ) {
-				IomyRe.apiphp.AjaxRequest({
-					url:       IomyRe.apiphp.APILocation("rooms"),
+				iomy.apiphp.AjaxRequest({
+					url:       iomy.apiphp.APILocation("rooms"),
 					data:      {
 						"Mode":             "AddRoom",
 						"PremiseId":        oCurrentFormData.PremiseId,
@@ -270,11 +270,11 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 										var sRoomId = mData.Data.RoomId;
 										var iRoomId = parseInt(sRoomId);
 										
-										IomyRe.apiphp.AjaxRequest({
-											url : IomyRe.apiphp.APILocation("permissions"),
+										iomy.apiphp.AjaxRequest({
+											url : iomy.apiphp.APILocation("permissions"),
 											data : {
 												"Mode" : "UpdateRoomPerms",
-												"UserId" : IomyRe.common.UserInfo.UserId,
+												"UserId" : iomy.common.UserInfo.UserId,
 												"RoomId" : iRoomId,
 												"Data" : "{\"Read\":"+1+",\"DataRead\":"+1+",\"Write\":"+1+",\"StateToggle\":"+1+"}"
 											},
@@ -282,20 +282,20 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 												//------------------------------------------------//
 												//-- STEP 5 - Update Room List                  --//
 												//------------------------------------------------//
-												IomyRe.common.RetreiveRoomList({
+												iomy.common.RetreiveRoomList({
 													onSuccess: $.proxy( function() {
 														//------------------------------------------------//
 														//-- STEP 6 - Update the Controller Model       --//
 														//------------------------------------------------//
 														oController.RefreshModel( oController, {
 															onSuccess: $.proxy( function() {
-                                                                IomyRe.common.showMessage({
+                                                                iomy.common.showMessage({
                                                                     text : oCurrentFormData.RoomName + " successfully created."
                                                                 });
 
                                                                 oController.ToggleSubmitCancelButtons(true);
                                                                 
-																IomyRe.common.NavigationChangePage( "pRoomList" , {} , false);
+																iomy.common.NavigationChangePage( "pRoomList" , {} , false);
 															}, oController )
 														});    //-- END RefreshControllerModel (STEP 6) --//
 													}, oController )
@@ -324,13 +324,13 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 						var sErrorMessage = "Error creating the room:\n\n" + response.responseText;
                         
 						jQuery.sap.log.error(sErrorMessage);
-                        IomyRe.common.showError( sErrorMessage, "Error", function () {
+                        iomy.common.showError( sErrorMessage, "Error", function () {
                             oController.ToggleSubmitCancelButtons(true);
                         });
 					}
 				});
 			} else {
-                IomyRe.common.showError(aErrorMessages.join("\n"), "No name", function () {
+                iomy.common.showError(aErrorMessages.join("\n"), "No name", function () {
                     oController.ToggleSubmitCancelButtons(true);
                 });
 			}
@@ -342,7 +342,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
     DeleteRoomInfoValues : function () {
         var oController     = this;
         var oView           = this.getView();
-        var iNumOfDevices   = IomyRe.functions.getNumberOfDevicesInRoom(oController.mRoomData.RoomId);
+        var iNumOfDevices   = iomy.functions.getNumberOfDevicesInRoom(oController.mRoomData.RoomId);
         var sDialogTitle;
         
         oController.ToggleSubmitCancelButtons(false);
@@ -359,7 +359,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
             sErrMessage += " still assigned to this room.\n\n";
             sErrMessage += "Move any devices from this room before deleting it.";
 
-            IomyRe.common.showError(sErrMessage, "Error",
+            iomy.common.showError(sErrMessage, "Error",
                 function () {
                     oController.ToggleSubmitCancelButtons(true);
                 }
@@ -368,7 +368,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
         } else {
 
             //-- Ask the user to confirm the deletion. --//
-            IomyRe.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
+            iomy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
                 function (oAction) {
                     if (oAction === sap.m.MessageBox.Action.OK) {
                         try {
@@ -376,16 +376,16 @@ sap.ui.controller("pages.staging.room.RoomForm", {
                                 roomID      : oController.mRoomData.RoomId,
 
                                 onSuccess   : function () {
-                                    IomyRe.common.showMessage({
+                                    iomy.common.showMessage({
                                         text : oController.mRoomData.RoomName + " successfully removed."
                                     });
 
                                     oController.ToggleSubmitCancelButtons(true);
-                                    IomyRe.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
+                                    iomy.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
                                 },
 
                                 onFail : function (sErrorMessage) {
-                                    IomyRe.common.showError(sErrorMessage, "Error",
+                                    iomy.common.showError(sErrorMessage, "Error",
                                         function () {
                                             oController.ToggleSubmitCancelButtons(true);
                                         }
@@ -406,7 +406,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
                                 sDialogTitle = "Error";
                             }
 
-                            IomyRe.common.showError(err.message, sDialogTitle,
+                            iomy.common.showError(err.message, sDialogTitle,
                                 function () {
                                     oController.ToggleSubmitCancelButtons(true);
                                 }
@@ -429,10 +429,10 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 		try {	
 			if(bEditing === false ) {
 				oView.byId("RoomToolbarTitle").setText("Add Room");
-				IomyRe.common.ShowFormFragment( oController, "room.AddRoom", "RoomBlock_Form", "FormContainer" );
+				iomy.common.ShowFormFragment( oController, "room.AddRoom", "RoomBlock_Form", "FormContainer" );
 			} else if(bEditing === true) {
 				oView.byId("RoomToolbarTitle").setText("Edit Room");
-				IomyRe.common.ShowFormFragment( oController, "room.EditRoom", "RoomBlock_Form", "FormContainer" );
+				iomy.common.ShowFormFragment( oController, "room.EditRoom", "RoomBlock_Form", "FormContainer" );
 			} else {
 				$.sap.log.error("ToggleButtonsAndView: Critcal Error. bEditing set incorrectly:"+bEditing);
 			}
@@ -483,8 +483,8 @@ sap.ui.controller("pages.staging.room.RoomForm", {
             if (mSettings.roomID !== undefined && mSettings.roomID !== null) {
                 iRoomId = mSettings.roomID;
                 
-                var mRoomIDResult = IomyRe.validation.isRoomIDValid(iRoomId);
-                var iNumOfDevices = IomyRe.functions.getNumberOfDevicesInRoom(iRoomId);
+                var mRoomIDResult = iomy.validation.isRoomIDValid(iRoomId);
+                var iNumOfDevices = iomy.functions.getNumberOfDevicesInRoom(iRoomId);
                 
                 if (mRoomIDResult.bIsValid) {
                     //--------------------------------------------------------------------//
@@ -558,7 +558,7 @@ sap.ui.controller("pages.staging.room.RoomForm", {
 //        // If this room is the only one registered in iOmy, it should not be
 //        // deleted.
 //        //--------------------------------------------------------------------//
-//        iNumOfRooms             = IomyRe.functions.getNumberOfRooms(true); // TRUE to include the "Unassigned" room.
+//        iNumOfRooms             = iomy.functions.getNumberOfRooms(true); // TRUE to include the "Unassigned" room.
 //        if (iNumOfRooms === 1) {
 //            sErrMessage = "This is the only room left in iOmy! You need at least "+
 //                    "one room to assign new devices to. This room will not be deleted " +
@@ -573,13 +573,13 @@ sap.ui.controller("pages.staging.room.RoomForm", {
         // Run the API Ajax request to delete the room.
         //--------------------------------------------------------------------//
         try {
-            IomyRe.apiphp.AjaxRequest({
-                url: IomyRe.apiphp.APILocation("rooms"),
+            iomy.apiphp.AjaxRequest({
+                url: iomy.apiphp.APILocation("rooms"),
                 data : {"Mode" : "DeleteRoom", "Id" : iRoomId},
 
                 onSuccess : function () {
                     try {
-                        IomyRe.common.RefreshCoreVariables({
+                        iomy.common.RefreshCoreVariables({
                             onSuccess : fnSuccess
                         });
                     } catch (e) {

@@ -21,7 +21,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.require("IomyRe.graph_jqplot");
+$.sap.require("iomy.graph_jqplot");
 
 sap.ui.controller("pages.staging.graphs.PieGraph", {
 	
@@ -91,7 +91,7 @@ sap.ui.controller("pages.staging.graphs.PieGraph", {
 		
 		var aTicks = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ];
 		
-		var oVarTest = IomyRe.graph_jqplot.CreatePieGraph( 
+		var oVarTest = iomy.graph_jqplot.CreatePieGraph( 
 			oController,
 			'PieGraphPage_Main',
 			[
@@ -170,8 +170,8 @@ sap.ui.controller("pages.staging.graphs.PieGraph", {
         //----------------------------------------------------//
         //-- 4.0 - Get the data for the appropriate Period  --//
         //----------------------------------------------------//
-        IomyRe.apiphp.AjaxRequest({
-			url:       IomyRe.apiphp.APILocation("graph"),
+        iomy.apiphp.AjaxRequest({
+			url:       iomy.apiphp.APILocation("graph"),
 			data:      {
 				"Mode": "6HourPiePreviousDay",
 				"Data": "{\"Type\":\"Normal\",\"IOId\":"+iIOId+"}",
@@ -193,7 +193,7 @@ sap.ui.controller("pages.staging.graphs.PieGraph", {
 
                             try {
                                 //-- Create the Pie Graph --//
-                                IomyRe.graph_jqplot.CreatePieGraph( 
+                                iomy.graph_jqplot.CreatePieGraph( 
                                     oController,
                                     'PieGraphPage_Main',
                                     [

@@ -1,5 +1,5 @@
 /*
-Title: IomyRe Page Widgets
+Title: iomy Page Widgets
 Author: 
     Brent Jarmaine (Capsicum Corporation) <brenton@capsicumcorp.com>
     Ian Borg (Capsicum Corporation) <ianb@capsicumcorp.com>
@@ -24,11 +24,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.widgets",true);
+$.sap.declare("iomy.widgets",true);
 
-IomyRe.widgets = new sap.ui.base.Object();
+iomy.widgets = new sap.ui.base.Object();
 
-$.extend( IomyRe.widgets, {
+$.extend( iomy.widgets, {
 	
 	//-- Top Navigation for all pages --//
 	getToolPageHeader : function (oCurrentController) {
@@ -50,7 +50,7 @@ $.extend( IomyRe.widgets, {
 		
 		var oView = oCurrentController.getView();  //-- Defines oView based on the Controller that's being passed --//
 
-		sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+		sDisplayName = iomy.common.UserInfo.Displayname || iomy.common.UserInfo.Username;
 		
 		//----------------------------------------------------//
 		//-- 2.0 - Create ToolHeader Content                --//
@@ -63,7 +63,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://menu2",
 			type: "Transparent",
 			press: function(oControlEvent) {
-				IomyRe.navigation.onSideNavButtonPress(oControlEvent, oView);
+				iomy.navigation.onSideNavButtonPress(oControlEvent, oView);
 			}
 		});
 		
@@ -89,7 +89,7 @@ $.extend( IomyRe.widgets, {
 			text: "Add",
 			type: "Transparent",
 			press: function(oControlEvent) {
-				IomyRe.navigation.AddMenu(oControlEvent, oView);
+				iomy.navigation.AddMenu(oControlEvent, oView);
 			}	
 		});
 		
@@ -101,7 +101,7 @@ $.extend( IomyRe.widgets, {
 			text: "Edit",
 			type: "Transparent",
 			press: function(oControlEvent) {
-				IomyRe.navigation.EditMenu(oControlEvent, oView);
+				iomy.navigation.EditMenu(oControlEvent, oView);
 			}	
 		});
 		
@@ -113,7 +113,7 @@ $.extend( IomyRe.widgets, {
 //			type: "Transparent",
 //			text: "View By",
 //			press: function(oControlEvent) {
-//				IomyRe.navigation.GroupMenu(oControlEvent, oView);
+//				iomy.navigation.GroupMenu(oControlEvent, oView);
 //			}	
 //		});
 		
@@ -124,7 +124,7 @@ $.extend( IomyRe.widgets, {
 			text: "Hi, "+sDisplayName,
 			type: "Transparent",
 			press: function(oControlEvent) {
-				IomyRe.navigation.UserMenu(oControlEvent, oView);
+				iomy.navigation.UserMenu(oControlEvent, oView);
 			}	
 		});
 		
@@ -171,7 +171,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://home",
 			text: "Home",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pBlock" , {} , true);
+				iomy.common.NavigationChangePage( "pBlock" , {} , true);
 			}
 		});
 		
@@ -185,7 +185,7 @@ $.extend( IomyRe.widgets, {
                     oController.RefreshPage({});
                 }
                 
-                IomyRe.common.NavigationChangePage( "pDevice" , {} , true);
+                iomy.common.NavigationChangePage( "pDevice" , {} , true);
 			}
 		});
 		
@@ -193,7 +193,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://building",
 			text: "Premise",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pPremise" , {} , true);
+				iomy.common.NavigationChangePage( "pPremise" , {} , true);
 			}
 		});
 		
@@ -210,7 +210,7 @@ $.extend( IomyRe.widgets, {
 
                 }
                 
-                IomyRe.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
+                iomy.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
 			}
 		});
 		
@@ -218,7 +218,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://add-activity",
 			text: "Rules",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pRulesList" , {} , true);
+				iomy.common.NavigationChangePage( "pRulesList" , {} , true);
 			}
 		});
 		
@@ -226,7 +226,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://family-protection",
 			text: "Users",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserList" , {} , true);
+				iomy.common.NavigationChangePage( "pUserList" , {} , true);
 			}
 		});
 		
@@ -234,7 +234,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://chain-link",
 			text: "Important Links",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pUserForm" , {} , true);
+				iomy.common.NavigationChangePage( "pUserForm" , {} , true);
 			}
 		});
 		
@@ -242,7 +242,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://compare",
 			text: "Legal Information",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "" , {} , true);
+				iomy.common.NavigationChangePage( "" , {} , true);
 			}
 		});
 		
@@ -250,7 +250,7 @@ $.extend( IomyRe.widgets, {
 			icon: "sap-icon://settings",
 			text: "Advanced",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pTelnet" , {} , true);
+				iomy.common.NavigationChangePage( "pTelnet" , {} , true);
 			}
 		});
 
@@ -258,7 +258,7 @@ $.extend( IomyRe.widgets, {
 			icon: "",
 			text: "Powered by Capsicum",
 			select : function () {
-				IomyRe.common.NavigationChangePage( "pServerInfo" , {} , true);
+				iomy.common.NavigationChangePage( "pServerInfo" , {} , true);
 			}
 		});
 		
@@ -631,7 +631,7 @@ $.extend( IomyRe.widgets, {
                                         items : [
                                             new sap.m.Image(oView.createId("ColourBox"), {
                                                 densityAware : false,
-                                                src : IomyRe.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iCurrentHue+"&S="+iCurrentSaturation+"&L="+Math.floor(iCurrentBrightness / 2)
+                                                src : iomy.apiphp.APILocation("colorbox")+"?Mode=HSL&H="+iCurrentHue+"&S="+iCurrentSaturation+"&L="+Math.floor(iCurrentBrightness / 2)
                                             }).addStyleClass("width80px height80px"),
 
                                             new sap.m.Switch (oView.createId("LightSwitch"), {
@@ -846,7 +846,7 @@ $.extend( IomyRe.widgets, {
             if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
                 iThingId = mSettings.thingID;
                 
-                var mInfo = IomyRe.validation.isThingIDValid(iThingId);
+                var mInfo = iomy.validation.isThingIDValid(iThingId);
                 
                 if (!mInfo.bIsValid) {
                     bError = true;
@@ -881,7 +881,7 @@ $.extend( IomyRe.widgets, {
         // Draw the popup.
         //--------------------------------------------------------------------//
         var oDialog = new sap.m.Dialog({
-            title : IomyRe.common.ThingList["_"+iThingId].DisplayName,
+            title : iomy.common.ThingList["_"+iThingId].DisplayName,
             content : [
                 new sap.m.Label({
                     text : "URL (copy if unable to play stream)"
@@ -929,7 +929,7 @@ $.extend( IomyRe.widgets, {
 		// Declare Variables
 		//================================================================//
 		try {
-            var aaOptions = IomyRe.functions.getNewDeviceOptions();
+            var aaOptions = iomy.functions.getNewDeviceOptions();
             var oSBox;
             var sID;
         } catch (e) {
@@ -1047,7 +1047,7 @@ $.extend( IomyRe.widgets, {
                 // normally the only one in the list. When we start adding support for
                 // multiple premises, this code will need to be redone.
                 //--------------------------------------------------------------------//
-                $.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+                $.each(iomy.common.PremiseList, function (sI, mPremise) {
                     sPremiseId = sI;
                     return false;
                 });
@@ -1119,7 +1119,7 @@ $.extend( IomyRe.widgets, {
             // normally the only one in the list. When we start adding support for
             // multiple premises, this code will need to be redone.
             //--------------------------------------------------------------------//
-            $.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+            $.each(iomy.common.PremiseList, function (sI, mPremise) {
                 sPremiseId = sI;
                 return false;
             });
@@ -1148,7 +1148,7 @@ $.extend( IomyRe.widgets, {
             }
             
             if (mTemplate === null) {
-                if (IomyRe.common.RoomsList[sPremiseId] !== undefined) {
+                if (iomy.common.RoomsList[sPremiseId] !== undefined) {
 
                     aFirstItem.push(
                         new sap.ui.core.Item({
@@ -1166,7 +1166,7 @@ $.extend( IomyRe.widgets, {
                         );
                     }
 
-                    $.each(IomyRe.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
+                    $.each(iomy.common.RoomsList[sPremiseId],function(sIndex,aRoom) {
                         //-- Verify that the Premise has rooms, other than the pseudo-room Unassigned --//
                         if( sIndex!==undefined && sIndex!==null && aRoom!==undefined && aRoom!==null)
                         {
@@ -1240,7 +1240,7 @@ $.extend( IomyRe.widgets, {
             return oSBox;
 
         } catch (e) {
-            e.message = "Error in IomyRe.widgets.selectBoxRoom(): "+e.message;
+            e.message = "Error in iomy.widgets.selectBoxRoom(): "+e.message;
             throw e;
         }
     },
@@ -1336,7 +1336,7 @@ $.extend( IomyRe.widgets, {
                     })
                 );
 
-                $.each(IomyRe.common.HubList, function (sI, mHub) {
+                $.each(iomy.common.HubList, function (sI, mHub) {
                     if (iFirstHubId === null) {
                         iFirstHubId = mHub.HubId;
                     }
@@ -1379,7 +1379,7 @@ $.extend( IomyRe.widgets, {
             return oSBox;
             
         } catch (e) {
-            e.message = "Error in IomyRe.widgets.selectBoxHub(): "+e.message;
+            e.message = "Error in iomy.widgets.selectBoxHub(): "+e.message;
             throw e;
             
         }
@@ -1486,15 +1486,15 @@ $.extend( IomyRe.widgets, {
         }
         
         try {
-            IomyRe.common.RefreshCommList({
+            iomy.common.RefreshCommList({
 
                 onSuccess : function () {
 
                     var iFirstModem = null;
 
-                    $.each(IomyRe.common.CommList, function (sI, mComm) {
+                    $.each(iomy.common.CommList, function (sI, mComm) {
 
-                        if (mComm.CommTypeId == IomyRe.devices.zigbeesmartplug.CommTypeId) {
+                        if (mComm.CommTypeId == iomy.devices.zigbeesmartplug.CommTypeId) {
                             if (iFirstModem === null) {
                                 iFirstModem = mComm.CommId;
                             }
@@ -1532,7 +1532,7 @@ $.extend( IomyRe.widgets, {
             return oSBox;
 
         } catch (e) {
-            e.message = "Error in IomyRe.widgets.selectBoxZigbeeModem(): "+e.message;
+            e.message = "Error in iomy.widgets.selectBoxZigbeeModem(): "+e.message;
             throw e;
         }
     },
@@ -1594,7 +1594,7 @@ $.extend( IomyRe.widgets, {
         }
         
         try {
-            IomyRe.devices.onvif.LookupProfiles({
+            iomy.devices.onvif.LookupProfiles({
                 linkID : iLinkId,
                 
                 onSuccess : function (aProfiles) {
@@ -1620,7 +1620,7 @@ $.extend( IomyRe.widgets, {
             
             return oSBox;
         } catch (e) {
-            e.message = "Error in IomyRe.widgets.selectBoxOnvifProfiles(): "+e.message;
+            e.message = "Error in iomy.widgets.selectBoxOnvifProfiles(): "+e.message;
             throw e;
         }
     },
@@ -1690,13 +1690,13 @@ $.extend( IomyRe.widgets, {
                 })
             );
         
-            $.each(IomyRe.common.LinkList, function (sI, mLink) {
+            $.each(iomy.common.LinkList, function (sI, mLink) {
                 
                 if (!bFirstElementFound) {
                     bFirstElementFound = true;
                 }
                 
-                if (mLink.LinkTypeId == IomyRe.devices.onvif.LinkTypeId) {
+                if (mLink.LinkTypeId == iomy.devices.onvif.LinkTypeId) {
                     aItems.push(
                         new sap.ui.core.Item({
                             key : mLink.LinkId,
@@ -1732,7 +1732,7 @@ $.extend( IomyRe.widgets, {
             
             return oSBox;
         } catch (e) {
-            e.message = "Error in IomyRe.widgets.selectBoxOnvifServer(): "+e.message;
+            e.message = "Error in iomy.widgets.selectBoxOnvifServer(): "+e.message;
             throw e;
         }
     }

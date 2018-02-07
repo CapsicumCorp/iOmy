@@ -21,11 +21,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.functions",true);
+$.sap.declare("iomy.functions",true);
 
-IomyRe.functions = new sap.ui.base.Object();
+iomy.functions = new sap.ui.base.Object();
 
-$.extend(IomyRe.functions, {
+$.extend(iomy.functions, {
     
     
     createDeviceListData : function (mSettings) {
@@ -55,7 +55,7 @@ $.extend(IomyRe.functions, {
 
             }
 
-            $.each( IomyRe.common.ThingList, function( sIndex, mThing ) {
+            $.each( iomy.common.ThingList, function( sIndex, mThing ) {
 
                 //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
                 if ( mThing!==undefined ) {
@@ -260,7 +260,7 @@ $.extend(IomyRe.functions, {
                 "light"         : 0
             };
             
-            $.sap.log.error("Error in IomyRe.functions.convertRGBToHSL ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.functions.convertRGBToHSL ("+e.name+"): " + e.message);
             
         } finally {
             return mResult;
@@ -344,7 +344,7 @@ $.extend(IomyRe.functions, {
                 "light"         : 0
             };
             
-            $.sap.log.error("Error in IomyRe.functions.convertRGBToHSL255 ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.functions.convertRGBToHSL255 ("+e.name+"): " + e.message);
             
         } finally {
             return mResult;
@@ -460,7 +460,7 @@ $.extend(IomyRe.functions, {
                 blue    : 0
             };
             
-            $.sap.log.error("Error in IomyRe.functions.convertHSLToRGB ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.functions.convertHSLToRGB ("+e.name+"): " + e.message);
             
         } finally {
             return mValues;
@@ -574,7 +574,7 @@ $.extend(IomyRe.functions, {
                 blue    : 0
             };
             
-            $.sap.log.error("Error in IomyRe.functions.convertHSL255ToRGB ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.functions.convertHSL255ToRGB ("+e.name+"): " + e.message);
             
         } finally {
             return mValues;
@@ -714,7 +714,7 @@ $.extend(IomyRe.functions, {
             //------------------------------------//
             //-- 3.0 - ERROR CHECKING           --//
             //------------------------------------//
-            if( iThingType!=IomyRe.devices.philipshue.ThingTypeId && iThingType!=IomyRe.devices.csrmesh.ThingTypeId ) {
+            if( iThingType!=iomy.devices.philipshue.ThingTypeId && iThingType!=iomy.devices.csrmesh.ThingTypeId ) {
                 bError   = true;
                 sErrMesg = "Unsupported ThingType Id! ThingTypeId="+iThingType;
             } 
@@ -728,12 +728,12 @@ $.extend(IomyRe.functions, {
                     //-- DB -> Normal                   --//
                     //------------------------------------//
                     if( sToType==="Normal" ) {
-                        if( iThingType == IomyRe.devices.philipshue.ThingTypeId) {
+                        if( iThingType == iomy.devices.philipshue.ThingTypeId) {
                             fHueConvRate   = 360 / 65535;      // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
                             fSatConvRate   = 254 / 255;
                             fLigConvRate   = 254 / 255;
                             
-                        } else if ( iThingType == IomyRe.devices.csrmesh.ThingTypeId) {
+                        } else if ( iThingType == iomy.devices.csrmesh.ThingTypeId) {
                             fHueConvRate   = 1;
                             fSatConvRate   = 1;
                             fLigConvRate   = 1;
@@ -751,12 +751,12 @@ $.extend(IomyRe.functions, {
                     //-- Normal -> DB                   --//
                     //------------------------------------//
                     if( sToType==="DB" ) {
-                        if( iThingType == IomyRe.devices.philipshue.ThingTypeId ) {
+                        if( iThingType == iomy.devices.philipshue.ThingTypeId ) {
                             fHueConvRate   = 65535 / 360 ;      // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
                             fSatConvRate   = 254 / 255;
                             fLigConvRate   = 254 / 255;
                             
-                        } else if( iThingType == IomyRe.devices.csrmesh.ThingTypeId ) {
+                        } else if( iThingType == iomy.devices.csrmesh.ThingTypeId ) {
                             fHueConvRate   = 1;
                             fSatConvRate   = 1;
                             fLigConvRate   = 1;
@@ -789,12 +789,12 @@ $.extend(IomyRe.functions, {
                     //-- Simple Slider -> DB            --//
                     //------------------------------------//
                     if( sToType==="DB" ) {
-                        if( iThingType == IomyRe.devices.philipshue.ThingTypeId ) {
+                        if( iThingType == iomy.devices.philipshue.ThingTypeId ) {
                             fHueConvRate   = 65535 / 360;      // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
                             fSatConvRate   = 254 / 100 ;
                             fLigConvRate   = 254 / 100 ;
                             
-                        } else if( iThingType == IomyRe.devices.csrmesh.ThingTypeId ) {
+                        } else if( iThingType == iomy.devices.csrmesh.ThingTypeId ) {
                             fHueConvRate   = 1;
                             fSatConvRate   = 1;
                             fLigConvRate   = 1;
@@ -829,12 +829,12 @@ $.extend(IomyRe.functions, {
                     //-- Adv Slider -> DB               --//
                     //------------------------------------//
                     if( sToType==="DB" ) {
-                        if( iThingType == IomyRe.devices.philipshue.ThingTypeId ) {
+                        if( iThingType == iomy.devices.philipshue.ThingTypeId ) {
                             fHueConvRate   = 65535 / 360;      // 65535 (2^16 - 1) is the maximum value the Philips Hue API will accept.
                             fSatConvRate   = 254 / 100;
                             fLigConvRate   = 254 / 100;
                             
-                        } else if( iThingType == IomyRe.devices.csrmesh.ThingTypeId ) {
+                        } else if( iThingType == iomy.devices.csrmesh.ThingTypeId ) {
                             fHueConvRate   = 1;
                             fSatConvRate   = 1;
                             fLigConvRate   = 1;
@@ -913,7 +913,7 @@ $.extend(IomyRe.functions, {
         //--------------------------------------------------------------------//
         var bError            = true;
         var aErrorMessages    = [];
-        var mLinkIdInfo     = IomyRe.validation.isLinkIDValid(iLinkId);
+        var mLinkIdInfo     = iomy.validation.isLinkIDValid(iLinkId);
         var iCommId;
         var iHubId;
         
@@ -930,10 +930,10 @@ $.extend(IomyRe.functions, {
         //--------------------------------------------------------------------//
         // Find its Comm ID and Hub ID and get the hub using the Hub ID.
         //--------------------------------------------------------------------//
-        iCommId    = IomyRe.common.LinkList["_"+iLinkId].CommId;
-        iHubId    = IomyRe.common.CommList["_"+iCommId].HubId;
+        iCommId    = iomy.common.LinkList["_"+iLinkId].CommId;
+        iHubId    = iomy.common.CommList["_"+iCommId].HubId;
         
-        return IomyRe.common.HubList["_"+iHubId];
+        return iomy.common.HubList["_"+iHubId];
         
     },*/
     
@@ -977,15 +977,15 @@ $.extend(IomyRe.functions, {
             //--------------------------------------------------------------------//
             // Get the core variables for this function.
             //--------------------------------------------------------------------//
-            aDeviceList        = IomyRe.common.LinkList;
-            aDeviceTypeList    = IomyRe.common.LinkTypeList;
+            aDeviceList        = iomy.common.LinkList;
+            aDeviceTypeList    = iomy.common.LinkTypeList;
 
             //--------------------------------------------------------------------//
             // Begin Constructing the structure by adding device types.
             //--------------------------------------------------------------------//
             $.each(aDeviceTypeList, function (sI, mDeviceType) {
                 // TODO: Place all of these options in alphabetical order.
-                if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId)
+                if (mDeviceType.LinkTypeId === iomy.devices.zigbeesmartplug.LinkTypeId)
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
@@ -994,7 +994,7 @@ $.extend(IomyRe.functions, {
                     };
                 }
 
-                if (mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId)
+                if (mDeviceType.LinkTypeId === iomy.devices.onvif.LinkTypeId)
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
@@ -1008,7 +1008,7 @@ $.extend(IomyRe.functions, {
                     };
                 }
 
-                if (mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId)
+                if (mDeviceType.LinkTypeId === iomy.devices.philipshue.LinkTypeId)
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
@@ -1021,7 +1021,7 @@ $.extend(IomyRe.functions, {
                     };
                 }
 
-                if (mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId)
+                if (mDeviceType.LinkTypeId === iomy.devices.weatherfeed.LinkTypeId)
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
@@ -1033,7 +1033,7 @@ $.extend(IomyRe.functions, {
                     };
                 }
 
-                if (mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
+                if (mDeviceType.LinkTypeId === iomy.devices.ipcamera.LinkTypeId)
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Hub" : "",
@@ -1056,7 +1056,7 @@ $.extend(IomyRe.functions, {
             //--------------------------------------------------------------------//
             // Add the onvif camera option
             //--------------------------------------------------------------------//
-            structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
+            structOptions["thingType"+iomy.devices.onvif.ThingTypeId] = {
                 "CameraName" : "",
                 "OnvifServer" : "",
                 "StreamProfile" : "",
@@ -1086,7 +1086,7 @@ $.extend(IomyRe.functions, {
             //--------------------------------------------------------------------//
             var bError			= true;
             var aErrorMessages	= [];
-            var mThingIdInfo	= IomyRe.validation.isThingIDValid(iThingId);
+            var mThingIdInfo	= iomy.validation.isThingIDValid(iThingId);
             var mThing;
             var iCommId;
             var iHubId;
@@ -1104,11 +1104,11 @@ $.extend(IomyRe.functions, {
             //--------------------------------------------------------------------//
             // Find its Comm ID and Hub ID and get the hub using the Hub ID.
             //--------------------------------------------------------------------//
-            mThing	= IomyRe.common.ThingList["_"+iThingId];
-            iCommId	= IomyRe.common.LinkList["_"+mThing.LinkId].CommId;
-            iHubId	= IomyRe.common.CommList["_"+iCommId].HubId;
+            mThing	= iomy.common.ThingList["_"+iThingId];
+            iCommId	= iomy.common.LinkList["_"+mThing.LinkId].CommId;
+            iHubId	= iomy.common.CommList["_"+iCommId].HubId;
 
-            return IomyRe.common.HubList["_"+iHubId];
+            return iomy.common.HubList["_"+iHubId];
         } catch (e) {
             $.sap.log.error("Failed to retrieve hub information for a device ("+e.name+"): " + e.message);
             return null;
@@ -1144,8 +1144,8 @@ $.extend(IomyRe.functions, {
             //----------------------------------------------------------------//
             // Report and throw an exception if no UTS is given.
             //----------------------------------------------------------------//
-            jQuery.sap.log.error("IomyRe.functions.getLengthOfTimePassedSince() requires a UTS parameter!");
-            throw "IomyRe.functions.getLengthOfTimePassedSince() requires a UTS parameter!";
+            jQuery.sap.log.error("iomy.functions.getLengthOfTimePassedSince() requires a UTS parameter!");
+            throw "iomy.functions.getLengthOfTimePassedSince() requires a UTS parameter!";
             
         } else {
             //----------------------------------------------------------------//
@@ -1260,13 +1260,13 @@ $.extend(IomyRe.functions, {
     getLinkConnInfo : function (iLinkId) {
         
         try {
-            var mLinkValidation = IomyRe.validation.isLinkIDValid(iLinkId);
+            var mLinkValidation = iomy.validation.isLinkIDValid(iLinkId);
             
             if (!mLinkValidation.bIsValid) {
                 throw new MissingSettingsMapException(mLinkValidation.aErrorMessages.join("\n"));
             }
             
-            var mLink = IomyRe.common.LinkList["_"+iLinkId];
+            var mLink = iomy.common.LinkList["_"+iLinkId];
             var mLinkConnInfo = {
                 LinkConnId              : mLink.LinkConnId,
                 LinkConnName            : mLink.LinkConnName,
@@ -1293,7 +1293,7 @@ $.extend(IomyRe.functions, {
         var iLinkTypeId = null;
         
         try {
-            $.each(IomyRe.common.LinkList, function (sI, mLink) {
+            $.each(iomy.common.LinkList, function (sI, mLink) {
                 if (mLink.LinkId == iLinkId) {
                     iLinkTypeId = mLink.LinkTypeId;
                     return false;
@@ -1303,7 +1303,7 @@ $.extend(IomyRe.functions, {
             return iLinkTypeId; 
             
         } catch (e) {
-            $.sap.log.error("An error occurred in IomyRe.functions.getLinkTypeIDOfLink(): "+e.name+": "+e.message);
+            $.sap.log.error("An error occurred in iomy.functions.getLinkTypeIDOfLink(): "+e.name+": "+e.message);
         }
     },
     
@@ -1339,19 +1339,19 @@ $.extend(IomyRe.functions, {
             //--------------------------------------------------------------------//
             // Get the core variables for this function
             //--------------------------------------------------------------------//
-            aDeviceList        = IomyRe.common.LinkList;
-            aDeviceTypeList    = IomyRe.common.LinkTypeList;
+            aDeviceList        = iomy.common.LinkList;
+            aDeviceTypeList    = iomy.common.LinkTypeList;
 
             //--------------------------------------------------------------------//
             // Begin Constructing the structure by adding device types.
             //--------------------------------------------------------------------//
             $.each(aDeviceTypeList, function (sI, mDeviceType) {
                 // TODO: Place all of these options in alphabetical order.
-                if (mDeviceType.LinkTypeId === IomyRe.devices.zigbeesmartplug.LinkTypeId ||
-                    mDeviceType.LinkTypeId === IomyRe.devices.onvif.LinkTypeId ||
-                    mDeviceType.LinkTypeId === IomyRe.devices.philipshue.LinkTypeId ||
-                    mDeviceType.LinkTypeId === IomyRe.devices.weatherfeed.LinkTypeId ||
-                    mDeviceType.LinkTypeId === IomyRe.devices.ipcamera.LinkTypeId)
+                if (mDeviceType.LinkTypeId === iomy.devices.zigbeesmartplug.LinkTypeId ||
+                    mDeviceType.LinkTypeId === iomy.devices.onvif.LinkTypeId ||
+                    mDeviceType.LinkTypeId === iomy.devices.philipshue.LinkTypeId ||
+                    mDeviceType.LinkTypeId === iomy.devices.weatherfeed.LinkTypeId ||
+                    mDeviceType.LinkTypeId === iomy.devices.ipcamera.LinkTypeId)
                 {
                     structOptions["linkType"+mDeviceType.LinkTypeId] = {
                         "Id"          : mDeviceType.LinkTypeId,
@@ -1365,8 +1365,8 @@ $.extend(IomyRe.functions, {
             //--------------------------------------------------------------------//
             // Add the onvif camera option
             //--------------------------------------------------------------------//
-            structOptions["thingType"+IomyRe.devices.onvif.ThingTypeId] = {
-                "Id"          : IomyRe.devices.onvif.ThingTypeId,
+            structOptions["thingType"+iomy.devices.onvif.ThingTypeId] = {
+                "Id"          : iomy.devices.onvif.ThingTypeId,
                 "Name"        : "Onvif Stream",
                 "Type"        : "thing"
             };
@@ -1382,10 +1382,10 @@ $.extend(IomyRe.functions, {
         var iCount = 0;
         
         try {
-            var mIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+            var mIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
         
             if (mIDInfo.bIsValid) {
-                $.each(IomyRe.common.ThingList, function (sI, mThing) {
+                $.each(iomy.common.ThingList, function (sI, mThing) {
                     if (iPremiseId == mThing.PremiseId) {
                         iCount++;
                     }
@@ -1404,10 +1404,10 @@ $.extend(IomyRe.functions, {
         var iCount = 0;
         
         try {
-            var mIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
+            var mIDInfo = iomy.validation.isRoomIDValid(iRoomId);
 
             if (mIDInfo.bIsValid) {
-                $.each(IomyRe.common.ThingList, function (sI, mThing) {
+                $.each(iomy.common.ThingList, function (sI, mThing) {
                     if (iRoomId == mThing.RoomId) {
                         iCount++;
                     }
@@ -1426,10 +1426,10 @@ $.extend(IomyRe.functions, {
         var iCount = 0;
         
         try {
-            var mIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+            var mIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
 
             if (mIDInfo.bIsValid) {
-                $.each(IomyRe.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
+                $.each(iomy.common.RoomsList["_"+iPremiseId], function (sI, mRoom) {
                     if (sI !== undefined && sI !== null && mRoom !== undefined && mRoom !== null) {
                         iCount++;
                     }
@@ -1446,7 +1446,7 @@ $.extend(IomyRe.functions, {
     },
     
     getRoom : function (iRoomId, iPremiseId) {
-        var mIDInfo     = IomyRe.validation.isRoomIDValid(iRoomId);
+        var mIDInfo     = iomy.validation.isRoomIDValid(iRoomId);
         var mFoundRoom  = null;
         
         if (mIDInfo.bIsValid) {
@@ -1455,10 +1455,10 @@ $.extend(IomyRe.functions, {
             // the room data.
             //----------------------------------------------------------------//
             if (iPremiseId !== undefined && iPremiseId !== null) {
-                var mPremiseIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                var mPremiseIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
                 
                 if (mPremiseIDInfo.bIsValid) {
-                    mFoundRoom = IomyRe.common.RoomsList["_"+iPremiseId]["_"+iRoomId];
+                    mFoundRoom = iomy.common.RoomsList["_"+iPremiseId]["_"+iRoomId];
                 } else {
                     throw new IllegalArgumentException(mPremiseIDInfo.aErrorMessages.join('\n'));
                 }
@@ -1467,7 +1467,7 @@ $.extend(IomyRe.functions, {
                 //----------------------------------------------------------------//
                 // Otherwise, loop through each premise to find the room.
                 //----------------------------------------------------------------//
-                $.each(IomyRe.common.RoomsList, function (sI, mPremise) {
+                $.each(iomy.common.RoomsList, function (sI, mPremise) {
                     if (sI !== undefined && sI !== null && mPremise !== undefined && mPremise !== null) {
                         var bFound = false;
                         
@@ -1734,10 +1734,10 @@ $.extend(IomyRe.functions, {
             var bIsAdmin = false;
             
             try {
-                mPremiseValidation = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                mPremiseValidation = iomy.validation.isPremiseIDValid(iPremiseId);
                 
                 if (mPremiseValidation.bIsValid) {
-                    bIsAdmin = IomyRe.common.PremiseList["_"+iPremiseId].PermRoomAdmin == 1;
+                    bIsAdmin = iomy.common.PremiseList["_"+iPremiseId].PermRoomAdmin == 1;
                 } else {
                     throw new InvalidArgumentException(mPremiseValidation.aErrorMessages.join('\n\n'));
                 }
@@ -1754,10 +1754,10 @@ $.extend(IomyRe.functions, {
             var bIsAdmin = false;
             
             try {
-                mPremiseValidation = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                mPremiseValidation = iomy.validation.isPremiseIDValid(iPremiseId);
                 
                 if (mPremiseValidation.bIsValid) {
-                    bIsAdmin = IomyRe.common.PremiseList["_"+iPremiseId].PermOwner == 1;
+                    bIsAdmin = iomy.common.PremiseList["_"+iPremiseId].PermOwner == 1;
                 } else {
                     throw new InvalidArgumentException(mPremiseValidation.aErrorMessages.join('\n\n'));
                 }
@@ -1770,10 +1770,10 @@ $.extend(IomyRe.functions, {
         },
         
         fetchRoomPermissions : function (mSettings) {
-            var self                = this;               // REMEMBER: 'this' refers to IomyRe.functions.permissions. NOT IomyRe.functions!
+            var self                = this;               // REMEMBER: 'this' refers to iomy.functions.permissions. NOT iomy.functions!
             var bError              = false;
             var aErrorMessages      = [];
-            var sUrl                = IomyRe.apiphp.APILocation("permissions");
+            var sUrl                = iomy.apiphp.APILocation("permissions");
             var iUserId             = null;
             var iRoomId             = null;
             var iPremiseId          = null;
@@ -1824,7 +1824,7 @@ $.extend(IomyRe.functions, {
                         if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
                             iPremiseId = mSettings.premiseID;
                             
-                            var mPremiseIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                            var mPremiseIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
 
                             if (!mPremiseIDInfo.bIsValid) {
                                 aErrorMessages = aErrorMessages.concat(mPremiseIDInfo.aErrorMessages);
@@ -1842,7 +1842,7 @@ $.extend(IomyRe.functions, {
                         //------------------------------------------------------------//
                         // Otherwise, validate the room ID.
                         //------------------------------------------------------------//
-//                        var mRoomIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
+//                        var mRoomIDInfo = iomy.validation.isRoomIDValid(iRoomId);
 //
 //                        if (!mRoomIDInfo.bIsValid) {
 //                            aErrorMessages = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
@@ -1915,7 +1915,7 @@ $.extend(IomyRe.functions, {
                     //--------------------------------------------------------------------//
                     // Load and display the permissions for the currently selected user.
                     //--------------------------------------------------------------------//
-                    IomyRe.apiphp.AjaxRequest({
+                    iomy.apiphp.AjaxRequest({
                         url : sUrl,
                         data : {
                             "Mode" : "LookupRoomPerms",
@@ -1959,7 +1959,7 @@ $.extend(IomyRe.functions, {
                     //----------------------------------------------------------------//
                     // Prepare each request.
                     //----------------------------------------------------------------//
-                    $.each(IomyRe.common.RoomAdminRoomsList, function (sI, mRoom) {
+                    $.each(iomy.common.RoomAdminRoomsList, function (sI, mRoom) {
 
                         aRequests.push({
                             library : "php",
@@ -2036,10 +2036,10 @@ $.extend(IomyRe.functions, {
         },
 
         updateRoomPermissions : function (mSettings) {
-            var self                = this;               // REMEMBER: 'this' refers to IomyRe.functions.permissions. NOT IomyRe.functions!
+            var self                = this;               // REMEMBER: 'this' refers to iomy.functions.permissions. NOT iomy.functions!
             var bError              = false;
             var aErrorMessages      = [];
-            var sUrl                = IomyRe.apiphp.APILocation("permissions");
+            var sUrl                = iomy.apiphp.APILocation("permissions");
             var iUserId             = null;
             var iRoomId             = null;
             var iPremiseId          = null;
@@ -2101,7 +2101,7 @@ $.extend(IomyRe.functions, {
                         if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
                             iPremiseId = mSettings.premiseID;
 
-                            var mPremiseIDInfo = IomyRe.validation.isPremiseIDValid(iPremiseId);
+                            var mPremiseIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
 
                             if (!mPremiseIDInfo.bIsValid) {
                                 aErrorMessages = aErrorMessages.concat(mPremiseIDInfo.aErrorMessages);
@@ -2114,7 +2114,7 @@ $.extend(IomyRe.functions, {
                         //------------------------------------------------------------//
                         // Otherwise, validate the room ID.
                         //------------------------------------------------------------//
-//                        var mRoomIDInfo = IomyRe.validation.isRoomIDValid(iRoomId);
+//                        var mRoomIDInfo = iomy.validation.isRoomIDValid(iRoomId);
 //
 //                        if (!mRoomIDInfo.bIsValid) {
 //                            aErrorMessages = aErrorMessages.concat(mRoomIDInfo.aErrorMessages);
@@ -2201,7 +2201,7 @@ $.extend(IomyRe.functions, {
 
                 if (iRoomId != 0) {
                     try {
-                        IomyRe.apiphp.AjaxRequest({
+                        iomy.apiphp.AjaxRequest({
                             url : sUrl,
                             data : {
                                 "Mode" : "UpdateRoomPerms",
@@ -2240,7 +2240,7 @@ $.extend(IomyRe.functions, {
                     var oRequestQueue       = null;
 
                     try {
-                        $.each(IomyRe.common.RoomAdminRoomsList, function (sI, mRoom) {
+                        $.each(iomy.common.RoomAdminRoomsList, function (sI, mRoom) {
 
                             aRequests.push({
                                 library : "php",
@@ -2317,7 +2317,7 @@ $.extend(IomyRe.functions, {
     
     server : {
         getDBIndexingState : function (mSettings) {
-            var sUrl            = IomyRe.apiphp.APILocation("serveradmin");
+            var sUrl            = iomy.apiphp.APILocation("serveradmin");
             var fnSuccess       = function () {};
             var fnFail          = function () {};
             var mSuccessMissing = "Success callback is missing. There is no way to return the data to the user.";
@@ -2326,15 +2326,15 @@ $.extend(IomyRe.functions, {
             // Process the settings map.
             //----------------------------------------------------------------//
             try {
-                if (IomyRe.validation.isValueGiven(mSettings)) {
+                if (iomy.validation.isValueGiven(mSettings)) {
 
-                    if (IomyRe.validation.isValueGiven(mSettings.onSuccess)) {
+                    if (iomy.validation.isValueGiven(mSettings.onSuccess)) {
                         fnSuccess = mSettings.onSuccess;
                     } else {
                         $.sap.log.error(mSuccessMissing);
                     }
 
-                    if (IomyRe.validation.isValueGiven(mSettings.onFail)) {
+                    if (iomy.validation.isValueGiven(mSettings.onFail)) {
                         fnFail = mSettings.onFail;
                     }
                 } else {
@@ -2350,7 +2350,7 @@ $.extend(IomyRe.functions, {
             // Attempt to lookup the indexing state of the data tables.
             //----------------------------------------------------------------//
             try {
-                IomyRe.apiphp.AjaxRequest({
+                iomy.apiphp.AjaxRequest({
                     url : sUrl,
                     data : {
                         "Mode" : "CheckOptionalDBIndices"

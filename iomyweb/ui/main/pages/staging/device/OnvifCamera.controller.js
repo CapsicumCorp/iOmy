@@ -58,21 +58,21 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
 		var oView = oController.getView();
         
         // Import the device label functions
-        //var LabelFunctions = IomyRe.functions.DeviceLabels;
+        //var LabelFunctions = iomy.functions.DeviceLabels;
 		
 		oView.addEventDelegate({
 			// Everything is rendered in this function before rendering.
 			onBeforeShow : function (evt) {
                 
                 // Import the given Thing
-                oController.oThing = IomyRe.common.ThingList['_'+evt.data.ThingId];
+                oController.oThing = iomy.common.ThingList['_'+evt.data.ThingId];
                 
 //                oController.loadLinkConn(oController.oThing.LinkId);
 //                oController.displayRoomLocation();
                 
                 oView.wSnapshotTimeField.setText("Loading...");
                 
-                oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+evt.data.ThingId].DisplayName );
+                oView.byId("ToolbarTitle").setText( iomy.common.ThingList["_"+evt.data.ThingId].DisplayName );
 				
 				//-- Store the Page Mode --//
 				oController.sMode = "Thumbnail";
@@ -128,7 +128,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
 //    },
 //    
 //    loadLinkConn : function (iLinkId) {
-//        this.mLinkConnInfo = IomyRe.functions.getLinkConnInfo(iLinkId);
+//        this.mLinkConnInfo = iomy.functions.getLinkConnInfo(iLinkId);
 //        this.sDeviceNetworkAddress = this.mLinkConnInfo.LinkConnAddress;
 //        this.iDeviceOnvifPort = this.mLinkConnInfo.LinkConnPort;
 //        this.sOnvifUsername = this.mLinkConnInfo.LinkConnUsername;
@@ -165,7 +165,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
     },
     
 	/**
-     * Wrapper function for the PTZ Move command in the IomyRe.devices.onvif
+     * Wrapper function for the PTZ Move command in the iomy.devices.onvif
      * library to send the desired number of steps vertically and horizontally
      * to the function.
      * 
@@ -184,7 +184,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
         // Lock all the PTZ buttons
         oController.setPTZButtonsEnabled(false);
         
-        IomyRe.devices.onvif.PTZMove({
+        iomy.devices.onvif.PTZMove({
             thingID : oController.oThing.Id,
             profileName : oController.sThumbnailProfileName,
             xpos : iPosX,
@@ -200,7 +200,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
 
             onFail : function (sErrMesg) {
                 jQuery.sap.log.error(sErrMesg);
-                IomyRe.common.showError(sErrMesg, "Error",
+                iomy.common.showError(sErrMesg, "Error",
                     function () {
                         // Unlock all the PTZ buttons
                         if( oController.sMode==="Thumbnail" ) {
@@ -246,7 +246,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
         var oView       = this.getView();
         
         oController.dateThumbnailUpdate = new Date();
-        oView.wSnapshotTimeField.setText(IomyRe.functions.getTimestampString(oController.dateThumbnailUpdate));
+        oView.wSnapshotTimeField.setText(iomy.functions.getTimestampString(oController.dateThumbnailUpdate));
     },
     
     /**
@@ -261,12 +261,12 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
         //---------------------------------------------------//
         // Check that it can find the device before it does anything
         //---------------------------------------------------//
-        IomyRe.devices.onvif.LookupProfiles({ 
+        iomy.devices.onvif.LookupProfiles({ 
             linkID : oController.oThing.LinkId,
             
             // Function if Lookup is successful (Onvif server is attached)
             onSuccess : function () {
-                var sThumbnailUrl = IomyRe.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.oThing.Id;
+                var sThumbnailUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.oThing.Id;
 
                 // Set the CSS rule using the API URL with parameters
                 document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
@@ -295,7 +295,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
             
             // Function if Lookup fails (Onvif server not found)
             onFail : function (response) {
-                jQuery.sap.log.error("Error checking for the Onvif device (onFail): "+IomyRe.devices.onvif.sProfileLookupErrors);
+                jQuery.sap.log.error("Error checking for the Onvif device (onFail): "+iomy.devices.onvif.sProfileLookupErrors);
                 oView.wSnapshotTimeField.setText("Failed to load the latest snapshot");
                 
                 // If there is an error, the page is to be redrawn when the user
@@ -315,8 +315,8 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
         var sFrameUrl = "<iframe height='300px' width='700' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.oThing.Id+"'></iframe>";
         
         try {
-			IomyRe.apiphp.AjaxRequest({
-				url: IomyRe.apiphp.APILocation("onvifthumbnail"),
+			iomy.apiphp.AjaxRequest({
+				url: iomy.apiphp.APILocation("onvifthumbnail"),
 				type: "POST",
 				data: { 
 					"Mode":    "SetupStream", 
@@ -332,7 +332,7 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
 				},
 				onFail : function(response) {
 					//-- TODO: Fix error message --//
-					IomyRe.common.showError(response.message, "Error Changing Device Status");
+					iomy.common.showError(response.message, "Error Changing Device Status");
 				},
 			});
             
@@ -380,8 +380,8 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
         
         
         // Start loading the profile names
-        IomyRe.apiodata.AjaxRequest({
-            Url             : IomyRe.apiodata.ODataLocation("datashortstring"),
+        iomy.apiodata.AjaxRequest({
+            Url             : iomy.apiodata.ODataLocation("datashortstring"),
             Columns         : ["DATASHORTSTRING_VALUE"],
             WhereClause     : [sNameWhereClause],
             OrderByClause   : [],
@@ -394,15 +394,15 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                 }
                 
                 // Then start loading the profile URLs
-                IomyRe.apiodata.AjaxRequest({
-                    Url             : IomyRe.apiodata.ODataLocation("datamedstring"),
+                iomy.apiodata.AjaxRequest({
+                    Url             : iomy.apiodata.ODataLocation("datamedstring"),
                     Columns         : ["DATAMEDSTRING_VALUE"],
                     WhereClause     : [sUrlWhereClause],
                     OrderByClause   : [],
 
                     onSuccess : function (type, data) {
-                        var oRoomInfo       = IomyRe.common.RoomsList["_"+oController.oThing.PremiseId]["_"+oController.oThing.RoomId];
-                        var sThumbnailUrl   = IomyRe.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+oController.oThing.Id;
+                        var oRoomInfo       = iomy.common.RoomsList["_"+oController.oThing.PremiseId]["_"+oController.oThing.RoomId];
+                        var sThumbnailUrl   = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+oController.oThing.Id;
                         
                         if (data.length > 0) {
                             oController.sStreamProfileUrl        = data[0].DATAMEDSTRING_VALUE;
@@ -436,14 +436,14 @@ sap.ui.controller("pages.staging.device.OnvifCamera", {
                     },
                     onFail : function (response) {
                         jQuery.sap.log.error("Error loading the profile URLs: "+JSON.stringify(response));
-                        IomyRe.common.showError("Error loading the profile URLs");
+                        iomy.common.showError("Error loading the profile URLs");
                     }
                 });
             },
             
             onFail : function (response) {
                 jQuery.sap.log.error("Error loading the profile names: "+JSON.stringify(response));
-                IomyRe.common.showError("Error loading the profile names");
+                iomy.common.showError("Error loading the profile names");
             }
         });
         

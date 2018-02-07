@@ -12,7 +12,7 @@ sap.ui.jsfragment("fragments.UserPremisePermissionDisplay", {
 			fields: [
 				new sap.m.Text ({
 					//text:"Read/Write"
-					text: "{ path:'Id', formatter:'IomyRe.common.LookupPremisePermissionFromId'}"
+					text: "{ path:'Id', formatter:'iomy.common.LookupPremisePermissionFromId'}"
 				})
 			]
 		});

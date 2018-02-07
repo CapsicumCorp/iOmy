@@ -39,11 +39,11 @@ sap.ui.controller("pages.staging.device.WeatherFeed", {
 				//-- (#ToDo# - Pull from the DB) --//
 				
 				//-- Defines the Screen Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 				
 				//-- Updates Paramaters & ID's on Load --//
                 oController.LoadData(oEvent.data.ThingId);
-                oView.byId("ToolbarTitle").setText( IomyRe.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
+                oView.byId("ToolbarTitle").setText( iomy.common.ThingList["_"+oEvent.data.ThingId].DisplayName );
 			}
 		});		
 	},
@@ -67,7 +67,7 @@ sap.ui.controller("pages.staging.device.WeatherFeed", {
         };
         
         try {
-            IomyRe.devices.weatherfeed.FetchCurrentWeather({
+            iomy.devices.weatherfeed.FetchCurrentWeather({
                 thingID : iThingId,
 
                 onSuccess : function (mData) {

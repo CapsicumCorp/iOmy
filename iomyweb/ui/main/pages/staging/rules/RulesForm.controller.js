@@ -43,9 +43,9 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
 		oView.addEventDelegate({
 			onBeforeShow : function (evt) {
 				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
-                if (IomyRe.validation.isValueGiven(evt.data.RuleId)) {
+                if (iomy.validation.isValueGiven(evt.data.RuleId)) {
                     oController.iRuleId     = evt.data.RuleId;
                     oController.bEditing    = true;
                 } else {
@@ -82,7 +82,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
         var oController         = this;
         var oView               = this.getView();
         var oModel              = {};
-        var aSupportedDevices   = JSON.parse(JSON.stringify(IomyRe.rules.loadSupportedDevices()));
+        var aSupportedDevices   = JSON.parse(JSON.stringify(iomy.rules.loadSupportedDevices()));
         
         var oData               = {
             "SupportedDevices"      : aSupportedDevices,
@@ -126,7 +126,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                 oData.Form.ThingId = aSupportedDevices[0].Id;
             }
         } else {
-            var mRule = JSON.parse(JSON.stringify(IomyRe.rules.RulesList["_"+oController.iRuleId]));
+            var mRule = JSON.parse(JSON.stringify(iomy.rules.RulesList["_"+oController.iRuleId]));
             var iEnabled;
             
             if (mRule.Enabled === 1) {
@@ -156,7 +156,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
     },
     
     GoToRulesList : function () {
-        IomyRe.common.NavigationChangePage( "pRulesList" , {}, false);
+        iomy.common.NavigationChangePage( "pRulesList" , {}, false);
     },
     
     submitRuleInformation : function () {
@@ -190,7 +190,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
             // If a rule ID is found, call the edit rule function.
             //----------------------------------------------------------------//
             try {
-                IomyRe.rules.editRule({
+                iomy.rules.editRule({
                     ruleID      : oController.iRuleId,
                     name        : sRuleName,
                     ruleTypeID  : iRuleTypeId,
@@ -198,7 +198,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                     enabled     : bEnabled,
                     
                     onSuccess : function () {
-                        IomyRe.common.showMessage({
+                        iomy.common.showMessage({
                             text : "'"+ sRuleName + "' successfully updated."
                         });
                         
@@ -208,7 +208,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                     onWarning : function (sErrorMessage) {
                         // This will likely execute if the rules could not be reloaded
                         // from the database.
-                        IomyRe.common.showWarning(sErrorMessage, "Warning",
+                        iomy.common.showWarning(sErrorMessage, "Warning",
                             function () {
                                 oController.ToggleControls(true);
                             }
@@ -216,7 +216,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                     },
                     
                     onFail : function (sErrorMessage) {
-                        IomyRe.common.showError(sErrorMessage, "Error",
+                        iomy.common.showError(sErrorMessage, "Error",
                             function () {
                                 oController.ToggleControls(true);
                             }
@@ -226,7 +226,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                 
             } catch (e) {
                 $.sap.log.error("Error editing a rule ("+e.name+"): " + e.message);
-                IomyRe.common.showError(e.message, "Error",
+                iomy.common.showError(e.message, "Error",
                     function () {
                         oController.ToggleControls(true);
                     }
@@ -238,7 +238,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
             // Otherwise, we are adding a rule.
             //----------------------------------------------------------------//
             try {
-                IomyRe.rules.addRule({
+                iomy.rules.addRule({
                     thingID     : iThingId,
                     name        : sRuleName,
                     ruleTypeID  : iRuleTypeId,
@@ -246,7 +246,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                     enabled     : bEnabled,
                     
                     onSuccess : function () {
-                        IomyRe.common.showMessage({
+                        iomy.common.showMessage({
                             text : "'"+ sRuleName + "' successfully created."
                         });
                         
@@ -256,7 +256,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                     onWarning : function (sErrorMessage) {
                         // This will likely execute if the rules could not be reloaded
                         // from the database.
-                        IomyRe.common.showWarning(sErrorMessage, "Warning",
+                        iomy.common.showWarning(sErrorMessage, "Warning",
                             function () {
                                 oController.ToggleControls(true);
                             }
@@ -264,7 +264,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                     },
                     
                     onFail : function (sErrorMessage) {
-                        IomyRe.common.showError(sErrorMessage, "Error",
+                        iomy.common.showError(sErrorMessage, "Error",
                             function () {
                                 oController.ToggleControls(true);
                             }
@@ -274,7 +274,7 @@ sap.ui.controller("pages.staging.rules.RulesForm", {
                 
             } catch (e) {
                 $.sap.log.error("Error adding a rule ("+e.name+"): " + e.message);
-                IomyRe.common.showError(e.message, "Error",
+                iomy.common.showError(e.message, "Error",
                     function () {
                         oController.ToggleControls(true);
                     }

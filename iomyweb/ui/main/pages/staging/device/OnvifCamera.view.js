@@ -110,8 +110,8 @@ sap.ui.jsview("pages.staging.device.OnvifCamera", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "OnvifStream",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents : [
 
 				new sap.m.ScrollContainer ({
@@ -119,7 +119,7 @@ sap.ui.jsview("pages.staging.device.OnvifCamera", {
                     height: "100%",
                     vertical : true,
                     content : [
-                        IomyRe.widgets.DeviceToolbar(oController, "Onvif Stream"),
+                        iomy.widgets.DeviceToolbar(oController, "Onvif Stream"),
                         
                         new sap.m.VBox( oView.createId("PageContainer_Thumbnail"), {
                             items : [

@@ -53,7 +53,7 @@ sap.ui.controller("pages.staging.RulesList", {
                 
 				//oController.RefreshModel(oController, {} );
 				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
 			
 		});
@@ -70,7 +70,7 @@ sap.ui.controller("pages.staging.RulesList", {
     LoadList : function () {
         var oController = this;
         
-        IomyRe.rules.loadRules({
+        iomy.rules.loadRules({
             hubID : 1,
             
             onSuccess : function () {
@@ -79,7 +79,7 @@ sap.ui.controller("pages.staging.RulesList", {
             
             onFail : function (sErrMessage) {
                 jQuery.sap.log.error("Unable to Load the rules list:"+e1.message);
-				IomyRe.common.showError(sErrMessage, "Error",
+				iomy.common.showError(sErrMessage, "Error",
                     function () {}
                 );
             }
@@ -104,7 +104,7 @@ sap.ui.controller("pages.staging.RulesList", {
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
 		var oView           = oController.getView();
-        var aaRulesList     = JSON.parse(JSON.stringify(IomyRe.rules.RulesList));
+        var aaRulesList     = JSON.parse(JSON.stringify(iomy.rules.RulesList));
         var aRules          = [];
         var oModel          = {};
         
@@ -130,9 +130,9 @@ sap.ui.controller("pages.staging.RulesList", {
                         "RuleId"        : mRule.Id,
                         "RuleName"      : mRule.Name,
                         "RuleState"     : sEnabledText,
-                        "EventType"     : IomyRe.rules.getRuleTypeName(mRule.TypeId),
+                        "EventType"     : iomy.rules.getRuleTypeName(mRule.TypeId),
                         "EventTime"     : mRule.Time
-                        //"EventTime"     : IomyRe.functions.getTimestampString(IomyRe.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
+                        //"EventTime"     : iomy.functions.getTimestampString(iomy.time.GetDateFromMilitaryTime( mRule.Ontime ), "", true, false)
                     });
                 }
 			} catch (e1) {
@@ -191,7 +191,7 @@ sap.ui.controller("pages.staging.RulesList", {
             if (aSelectedRules.length > 0) {
                 oController.ToggleControls(false);
                 
-                IomyRe.common.showConfirmQuestion(sWarningMessage, "Discard Rule",
+                iomy.common.showConfirmQuestion(sWarningMessage, "Discard Rule",
                     function (oAction) {
                         if (oAction === sap.m.MessageBox.Action.OK) {
                             try {
@@ -237,11 +237,11 @@ sap.ui.controller("pages.staging.RulesList", {
             //--------------------------------------------------------------//
             // Begin deleting the rule(s).
             //--------------------------------------------------------------//
-            IomyRe.rules.discardRules({
+            iomy.rules.discardRules({
                 ruleIDs : aList,
 
                 onSuccess : function () {
-                    IomyRe.common.showMessage({
+                    iomy.common.showMessage({
                         text : sSuccessMessage
                     });
 
@@ -250,7 +250,7 @@ sap.ui.controller("pages.staging.RulesList", {
                 },
                 
                 onWarning : function (sError) {
-                    IomyRe.common.showWarning("An error occurred while deleting the rules:\n\n"+sError, "Error",
+                    iomy.common.showWarning("An error occurred while deleting the rules:\n\n"+sError, "Error",
                         function () {
                             oController.RefreshModel(oController, {});
                             oController.ToggleControls(true);
@@ -259,7 +259,7 @@ sap.ui.controller("pages.staging.RulesList", {
                 },
 
                 onFail : function (sError) {
-                    IomyRe.common.showError("An error occurred while deleting the rules:\n\n"+sError, "Error",
+                    iomy.common.showError("An error occurred while deleting the rules:\n\n"+sError, "Error",
                         function () {
                             oController.RefreshModel(oController, {});
                             oController.ToggleControls(true);
@@ -288,7 +288,7 @@ sap.ui.controller("pages.staging.RulesList", {
                 //--------------------------------------------------------------//
                 // Begin deleting the rule(s).
                 //--------------------------------------------------------------//
-                IomyRe.rules.toggleRules({
+                iomy.rules.toggleRules({
                     ruleIDs : aSelectedRules,
 
                     onSuccess : function () {
@@ -300,7 +300,7 @@ sap.ui.controller("pages.staging.RulesList", {
                             sMessage = aSelectedRules.length + " rules toggled."
                         }
 
-                        IomyRe.common.showMessage({
+                        iomy.common.showMessage({
                             text : sMessage
                         });
 
@@ -309,7 +309,7 @@ sap.ui.controller("pages.staging.RulesList", {
                     },
 
                     onWarning : function (sError) {
-                        IomyRe.common.showWarning("An error occurred while deleting the rule states:\n\n"+sError, "Error",
+                        iomy.common.showWarning("An error occurred while deleting the rule states:\n\n"+sError, "Error",
                             function () {
                                 oController.RefreshModel(oController, {});
                                 oController.ToggleControls(true);
@@ -318,7 +318,7 @@ sap.ui.controller("pages.staging.RulesList", {
                     },
 
                     onFail : function (sError) {
-                        IomyRe.common.showError("An error occurred while toggling the rule states:\n\n"+sError, "Error",
+                        iomy.common.showError("An error occurred while toggling the rule states:\n\n"+sError, "Error",
                             function () {
                                 oController.RefreshModel(oController, {});
                                 oController.ToggleControls(true);

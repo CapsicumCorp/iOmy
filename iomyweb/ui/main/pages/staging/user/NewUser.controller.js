@@ -51,7 +51,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 				oView.byId("ObjectPageLayout").setHeaderTitle(oController.getObjectPageTitle(oController));
 				
 				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
 			
 		});
@@ -110,8 +110,8 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		//-- Setup "All" in the Premise & Room Array    --//
 		//------------------------------------------------//
 		try {
-			if( typeof IomyRe.common.AllRoomsList!=="undefined" ) {
-				aRoomData = JSON.parse(JSON.stringify(IomyRe.common.AllRoomsList ));
+			if( typeof iomy.common.AllRoomsList!=="undefined" ) {
+				aRoomData = JSON.parse(JSON.stringify(iomy.common.AllRoomsList ));
 				aRoomData['_0'] = {
 					RoomId: 0,
 					RoomName: "All Rooms"
@@ -123,8 +123,8 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		}
 		
 		try {
-			if( typeof IomyRe.common.PremiseList!=="undefined" ) {
-				aPremiseData = JSON.parse(JSON.stringify(IomyRe.common.PremiseList ));
+			if( typeof iomy.common.PremiseList!=="undefined" ) {
+				aPremiseData = JSON.parse(JSON.stringify(iomy.common.PremiseList ));
 				aPremiseData['_0'] = {
 					Id: 0,
 					Name: "All Premise"
@@ -138,9 +138,9 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
 		var oModel = new sap.ui.model.json.JSONModel({
-			"Regions":               IomyRe.common.Regions,
-			"Languages":             IomyRe.common.Languages,
-			"Timezones":             IomyRe.common.Timezones,
+			"Regions":               iomy.common.Regions,
+			"Languages":             iomy.common.Languages,
+			"Timezones":             iomy.common.Timezones,
 			"Premise":               aPremiseData,
 			"Rooms":                 aRoomData,
 			"NewUser":               aNewUserData
@@ -212,7 +212,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
             //----------------------------------------------------------------//
             // Make sure it's a secure password.
             //----------------------------------------------------------------//
-            var mPasswordInfo = IomyRe.validation.isPasswordSecure(sPassword);
+            var mPasswordInfo = iomy.validation.isPasswordSecure(sPassword);
             
             if (!mPasswordInfo.bIsValid) {
                 aErrorMessages = aErrorMessages.concat(mPasswordInfo.aErrorMessages);
@@ -269,8 +269,8 @@ sap.ui.controller("pages.staging.user.NewUser", {
 		//-- Add User Section --//
 		try {
 			if( bError===false ) {
-				 IomyRe.apiphp.AjaxRequest({
-                    url : IomyRe.apiphp.APILocation("users"),
+				 iomy.apiphp.AjaxRequest({
+                    url : iomy.apiphp.APILocation("users"),
                     data : {
                         "Mode" :                 "AddUser",
                         "Title" :                oCurrentFormData.Title,
@@ -333,11 +333,11 @@ sap.ui.controller("pages.staging.user.NewUser", {
 										
 										//-- If Check to see if single premise or all premise --//
 										if (oCurrentFormData.PremiseId === 0) {
-											$.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+											$.each(iomy.common.PremiseList, function (sI, mPremise) {
 												oController.mxUpdateRequests.synchronize({
 													task : function () {
-														IomyRe.apiphp.AjaxRequest({
-															url : IomyRe.apiphp.APILocation("permissions"),
+														iomy.apiphp.AjaxRequest({
+															url : iomy.apiphp.APILocation("permissions"),
 															data : {
 																"Mode" : "UpdatePremisePerms",
 																"UserId" : iUserId,
@@ -354,7 +354,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 																}
 															},
 															onFail : function (response) {
-																IomyRe.common.showError(response.responseText, "Error",
+																iomy.common.showError(response.responseText, "Error",
 																	function () {
 																		if (oController.mxUpdateRequests.busy) {
 																			oController.mxUpdateRequests.dequeue();
@@ -372,8 +372,8 @@ sap.ui.controller("pages.staging.user.NewUser", {
 											});										
 											oController.mxUpdateRequests.dequeue();
 										} else {
-											IomyRe.apiphp.AjaxRequest({
-												url : IomyRe.apiphp.APILocation("permissions"),
+											iomy.apiphp.AjaxRequest({
+												url : iomy.apiphp.APILocation("permissions"),
 												data : {
 													"Mode" : "UpdatePremisePerms",
 													"UserId" : iUserId,
@@ -391,7 +391,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 												onFail : function (response) {
 													jQuery.sap.log.error("There was an error updating the premise permissions: "+JSON.stringify(response));
                                                     
-                                                    IomyRe.common.showError( response.responseText, "Error",
+                                                    iomy.common.showError( response.responseText, "Error",
                                                         function () {
                                                             oController.ToggleSubmitCancelButtons(true);
                                                         }
@@ -422,7 +422,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 						//	aConfig.onFail();
 						//}
 						jQuery.sap.log.error("Error with the 'UpdateRoomPerms' API Request when inserting Room Permissions in the 'RoomForm' controller!\n\n" + response.responseText);
-                        IomyRe.common.showError( response.responseText, "Error",
+                        iomy.common.showError( response.responseText, "Error",
                             function () {
                                 oController.ToggleSubmitCancelButtons(true);
                             }
@@ -430,7 +430,7 @@ sap.ui.controller("pages.staging.user.NewUser", {
 					}
 				});
 			} else {
-				IomyRe.common.showError( aErrorMessages.join("\n\n"), "Error",
+				iomy.common.showError( aErrorMessages.join("\n\n"), "Error",
                     function () {
                         oController.ToggleSubmitCancelButtons(true);
                     }
@@ -488,11 +488,11 @@ sap.ui.controller("pages.staging.user.NewUser", {
 						
 						//-- If Check to see if single Room or all Rooms --//
 						if (oCurrentFormData.RoomId === 0) {
-							$.each(IomyRe.common.AllRoomsList, function (sI, mRoom) {
+							$.each(iomy.common.AllRoomsList, function (sI, mRoom) {
 								oController.mxUpdateRequests.synchronize({
 									task : function () {
-										IomyRe.apiphp.AjaxRequest({
-											url : IomyRe.apiphp.APILocation("permissions"),
+										iomy.apiphp.AjaxRequest({
+											url : iomy.apiphp.APILocation("permissions"),
 											data : {
 												"Mode" : "UpdateRoomPerms",
 												"UserId" : iUserId,
@@ -505,20 +505,20 @@ sap.ui.controller("pages.staging.user.NewUser", {
 												
 												// The queue is empty
 												if (!oController.mxUpdateRequests.busy) {
-													IomyRe.common.RefreshCoreVariables({
+													iomy.common.RefreshCoreVariables({
 														onSuccess : function () {
-                                                            IomyRe.common.showMessage({
+                                                            iomy.common.showMessage({
                                                                 text : "New iOmy user \""+oCurrentFormData.Username+"\" created."
                                                             });
                                                             
                                                             oController.ToggleSubmitCancelButtons(true);
-															IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+															iomy.common.NavigationChangePage( "pUserList" , {} , false);
 														}
 													});
 												}
 											},
 											onFail : function (response) {
-												IomyRe.common.showError(response.responseText, "Error",
+												iomy.common.showError(response.responseText, "Error",
 													function () {
 														if (oController.mxUpdateRequests.busy) {
 															oController.mxUpdateRequests.dequeue();
@@ -536,8 +536,8 @@ sap.ui.controller("pages.staging.user.NewUser", {
 							});										
 							oController.mxUpdateRequests.dequeue();
 						} else {
-							IomyRe.apiphp.AjaxRequest({
-								url : IomyRe.apiphp.APILocation("permissions"),
+							iomy.apiphp.AjaxRequest({
+								url : iomy.apiphp.APILocation("permissions"),
 								data : {
 									"Mode" : "UpdateRoomPerms",
 									"UserId" : iUserId,
@@ -545,17 +545,17 @@ sap.ui.controller("pages.staging.user.NewUser", {
 									"Data" : "{\"Read\":"+iRoomRead+",\"DataRead\":"+iRoomDataRead+",\"Write\":"+iRoomWrite+",\"StateToggle\":"+iRoomStateToggle+"}"
 								},
 								onSuccess : function (responseType, mData) {
-                                    IomyRe.common.showMessage({
+                                    iomy.common.showMessage({
                                         text : "New iOmy user \""+oCurrentFormData.Username+"\" created."
                                     });
 
                                     oController.ToggleSubmitCancelButtons(true);
-									IomyRe.common.NavigationChangePage( "pUserList" , {} , false);
+									iomy.common.NavigationChangePage( "pUserList" , {} , false);
 								},
 								onFail : function (response) {
 									jQuery.sap.log.error("There was an error updating the room permissions: "+JSON.stringify(response));
                                     
-                                    IomyRe.common.showError( response.responseText, "Error",
+                                    iomy.common.showError( response.responseText, "Error",
                                         function () {
                                             oController.ToggleSubmitCancelButtons(true);
                                         }
@@ -598,26 +598,26 @@ sap.ui.controller("pages.staging.user.NewUser", {
 				case "AddUser":
 					//-- New User Login Info --//
 					oView.byId("Login").setVisible( true );
-					IomyRe.common.ShowFormFragment( oController, "AddLogin", "LoginBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "AddLogin", "LoginBlock_Form", "FormContainer" );
 					//-- DB Auth Credentials --//
 					oView.byId("DBAuth").setVisible( true );
-					IomyRe.common.ShowFormFragment( oController, "DBAuth", "DBAuthBlock_Form", "FormContainer" );
+					iomy.common.ShowFormFragment( oController, "DBAuth", "DBAuthBlock_Form", "FormContainer" );
 					//-- Add Info --//
 					oView.byId("Info").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "AddUserInfo", "InfoBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
+					iomy.common.ShowFormFragment( oController, "AddUserInfo", "InfoBlock_Form", "FormContainer" );
 					//-- Add Address --//
 					oView.byId("Address").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "AddUserAddress", "AddrBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
+					iomy.common.ShowFormFragment( oController, "AddUserAddress", "AddrBlock_Form", "FormContainer" );
 					//-- Add Permissions --//
 					oView.byId("Premise").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "AddPremisePermission", "PremPermBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "PremPermBlock_Form", true);
+					iomy.common.ShowFormFragment( oController, "AddPremisePermission", "PremPermBlock_Form", "FormContainer" );
 					//-- Add Permissions --//
 					oView.byId("Room").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "AddRoomPermission", "RoomPermBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "RoomPermBlock_Form", true);
+					iomy.common.ShowFormFragment( oController, "AddRoomPermission", "RoomPermBlock_Form", "FormContainer" );
 				break;
 				default:
 					$.sap.log.error("ToggleButtonsAndView: Critcal Error. sMode set incorrectly:"+sMode);

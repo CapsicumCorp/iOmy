@@ -47,15 +47,15 @@ sap.ui.jsview("pages.staging.FFMPEG", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Home",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [
 				new sap.m.ScrollContainer({
 					vertical: true,
 					horizontal: false,
 					height: "100%",
 					content : [
-						IomyRe.widgets.DeviceToolbar(oController, "FFMPEG"),
+						iomy.widgets.DeviceToolbar(oController, "FFMPEG"),
 						new sap.m.ScrollContainer({
 							vertical: true,
 							width: "100%",

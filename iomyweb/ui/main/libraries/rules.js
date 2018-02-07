@@ -21,11 +21,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.rules",true);
+$.sap.declare("iomy.rules",true);
 
-IomyRe.rules = new sap.ui.base.Object();
+iomy.rules = new sap.ui.base.Object();
 
-$.extend(IomyRe.rules, {
+$.extend(iomy.rules, {
     
     RulesList : {},
     
@@ -75,7 +75,7 @@ $.extend(IomyRe.rules, {
             var mHub;
             var bSupported;
 
-            mHub = IomyRe.common.getHub(iHub);
+            mHub = iomy.common.getHub(iHub);
 
             if (mHub.HubTypeId == 2) {
                 bSupported = true;
@@ -100,8 +100,8 @@ $.extend(IomyRe.rules, {
         var aDevices   = [];
         
         try {
-            $.each(IomyRe.common.ThingList, function (sI, mThing) {
-                if (mThing.TypeId == IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+            $.each(iomy.common.ThingList, function (sI, mThing) {
+                if (mThing.TypeId == iomy.devices.zigbeesmartplug.ThingTypeId) {
                     aDevices.push(mThing);
                 }
             });
@@ -135,7 +135,7 @@ $.extend(IomyRe.rules, {
         //--------------------------------------------------------------------//
         var bError          = false;
         var aErrorMessages  = [];
-        var sURL            = IomyRe.apiphp.APILocation("hubrules");
+        var sURL            = iomy.apiphp.APILocation("hubrules");
         //var iHub            = null;
         var sMode           = "ListAllRules";
 		//var mHub;
@@ -161,10 +161,10 @@ $.extend(IomyRe.rules, {
 //            } else {
 //                iHub = mSettings.hubID;
 //                
-//                var mHubInfo = IomyRe.validation.isHubIDValid(iHub);
+//                var mHubInfo = iomy.validation.isHubIDValid(iHub);
 //                
 //                if (mHubInfo.bIsValid) {
-//                    mHub = IomyRe.common.HubList["_"+iHub];
+//                    mHub = iomy.common.HubList["_"+iHub];
 //				
 //                    if (mHub.HubTypeId != 2) {
 //                        fnAppendError("The given hub does not support device rules.");
@@ -175,7 +175,7 @@ $.extend(IomyRe.rules, {
 //                }
 //            }
             
-            if (IomyRe.validation.isValueGiven(mSettings.enabledOnly)) {
+            if (iomy.validation.isValueGiven(mSettings.enabledOnly)) {
                 if (mSettings.enabledOnly === true) {
                     sMode = "ListAllActiveRules";
                 } else {
@@ -209,12 +209,12 @@ $.extend(IomyRe.rules, {
         }
         
         try {
-            IomyRe.rules.RulesList = {};
+            iomy.rules.RulesList = {};
             
             //--------------------------------------------------------------------//
             // Run the API to acquire the list of rules.
             //--------------------------------------------------------------------//
-            IomyRe.apiphp.AjaxRequest({
+            iomy.apiphp.AjaxRequest({
 
                 url : sURL,
                 data : {
@@ -237,7 +237,7 @@ $.extend(IomyRe.rules, {
                             for (var i = 0; i < aRules.length; i++) {
                                 mRule = aRules[i];
 
-                                IomyRe.rules.RulesList["_"+mRule.Id] = mRule;
+                                iomy.rules.RulesList["_"+mRule.Id] = mRule;
                             }
 
                             fnSuccess();
@@ -286,7 +286,7 @@ $.extend(IomyRe.rules, {
         var oModule             = this;
         var bError              = false;
         var aErrorMessages      = [];
-        var sURL                = IomyRe.apiphp.APILocation("hubrules");
+        var sURL                = iomy.apiphp.APILocation("hubrules");
         var iHub                = null;
         var sMode               = "AddRule";
         var fnSuccess           = function () {};
@@ -322,10 +322,10 @@ $.extend(IomyRe.rules, {
 //            } else {
 //                iHub = mSettings.hubID;
 //                
-//                var mHubInfo = IomyRe.validation.isHubIDValid(iHub);
+//                var mHubInfo = iomy.validation.isHubIDValid(iHub);
 //                
 //                if (mHubInfo.bIsValid) {
-//                    mHub = IomyRe.common.HubList["_"+iHub];
+//                    mHub = iomy.common.HubList["_"+iHub];
 //				
 //                    if (mHub.HubTypeId != 2) {
 //                        fnAppendError("The given hub does not support device rules.");
@@ -344,13 +344,13 @@ $.extend(IomyRe.rules, {
             } else {
                 iThingId = parseInt(mSettings.thingID);
                 
-                var mThingInfo = IomyRe.validation.isThingIDValid(iThingId);
+                var mThingInfo = iomy.validation.isThingIDValid(iThingId);
                 
                 if (mThingInfo.bIsValid) {
-                    mThing = IomyRe.common.ThingList["_"+iThingId];
-                    mHub = IomyRe.functions.getHubConnectedToThing(iThingId);
+                    mThing = iomy.common.ThingList["_"+iThingId];
+                    mHub = iomy.functions.getHubConnectedToThing(iThingId);
 				
-                    if (mThing.TypeId != IomyRe.devices.zigbeesmartplug.ThingTypeId) {
+                    if (mThing.TypeId != iomy.devices.zigbeesmartplug.ThingTypeId) {
                         fnAppendError("The given device is not supported.");
                     }
                     
@@ -370,7 +370,7 @@ $.extend(IomyRe.rules, {
             //----------------------------------------------------------------//
             // Get the time
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.time) && mSettings.time !== "") {
+            if (iomy.validation.isValueGiven(mSettings.time) && mSettings.time !== "") {
                 sTime = mSettings.time;
             } else {
                 fnAppendError(sTimeMissing);
@@ -379,7 +379,7 @@ $.extend(IomyRe.rules, {
             //----------------------------------------------------------------//
             // Get the name of the rule
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.name) && mSettings.name !== "") {
+            if (iomy.validation.isValueGiven(mSettings.name) && mSettings.name !== "") {
                 sRuleName = mSettings.name;
             } else {
                 fnAppendError(sNameMissing);
@@ -388,7 +388,7 @@ $.extend(IomyRe.rules, {
             //----------------------------------------------------------------//
             // Get the rule type ID
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.ruleTypeID)) {
+            if (iomy.validation.isValueGiven(mSettings.ruleTypeID)) {
                 iRuleTypeId = mSettings.ruleTypeID;
             } else {
                 fnAppendError(sTypeMissing);
@@ -443,7 +443,7 @@ $.extend(IomyRe.rules, {
             //--------------------------------------------------------------------//
             // Run the API to add a rule.
             //--------------------------------------------------------------------//
-            IomyRe.apiphp.AjaxRequest({
+            iomy.apiphp.AjaxRequest({
 
                 url : sURL,
                 data : {
@@ -512,7 +512,7 @@ $.extend(IomyRe.rules, {
         var oModule             = this;
         var bError              = false;
         var aErrorMessages      = [];
-        var sURL                = IomyRe.apiphp.APILocation("hubrules");
+        var sURL                = iomy.apiphp.APILocation("hubrules");
         var sMode               = "EditRule";
         var fnSuccess           = function () {};
         var fnWarning           = function () {};
@@ -540,7 +540,7 @@ $.extend(IomyRe.rules, {
             //----------------------------------------------------------------//
             // Find the thing ID and verify that it is a valid type.
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.ruleID)) {
+            if (iomy.validation.isValueGiven(mSettings.ruleID)) {
                 iRuleId = mSettings.ruleID;
             } else {
                 fnAppendError(sRuleMissing);
@@ -549,7 +549,7 @@ $.extend(IomyRe.rules, {
             //----------------------------------------------------------------//
             // Get the time.
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.time) && mSettings.time !== "") {
+            if (iomy.validation.isValueGiven(mSettings.time) && mSettings.time !== "") {
                 sTime = mSettings.time;
             } else {
                 fnAppendError(sTimeMissing);
@@ -558,7 +558,7 @@ $.extend(IomyRe.rules, {
             //----------------------------------------------------------------//
             // Get the name of the rule.
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.name) && mSettings.name !== "") {
+            if (iomy.validation.isValueGiven(mSettings.name) && mSettings.name !== "") {
                 sRuleName = mSettings.name;
             } else {
                 fnAppendError(sNameMissing);
@@ -567,7 +567,7 @@ $.extend(IomyRe.rules, {
             //----------------------------------------------------------------//
             // Get the rule type ID.
             //----------------------------------------------------------------//
-            if (IomyRe.validation.isValueGiven(mSettings.ruleTypeID)) {
+            if (iomy.validation.isValueGiven(mSettings.ruleTypeID)) {
                 iRuleTypeId = mSettings.ruleTypeID;
             } else {
                 fnAppendError(sTypeMissing);
@@ -622,7 +622,7 @@ $.extend(IomyRe.rules, {
             //--------------------------------------------------------------------//
             // Run the API to edit a rule.
             //--------------------------------------------------------------------//
-            IomyRe.apiphp.AjaxRequest({
+            iomy.apiphp.AjaxRequest({
 
                 url : sURL,
                 data : {
@@ -767,7 +767,7 @@ $.extend(IomyRe.rules, {
             for (var i = 0; i < aRuleIDs.length; i++) {
                 aDiscardRequests.push({
                     library : "php",
-                    url : IomyRe.apiphp.APILocation("hubrules"),
+                    url : iomy.apiphp.APILocation("hubrules"),
                     data : {
                         Mode : "DeleteRule",
                         Id : aRuleIDs[i]
@@ -777,7 +777,7 @@ $.extend(IomyRe.rules, {
                         try {
                             if (sType === "JSON") {
                                 if (!mData.Error) {
-                                    delete IomyRe.rules.RulesList["_"+aRuleIDs[i]];
+                                    delete iomy.rules.RulesList["_"+aRuleIDs[i]];
                                     
                                 } else {
                                     aErrorMessages.push("Error after a successful API call: " + mData.ErrMesg);
@@ -940,11 +940,11 @@ $.extend(IomyRe.rules, {
             // Process each rule for removal.
             //--------------------------------------------------------------------//
             for (var i = 0; i < aRuleIDs.length; i++) {
-                iEnabled = (IomyRe.rules.RulesList["_"+aRuleIDs[i]].Enabled + 1) % 2;
+                iEnabled = (iomy.rules.RulesList["_"+aRuleIDs[i]].Enabled + 1) % 2;
                 
                 aToggleRequests.push({
                     library : "php",
-                    url : IomyRe.apiphp.APILocation("hubrules"),
+                    url : iomy.apiphp.APILocation("hubrules"),
                     data : {
                         Mode : "SetRuleEnabled",
                         Id : aRuleIDs[i],

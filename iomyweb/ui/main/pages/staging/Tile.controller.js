@@ -44,7 +44,7 @@ sap.ui.controller("pages.staging.Tile", {
 				//-- IOMy.common.NavigationRefreshButtons( me ); --//
 				
 				//-- Defines the Device Type --//
-				IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
 		});
 			

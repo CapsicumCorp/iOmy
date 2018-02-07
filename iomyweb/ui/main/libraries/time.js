@@ -21,11 +21,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.time",true);
+$.sap.declare("iomy.time",true);
 
-IomyRe.time = new sap.ui.base.Object();
+iomy.time = new sap.ui.base.Object();
 
-$.extend(IomyRe.time,{
+$.extend(iomy.time,{
 	bBackdateUTS:           false,          //-- BOOLEAN:       Used to indicate if an old timestamp should be used instead of the current timestamp --//
 	bRoundTime:             false,          //-- BOOLEAN:       Used to indicate if the time should be rounded down. (eg. rounded to down to a 5 minute value). --//
 	iSecondsToRound:        300,            //-- INTEGER:       Nearest amount of time in seconds of when to round to (only if round time is turned on ).  --//
@@ -92,7 +92,7 @@ $.extend(IomyRe.time,{
             
         } catch (e) {
             aResult = null;
-            $.sap.log.error("Error in IomyRe.time.ExtractTimeDataFromJSDate ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.time.ExtractTimeDataFromJSDate ("+e.name+"): " + e.message);
             
         } finally {
             //----------------------------------------------------//
@@ -127,13 +127,13 @@ $.extend(IomyRe.time,{
 		
         try {
             //-- IF BACKDATE IS SET				--//
-            if( IomyRe.time.bBackdateUTS===true ) {
-                iCurrentTimestamp = IomyRe.time.iDefaultBackdateUTS;
+            if( iomy.time.bBackdateUTS===true ) {
+                iCurrentTimestamp = iomy.time.iDefaultBackdateUTS;
 
 
             //-- ELSE IF ROUNDTIME IS SET		--//
-            } else if(IomyRe.time.bRoundTime===true  ) {
-                iCurrentTimestamp = Math.floor( iUTS / (1000 * IomyRe.time.iSecondsToRound) ) * IomyRe.time.iSecondsToRound;
+            } else if(iomy.time.bRoundTime===true  ) {
+                iCurrentTimestamp = Math.floor( iUTS / (1000 * iomy.time.iSecondsToRound) ) * iomy.time.iSecondsToRound;
 
 
             //-- ELSE DO NORMAL CONVERSION		--//
@@ -143,7 +143,7 @@ $.extend(IomyRe.time,{
             
         } catch (e) {
             iCurrentTimestamp = -1;
-            $.sap.log.error("Error in IomyRe.time.GetCurrentUTS:\n" + e.message);
+            $.sap.log.error("Error in iomy.time.GetCurrentUTS:\n" + e.message);
             
         } finally {
             //----------------------------------------------------//
@@ -315,7 +315,7 @@ $.extend(IomyRe.time,{
 		
 		//-- 1.2 - If parameter is undefined then use the preset    --//
 		if( typeof iEndStamp === 'undefined' ) {
-			iEndStamp = IomyRe.time.GetCurrentUTS();
+			iEndStamp = iomy.time.GetCurrentUTS();
 		}
 		
         try {
@@ -373,7 +373,7 @@ $.extend(IomyRe.time,{
 
         } catch (e) {
             iStartStamp = -1;
-            $.sap.log.error("Error in IomyRe.time.GetStartStampForTimePeriod: ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.time.GetStartStampForTimePeriod: ("+e.name+"): " + e.message);
             
         } finally {
             //------------------------------------------------------------//
@@ -427,7 +427,7 @@ $.extend(IomyRe.time,{
             
         } catch (e) {
             sMilitaryTime = null;
-            $.sap.log.error("Error in IomyRe.time.GetMilitaryTimeFromDate: ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.time.GetMilitaryTimeFromDate: ("+e.name+"): " + e.message);
             
         } finally {
             return sMilitaryTime;
@@ -503,7 +503,7 @@ $.extend(IomyRe.time,{
             
         } catch (e) {
             date = null;
-            $.sap.log.error("Error in IomyRe.time.GetDateFromMilitaryTime ("+e.name+"): " + e.message);
+            $.sap.log.error("Error in iomy.time.GetDateFromMilitaryTime ("+e.name+"): " + e.message);
             
         } finally {
             return date;

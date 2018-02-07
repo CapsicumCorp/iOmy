@@ -47,15 +47,15 @@ sap.ui.jsview("pages.staging.Premise", {
         
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
             title: "Home",
-            header : IomyRe.widgets.getToolPageHeader( oController ),
-            sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+            header : iomy.widgets.getToolPageHeader( oController ),
+            sideContent : iomy.widgets.getToolPageSideContent(oController),
             mainContents: [        
                 new sap.m.ScrollContainer ({
                     width: "100%",
                     height: "100%",
                     vertical : true,
                     content : [
-                        IomyRe.widgets.DeviceToolbar(oController, "Premise List"),
+                        iomy.widgets.DeviceToolbar(oController, "Premise List"),
                         new sap.m.List (oView.createId("PremiseList"), {
                             mode: sap.m.ListMode.None,
                             items: []

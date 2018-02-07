@@ -47,15 +47,15 @@ sap.ui.jsview("pages.staging.device.WeatherFeed", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "WeatherFeed",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents : [
 				new sap.m.ScrollContainer ({
 					width: "100%",
 					height: "100%",
 					vertical : true,
 					content : [
-                        IomyRe.widgets.DeviceToolbar(oController, "Local Weather"),
+                        iomy.widgets.DeviceToolbar(oController, "Local Weather"),
 						new sap.m.List({
 							items :[
 								//-- Weather Outside --//

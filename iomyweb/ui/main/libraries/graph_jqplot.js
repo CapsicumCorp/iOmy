@@ -21,10 +21,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.graph_jqplot",true);
-IomyRe.graph_jqplot = new sap.ui.base.Object();
+$.sap.declare("iomy.graph_jqplot",true);
+iomy.graph_jqplot = new sap.ui.base.Object();
 
-$.extend( IomyRe.graph_jqplot, {
+$.extend( iomy.graph_jqplot, {
 	
 	
 	DefaultLineSeriesColors: [
@@ -234,7 +234,7 @@ $.extend( IomyRe.graph_jqplot, {
 				iLegendPreset = aSetupData.LegendPreset;
 				
 				//-- Setup the static legend data --//
-				aLegendCustomData = IomyRe.graph_jqplot.LegendPreset( iLegendPreset );
+				aLegendCustomData = iomy.graph_jqplot.LegendPreset( iLegendPreset );
 				
 				
 			//----------------------------------------//
@@ -489,7 +489,7 @@ $.extend( IomyRe.graph_jqplot, {
 			
 		} else {
 			//-- Use the defaults --//
-			aGraphSettings.seriesColors = IomyRe.graph_jqplot.DefaultLineSeriesColors;
+			aGraphSettings.seriesColors = iomy.graph_jqplot.DefaultLineSeriesColors;
 		}
 		
 		//------------------------------------------------//
@@ -664,7 +664,7 @@ $.extend( IomyRe.graph_jqplot, {
 		}
 		
 		if( sGraphType==='6HourPie') {
-			aGraphSettings.seriesColors = IomyRe.graph_jqplot.Default6HourPieSeriesColors;
+			aGraphSettings.seriesColors = iomy.graph_jqplot.Default6HourPieSeriesColors;
 		}
 		
 		//------------------------------------------------//
@@ -793,7 +793,7 @@ $.extend( IomyRe.graph_jqplot, {
 				iLegendPreset = aSetupData.LegendPreset;
 				
 				//-- Setup the static legend data --//
-				aLegendCustomData = IomyRe.graph_jqplot.LegendPreset( iLegendPreset );
+				aLegendCustomData = iomy.graph_jqplot.LegendPreset( iLegendPreset );
 				
 				
 			//----------------------------------------//
@@ -1015,7 +1015,7 @@ $.extend( IomyRe.graph_jqplot, {
 			aGraphSettings.seriesColors = aCustomColors;
 		} else {
 			//-- Use the defaults --//
-			aGraphSettings.seriesColors = IomyRe.graph_jqplot.DefaultBarSeriesColors;
+			aGraphSettings.seriesColors = iomy.graph_jqplot.DefaultBarSeriesColors;
 		}
 		
 		

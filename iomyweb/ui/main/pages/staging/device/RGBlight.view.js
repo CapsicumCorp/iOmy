@@ -47,22 +47,22 @@ sap.ui.jsview("pages.staging.device.RGBlight", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "RGB Light",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents : [
 				new sap.m.ScrollContainer ({
                     width: "100%",
                     height: "100%",
                     vertical : true,
                     content : [
-                        IomyRe.widgets.DeviceToolbar(oController, ""),
+                        iomy.widgets.DeviceToolbar(oController, ""),
                         
                         new sap.m.ScrollContainer(oView.createId("RGB_Cont"), {
                             width: "100%",
                             height: "100%",
                             vertical : true,
                             content : [
-                                IomyRe.widgets.LightBulbControlsContainer(oController, {
+                                iomy.widgets.LightBulbControlsContainer(oController, {
                                     hue             : 180,
                                     saturation      : 100,
                                     brightness      : 100,

@@ -23,11 +23,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.apiodata",true);
+$.sap.declare("iomy.apiodata",true);
 
-IomyRe.apiodata = new sap.ui.base.Object();
+iomy.apiodata = new sap.ui.base.Object();
 
-$.extend(IomyRe.apiodata,{
+$.extend(iomy.apiodata,{
 	
 	callingObject : null,
 	
@@ -40,10 +40,10 @@ $.extend(IomyRe.apiodata,{
      */
 	ODataLocation: function( sOData ) {
 		
-		var sUrlPublic			= IomyRe.common.ConfigVars("URLPublicApi");
-		var sUrlRestricted		= IomyRe.common.ConfigVars("URLRestrictedApi");
+		var sUrlPublic			= iomy.common.ConfigVars("URLPublicApi");
+		var sUrlRestricted		= iomy.common.ConfigVars("URLRestrictedApi");
 		
-		var sUrlOData	= IomyRe.common.ConfigVars("URLRestrictedOData");
+		var sUrlOData	= iomy.common.ConfigVars("URLRestrictedOData");
 		
 		var sReturn			= "";
 		
@@ -254,7 +254,7 @@ $.extend(IomyRe.apiodata,{
 		iLimit			= aConfig.Limit || 0;
 		sHTTPMethod		= aConfig.HTTPMethod || "GET";
 		sDataType		= aConfig.DataType || "json";
-		iLoginTimestamp = IomyRe.common.oCurrentLoginTimestamp.getTime();
+		iLoginTimestamp = iomy.common.oCurrentLoginTimestamp.getTime();
 		
 		
 		
@@ -314,7 +314,7 @@ $.extend(IomyRe.apiodata,{
 			}
 			jQuery.sap.log.debug(sUrl);
 		} catch(e2) {
-			jQuery.sap.log.error("Error  "+e2.message, "", "IomyRe.apiodata.AjaxRequest");
+			jQuery.sap.log.error("Error  "+e2.message, "", "iomy.apiodata.AjaxRequest");
 			
 		}
 		
@@ -324,7 +324,7 @@ $.extend(IomyRe.apiodata,{
 		//== ODATA API REQUEST                                      ==//
 		//============================================================//
 		//-- Check that the User is logged in --//
-		if( IomyRe.common.bUserCurrentlyLoggedIn===true ) {
+		if( iomy.common.bUserCurrentlyLoggedIn===true ) {
 			
 			oAjax = $.ajax({
 				url:                    sUrl,
@@ -359,10 +359,10 @@ $.extend(IomyRe.apiodata,{
 						//============================================================//
 						//== 1.2.A - IF this task is orphaned                       ==//
 						//============================================================//
-						if( IomyRe.common.bUserCurrentlyLoggedIn===false || this.iCurrentLoginTimestamp!==IomyRe.common.oCurrentLoginTimestamp.getTime() ) {
+						if( iomy.common.bUserCurrentlyLoggedIn===false || this.iCurrentLoginTimestamp!==iomy.common.oCurrentLoginTimestamp.getTime() ) {
 							//-- TODO: Log a message that an Odata API request had to be aborted --//
 							var sErrorMesg1 = "Silently aborting Odata API request (before parsing the sucessful response from the ajax request) due to being logged out!";
-							jQuery.sap.log.info( sErrorMesg1, "", "IomyRe.apiodata.AjaxRequest" );
+							jQuery.sap.log.info( sErrorMesg1, "", "iomy.apiodata.AjaxRequest" );
 							
 						//============================================================//
 						//== 1.2.B - ELSEIF the Response isn't null                 ==//
@@ -398,7 +398,7 @@ $.extend(IomyRe.apiodata,{
 											aConfig.onFail(Response);
 										} catch( e02 ) {
 											if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-											jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e02)\n"+e02.message+" \n"+sUrl, "", "IomyRe.apiodata.AjaxRequest");
+											jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e02)\n"+e02.message+" \n"+sUrl, "", "iomy.apiodata.AjaxRequest");
 										}
 										
 										
@@ -410,7 +410,7 @@ $.extend(IomyRe.apiodata,{
 												aConfig.onSuccess("JSON", aData);
 											} catch( e03 ) {
 												if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-												jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!.(e03)\n"+e03.message+" \n"+sUrl, "", "IomyRe.apiodata.AjaxRequest");
+												jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!.(e03)\n"+e03.message+" \n"+sUrl, "", "iomy.apiodata.AjaxRequest");
 											}
 											
 										} else {
@@ -419,7 +419,7 @@ $.extend(IomyRe.apiodata,{
 												aConfig.onSuccess("JSON", aData);
 											} catch( e04 ) {
 												if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-												jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e04)\n"+e04.message+" \n"+sUrl, "", "IomyRe.apiodata.AjaxRequest");
+												jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e04)\n"+e04.message+" \n"+sUrl, "", "iomy.apiodata.AjaxRequest");
 											}
 											
 										}
@@ -438,7 +438,7 @@ $.extend(IomyRe.apiodata,{
 								} else {
 									//-- No Method for this response type --//
 									if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Method for parsing Response type, ExpResType="+sERType, "", "IomyRe.apiodata.AjaxRequest" );
+									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Method for parsing Response type, ExpResType="+sERType, "", "iomy.apiodata.AjaxRequest" );
 									
 								}
 							
@@ -452,12 +452,12 @@ $.extend(IomyRe.apiodata,{
 								if(typeof Response === "string") {
 									//-- Push Error & Content type and Response --//
 									if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Response, ContentType="+sContentType+"  Response="+Response, "", "IomyRe.apiodata.AjaxRequest");
+									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Response, ContentType="+sContentType+"  Response="+Response, "", "iomy.apiodata.AjaxRequest");
 									
 								} else {
 									//-- Push Error to Console Log --//
 									if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Response, ContentType="+sContentType+", Expected="+cfg.ExpectedResponseType, "", "IomyRe.apiodata.AjaxRequest");
+									jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Unexpected Response, ContentType="+sContentType+", Expected="+cfg.ExpectedResponseType, "", "iomy.apiodata.AjaxRequest");
 								}
 							}
 						//============================================================//
@@ -467,12 +467,12 @@ $.extend(IomyRe.apiodata,{
 							//-- Error: Response is null --//
 							
 							if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-							jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Response is null", "", "IomyRe.apiodata.AjaxRequest");
+							jQuery.sap.log.error(this.DebugLogString+"ErrMesg: Response is null", "", "iomy.apiodata.AjaxRequest");
 						}
 					} catch(e1) {
 						
 						if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-						jQuery.sap.log.error(this.DebugLogString+"\nCritical Error occurred in the Success Section: "+e1.message, "", "IomyRe.apiodata.AjaxRequest");
+						jQuery.sap.log.error(this.DebugLogString+"\nCritical Error occurred in the Success Section: "+e1.message, "", "iomy.apiodata.AjaxRequest");
 					}
 				},
 				//============================================================================================//
@@ -488,10 +488,10 @@ $.extend(IomyRe.apiodata,{
 					//============================================================//
 					//== 2.2.A - IF this task is orphaned                       ==//
 					//============================================================//
-					if( IomyRe.common.bUserCurrentlyLoggedIn===false || this.iCurrentLoginTimestamp!==IomyRe.common.oCurrentLoginTimestamp.getTime() ) {
+					if( iomy.common.bUserCurrentlyLoggedIn===false || this.iCurrentLoginTimestamp!==iomy.common.oCurrentLoginTimestamp.getTime() ) {
 						//-- TODO: Log a message that an Odata API request had to be aborted --//
 						var sErrorMesg1 = "Silently aborting Odata API request (before parsing the unsucessful response from the ajax request) due to being logged out!";
-						jQuery.sap.log.info( sErrorMesg1, "", "IomyRe.apiodata.AjaxRequest" );
+						jQuery.sap.log.info( sErrorMesg1, "", "iomy.apiodata.AjaxRequest" );
 							
 					//============================================================//
 					//== 2.2.B - ELSE the task is not orphaned                  ==//
@@ -541,14 +541,14 @@ $.extend(IomyRe.apiodata,{
 								//-- TODO: This section needs to be looked into further to see if anything needs to be changed --// 
 								
 								if( statusObj ) {
-									IomyRe.common.notAuthorized("HTTP Auth has expired! Please log back in to continue.");
+									iomy.common.notAuthorized("HTTP Auth has expired! Please log back in to continue.");
 									
 								} else if( aConfig.auth ) {
-									IomyRe.common.showError("Incorrect username and/or password. Please retype your username and password again!");
-									IomyRe.common.showLoading(false);
+									iomy.common.showError("Incorrect username and/or password. Please retype your username and password again!");
+									iomy.common.showLoading(false);
 									
 								} else {
-									IomyRe.common.showError("Unexpected HTTP 401 Status Code");
+									iomy.common.showError("Unexpected HTTP 401 Status Code");
 								}
 								
 								//-- Flag that we shouldn't retry the ajax request --// 
@@ -561,10 +561,10 @@ $.extend(IomyRe.apiodata,{
 								//-- Flag that we shouldn't retry the ajax request --//
 								this.bApiComplete = true;
 								//-- Flag that the user isn't currently logged in --//
-								IomyRe.common.bUserCurrentlyLoggedIn = false;
+								iomy.common.bUserCurrentlyLoggedIn = false;
 									
 								//-- Run the handle403APIError function --//
-								IomyRe.apiphp.handle403APIError(aConfig);
+								iomy.apiphp.handle403APIError(aConfig);
 			
 							//------------------------------------------------------------------------//
 							//-- 2.3.F - UNEXPECTED STATUS CODE:                                    --//
@@ -580,7 +580,7 @@ $.extend(IomyRe.apiodata,{
 						} catch( e20 ) {
 							//-- Flag that this API Request has completed unsuccessfully --//
 							this.bApiComplete = true;
-							jQuery.sap.log.error( "Critical Error occurred in the Odata on error section 1: "+e20.message, "", "IomyRe.apiodata.AjaxRequest" );
+							jQuery.sap.log.error( "Critical Error occurred in the Odata on error section 1: "+e20.message, "", "iomy.apiodata.AjaxRequest" );
 						}
 						
 						try {
@@ -601,7 +601,7 @@ $.extend(IomyRe.apiodata,{
 							//-- API didin't get a desired result before max attempts was exceeded --//
 							} else if( (this.RetryAttemptCount===this.RetryAttempLimit) && this.bApiComplete == false) {
 								this.DebugLogString += sDebugLogLines+"The number of retry attempts to get a desired result from the API has been exceeded! \nThe UI will no make any more attempts with this request.\n"+sDebugLogLines;
-								jQuery.sap.log.error(this.DebugLogString, "", "IomyRe.apiodata.AjaxRequest");
+								jQuery.sap.log.error(this.DebugLogString, "", "iomy.apiodata.AjaxRequest");
 							}
 							
 							//------------------------------------------------------------------------//
@@ -614,14 +614,14 @@ $.extend(IomyRe.apiodata,{
 									aConfig.onFail( err );
 								} catch( e21 ) {
 									if( this.DebugLogString==="" ) { this.DebugLogString = sDebugHeader; }
-									jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e21)\n"+e21.message+" \n"+sUrl, "", "IomyRe.apiodata.AjaxRequest");
+									jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e21)\n"+e21.message+" \n"+sUrl, "", "iomy.apiodata.AjaxRequest");
 								}
 								
 							}
 						} catch( e21 ) {
 							//-- Flag that this API Request has completed unsuccessfully --//
 							this.bApiComplete = true;
-							jQuery.sap.log.error( "Critical Error occurred in the Odata on error section 2: "+e20.message, "", "IomyRe.apiodata.AjaxRequest" );
+							jQuery.sap.log.error( "Critical Error occurred in the Odata on error section 2: "+e20.message, "", "iomy.apiodata.AjaxRequest" );
 						}
 					}
 				} //-- END "error" function --//
@@ -631,7 +631,7 @@ $.extend(IomyRe.apiodata,{
 			//== ?.? - IF the User isn't currently logged in            ==//
 			//============================================================//
 			var sErrorMesg = "Silently aborting Odata API request (before starting the ajax request) due to being logged out!";
-			jQuery.sap.log.info( sErrorMesg, "", "IomyRe.apiodata.AjaxRequest" );
+			jQuery.sap.log.info( sErrorMesg, "", "iomy.apiodata.AjaxRequest" );
 			
 		}
 	}

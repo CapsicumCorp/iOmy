@@ -22,11 +22,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-$.sap.declare("IomyRe.forms",true);
+$.sap.declare("iomy.forms",true);
 
-IomyRe.forms = new sap.ui.base.Object();
+iomy.forms = new sap.ui.base.Object();
 
-$.extend( IomyRe.forms, {
+$.extend( iomy.forms, {
 
 	/* Toggles the "editable" form property allowing form objects to be outside of fragments */
 	ToggleFormMode : function (oController, sFormId, bEditable) {

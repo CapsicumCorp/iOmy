@@ -76,15 +76,15 @@ sap.ui.jsview("pages.staging.telnet.Telnet", {
 		
 		return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "MJPEG",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents : [
 				
 				new sap.m.ScrollContainer({
 					vertical: true,
 					height: "100%",
 					content : [
-						IomyRe.widgets.DeviceToolbar(oController, "Telnet Console"),
+						iomy.widgets.DeviceToolbar(oController, "Telnet Console"),
 						// Put the telnet output area
 						new sap.m.VBox ({
 							layoutData : new sap.m.FlexItemData({

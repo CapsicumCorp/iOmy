@@ -37,7 +37,7 @@ sap.ui.controller("pages.staging.Premise", {
         oView.addEventDelegate({
             onBeforeShow : function (evt) {
                 
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 oController.BuildPremiseListUI();
             }
         });
@@ -53,7 +53,7 @@ sap.ui.controller("pages.staging.Premise", {
         wList.destroyItems();
         
         // Fetch the list from the core variables.
-        var aaPremiseList = IomyRe.common.PremiseList;
+        var aaPremiseList = iomy.common.PremiseList;
         
         //--------------------------------------------------------------------//
         // Construct the Premise List
@@ -64,7 +64,7 @@ sap.ui.controller("pages.staging.Premise", {
                 new sap.m.ObjectListItem (oView.createId("entry"+mPremise.Id), {        
                     title: mPremise.Name,
                     type: "Active",
-                    number: IomyRe.functions.getNumberOfDevicesInPremise(mPremise.Id),
+                    number: iomy.functions.getNumberOfDevicesInPremise(mPremise.Id),
                     numberUnit: "Devices",
                     attributes : [
                         new sap.m.ObjectAttribute ({
@@ -76,7 +76,7 @@ sap.ui.controller("pages.staging.Premise", {
 
                     ],
                     press : function () {
-                        IomyRe.common.NavigationChangePage( "pDevice" , {PremiseId : mPremise.Id} , false);
+                        iomy.common.NavigationChangePage( "pDevice" , {PremiseId : mPremise.Id} , false);
                     }
                 })
             );
@@ -89,8 +89,8 @@ sap.ui.controller("pages.staging.Premise", {
     LoadPremiseAddresses : function () {
         var oController = this;
         
-        IomyRe.apiodata.AjaxRequest({
-            Url : IomyRe.apiodata.ODataLocation("premiselocation"),
+        iomy.apiodata.AjaxRequest({
+            Url : iomy.apiodata.ODataLocation("premiselocation"),
             Columns : ["PREMISE_PK", "REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
                         "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
                         "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
@@ -156,7 +156,7 @@ sap.ui.controller("pages.staging.Premise", {
             },
             
             onFail : function (response) {
-                IomyRe.common.showError("There was an unexpected error loading the premise address.");
+                iomy.common.showError("There was an unexpected error loading the premise address.");
                 jQuery.sap.log.error(JSON.stringify(response));
             }
         });

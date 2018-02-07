@@ -42,7 +42,7 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"), {
+								iomy.widgets.selectBoxHub(oView.createId("HubSelect"), {
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}",
                                     template : {
                                         path : "/Hubs",
@@ -61,7 +61,7 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 						new sap.ui.layout.form.FormElement(oView.createId("RoomFormElement"), {
 							label : "Put this device in",
 							fields: [ 
-								IomyRe.widgets.selectBoxRoom({
+								iomy.widgets.selectBoxRoom({
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}",
                                     template : {
                                         path : "/Rooms",

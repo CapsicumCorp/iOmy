@@ -47,8 +47,8 @@ sap.ui.jsview("pages.staging.user.UserSettings", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "User Settings",
-			header : IomyRe.widgets.getToolPageHeader(oController),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader(oController),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
 				new sap.uxap.ObjectPageLayout (oView.createId("ObjectPageLayout"), {
 					isObjectIconAlwaysVisible: true,

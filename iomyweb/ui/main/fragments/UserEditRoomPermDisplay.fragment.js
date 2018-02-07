@@ -12,7 +12,7 @@ sap.ui.jsfragment("fragments.UserEditRoomPermDisplay", {
 			fields: [
 				new sap.m.Text ({
 					//text: "In progress"
-					//text: "{ path:'RoomId', formatter:'IomyRe.common.LookupRoomPermLevelName'}"
+					//text: "{ path:'RoomId', formatter:'iomy.common.LookupRoomPermLevelName'}"
 					text: {
 						path: 'Id', 
 						formatter: function( iRoomId ){ 
@@ -29,7 +29,7 @@ sap.ui.jsfragment("fragments.UserEditRoomPermDisplay", {
 									iRoomPermLevel = 0;
 								}
 								
-								return IomyRe.common.LookupRoomPermLevelName( iRoomPermLevel );
+								return iomy.common.LookupRoomPermLevelName( iRoomPermLevel );
 								
 							} catch(e1) {
 								$.sap.log.error("FormatRoomPermNameFromRoomId: Critcal Error:"+e1.message);

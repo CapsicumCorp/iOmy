@@ -53,7 +53,7 @@ sap.ui.controller("pages.staging.user.UserList", {
                 //-- Check the parameters --//
                 oController.GetListOfUsers();
                 //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
             }
             
         });
@@ -70,8 +70,8 @@ sap.ui.controller("pages.staging.user.UserList", {
         //------------------------------------------------//
         try {
             if( bError===false ) {
-                IomyRe.apiphp.AjaxRequest({
-                    url:       IomyRe.apiphp.APILocation("users"),
+                iomy.apiphp.AjaxRequest({
+                    url:       iomy.apiphp.APILocation("users"),
                     data:      {
                         "Mode":              "AdminUserList",
                     },
@@ -83,10 +83,10 @@ sap.ui.controller("pages.staging.user.UserList", {
                             if( sType==="JSON" && aData.Error===false ) {
                                 try {
                                     if(typeof aData.Data!=="undefined") {
-                                        IomyRe.common.UserList = {};
+                                        iomy.common.UserList = {};
                                         
                                         for (var i = 0; i < aData.Data.length; i++) {
-                                            IomyRe.common.UserList["_"+aData.Data[i].Id] = aData.Data[i];
+                                            iomy.common.UserList["_"+aData.Data[i].Id] = aData.Data[i];
                                         }
                                         //------------------------------------------------//
                                         //-- STEP 2 - Update the Controller Model       --//
@@ -117,7 +117,7 @@ sap.ui.controller("pages.staging.user.UserList", {
                     }
                 });
             } else {
-                IomyRe.common.showError( sErrMesg, "Error" );
+                iomy.common.showError( sErrMesg, "Error" );
             }
         } catch( e1 ) {
             jQuery.sap.log.error("Error with the 'UserList' in the 'UserList' controller! "+e1.message);
@@ -213,7 +213,7 @@ sap.ui.controller("pages.staging.user.UserList", {
             if (aSelectedUsers[i].Status === "Disabled") {
                 aRequests.push({
                     "library" : "PHP",
-                    "url" : IomyRe.apiphp.APILocation("users"),
+                    "url" : iomy.apiphp.APILocation("users"),
                     "data" : {
                         "Mode" : "ChangeUserState",
                         "Data" : JSON.stringify({
@@ -238,7 +238,7 @@ sap.ui.controller("pages.staging.user.UserList", {
                     sMessage = aRequests.length + " users enabled.";
                 }
                 
-                IomyRe.common.showMessage({
+                iomy.common.showMessage({
                     text : sMessage
                 });
                 
@@ -246,11 +246,11 @@ sap.ui.controller("pages.staging.user.UserList", {
             },
             
             onWarning : function () {
-                IomyRe.common.showWarning("Could not enable all users.", "");
+                iomy.common.showWarning("Could not enable all users.", "");
             },
             
             onFail : function () {
-                IomyRe.common.showError("Failed to enable any users.", "");
+                iomy.common.showError("Failed to enable any users.", "");
             }
             
         });
@@ -272,14 +272,14 @@ sap.ui.controller("pages.staging.user.UserList", {
         for (var i = 0; i < aSelectedUsers.length; i++) {
             if (aSelectedUsers[i].UserId !== 1 && aSelectedUsers[i].UserId !== 2) {
                 
-                if (aSelectedUsers[i].UserId == IomyRe.common.UserInfo.UserId) {
-                    IomyRe.common.showWarning("Unable to disable yourself while logged in.", "Still logged in");
+                if (aSelectedUsers[i].UserId == iomy.common.UserInfo.UserId) {
+                    iomy.common.showWarning("Unable to disable yourself while logged in.", "Still logged in");
                     
                 } else {
                     if (aSelectedUsers[i].Status === "Enabled") {
                         aRequests.push({
                             "library" : "PHP",
-                            "url" : IomyRe.apiphp.APILocation("users"),
+                            "url" : iomy.apiphp.APILocation("users"),
                             "data" : {
                                 "Mode" : "ChangeUserState",
                                 "Data" : JSON.stringify({
@@ -291,7 +291,7 @@ sap.ui.controller("pages.staging.user.UserList", {
                     }
                 }
             } else {
-                IomyRe.common.showWarning("Cannot disable the owner.", "iOmy Owner");
+                iomy.common.showWarning("Cannot disable the owner.", "iOmy Owner");
             }
         }
         
@@ -312,7 +312,7 @@ sap.ui.controller("pages.staging.user.UserList", {
                     sMessage = aRequests.length + " users disabled.";
                 }
                 
-                IomyRe.common.showMessage({
+                iomy.common.showMessage({
                     text : sMessage
                 });
                 
@@ -320,11 +320,11 @@ sap.ui.controller("pages.staging.user.UserList", {
             },
             
             onWarning : function () {
-                IomyRe.common.showWarning("Could not disable all users.", "");
+                iomy.common.showWarning("Could not disable all users.", "");
             },
             
             onFail : function () {
-                IomyRe.common.showError("Failed to disable any users.", "");
+                iomy.common.showError("Failed to disable any users.", "");
             }
             
         });

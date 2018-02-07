@@ -45,7 +45,7 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
             onBeforeShow : function (evt) {
                 
                 //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 oController.RefreshModel();
                 oController.CheckDBIndexing();
@@ -80,7 +80,7 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
             oController.bLoading = true;
             oController.ToggleControls(false);
             
-            IomyRe.functions.server.getDBIndexingState({
+            iomy.functions.server.getDBIndexingState({
                 onSuccess : function (bState) {
                     oController.bIndexingOn = bState;
                     oController.bLoading = false;
@@ -89,7 +89,7 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                 },
 
                 onFail : function (sErrorMessage) {
-                    IomyRe.common.showError(sErrorMessage, "Error",
+                    iomy.common.showError(sErrorMessage, "Error",
                         function () {
                             oController.bLoading = false;
                             oController.RefreshModel();
@@ -98,7 +98,7 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                 }
             });
         } catch (e) {
-            IomyRe.common.showError("Error attempting to call the function to retrieve the database indexing state ("+e.name+"): " + e.message, "Error",
+            iomy.common.showError("Error attempting to call the function to retrieve the database indexing state ("+e.name+"): " + e.message, "Error",
                 function () {
                     oController.bLoading = false;
                     oController.RefreshModel();
@@ -168,11 +168,11 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                         sMessage = "Database indexing disabled.";
                     }
                     
-                    IomyRe.common.showMessage({
+                    iomy.common.showMessage({
                         text : sMessage
                     });
                     
-                    IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+                    iomy.common.NavigationChangePage( "pServerInfo" ,  {} , false);
                 },
 
                 onWarning : function () {
@@ -188,7 +188,7 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                         sError = "Failed to disable indexing.";
                     }
                     
-                    IomyRe.common.showError(sError, "Error",
+                    iomy.common.showError(sError, "Error",
                         function () {
                             oController.ToggleControls(true);
                         }
@@ -212,7 +212,7 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
 
                 oDBIndexingQueue.addRequest({
                     library : "php",
-                    url : IomyRe.apiphp.APILocation("serveradmin"),
+                    url : iomy.apiphp.APILocation("serveradmin"),
                     data : {
                         Mode : "ChangeOptionalDBIndices",
                         Command : sCommand,

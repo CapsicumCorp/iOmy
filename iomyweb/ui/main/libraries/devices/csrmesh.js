@@ -21,10 +21,10 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.devices.csrmesh",true);
-IomyRe.devices.csrmesh = new sap.ui.base.Object();
+$.sap.declare("iomy.devices.csrmesh",true);
+iomy.devices.csrmesh = new sap.ui.base.Object();
 
-$.extend(IomyRe.devices.csrmesh,{
+$.extend(iomy.devices.csrmesh,{
     
     LinkTypeId        : 15,
     ThingTypeId       : 19,
@@ -51,7 +51,7 @@ $.extend(IomyRe.devices.csrmesh,{
             if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
                 iThingId = mSettings.thingID;
                 
-                var mThingIDInfo = IomyRe.validation.isThingIDValid(iThingId);
+                var mThingIDInfo = iomy.validation.isThingIDValid(iThingId);
                 
                 bError          = !mThingIDInfo.bIsValid;
                 aErrorMessages  = mThingIDInfo.aErrorMessages;
@@ -91,8 +91,8 @@ $.extend(IomyRe.devices.csrmesh,{
         // support is fully supported.
         //--------------------------------------------------------------------//
         try {
-            IomyRe.apiphp.AjaxRequest({
-                "url"     : IomyRe.apiphp.APILocation("light"),
+            iomy.apiphp.AjaxRequest({
+                "url"     : iomy.apiphp.APILocation("light"),
                 "method"  : "POST",
                 "data"    : {
                     "Mode" : "ChangeColorBrightness",
@@ -127,8 +127,8 @@ $.extend(IomyRe.devices.csrmesh,{
                 }
             });
         
-    //        IomyRe.apiphp.AjaxRequest({
-    //            url: IomyRe.apiphp.APILocation("statechange"),
+    //        iomy.apiphp.AjaxRequest({
+    //            url: iomy.apiphp.APILocation("statechange"),
     //            type: "POST",
     //            data: { 
     //                "Mode":"ThingToggleStatus", 
@@ -144,15 +144,15 @@ $.extend(IomyRe.devices.csrmesh,{
     //                    fnSuccess(type, data);
     //                };
     //                
-    //                IomyRe.apiphp.AjaxRequest(this);
+    //                iomy.apiphp.AjaxRequest(this);
     //            }
     //        });
         } catch (e) {
-//            e.message = "Error in IomyRe.devices.csrmesh.turnOnWhiteLight ("+e.name+"):\n" + e.message;
+//            e.message = "Error in iomy.devices.csrmesh.turnOnWhiteLight ("+e.name+"):\n" + e.message;
 //            $.sap.log.error(e.message);
 //            throw e;
 
-            fnFail("Error in IomyRe.devices.csrmesh.turnOnWhiteLight ("+e.name+"):\n" + e.message);
+            fnFail("Error in iomy.devices.csrmesh.turnOnWhiteLight ("+e.name+"):\n" + e.message);
         }
     },
     
@@ -173,7 +173,7 @@ $.extend(IomyRe.devices.csrmesh,{
                 "Type":"Function", 
                 "Execute": function () {
                     try {
-                        IomyRe.devices.getHexOfLightColour({
+                        iomy.devices.getHexOfLightColour({
                             thingID     : mSettings.deviceData.DeviceId,
                             onSuccess   : mSettings.onSuccess,
                             onFail      : mSettings.onFail

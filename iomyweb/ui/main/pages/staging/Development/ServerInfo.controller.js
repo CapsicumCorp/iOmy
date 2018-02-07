@@ -41,7 +41,7 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
             onBeforeShow : function (evt) {
                 
                 //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 oController.RefreshModel();
                 oController.CheckDBIndexing();
@@ -59,7 +59,7 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
         
         oData = {
             "ui5Version"        : oVersion.toString(),
-            "dbVersion"         : IomyRe.common.DatabaseVersion,
+            "dbVersion"         : iomy.common.DatabaseVersion,
             "interfaceVersion"  : "0.4.11",              // TODO: Interface version is hardcoded. Each time a release is done, this will need to be updated.
             
             "indexingOn"        : oController.bIndexingOn,
@@ -113,7 +113,7 @@ sap.ui.controller("pages.staging.Development.ServerInfo", {
         var oController     = this;
         
         try {
-            IomyRe.functions.server.getDBIndexingState({
+            iomy.functions.server.getDBIndexingState({
                 onSuccess : function (bState) {
                     oController.bIndexingOn = bState;
                     

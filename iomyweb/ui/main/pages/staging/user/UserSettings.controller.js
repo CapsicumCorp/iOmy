@@ -47,7 +47,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 				
 				oController.RefreshModel( oController, {} );
 
-                oView.byId("PageHeader").setObjectTitle(IomyRe.common.UserInfo.Username);
+                oView.byId("PageHeader").setObjectTitle(iomy.common.UserInfo.Username);
 
                 if (bIsOwner) {
                     oView.byId("PageHeader").setObjectSubtitle("Owner");
@@ -65,7 +65,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                 oController.ToggleButtonsAndView( oController, "ShowRoomPermissions");
 
                 //-- Defines the Device Type --//
-                IomyRe.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
 			
 		});
@@ -83,11 +83,11 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         //-- Make sure the previous data isn't shown before refresh. --//
         oView.setModel( oModel );
         
-        IomyRe.common.RetrieveRoomAdminRoomList({
+        iomy.common.RetrieveRoomAdminRoomList({
             
             onSuccess : function () {
                 try {
-                    var aRoomData = JSON.parse(JSON.stringify(IomyRe.common.RoomAdminRoomsList));
+                    var aRoomData = JSON.parse(JSON.stringify(iomy.common.RoomAdminRoomsList));
                     aRoomData['_0'] = {
                         RoomId: "0",
                         RoomName: "All Rooms"
@@ -96,19 +96,19 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                     //------------------------------------------------//
                     //-- Setup New UserData Array                   --//
                     //------------------------------------------------//
-                    if( typeof IomyRe.common.UserInfo!=="undefined" ) {
-                        aUserData = JSON.parse(JSON.stringify(IomyRe.common.UserInfo ));
+                    if( typeof iomy.common.UserInfo!=="undefined" ) {
+                        aUserData = JSON.parse(JSON.stringify(iomy.common.UserInfo ));
                     }
 
                     //------------------------------------------------//
                     //-- Build and Bind Model to the View           --//
                     //------------------------------------------------//
                     oModel = new sap.ui.model.json.JSONModel({
-                        "Regions":               IomyRe.common.Regions,
-                        "Languages":             IomyRe.common.Languages,
-                        "Timezones":             IomyRe.common.Timezones,
-                        "Premises":              IomyRe.common.PremiseList,
-                        "Rooms":                 IomyRe.common.AllRoomsList,
+                        "Regions":               iomy.common.Regions,
+                        "Languages":             iomy.common.Languages,
+                        "Timezones":             iomy.common.Timezones,
+                        "Premises":              iomy.common.PremiseList,
+                        "Rooms":                 iomy.common.AllRoomsList,
                         "RoomOptions":           aRoomData,
                         "UserInfo":              aUserData,
                         "Password":              {
@@ -164,7 +164,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         var bPremiseOwner = false;
         
         try {
-            $.each(IomyRe.common.PremiseList, function (sI, mPremise) {
+            $.each(iomy.common.PremiseList, function (sI, mPremise) {
                 
                 if (mPremise.PermOwner === 1) {
                     bPremiseOwner = true;
@@ -236,8 +236,8 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//------------------------------------------------//
 		try {
 			if( bError===false ) {
-				IomyRe.apiphp.AjaxRequest({
-					url:       IomyRe.apiphp.APILocation("users"),
+				iomy.apiphp.AjaxRequest({
+					url:       iomy.apiphp.APILocation("users"),
 					data:      {
 						"Mode":              "EditUserInfo",
 						"Title":             oCurrentFormData.UserTitle,
@@ -255,7 +255,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 									//------------------------------------------------//
 									//-- STEP 5 - Update Global LandPackagesList    --//
 									//------------------------------------------------//
-									IomyRe.common.RefreshUserInfoList({
+									iomy.common.RefreshUserInfoList({
 										onSuccess: $.proxy( function() {
 											//------------------------------------------------//
 											//-- STEP 6 - Update the Controller Model       --//
@@ -265,12 +265,12 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 													//------------------------------------------------//
 													//-- STEP 8 - Load the Display Fragment         --//
 													//------------------------------------------------//
-                                                    IomyRe.common.showMessage({
+                                                    iomy.common.showMessage({
                                                         text : "User Information successfully updated."
                                                     });
                                                     
                                                     if (oView.byId("openMenu") !== undefined) {
-                                                        var sDisplayName = IomyRe.common.UserInfo.Displayname || IomyRe.common.UserInfo.Username;
+                                                        var sDisplayName = iomy.common.UserInfo.Displayname || iomy.common.UserInfo.Username;
                                                         oView.byId("openMenu").setText("Hi, "+sDisplayName);
                                                     }
                                                     
@@ -305,7 +305,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error", function () {
+				iomy.common.showError( sErrMesg, "Error", function () {
                     oController.ToggleInformationControls(true);
                 });
 			}
@@ -313,7 +313,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
             var sErrorMesg = "Error with'UpdateUserInfoValues' in the 'UserSettings' controller! "+e1.message;
             
 			jQuery.sap.log.error(sErrorMesg);
-            IomyRe.common.showError( sErrorMesg, "Error", function () {
+            iomy.common.showError( sErrorMesg, "Error", function () {
                 oController.ToggleInformationControls(true);
             });
 		}
@@ -340,8 +340,8 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 		//------------------------------------------------//
 		try {
 			if( bError===false ) {
-				IomyRe.apiphp.AjaxRequest({
-					url:       IomyRe.apiphp.APILocation("users"),
+				iomy.apiphp.AjaxRequest({
+					url:       iomy.apiphp.APILocation("users"),
 					data:      {
 						"Mode":                       "EditUserAddress",
 						"AddressLine1":               oCurrentFormData.AddressLine1,
@@ -360,7 +360,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 									//------------------------------------------------//
 									//-- STEP 5 - Update Global LandPackagesList    --//
 									//------------------------------------------------//
-									IomyRe.common.RefreshUserInfoList({
+									iomy.common.RefreshUserInfoList({
 										onSuccess: $.proxy( function() {
 											//------------------------------------------------//
 											//-- STEP 6 - Update the Controller Model       --//
@@ -404,7 +404,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 					}
 				});
 			} else {
-				IomyRe.common.showError( sErrMesg, "Error", function () {
+				iomy.common.showError( sErrMesg, "Error", function () {
                     oController.ToggleAddressControls(true);
                 });
 			}
@@ -428,16 +428,16 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                 confirmNewPassword  : oFormData.ConfirmPassword,
                 
                 onSuccess : function () {
-                    IomyRe.common.showMessage({
+                    iomy.common.showMessage({
                         text : "Log back in to continue using iOmy."
                     });
                     
                     oController.TogglePasswordControls(true);
-                    IomyRe.common.Logout();
+                    iomy.common.Logout();
                 },
                 
                 onFail : function (sError) {
-                    IomyRe.common.showError(sError, "Update failed",
+                    iomy.common.showError(sError, "Update failed",
                         function () {
                             oController.TogglePasswordControls(true);
                         }
@@ -445,7 +445,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                 }
             });
         } catch (e) {
-            IomyRe.common.showError(e.message, "Invalid Input",
+            iomy.common.showError(e.message, "Invalid Input",
                 function () {
                     oController.TogglePasswordControls(true);
                 }
@@ -456,7 +456,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
     changeUserPassword : function (mSettings) {
         var bError          = false;
         var aErrorMessages  = [];
-        var iUserId         = IomyRe.common.UserInfo.UserId;
+        var iUserId         = iomy.common.UserInfo.UserId;
         var fnSuccess       = function () {};
         var fnFail          = function () {};
         var sOldPassword;
@@ -497,7 +497,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
             {
                 sNewPassword = mSettings.newPassword;
                 
-                var mPasswordInfo = IomyRe.validation.isPasswordSecure(sNewPassword);
+                var mPasswordInfo = iomy.validation.isPasswordSecure(sNewPassword);
                 
                 if (!mPasswordInfo.bIsValid) {
                     bError = true;
@@ -565,8 +565,8 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         // Run the API to update the user's password.
         //--------------------------------------------------------------------//
         try {
-            IomyRe.apiphp.AjaxRequest({
-                url : IomyRe.apiphp.APILocation("users"),
+            iomy.apiphp.AjaxRequest({
+                url : iomy.apiphp.APILocation("users"),
                 data : {
                     "Mode" : "EditPassword", "Id" : iUserId,
                     "OldPassword" : sOldPassword, "NewPassword" : sNewPassword
@@ -627,8 +627,8 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         oController.ToggleRoomPermissionControls(false);
         
         try {
-            IomyRe.functions.permissions.fetchRoomPermissions({
-                userID          : IomyRe.common.UserInfo.UserId,
+            iomy.functions.permissions.fetchRoomPermissions({
+                userID          : iomy.common.UserInfo.UserId,
                 roomID          : iRoomId,
                 premiseID       : iPremiseId,
 
@@ -641,7 +641,7 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                 },
 
                 onWarning : function (iLevel, sErrors) {
-                    IomyRe.common.showWarning(sErrors, "Unable to find permissions for some rooms.");
+                    iomy.common.showWarning(sErrors, "Unable to find permissions for some rooms.");
 
                     oController.DisplayRoomPermissions(iLevel);
                     oController.ToggleButtonsAndView( oController, "EditRoomPermissions" );
@@ -650,14 +650,14 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                 },
 
                 onFail : function (sErrors) {
-                    IomyRe.common.showError(sErrors, "Failed to retrieve room permissions.");
+                    iomy.common.showError(sErrors, "Failed to retrieve room permissions.");
 
                     oController.ToggleRoomPermissionControls(true);
                 }
             });
             
         } catch (e) {
-            IomyRe.common.showError(e.message, "Error", function () {
+            iomy.common.showError(e.message, "Error", function () {
                 oController.ToggleRoomPermissionControls(true);
             });
         }
@@ -674,17 +674,17 @@ sap.ui.controller("pages.staging.user.UserSettings", {
         oController.ToggleRoomPermissionControls(false);
         
         try {
-            IomyRe.functions.permissions.updateRoomPermissions({
+            iomy.functions.permissions.updateRoomPermissions({
                 level           : parseInt(iLevel),
-                userID          : IomyRe.common.UserInfo.UserId,
+                userID          : iomy.common.UserInfo.UserId,
                 roomID          : iRoomId,
                 premiseID       : iPremiseId,
 
                 onSuccess : function () {
-                    IomyRe.common.RefreshCoreVariables({
+                    iomy.common.RefreshCoreVariables({
 
                         onSuccess : function () {
-                            IomyRe.common.showMessage({
+                            iomy.common.showMessage({
                                 "text" : "Updated permissions successfully"
                             });
 
@@ -697,20 +697,20 @@ sap.ui.controller("pages.staging.user.UserSettings", {
                 },
 
                 onWarning : function (sErrors) {
-                    IomyRe.common.showWarning(sErrors, "Unable to update for some rooms.");
+                    iomy.common.showWarning(sErrors, "Unable to update for some rooms.");
 
                     oController.ToggleRoomPermissionControls(true);
                 },
 
                 onFail : function (sErrors) {
-                    IomyRe.common.showError(sErrors, "Failed to update room permissions.");
+                    iomy.common.showError(sErrors, "Failed to update room permissions.");
 
                     oController.ToggleRoomPermissionControls(true);
                 }
             });
             
         } catch (e) {
-            IomyRe.common.showError(e.message, "Invalid input", function () {
+            iomy.common.showError(e.message, "Invalid input", function () {
                 oController.ToggleRoomPermissionControls(true);
             });
         }
@@ -727,70 +727,70 @@ sap.ui.controller("pages.staging.user.UserSettings", {
 					oView.byId("PasswordBlock_BtnEdit").setVisible( true );
 					oView.byId("PasswordBlock_BtnSave").setVisible( false );
 					oView.byId("PasswordBlock_BtnCancel").setVisible( false );
-					IomyRe.forms.ToggleFormMode(oController, "PasswordBlock_Form", false);
-					IomyRe.common.ShowFormFragment( oController, "UserPasswordDisplay", "PasswordBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "PasswordBlock_Form", false);
+					iomy.common.ShowFormFragment( oController, "UserPasswordDisplay", "PasswordBlock_Form", "FormContainer" );
 				break;
 				case "EditPassword":
 					//-- Edit Password --//
 					oView.byId("PasswordBlock_BtnEdit").setVisible( false );
 					oView.byId("PasswordBlock_BtnSave").setVisible( true );
 					oView.byId("PasswordBlock_BtnCancel").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "PasswordBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserPasswordEdit", "PasswordBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "PasswordBlock_Form", true);
+					iomy.common.ShowFormFragment( oController, "UserPasswordEdit", "PasswordBlock_Form", "FormContainer" );
 				break;
 				case "ShowInfo":
 					//-- Show Info --//
 					oView.byId("InfoBlock_BtnEdit").setVisible( true );
 					oView.byId("InfoBlock_BtnSave").setVisible( false );
 					oView.byId("InfoBlock_BtnCancel").setVisible( false );
-					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", false);
-					IomyRe.common.ShowFormFragment( oController, "UserInfoDisplay", "InfoBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "InfoBlock_Form", false);
+					iomy.common.ShowFormFragment( oController, "UserInfoDisplay", "InfoBlock_Form", "FormContainer" );
 				break;
 				case "EditInfo":
 					//-- Edit Info --//
 					oView.byId("InfoBlock_BtnEdit").setVisible( false );
 					oView.byId("InfoBlock_BtnSave").setVisible( true );
 					oView.byId("InfoBlock_BtnCancel").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserInfoEdit", "InfoBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "InfoBlock_Form", true);
+					iomy.common.ShowFormFragment( oController, "UserInfoEdit", "InfoBlock_Form", "FormContainer" );
 				break;
 				case "ShowAddress":
 					//-- Show Address --//
 					oView.byId("AddrBlock_BtnEdit").setVisible( true );
 					oView.byId("AddrBlock_BtnSave").setVisible( false );
 					oView.byId("AddrBlock_BtnCancel").setVisible( false );
-					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", false);
-					IomyRe.common.ShowFormFragment( oController, "UserAddressDisplay", "AddrBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "AddrBlock_Form", false);
+					iomy.common.ShowFormFragment( oController, "UserAddressDisplay", "AddrBlock_Form", "FormContainer" );
 				break;
 				case "EditAddress":
 					//-- Edit Address --//
 					oView.byId("AddrBlock_BtnEdit").setVisible( false );
 					oView.byId("AddrBlock_BtnSave").setVisible( true );
 					oView.byId("AddrBlock_BtnCancel").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserAddressEdit", "AddrBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "AddrBlock_Form", true);
+					iomy.common.ShowFormFragment( oController, "UserAddressEdit", "AddrBlock_Form", "FormContainer" );
 				break;
 				
 				case "ShowPremPermissions":
 					//-- Show Permissions --//
-					IomyRe.forms.ToggleFormMode(oController, "PremPBlock_Form", false);
-					IomyRe.common.ShowFormFragment(oController, "UserPremisePermissionDisplay", "PremPBlock_Form", "FormContainer");
+					iomy.forms.ToggleFormMode(oController, "PremPBlock_Form", false);
+					iomy.common.ShowFormFragment(oController, "UserPremisePermissionDisplay", "PremPBlock_Form", "FormContainer");
 				break;
 				case "ShowRoomPermissions":
 					//-- Show Permissions --//
 					oView.byId("UserRoomPermissionsBlock_BtnEdit").setVisible( true );
 					oView.byId("UserRoomPermissionsBlock_BtnSave").setVisible( false );
 					oView.byId("UserRoomPermissionsBlock_BtnCancel").setVisible( false );
-					IomyRe.forms.ToggleFormMode(oController, "UserRoomPermissionsBlock_Form", false);
-					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionDisplay", "UserRoomPermissionsBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "UserRoomPermissionsBlock_Form", false);
+					iomy.common.ShowFormFragment( oController, "UserRoomPermissionDisplay", "UserRoomPermissionsBlock_Form", "FormContainer" );
 				break;	
 				case "EditRoomPermissions":
 					//-- Edit Permissions --//
 					oView.byId("UserRoomPermissionsBlock_BtnEdit").setVisible( false );
 					oView.byId("UserRoomPermissionsBlock_BtnSave").setVisible( true );
 					oView.byId("UserRoomPermissionsBlock_BtnCancel").setVisible( true );
-					IomyRe.forms.ToggleFormMode(oController, "UserRoomPermissionsBlock_Form", true);
-					IomyRe.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "UserRoomPermissionsBlock_Form", "FormContainer" );
+					iomy.forms.ToggleFormMode(oController, "UserRoomPermissionsBlock_Form", true);
+					iomy.common.ShowFormFragment( oController, "UserRoomPermissionEdit", "UserRoomPermissionsBlock_Form", "FormContainer" );
 				break;
 				default:
 					$.sap.log.error("ToggleButtonsAndView: Critcal Error. sMode set incorrectly:"+sMode);

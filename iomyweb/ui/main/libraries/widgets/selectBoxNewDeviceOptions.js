@@ -21,11 +21,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.widgets.selectBoxNewDeviceOptions",true);
+$.sap.declare("iomy.widgets.selectBoxNewDeviceOptions",true);
 
-$.sap.require("IomyRe.functions.getNewDeviceOptions");
+$.sap.require("iomy.functions.getNewDeviceOptions");
 
-$.extend(IomyRe.widgets,{
+$.extend(iomy.widgets,{
     
     /**
      * Returns a select box containing a list of device types and onvif servers
@@ -42,7 +42,7 @@ $.extend(IomyRe.widgets,{
 		// Declare Variables
 		//================================================================//
 		try {
-            var aaOptions = IomyRe.functions.getNewDeviceOptions();
+            var aaOptions = iomy.functions.getNewDeviceOptions();
             var oSBox;
             var sID;
         } catch (e) {

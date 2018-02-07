@@ -27,7 +27,7 @@ sap.ui.jsfragment("fragments.UserEditPremPermDisplay", {
 									iPremPermLevel = 0;
 								}
 								
-								return IomyRe.common.LookupPremPermLevelName( iPremPermLevel );
+								return iomy.common.LookupPremPermLevelName( iPremPermLevel );
 								
 							} catch(e1) {
 								$.sap.log.error("FormatPremisePermNameFromPremiseId: Critcal Error:"+e1.message);

@@ -18,7 +18,7 @@ sap.ui.jsfragment("fragments.rules.EditRule", {
 					fields: [ 
 						new sap.m.Input ({
                             enabled: false,
-							value: "{path:'/Rule/Serial', formatter: 'IomyRe.rules.getDeviceDisplayName'}"
+							value: "{path:'/Rule/Serial', formatter: 'iomy.rules.getDeviceDisplayName'}"
 						})
 					]
 				}),
@@ -58,7 +58,7 @@ sap.ui.jsfragment("fragments.rules.EditRule", {
 							text: "Cancel",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
-								IomyRe.common.NavigationChangePage( "pRulesList" ,  {} , false);
+								iomy.common.NavigationChangePage( "pRulesList" ,  {} , false);
 							}
 						})
 					]

@@ -47,15 +47,15 @@ sap.ui.jsview("pages.staging.Device", {
         
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
             title: "Device List",
-            header : IomyRe.widgets.getToolPageHeader( oController ),
-            sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+            header : iomy.widgets.getToolPageHeader( oController ),
+            sideContent : iomy.widgets.getToolPageSideContent(oController),
             mainContents: [
                 new sap.m.ScrollContainer ({
                     width: "100%",
                     height: "100%",
                     vertical : true,
                     content : [
-                        IomyRe.widgets.DeviceToolbar(oController, "Device List"),
+                        iomy.widgets.DeviceToolbar(oController, "Device List"),
                         new sap.m.List (oView.createId("DeviceList"), {
                             mode: sap.m.ListMode.None,
                             items: [

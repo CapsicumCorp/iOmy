@@ -109,7 +109,7 @@ sap.ui.jsfragment("fragments.rules.AddRuleNew", {
 							text: "Cancel",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
-								IomyRe.common.NavigationChangePage( "pRulesList" ,  {} , false);
+								iomy.common.NavigationChangePage( "pRulesList" ,  {} , false);
 							}
 						})
 					]

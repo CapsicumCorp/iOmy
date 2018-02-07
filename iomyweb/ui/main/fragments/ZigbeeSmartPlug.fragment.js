@@ -42,7 +42,7 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 						new sap.ui.layout.form.FormElement({
 							label : "Hub",
 							fields: [ 
-								IomyRe.widgets.selectBoxHub(oView.createId("HubSelect"), {
+								iomy.widgets.selectBoxHub(oView.createId("HubSelect"), {
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}",
                                     template : {
                                         path : "/Hubs",
@@ -61,7 +61,7 @@ sap.ui.jsfragment("fragments.ZigbeeSmartPlug", {
 						new sap.ui.layout.form.FormElement({
 							label : "Modem",
 							fields: [ 
-                                IomyRe.widgets.selectBoxZigbeeModem(oView.createId("ZigModemSelect"), {
+                                iomy.widgets.selectBoxZigbeeModem(oView.createId("ZigModemSelect"), {
                                     //selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Modem}",
                                     
                                     onSuccess : function () {

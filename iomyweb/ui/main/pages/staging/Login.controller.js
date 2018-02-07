@@ -41,7 +41,7 @@ sap.ui.controller("pages.staging.Login", {
             
             onAfterShow : function (evt) {
                 try {
-                    IomyRe.common.CheckSessionInfo({
+                    iomy.common.CheckSessionInfo({
                         //----------------------------------------------------//
                         // Function to run if user is currently logged in
                         //----------------------------------------------------//
@@ -151,20 +151,20 @@ sap.ui.controller("pages.staging.Login", {
         //------------------------------------------------------------//
         //-- Flag that the User is currently logged in              --//
         //------------------------------------------------------------//
-        IomyRe.common.oCurrentLoginTimestamp = new Date();
-        IomyRe.common.bUserCurrentlyLoggedIn = true;
+        iomy.common.oCurrentLoginTimestamp = new Date();
+        iomy.common.bUserCurrentlyLoggedIn = true;
 
         //------------------------------------------------------------//
         //-- Begin Refreshing the Core Variables                    --//
         //------------------------------------------------------------//
-        IomyRe.common.RefreshCoreVariables( IomyRe.common.aRefreshCoreVariablesFirstRun );
+        iomy.common.RefreshCoreVariables( iomy.common.aRefreshCoreVariablesFirstRun );
 
         //----------------------------------------------------------------------------//
         // Load the user's display name and ID
         //----------------------------------------------------------------------------//
         //IOMy.functions.setCurrentUserNameForNavigation();
 
-        //IomyRe.common.NavigationChangePage( "pBlock" , {} , false);
+        //iomy.common.NavigationChangePage( "pBlock" , {} , false);
         //oController.ToggleInputsAndButton(true);
         
         oView.byId("page").destroyContent();
@@ -190,7 +190,7 @@ sap.ui.controller("pages.staging.Login", {
                 //== ATTMEPT TO LOG THE USER IN        ==//
                 //====================================//
                 $.ajax({
-                    url : IomyRe.apiphp.APILocation('sessioncheck'), 
+                    url : iomy.apiphp.APILocation('sessioncheck'), 
                     type : "POST",
                     dataType : "json",
                     data : aLoginData,
@@ -202,7 +202,7 @@ sap.ui.controller("pages.staging.Login", {
                             //----------------------------------------------------------------------------//
                             // Go to the home page.
                             //----------------------------------------------------------------------------//
-                            IomyRe.common.ComposeDBServerVersion(oResponseData.ServerDBVer);
+                            iomy.common.ComposeDBServerVersion(oResponseData.ServerDBVer);
                             oController.goToHomePage();
     
                         } else {
@@ -210,14 +210,14 @@ sap.ui.controller("pages.staging.Login", {
                             
                             //-- If the user was simply unsuccessful, get them to check their username or password. --//
                             if (oResponseData.ErrCode === "0001") {
-                                IomyRe.common.showError(oResponseData.ErrMesg+"\nPlease check that your username and password are correct.", "Login Error",
+                                iomy.common.showError(oResponseData.ErrMesg+"\nPlease check that your username and password are correct.", "Login Error",
                                     function () {
                                         oController.ToggleInputsAndButton(true);
                                     }
                                 );
                             
                             } else {
-                                IomyRe.common.showError(oResponseData.ErrMesg, "Error",
+                                iomy.common.showError(oResponseData.ErrMesg, "Error",
                                     function () {
                                         oController.ToggleInputsAndButton(true);
                                     }
@@ -228,7 +228,7 @@ sap.ui.controller("pages.staging.Login", {
                     error : function(err) {
                         //-- TODO: Replace this with a more apporpiate error --//
                         jQuery.sap.log.error(JSON.stringify(err));
-                        IomyRe.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy", "Connection Error",
+                        iomy.common.showError("A connection error has occurred. Please try again. If the problem persists, restart iOmy", "Connection Error",
                             function () {
                                 oController.ToggleInputsAndButton(true);
                             }
@@ -237,7 +237,7 @@ sap.ui.controller("pages.staging.Login", {
                 });
             } else if (sUsername === "" && sPassword === "") {
                 //-- ERROR --//
-                IomyRe.common.showError("You must enter your username and password to continue.", "Login Error",
+                iomy.common.showError("You must enter your username and password to continue.", "Login Error",
                     function () {
                         oController.ToggleInputsAndButton(true);
                     }
@@ -245,14 +245,14 @@ sap.ui.controller("pages.staging.Login", {
             } else {                       
                 if (sUsername === "") {
                     //-- ERROR --//
-                    IomyRe.common.showError("A username is required to login.", "Login Error",
+                    iomy.common.showError("A username is required to login.", "Login Error",
                         function () {
                             oController.ToggleInputsAndButton(true);
                         }
                     );              
                 } else if (sPassword === "") {
                     //-- ERROR --//
-                    IomyRe.common.showError("A password is required to login.", "Login Error",
+                    iomy.common.showError("A password is required to login.", "Login Error",
                         function () {
                             oController.ToggleInputsAndButton(true);
                         }

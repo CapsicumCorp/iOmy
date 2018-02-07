@@ -10,52 +10,52 @@ Copyright: Capsicum Corporation 2017
 //================================================//
 //== 1.0 - CAPSICUM LOAD JS MODULES				==//
 //================================================//
-$.sap.registerModulePath('IomyRe.apiphp', sModuleInitialBuildLocation+'libraries/apiphp');
-$.sap.require("IomyRe.apiphp");
+$.sap.registerModulePath('iomy.apiphp', sModuleInitialBuildLocation+'libraries/apiphp');
+$.sap.require("iomy.apiphp");
 
-$.sap.registerModulePath('IomyRe.apiodata', sModuleInitialBuildLocation+'libraries/apiodata');
-$.sap.require("IomyRe.apiodata");
+$.sap.registerModulePath('iomy.apiodata', sModuleInitialBuildLocation+'libraries/apiodata');
+$.sap.require("iomy.apiodata");
 
-$.sap.registerModulePath('IomyRe.common', sModuleInitialBuildLocation+'libraries/common');
-$.sap.require("IomyRe.common");
+$.sap.registerModulePath('iomy.common', sModuleInitialBuildLocation+'libraries/common');
+$.sap.require("iomy.common");
 
-$.sap.registerModulePath('IomyRe.navigation', sModuleInitialBuildLocation+'libraries/navigation');
-$.sap.require("IomyRe.navigation");
+$.sap.registerModulePath('iomy.navigation', sModuleInitialBuildLocation+'libraries/navigation');
+$.sap.require("iomy.navigation");
 
-$.sap.registerModulePath('IomyRe.devices', sModuleInitialBuildLocation+'libraries/devices');
-$.sap.require("IomyRe.devices");
+$.sap.registerModulePath('iomy.devices', sModuleInitialBuildLocation+'libraries/devices');
+$.sap.require("iomy.devices");
 
-$.sap.registerModulePath('IomyRe.functions', sModuleInitialBuildLocation+'libraries/functions');
-$.sap.require("IomyRe.functions");
+$.sap.registerModulePath('iomy.functions', sModuleInitialBuildLocation+'libraries/functions');
+$.sap.require("iomy.functions");
 
-$.sap.registerModulePath('IomyRe.widgets', sModuleInitialBuildLocation+'libraries/widgets');
-$.sap.require("IomyRe.widgets");
+$.sap.registerModulePath('iomy.widgets', sModuleInitialBuildLocation+'libraries/widgets');
+$.sap.require("iomy.widgets");
 
-$.sap.registerModulePath('IomyRe.forms', sModuleInitialBuildLocation+'libraries/forms');
-$.sap.require("IomyRe.forms");
+$.sap.registerModulePath('iomy.forms', sModuleInitialBuildLocation+'libraries/forms');
+$.sap.require("iomy.forms");
 
-$.sap.registerModulePath('IomyRe.pages', sModuleInitialBuildLocation+'libraries/pages');
-$.sap.require("IomyRe.pages");
+$.sap.registerModulePath('iomy.pages', sModuleInitialBuildLocation+'libraries/pages');
+$.sap.require("iomy.pages");
 
-$.sap.registerModulePath('IomyRe.telnet', sModuleInitialBuildLocation+'libraries/telnet');
-$.sap.require("IomyRe.telnet");
+$.sap.registerModulePath('iomy.telnet', sModuleInitialBuildLocation+'libraries/telnet');
+$.sap.require("iomy.telnet");
 
-$.sap.registerModulePath('IomyRe.help', sModuleInitialBuildLocation+'libraries/help');
-$.sap.require("IomyRe.help");
+$.sap.registerModulePath('iomy.help', sModuleInitialBuildLocation+'libraries/help');
+$.sap.require("iomy.help");
 
-$.sap.registerModulePath('IomyRe.time', sModuleInitialBuildLocation+'libraries/time');
-$.sap.require("IomyRe.time");
+$.sap.registerModulePath('iomy.time', sModuleInitialBuildLocation+'libraries/time');
+$.sap.require("iomy.time");
 
-$.sap.registerModulePath('IomyRe.rules', sModuleInitialBuildLocation+'libraries/rules');
-$.sap.require("IomyRe.rules");
+$.sap.registerModulePath('iomy.rules', sModuleInitialBuildLocation+'libraries/rules');
+$.sap.require("iomy.rules");
 
-$.sap.registerModulePath('IomyRe.validation', sModuleInitialBuildLocation+'libraries/validation');
-$.sap.require("IomyRe.validation");
+$.sap.registerModulePath('iomy.validation', sModuleInitialBuildLocation+'libraries/validation');
+$.sap.require("iomy.validation");
 
 //----------------------------------------//
 //-- 1.2 - Optional Libraries           --//
 //----------------------------------------//
-$.sap.registerModulePath('IomyRe.graph_jqplot', sModuleInitialBuildLocation+'libraries/graph_jqplot');
+$.sap.registerModulePath('iomy.graph_jqplot', sModuleInitialBuildLocation+'libraries/graph_jqplot');
 
 
 
@@ -262,7 +262,7 @@ var aPages = [
 ];
 
 
-IomyRe.pages.createPage("pLogin");
+iomy.pages.createPage("pLogin");
 
 //================================================//
 //== 5.4 - DEPLOY OPENUI5 APP					==//

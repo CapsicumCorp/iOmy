@@ -53,10 +53,10 @@ sap.ui.jsview("pages.staging.graphs.PieGraph", {
         
         var oPage = new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "6-Hour Pie Graph",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-				IomyRe.widgets.DeviceToolbar(oController, "Pie Graph"),
+				iomy.widgets.DeviceToolbar(oController, "Pie Graph"),
 				new sap.ui.core.HTML ({
                     content: "<div id=\"PieGraphPage_Main\" class=\"\" style=\"min-width: 400px; padding-right: 5.5rem\" ></div><div id=\"PieGraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
                 }).addStyleClass("")

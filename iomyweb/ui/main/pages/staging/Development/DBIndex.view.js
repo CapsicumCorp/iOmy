@@ -47,8 +47,8 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
         
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
             title: "Server Information",
-            header : IomyRe.widgets.getToolPageHeader(oController),
-            sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+            header : iomy.widgets.getToolPageHeader(oController),
+            sideContent : iomy.widgets.getToolPageSideContent(oController),
             mainContents: [ 
                 new sap.uxap.ObjectPageLayout (oView.createId("ObjectPageLayout"), {
                     isObjectIconAlwaysVisible: true,
@@ -141,7 +141,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                                     type: sap.m.ButtonType.Reject,
                                                                     enabled : "{/controls/CancelEnabled}",
                                                                     press:   function( oEvent ) {
-                                                                        IomyRe.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+                                                                        iomy.common.NavigationChangePage( "pServerInfo" ,  {} , false);
                                                                     }
                                                                 }),
                                                             ]

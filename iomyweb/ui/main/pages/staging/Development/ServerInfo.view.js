@@ -47,8 +47,8 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
         
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
             title: "Server Information",
-            header : IomyRe.widgets.getToolPageHeader(oController),
-            sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+            header : iomy.widgets.getToolPageHeader(oController),
+            sideContent : iomy.widgets.getToolPageSideContent(oController),
             mainContents: [ 
                 new sap.uxap.ObjectPageLayout (oView.createId("ObjectPageLayout"), {
                     isObjectIconAlwaysVisible: true,
@@ -153,7 +153,7 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                                     enabled : "{/editIndex/buttonEnabled}",
                                                                     visible : "{/editIndex/buttonVisible}",
                                                                     press : function () {
-                                                                        IomyRe.common.NavigationChangePage( "pDBIndex" , {} , false);
+                                                                        iomy.common.NavigationChangePage( "pDBIndex" , {} , false);
                                                                     }
                                                                 })
                                                             ]

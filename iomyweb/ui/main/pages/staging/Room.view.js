@@ -47,15 +47,15 @@ sap.ui.jsview("pages.staging.Room", {
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Rooms",
-			header : IomyRe.widgets.getToolPageHeader( oController ),
-			sideContent : IomyRe.widgets.getToolPageSideContent(oController),
+			header : iomy.widgets.getToolPageHeader( oController ),
+			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
 				new sap.m.ScrollContainer ({
 					width: "100%",
 					height: "100%",
 					vertical : true,
 					content : [
-						IomyRe.widgets.DeviceToolbar(oController, "Rooms"),
+						iomy.widgets.DeviceToolbar(oController, "Rooms"),
 						new sap.m.List (oView.createId("RoomList"), {
 							mode: sap.m.ListMode.None,
 							items: []

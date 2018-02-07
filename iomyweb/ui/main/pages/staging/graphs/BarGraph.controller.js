@@ -21,7 +21,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.require("IomyRe.graph_jqplot");
+$.sap.require("iomy.graph_jqplot");
 
 sap.ui.controller("pages.staging.graphs.BarGraph", {
 	
@@ -51,15 +51,15 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 				oController.iThingId	= evt.data.ThingId;
                 
                 //oController.sPeriod = evt.data.TimePeriod;
-                oController.sPeriod = IomyRe.graph_jqplot.PeriodYear;
+                oController.sPeriod = iomy.graph_jqplot.PeriodYear;
                 
 				var dateCurrentTime = new Date();
 				$("#GraphPage_Main").html("");
 				$("#GraphPage_Main_Info").html("");
 				
-                //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), IomyRe.graph_jqplot.PeriodWeek );
+                //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), iomy.graph_jqplot.PeriodWeek );
                 //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), sPeriod );
-                oController.GetBarDataAndDrawGraph( oController.iIOId, 1501509600, IomyRe.graph_jqplot.PeriodYear );
+                oController.GetBarDataAndDrawGraph( oController.iIOId, 1501509600, iomy.graph_jqplot.PeriodYear );
 			}
 		});
 	},
@@ -104,13 +104,13 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
             dateTmp1.setDate(1);
             
             mUTSData["period"+(12 - (i - 1))] = {
-                start : iUTS - ( 86400 * (IomyRe.time.getMaximumDateInMonth( dateTmp1.getFullYear(), dateTmp1.getMonth() + 1 )) * i),
-                end : ( dateTmp3.getDate() / 1000 ) - ( 86400 * ((IomyRe.time.getMaximumDateInMonth( dateTmp2.getFullYear(), dateTmp2.getMonth() + 1 )) * i) )
+                start : iUTS - ( 86400 * (iomy.time.getMaximumDateInMonth( dateTmp1.getFullYear(), dateTmp1.getMonth() + 1 )) * i),
+                end : ( dateTmp3.getDate() / 1000 ) - ( 86400 * ((iomy.time.getMaximumDateInMonth( dateTmp2.getFullYear(), dateTmp2.getMonth() + 1 )) * i) )
             };
             
-            dateTmp3.setDate(IomyRe.time.getMaximumDateInMonth( dateTmp3.getFullYear(), dateTmp3.getMonth() + 1 ));
+            dateTmp3.setDate(iomy.time.getMaximumDateInMonth( dateTmp3.getFullYear(), dateTmp3.getMonth() + 1 ));
             dateTmp3.setMonth( dateTmp1.getMonth() - (12 - (i - 1)) );
-            dateTmp3.setDate(IomyRe.time.getMaximumDateInMonth( dateTmp3.getFullYear(), dateTmp3.getMonth() + 1 ));
+            dateTmp3.setDate(iomy.time.getMaximumDateInMonth( dateTmp3.getFullYear(), dateTmp3.getMonth() + 1 ));
         }
         
         mData.ticks = oController.generateTicks(mUTSData);
@@ -126,8 +126,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         $.each(mUTSData, function (sI, mUTS) {
             
             switch (oController.sPeriod) {
-                case IomyRe.graph_jqplot.PeriodWeek:
-                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod(oController.sPeriod, Math.floor(mUTS.end) * 1000));
+                case iomy.graph_jqplot.PeriodWeek:
+                    var date = new Date(iomy.time.GetStartStampForTimePeriod(oController.sPeriod, Math.floor(mUTS.end) * 1000));
                     
                     if (date.getDay() === 0) {
                         aTicks.push('Sun');
@@ -154,8 +154,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     
                     break;
                     
-                case IomyRe.graph_jqplot.PeriodYear:
-                    var date = new Date(IomyRe.time.GetStartStampForTimePeriod("month", Math.floor(mUTS.end) * 1000));
+                case iomy.graph_jqplot.PeriodYear:
+                    var date = new Date(iomy.time.GetStartStampForTimePeriod("month", Math.floor(mUTS.end) * 1000));
                     //var date = new Date(Math.floor(mUTS.start) * 1000);
                     
                     if (date.getMonth() === 0) {
@@ -222,7 +222,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         // Create the map of UTS timestamps calculated for each period
         //--------------------------------------------------------------------//
         switch (sPeriodType) {
-            case IomyRe.graph_jqplot.PeriodWeek:
+            case iomy.graph_jqplot.PeriodWeek:
                 for (var i = 7; i > 0; i--) {
                     mUTSData["period"+(7 - (i - 1))] = {
                         start : iEndUTS - ( 86400 * i ),
@@ -234,7 +234,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                 
                 break;
                 
-            case IomyRe.graph_jqplot.PeriodYear:
+            case iomy.graph_jqplot.PeriodYear:
                 var mData = oController.generateMonthlyTicks(iEndUTS);
                 
                 mUTSData = mData.utsData;
@@ -254,7 +254,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         try {
             aRequests.push({
                 library : "php",
-                url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                url:  iomy.apiphp.APILocation( "aggregation" ),
                 data: {
                     Id:        iIOId,
                     Mode:      "Min",
@@ -282,7 +282,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
             $.each(mUTSData, function(sI, mUTS) {
                 aRequests.push({
                     library : "php",
-                    url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                    url:  iomy.apiphp.APILocation( "aggregation" ),
                     data: {
                         Id:        iIOId,
                         Mode:      "Max",
@@ -321,7 +321,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                 onSuccess : function () {
                     try {
-                        var sDeviceName		= IomyRe.common.ThingList["_"+oController.iThingId].DisplayName;
+                        var sDeviceName		= iomy.common.ThingList["_"+oController.iThingId].DisplayName;
 
                         var aSeriesData = {
                             "Label": sDeviceName,
@@ -330,7 +330,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                         };
 
                         try {
-                            IomyRe.graph_jqplot.CreateBarGraph( 
+                            iomy.graph_jqplot.CreateBarGraph( 
                                 oController,
                                 'GraphPage_Main',
                                 [
@@ -427,8 +427,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                 //--------------------------------//
                 //-- PERFORM THE AJAX REQUESTS  --//
-                IomyRe.apiphp.AjaxRequest({
-                    url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                iomy.apiphp.AjaxRequest({
+                    url:  iomy.apiphp.APILocation( "aggregation" ),
                     data: {
                         Id:        iIOId,
                         Mode:      "Min",
@@ -438,8 +438,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     onSuccess: function ( sResponseType, aData1Min ) {
                         //--------------------------------//
                         //-- DATA1 MAX                  --//
-                        IomyRe.apiphp.AjaxRequest({
-                            url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                        iomy.apiphp.AjaxRequest({
+                            url:  iomy.apiphp.APILocation( "aggregation" ),
                             data: {
                                 Id:       iIOId,
                                 Mode:     "Max",
@@ -450,8 +450,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                                 //--------------------------------//
                                 //-- DATA2 MAX                  --//
-                                IomyRe.apiphp.AjaxRequest({
-                                    url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                                iomy.apiphp.AjaxRequest({
+                                    url:  iomy.apiphp.APILocation( "aggregation" ),
                                     data: {
                                         Id:        iIOId,
                                         Mode:      "Max",
@@ -462,8 +462,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                                         //--------------------------------//
                                         //-- DATA3 MAX                  --//
-                                        IomyRe.apiphp.AjaxRequest({
-                                            url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                                        iomy.apiphp.AjaxRequest({
+                                            url:  iomy.apiphp.APILocation( "aggregation" ),
                                             data: {
                                                 Id:       iIOId,
                                                 Mode:     "Max",
@@ -474,8 +474,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                                                 //--------------------------------//
                                                 //-- DATA4 MAX                  --//
-                                                IomyRe.apiphp.AjaxRequest({
-                                                    url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                                                iomy.apiphp.AjaxRequest({
+                                                    url:  iomy.apiphp.APILocation( "aggregation" ),
                                                     data: {
                                                         Id:       iIOId,
                                                         Mode:     "Max",
@@ -486,8 +486,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                                                         //--------------------------------//
                                                         //-- DATA5 MAX                  --//
-                                                        IomyRe.apiphp.AjaxRequest({
-                                                            url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                                                        iomy.apiphp.AjaxRequest({
+                                                            url:  iomy.apiphp.APILocation( "aggregation" ),
                                                             data: {
                                                                 Id:       iIOId,
                                                                 Mode:     "Max",
@@ -498,8 +498,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                                                                 //--------------------------------//
                                                                 //-- DATA6 MAX                  --//
-                                                                IomyRe.apiphp.AjaxRequest({
-                                                                    url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                                                                iomy.apiphp.AjaxRequest({
+                                                                    url:  iomy.apiphp.APILocation( "aggregation" ),
                                                                     data: {
                                                                         Id:       iIOId,
                                                                         Mode:     "Max",
@@ -510,8 +510,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                                                                         //--------------------------------//
                                                                         //-- DATA7 MAX                  --//
-                                                                        IomyRe.apiphp.AjaxRequest({
-                                                                            url:  IomyRe.apiphp.APILocation( "aggregation" ),
+                                                                        iomy.apiphp.AjaxRequest({
+                                                                            url:  iomy.apiphp.APILocation( "aggregation" ),
                                                                             data: {
                                                                                 Id:       iIOId,
                                                                                 Mode:     "Max",
@@ -528,7 +528,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                                                                                     var iThursdayValue  = aData5Max['Value'] - aData4Max['Value'];
                                                                                     var iFridayValue    = aData6Max['Value'] - aData5Max['Value'];
                                                                                     var iSaturdayValue  = aData7Max['Value'] - aData6Max['Value'];
-																					var sDeviceName		= IomyRe.common.ThingList["_"+oController.iThingId].DisplayName;
+																					var sDeviceName		= iomy.common.ThingList["_"+oController.iThingId].DisplayName;
 																					
                                                                                     var aSeriesData = {
                                                                                         "Label": sDeviceName,
@@ -540,7 +540,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                                                                                     var aTicks = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
 
                                                                                     try {
-                                                                                        IomyRe.graph_jqplot.CreateBarGraph( 
+                                                                                        iomy.graph_jqplot.CreateBarGraph( 
                                                                                             oController,
                                                                                             'GraphPage_Main',
                                                                                             [

@@ -22,11 +22,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
-$.sap.declare("IomyRe.navigation",true);
+$.sap.declare("iomy.navigation",true);
 
-IomyRe.navigation = new sap.ui.base.Object();
+iomy.navigation = new sap.ui.base.Object();
 
-$.extend( IomyRe.navigation, {
+$.extend( iomy.navigation, {
     
     onSideNavButtonPress : function(event, oView) {
         try {
@@ -75,7 +75,7 @@ $.extend( IomyRe.navigation, {
                                 oController.loadDeviceForm();
                             }
                             
-                            IomyRe.common.NavigationChangePage( "pDeviceForm" , {} , false);
+                            iomy.common.NavigationChangePage( "pDeviceForm" , {} , false);
                         }
                     }),    
                     new sap.m.Button ({
@@ -91,21 +91,21 @@ $.extend( IomyRe.navigation, {
                                 oController.loadRoomForm();
                             }
                             
-                            IomyRe.common.NavigationChangePage( "pRoomForm" ,  {"bEditing": false} , false);
+                            iomy.common.NavigationChangePage( "pRoomForm" ,  {"bEditing": false} , false);
                         }
                     }),
                     new sap.m.Button ({
                         text: "Add Rule",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            IomyRe.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
+                            iomy.common.NavigationChangePage( "pRulesForm" ,  {"bEditing": false} , false);
                         }
                     }),
                     new sap.m.Button ({
                         text: "Add User",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            IomyRe.common.NavigationChangePage( "pNewUser" , {} , false);
+                            iomy.common.NavigationChangePage( "pNewUser" , {} , false);
                         }
                     }),
                 ],
@@ -169,14 +169,14 @@ $.extend( IomyRe.navigation, {
                                 
                             }
                             
-                            IomyRe.common.NavigationChangePage( "pDevice" , {"bEditing": true} , true);
+                            iomy.common.NavigationChangePage( "pDevice" , {"bEditing": true} , true);
                         }
                     }),    
                     new sap.m.Button ({
                         text: "Edit Premise",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            IomyRe.common.NavigationChangePage( "pPremiseForm" , {"PremiseId" : 1} , true);
+                            iomy.common.NavigationChangePage( "pPremiseForm" , {"PremiseId" : 1} , true);
                         }
                     }),
                     new sap.m.Button ({
@@ -192,21 +192,21 @@ $.extend( IomyRe.navigation, {
                                 
                             }
                             
-                            IomyRe.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , true);
+                            iomy.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , true);
                         }
                     }),
                     new sap.m.Button ({
                         text: "Edit Rule",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            IomyRe.common.NavigationChangePage( "pRulesList" ,  {} , true);
+                            iomy.common.NavigationChangePage( "pRulesList" ,  {} , true);
                         }
                     }),
                     new sap.m.Button ({
                         text: "Edit User",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            IomyRe.common.NavigationChangePage( "pUserList" , {} , true);
+                            iomy.common.NavigationChangePage( "pUserList" , {} , true);
                         }
                     }),
                 ],
@@ -231,18 +231,18 @@ $.extend( IomyRe.navigation, {
                         text: 'User Settings',
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            IomyRe.common.NavigationChangePage( "pUserSettings" , {} , false);
+                            iomy.common.NavigationChangePage( "pUserSettings" , {} , false);
                         }
                     }),
                     new sap.m.Button(oView.createId("helpButton"), {
                         text: 'Help',
                         type: sap.m.ButtonType.Transparent,
-                        enabled: IomyRe.help.PageInformation[oView.getId()] !== undefined,
+                        enabled: iomy.help.PageInformation[oView.getId()] !== undefined,
                         
                         press : function () {
                             try {
-                                if (typeof IomyRe.help.PageInformation[oView.getId()] !== "undefined") {
-                                    IomyRe.common.showInformation( IomyRe.help.PageInformation[oView.getId()], "Help" );   
+                                if (typeof iomy.help.PageInformation[oView.getId()] !== "undefined") {
+                                    iomy.common.showInformation( iomy.help.PageInformation[oView.getId()], "Help" );   
                                 } else {
                                      $.sap.log.error(" Help: no help message exists for this page");
                                 }
@@ -255,7 +255,7 @@ $.extend( IomyRe.navigation, {
                         text: 'Logout',
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            IomyRe.common.Logout();
+                            iomy.common.Logout();
                         }
                     })
                 ],

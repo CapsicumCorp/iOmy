@@ -23,11 +23,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-$.sap.declare("IomyRe.apiphp",true);
+$.sap.declare("iomy.apiphp",true);
 
-IomyRe.apiphp = new sap.ui.base.Object();
+iomy.apiphp = new sap.ui.base.Object();
 
-$.extend(IomyRe.apiphp,{
+$.extend(iomy.apiphp,{
 	
 	//============================================================================================//
 	//== PHP API LOCATION FUNCTION                                                              ==//
@@ -40,8 +40,8 @@ $.extend(IomyRe.apiphp,{
 		//------------------------------------------------//
 		//-- 1.0 - Initialise Variables                 --//
 		//------------------------------------------------//
-		var sUrlPublic      = IomyRe.common.ConfigVars("URLPublicApi");
-		var sUrlRestricted  = IomyRe.common.ConfigVars("URLRestrictedApi");
+		var sUrlPublic      = iomy.common.ConfigVars("URLPublicApi");
+		var sUrlRestricted  = iomy.common.ConfigVars("URLRestrictedApi");
 		var sReturn         = "";
 		
 		//------------------------------------------------//
@@ -206,7 +206,7 @@ $.extend(IomyRe.apiphp,{
 		sERType         = aConfig.ExpectedResponseType;
 		bAsync          = aConfig.async || true;
 		
-		iLoginTimestamp = IomyRe.common.oCurrentLoginTimestamp.getTime();
+		iLoginTimestamp = iomy.common.oCurrentLoginTimestamp.getTime();
 		
 		//------------------------------------------------//
 		//-- 3.0 - Make the Ajax Request                --//
@@ -215,7 +215,7 @@ $.extend(IomyRe.apiphp,{
 			//--------------------------------------------//
 			//-- Check if the User is logged in         --//
 			//--------------------------------------------//
-			if( IomyRe.common.bUserCurrentlyLoggedIn===true ) {
+			if( iomy.common.bUserCurrentlyLoggedIn===true ) {
 				oAjax = $.ajax({
 					url: sUrl,                                     //-- The URL to the PHP API that needs to be called.                                          --//
 					crossDomain: true,                             //-- Allow calls to other servers                                                             --//
@@ -241,7 +241,7 @@ $.extend(IomyRe.apiphp,{
 						var sDebugHeader   = "\n"+sDebugLogLines+"== PHP Ajax Error!            ==\n"+sDebugLogLines;
 						
 						try {
-							if( IomyRe.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp===IomyRe.common.oCurrentLoginTimestamp.getTime() ) {
+							if( iomy.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp===iomy.common.oCurrentLoginTimestamp.getTime() ) {
 								
 								//-- Increment the attempt count even though this was a success! --//
 								this.RetryAttemptCount++;
@@ -274,7 +274,7 @@ $.extend(IomyRe.apiphp,{
 												try {
 													aConfig.onSuccess("JSON", Data);
 												} catch( e01 ) {
-													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e01)\n"+e01.message+" \n"+sUrl, "", "IomyRe.apiphp.AjaxRequest");
+													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e01)\n"+e01.message+" \n"+sUrl, "", "iomy.apiphp.AjaxRequest");
 												}
 											}
 											
@@ -299,7 +299,7 @@ $.extend(IomyRe.apiphp,{
 													try {
 														aConfig.onSuccess("Text", Data);
 													} catch( e02 ) {
-														jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e02)\n"+e02.message+" \n"+sUrl, "", "IomyRe.apiphp.AjaxRequest");
+														jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onSuccess\" section of the passed parameter!. (e02)\n"+e02.message+" \n"+sUrl, "", "iomy.apiphp.AjaxRequest");
 													}
 												}
 												
@@ -317,7 +317,7 @@ $.extend(IomyRe.apiphp,{
 													try {
 														aConfig.onFail();
 													} catch( e03 ) {
-														jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e03)\n"+e03.message+" \n"+sUrl, "", "IomyRe.apiphp.AjaxRequest");
+														jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e03)\n"+e03.message+" \n"+sUrl, "", "iomy.apiphp.AjaxRequest");
 													}
 												}
 											}
@@ -335,7 +335,7 @@ $.extend(IomyRe.apiphp,{
 												try {
 													aConfig.onFail();
 												} catch( e04 ) {
-													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e04)\n"+e04.message+" \n"+sUrl, "", "IomyRe.apiphp.AjaxRequest");
+													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e04)\n"+e04.message+" \n"+sUrl, "", "iomy.apiphp.AjaxRequest");
 												}
 											}
 										}
@@ -357,7 +357,7 @@ $.extend(IomyRe.apiphp,{
 												try {
 													aConfig.onFail(Response);
 												} catch( e05 ) {
-													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e05)\n"+e05.message+" \n"+sUrl, "", "IomyRe.apiphp.AjaxRequest");
+													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e05)\n"+e05.message+" \n"+sUrl, "", "iomy.apiphp.AjaxRequest");
 												}
 											}
 											
@@ -370,7 +370,7 @@ $.extend(IomyRe.apiphp,{
 												try {
 													aConfig.onFail();
 												} catch( e06 ) {
-													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e06)\n"+e06.message+" \n"+sUrl, "", "IomyRe.apiphp.AjaxRequest");
+													jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e06)\n"+e06.message+" \n"+sUrl, "", "iomy.apiphp.AjaxRequest");
 												}
 											}
 										}
@@ -386,7 +386,7 @@ $.extend(IomyRe.apiphp,{
 										try {
 											aConfig.onFail();
 										} catch( e07 ) {
-											jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e07)\n"+e07.message+" \n"+sUrl, "", "IomyRe.apiphp.AjaxRequest");
+											jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e07)\n"+e07.message+" \n"+sUrl, "", "iomy.apiphp.AjaxRequest");
 										}
 									}
 								}
@@ -396,7 +396,7 @@ $.extend(IomyRe.apiphp,{
 							//--------------------------------------------------------//
 							} else {
 								var sErrorMesg2 = "Silently aborting PHP API request (before parsing the sucessful response from the ajax request) due to being logged out!!";
-								jQuery.sap.log.info( sErrorMesg2, "", "IomyRe.apiphp.AjaxRequest" );
+								jQuery.sap.log.info( sErrorMesg2, "", "iomy.apiphp.AjaxRequest" );
 							}
 							
 						} catch(e1) {
@@ -409,7 +409,7 @@ $.extend(IomyRe.apiphp,{
 					//============================================================================================//
 					error:function(err) {
 						try {
-							if( IomyRe.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp===IomyRe.common.oCurrentLoginTimestamp.getTime() ) {
+							if( iomy.common.bUserCurrentlyLoggedIn===true && this.iCurrentLoginTimestamp===iomy.common.oCurrentLoginTimestamp.getTime() ) {
 								//================================================//
 								//== 2.1 - Initialise Variables                 ==//
 								//================================================//
@@ -456,11 +456,11 @@ $.extend(IomyRe.apiphp,{
 									//-- TODO: This section needs to be looked into further to see if anything needs to be changed --// 
 									
 									if( aConfig.auth ) {
-										IomyRe.common.showError("Incorrect username and/or password. Please retype your username and password again!");
-										IomyRe.common.showLoading(false);
+										iomy.common.showError("Incorrect username and/or password. Please retype your username and password again!");
+										iomy.common.showLoading(false);
 										
 									} else {
-										IomyRe.common.showError("Unexpected HTTP 401 Status Code");
+										iomy.common.showError("Unexpected HTTP 401 Status Code");
 									}
 									
 									//-- Flag that we shouldn't retry the ajax request --// 
@@ -473,10 +473,10 @@ $.extend(IomyRe.apiphp,{
 		                            //-- Flag that we shouldn't retry the ajax request --// 
 									this.bApiComplete = true;
 									//-- Flag that the user isn't currently logged in --//
-									IomyRe.common.bUserCurrentlyLoggedIn = false;
+									iomy.common.bUserCurrentlyLoggedIn = false;
 									
 									//-- Run the handle403APIError function --//
-		                            IomyRe.apiphp.handle403APIError(aConfig);
+		                            iomy.apiphp.handle403APIError(aConfig);
 									
 									
 								//------------------------------------------------------------------------//
@@ -487,9 +487,9 @@ $.extend(IomyRe.apiphp,{
 									this.bApiComplete = true;
 									
 									//-- Flag that the user isn't currently logged in --//
-									IomyRe.common.bUserCurrentlyLoggedIn = false;
+									iomy.common.bUserCurrentlyLoggedIn = false;
 									
-									IomyRe.common.showError("HTTP 520 Status Code: Corrupted User Data! Please contact the administrator to ");
+									iomy.common.showError("HTTP 520 Status Code: Corrupted User Data! Please contact the administrator to ");
 									
 								//------------------------------------------------------------------------//
 								//-- 2.2.F - UNEXPECTED STATUS CODE:                                    --//
@@ -531,13 +531,13 @@ $.extend(IomyRe.apiphp,{
 									try {
 										aConfig.onFail(err);
 									} catch( e21 ) {
-										jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e21)\n"+e21.message+" \n"+sUrl, "", "IomyRe.apiphp.AjaxRequest");
+										jQuery.sap.log.error(this.DebugLogString+"\nCritical Error: Problem in the \"onFail\" section of the passed parameter!. (e21)\n"+e21.message+" \n"+sUrl, "", "iomy.apiphp.AjaxRequest");
 									}
 								}
 							
 							} else {
 								var sErrorMesg2 = "Silently aborting PHP API request (before parsing the unsucessful response from the ajax request) due to being logged out!!";
-								jQuery.sap.log.info( sErrorMesg2, "", "IomyRe.apiphp.AjaxRequest" );
+								jQuery.sap.log.info( sErrorMesg2, "", "iomy.apiphp.AjaxRequest" );
 							}
 							
 							
@@ -552,7 +552,7 @@ $.extend(IomyRe.apiphp,{
 			//-----------------------------------------------------------------------------//
 			} else {
 				var sErrorMesg = "Silently aborting PHP API request (before starting the ajax request) due to being logged out!";
-				jQuery.sap.log.info( sErrorMesg, "", "IomyRe.apiphp.AjaxRequest" );
+				jQuery.sap.log.info( sErrorMesg, "", "iomy.apiphp.AjaxRequest" );
 			}
 		}
 	},
@@ -576,9 +576,9 @@ $.extend(IomyRe.apiphp,{
         //--------------------------------------------------------------------//
         // Handle the error by replacing the onFail function.
         //--------------------------------------------------------------------//
-        if (IomyRe.common.bSessionTerminated === false) {
+        if (iomy.common.bSessionTerminated === false) {
             //-- 403 Errors indicate that the session has been terminated and the user will need to log back in. Flag this --//
-            IomyRe.common.bSessionTerminated = true;
+            iomy.common.bSessionTerminated = true;
             //-- Overwrite the onFail function to handle a terminated session. --//
             mConfig.onFail = function () {
                 //-- 403 was returned! Take the user back to the login screen   --//
