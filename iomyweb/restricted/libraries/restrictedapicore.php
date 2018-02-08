@@ -133,10 +133,6 @@ class RestrictedAPICore {
 				//--------------------------------------------------------------------//
 				session_start();
 				
-				
-				
-				
-				
 				//--------------------------------------------------------------------//
 				//-- 2.3.A - If the User attempting to login                        --//
 				//--------------------------------------------------------------------//
@@ -489,6 +485,8 @@ class RestrictedAPICore {
 			//-- ERROR: No Config was found --//
 			$this->UserAuth_ServerNotDeployed();
 		}
+		
+		
 	}
 	
 	
@@ -729,7 +727,7 @@ class RestrictedAPICore {
 		$aUserTemp = APICore_UserData( $this->oRestrictedDB );
 		
 		if( $aUserTemp['Error']===false ) {
-			if( $aUserTemp['Data']['UserState']>=1 ) {
+			if( $aUserTemp['Data']['UserState']>=1 || $aUserTemp['Data']['UserState']===-1 ) {
 				//-- Success: Return the result --//
 				return $aUserTemp['Data'];
 				
