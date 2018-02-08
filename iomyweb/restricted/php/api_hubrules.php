@@ -422,35 +422,71 @@ if( $bError===false ) {
 							//------------------------------------//
 							
 							
-							
-							//------------------------//
-							//-- IF ThingId         --//
-							//------------------------//
-							if( isset( $aPostParameter['ThingId'] ) ) {
-								if( is_numeric( $aPostParameter['ThingId'] ) ) {
-									$iPostDataParamThingId = $aPostParameter['ThingId'];
+							//------------------------------------//
+							//-- IF a ThingRule                 --//
+							//------------------------------------//
+							if( $iPostRuleTypeId===1 || $iPostRuleTypeId===2 || $iPostRuleTypeId===3 || $iPostRuleTypeId===4 ) {
+								//------------------------//
+								//-- IF ThingId         --//
+								//------------------------//
+								if( isset( $aPostParameter['ThingId'] ) ) {
+									if( is_numeric( $aPostParameter['ThingId'] ) ) {
+										$iPostDataParamThingId = $aPostParameter['ThingId'];
+										
+										//------------------------------------//
+										//-- Lookup the ThingInfo           --//
+										//------------------------------------//
+										
+										//------------------------------------//
+										//-- Lookup the Thing Data          --//
+										//------------------------------------//
+										$aTempFunction1 = dbGetThingInfo( $aParamData['ThingId'] ); 
+										
+										
+										//------------------------------------//
+										//--  --//
+										//------------------------------------//
+										if( $aTempFunction1['Error']===false ) {
+											
+											$aPostParameterEdited = array(
+												"LinkId"         => $aTempFunction1['Data']['LinkId'],
+												"LinkSerialCode" => $aTempFunction1['Data']['LinkSerialCode'],
+												"LinkTypeId"     => $aTempFunction1['Data']['LinkTypeId'],
+												"ThingId"        => $iPostDataParamThingId,
+												"ThingHWID"      => $aTempFunction1['Data']['ThingHWId']
+											);
+										} else {
+											//------------------------------------//
+											//-- ERROR: Can't find Thing        --//
+											$bError    = true;
+											$iErrCode  = 210;
+											$sErrMesg .= "Error Code:'0210' \n";
+											$sErrMesg .= "Error: The 'Parameter' array in the 'Data' JSON parameter is not supported!\n";
+											$sErrMesg .= "The desired Thing does not exist or your user doesn't have permission to it!\n";
+										}
+									} else {
+										//------------------------------------//
+										//-- ERROR: Non-numeric ThingId     --//
+										$bError    = true;
+										$iErrCode  = 210;
+										$sErrMesg .= "Error Code:'0210' \n";
+										$sErrMesg .= "Error: The 'Parameter' array in the 'Data' JSON parameter is not supported!\n";
+										$sErrMesg .= "Can not find the ThingId in the parameter array!\n";
+									}
 									
+								//------------------------//
+								//-- ELSE Error         --//
+								//------------------------//
 								} else {
 									//------------------------------------//
-									//-- ERROR: Non-numeric ThingId     --//
+									//-- ERROR: Missing ThingId         --//
 									$bError    = true;
 									$iErrCode  = 210;
 									$sErrMesg .= "Error Code:'0210' \n";
 									$sErrMesg .= "Error: The 'Parameter' array in the 'Data' JSON parameter is not supported!\n";
-									$sErrMesg .= "!\n";
 								}
-								
-							//------------------------//
-							//-- ELSE Error         --//
-							//------------------------//
-							} else {
-								//------------------------------------//
-								//-- ERROR: Missing ThingId         --//
-								$bError    = true;
-								$iErrCode  = 210;
-								$sErrMesg .= "Error Code:'0210' \n";
-								$sErrMesg .= "Error: The 'Parameter' array in the 'Data' JSON parameter is not supported!\n";
 							}
+							
 						} else {
 							//------------------------------------//
 							//-- ERROR: Missing Parameter       --//
@@ -783,7 +819,7 @@ if( $bError===false ) {
 		//================================================================//
 		} else if( $sPostMode==="AddRule" ) {
 			try {
-				$aResult = AddNewRuleToDatabase( $iPostRuleTypeId, $iPostHubId, $sPostName, $sPostTime, $aPostParameter, $iPostNewStatus, $iNextRun );
+				$aResult = AddNewRuleToDatabase( $iPostRuleTypeId, $iPostHubId, $sPostName, $sPostTime, $aPostParameterEdited, $iPostNewStatus, $iNextRun );
 				
 				//----------------------------------------------------//
 				//-- 5.3.2 - Check for errors                       --//
