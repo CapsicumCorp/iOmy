@@ -436,7 +436,7 @@ void processReceivedRules(const boost::property_tree::ptree& pt) {
       }
     }
   } catch (boost::property_tree::ptree_bad_path& e) {
-    debuglibifaceptr->debuglib_printf(1, "%s: Failed to parse Json result for received rules request\n", __PRETTY_FUNCTION__);
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to parse Json result for received rules request: %s\n", __PRETTY_FUNCTION__, e.what());
     return;
   }
   {
