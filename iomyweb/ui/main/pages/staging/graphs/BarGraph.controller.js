@@ -51,7 +51,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 				oController.iThingId	= evt.data.ThingId;
                 
                 //oController.sPeriod = evt.data.TimePeriod;
-                oController.sPeriod = iomy.graph_jqplot.PeriodYear;
+                oController.sPeriod = iomy.graph_jqplot.PeriodWeek;
                 
 				var dateCurrentTime = new Date();
 				$("#GraphPage_Main").html("");
@@ -59,7 +59,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 				
                 //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), iomy.graph_jqplot.PeriodWeek );
                 //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), sPeriod );
-                oController.GetBarDataAndDrawGraph( oController.iIOId, 1501509600, iomy.graph_jqplot.PeriodYear );
+                oController.GetBarDataAndDrawGraph( oController.iIOId, 1501509599, oController.sPeriod );
 			}
 		});
 	},
@@ -90,27 +90,77 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         
 	},
     
+    generateMonthData : function (iUTS) {
+        var aMonths = [];
+        
+        try {
+            var date    = new Date(iUTS * 1000);
+            var iMonth  = date.getMonth() + 1;
+            var iYear   = date.getFullYear();
+            var mData   = {};
+
+            for (var i = 0; i < 12; i++) {
+                mData = {
+                    month   : iMonth,
+                    year    : iYear,
+                    days    : iomy.time.getMaximumDateInMonth( iYear, iMonth )
+                };
+
+                aMonths.push(mData);
+
+                iMonth--;
+
+                if (iMonth === 0) {
+                    iMonth = 12;
+                    iYear--;
+                }
+            }
+        } catch (e) {
+            $.sap.log.error("Error generating data about months in a year for the bar graph ("+e.name+"): " + e.message);
+            
+        } finally {
+            return aMonths.reverse();
+        }
+    },
+    
     generateMonthlyTicks : function (iUTS) {
         var oController = this;
         var mData       = {};
         var mUTSData    = {};
-        var dateTmp3    = new Date(iUTS * 1000);
-        var dateTmp1;
-        var dateTmp2;
+        var aMonthInfo  = oController.generateMonthData(iUTS);
+        var iDays       = 0;
+        var dateTmp     = null;
+        var iStart;
+        var iEnd;
         
-        for (var i = 12; i > 0; i--) {
-            dateTmp1 = new Date(iUTS * 1000);
-            dateTmp2 = new Date(iUTS * 1000);
-            dateTmp1.setDate(1);
+        for (var i = 0; i < aMonthInfo.length; i++) {
+            iDays += aMonthInfo[i].days;
+        }
+        
+        for (var i = 0; i < aMonthInfo.length; i++) {
+            iStart = iUTS - ( 86400 * (iDays - 1));
             
-            mUTSData["period"+(12 - (i - 1))] = {
-                start : iUTS - ( 86400 * (iomy.time.getMaximumDateInMonth( dateTmp1.getFullYear(), dateTmp1.getMonth() + 1 )) * i),
-                end : ( dateTmp3.getDate() / 1000 ) - ( 86400 * ((iomy.time.getMaximumDateInMonth( dateTmp2.getFullYear(), dateTmp2.getMonth() + 1 )) * i) )
+            dateTmp = new Date(iStart * 1000);
+            dateTmp.setMilliseconds(0);
+            dateTmp.setSeconds(0);
+            dateTmp.setMinutes(0);
+            dateTmp.setHours(0);
+            
+            if (aMonthInfo[i+1] !== undefined) {
+                iDays -= iomy.time.getMaximumDateInMonth( aMonthInfo[i].year, aMonthInfo[i].month );
+                
+                iEnd = iUTS - ( 86400 * iDays);
+            } else {
+                iEnd = iUTS;
+            }
+            
+//            console.log("Start: " + dateTmp);
+//            console.log("End: " + new Date(iEnd * 1000) + "\n");
+            
+            mUTSData["period"+i] = {
+                start : dateTmp.getTime() / 1000,
+                end : iEnd
             };
-            
-            dateTmp3.setDate(iomy.time.getMaximumDateInMonth( dateTmp3.getFullYear(), dateTmp3.getMonth() + 1 ));
-            dateTmp3.setMonth( dateTmp1.getMonth() - (12 - (i - 1)) );
-            dateTmp3.setDate(iomy.time.getMaximumDateInMonth( dateTmp3.getFullYear(), dateTmp3.getMonth() + 1 ));
         }
         
         mData.ticks = oController.generateTicks(mUTSData);
@@ -127,7 +177,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
             
             switch (oController.sPeriod) {
                 case iomy.graph_jqplot.PeriodWeek:
-                    var date = new Date(iomy.time.GetStartStampForTimePeriod(oController.sPeriod, Math.floor(mUTS.end) * 1000));
+                    var date = new Date(mUTS.start * 1000);
                     
                     if (date.getDay() === 0) {
                         aTicks.push('Sun');
@@ -155,8 +205,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     break;
                     
                 case iomy.graph_jqplot.PeriodYear:
-                    var date = new Date(iomy.time.GetStartStampForTimePeriod("month", Math.floor(mUTS.end) * 1000));
-                    //var date = new Date(Math.floor(mUTS.start) * 1000);
+                    //var date = new Date(iomy.time.GetStartStampForTimePeriod("month", Math.floor(mUTS.end) * 1000));
+                    var date = new Date(Math.floor(mUTS.start) * 1000);
                     
                     if (date.getMonth() === 0) {
                         aTicks.push('Jan');
