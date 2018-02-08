@@ -90,7 +90,7 @@ sap.ui.jsview("pages.staging.Development.ServerInfo", {
                                                     toolbar : new sap.m.Toolbar({
                                                     content : [
                                                         new sap.m.Title (oView.createId("VersionInfoToolbar"),{
-                                                            text:"Verison Information"
+                                                            text:"Version Information"
                                                         })
                                                     ]
                                                 }).addStyleClass("MarBottom1d0Rem"),

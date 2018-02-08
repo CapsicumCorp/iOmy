@@ -104,8 +104,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                                     enabled : "{/controls/ControlsEnabled}",
                                                                     selected : "{/DBIndexingOn}",
                                                                     select : function () {
-                                                                        oController.bOptionChanged = !oController.bOptionChanged;
-                                                                        oController.ToggleControls(true);
+                                                                        oController.ToggleEditIndexButton();
                                                                     }
                                                                 })
                                                             ]

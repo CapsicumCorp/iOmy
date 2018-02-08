@@ -57,6 +57,11 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
         });
     },
     
+    /**
+     * Toggles 
+     * 
+     * @param {type} bEnabled
+     */
     ToggleControls : function (bEnabled) {
         try {
             var oController     = this;
@@ -81,16 +86,8 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
     ToggleEditIndexButton: function () {
         try {
             var oController     = this;
-            var oView           = oController.getView();
-            var oData           = JSON.parse(oView.getModel().getJSON());
-            var oModel          = {};
-            
             oController.bOptionChanged = !oController.bOptionChanged;
-            
-            oData.controls.EditIndexEnabled     = oController.bOptionChanged;
-            
-            oModel = new sap.ui.model.json.JSONModel(oData);
-            oView.setModel(oModel);
+            oController.ToggleControls(true);
             
         } catch (e) {
             $.sap.log.error("Error toggling the edit index button ("+e.name+"): " + e.message);
