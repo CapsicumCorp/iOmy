@@ -440,7 +440,7 @@ if( $bError===false ) {
 										//------------------------------------//
 										//-- Lookup the Thing Data          --//
 										//------------------------------------//
-										$aTempFunction1 = dbGetThingInfo( $aParamData['ThingId'] ); 
+										$aTempFunction1 = GetThingInfo( $aPostParameter['ThingId'] ); 
 										
 										
 										//------------------------------------//
