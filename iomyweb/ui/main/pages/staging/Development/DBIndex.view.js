@@ -102,7 +102,11 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                                 new sap.m.CheckBox ({
                                                                     text: "Database Indexed",
                                                                     enabled : "{/controls/ControlsEnabled}",
-                                                                    selected : "{/DBIndexingOn}"
+                                                                    selected : "{/DBIndexingOn}",
+                                                                    select : function () {
+                                                                        oController.bOptionChanged = !oController.bOptionChanged;
+                                                                        oController.ToggleControls(true);
+                                                                    }
                                                                 })
                                                             ]
                                                         }),
@@ -131,7 +135,7 @@ sap.ui.jsview("pages.staging.Development.DBIndex", {
                                                                 new sap.m.Button (oView.createId("ButtonSubmit"), {
                                                                     text: "Save",
                                                                     type: sap.m.ButtonType.Accept,
-                                                                    enabled : "{/controls/ControlsEnabled}",
+                                                                    enabled : "{/controls/EditIndexEnabled}",
                                                                     press:   function( oEvent ) {
                                                                         oController.ToggleDBIndexing();
                                                                     }

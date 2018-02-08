@@ -29,6 +29,8 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
     bIndexingOn         : false,
     bControlsEnabled    : false,
     bLoading            : false,
+    bOptionChanged      : false,
+    
     iThingId            : null,
     
 /**
@@ -43,6 +45,8 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
         
         oView.addEventDelegate({
             onBeforeShow : function (evt) {
+                
+                oController.bOptionChanged = false;
                 
                 //-- Defines the Device Type --//
                 iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
@@ -64,12 +68,32 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
             
             oData.controls.ControlsEnabled      = oController.bControlsEnabled;
             oData.controls.CancelEnabled        = oController.bControlsEnabled || oController.bLoading;
+            oData.controls.EditIndexEnabled     = oController.bControlsEnabled && oController.bOptionChanged;
             
             oModel = new sap.ui.model.json.JSONModel(oData);
             oView.setModel(oModel);
             
         } catch (e) {
             $.sap.log.error("Error toggling controls ("+e.name+"): " + e.message);
+        }
+    },
+    
+    ToggleEditIndexButton: function () {
+        try {
+            var oController     = this;
+            var oView           = oController.getView();
+            var oData           = JSON.parse(oView.getModel().getJSON());
+            var oModel          = {};
+            
+            oController.bOptionChanged = !oController.bOptionChanged;
+            
+            oData.controls.EditIndexEnabled     = oController.bOptionChanged;
+            
+            oModel = new sap.ui.model.json.JSONModel(oData);
+            oView.setModel(oModel);
+            
+        } catch (e) {
+            $.sap.log.error("Error toggling the edit index button ("+e.name+"): " + e.message);
         }
     },
     
@@ -121,7 +145,8 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
             
             "controls" : {
                 "ControlsEnabled"   : true,
-                "CancelEnabled"     : true
+                "CancelEnabled"     : true,
+                "EditIndexEnabled"  : false
             }
         };
         
@@ -133,6 +158,8 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
     ToggleDBIndexing : function () {
         var oController         = this;
         var oView               = oController.getView();
+        var bError              = false;
+        var aErrorMessages      = [];
         var bEnabled            = oView.getModel().getProperty("/DBIndexingOn");
         var sDBUsername         = oView.getModel().getProperty("/DBAdminUsername");
         var sDBPassword         = oView.getModel().getProperty("/DBAdminPassword");
@@ -141,7 +168,6 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
         var oDBIndexingQueue;
         var aDataTables = [
             "DATABIGINT",
-            "DATABLOB",
             "DATAINT",
             "DATALONGSTRING",
             "DATAMEDSTRING",
@@ -151,86 +177,110 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
             "DATATINYSTRING"
         ];
         
+        //--------------------------------------------------------------------//
+        // Check that the database admin username and password are given.
+        //--------------------------------------------------------------------//
         try {
-            oController.ToggleControls(false);
-            //----------------------------------------------------------------//
-            // Create the request queue with its callbacks.
-            //----------------------------------------------------------------//
-            oDBIndexingQueue = new AjaxRequestQueue({
-                executeNow : false,
-
-                onSuccess : function () {
-                    var sMessage = "";
-                    
-                    if (bEnabled) {
-                        sMessage = "Database indexing enabled.";
-                    } else {
-                        sMessage = "Database indexing disabled.";
-                    }
-                    
-                    iomy.common.showMessage({
-                        text : sMessage
-                    });
-                    
-                    iomy.common.NavigationChangePage( "pServerInfo" ,  {} , false);
-                },
-
-                onWarning : function () {
-
-                },
-
-                onFail : function () {
-                    var sError = "";
-                    
-                    if (bEnabled) {
-                        sError = "Failed to enable indexing.";
-                    } else {
-                        sError = "Failed to disable indexing.";
-                    }
-                    
-                    iomy.common.showError(sError, "Error",
-                        function () {
-                            oController.ToggleControls(true);
-                        }
-                    );
-
-                }
-            });
-            
-            //----------------------------------------------------------------//
-            // Populate the queue with requests to toggle indexing for each
-            // data table.
-            //----------------------------------------------------------------//
-            for (var i = 0; i < aDataTables.length; i++) {
-                sDBTable = aDataTables[i];
-                
-                if (bEnabled) {
-                    sCommand = sDBTable + "_Add";
-                } else {
-                    sCommand = sDBTable + "_Remove";
-                }
-
-                oDBIndexingQueue.addRequest({
-                    library : "php",
-                    url : iomy.apiphp.APILocation("serveradmin"),
-                    data : {
-                        Mode : "ChangeOptionalDBIndices",
-                        Command : sCommand,
-                        Access : JSON.stringify({
-                            URI         : "localhost",
-                            Port        : 3306,
-                            Username    : sDBUsername,
-                            Password    : sDBPassword
-                        })
-                    }
-                });
+            if (sDBUsername === "") {
+                bError = true;
+                aErrorMessages.push("Database username is required.");
             }
 
-            //-- Run the requests --//
-            oDBIndexingQueue.execute();
-
+            if (sDBPassword === "") {
+                bError = true;
+                aErrorMessages.push("Database password is required.");
+            }
         } catch (e) {
-            $.sap.log.error("Error attempting to add and execute requests ("+e.name+"): " + e.message);
+            bError = true;
+            aErrorMessages.push(e.name + ": " + e.message);
+        }
+        
+        if (bError) {
+            //-- Display the error popup if there are incomplete fields. --//
+            iomy.common.showError(aErrorMessages.join("\n\n"), "Error");
+            
+        } else {
+            try {
+                oController.ToggleControls(false);
+                //----------------------------------------------------------------//
+                // Create the request queue with its callbacks.
+                //----------------------------------------------------------------//
+                oDBIndexingQueue = new AjaxRequestQueue({
+                    executeNow : false,
+
+                    onSuccess : function () {
+                        var sMessage = "";
+
+                        if (bEnabled) {
+                            sMessage = "Database indexing enabled.";
+                        } else {
+                            sMessage = "Database indexing disabled.";
+                        }
+
+                        iomy.common.showMessage({
+                            text : sMessage
+                        });
+
+                        iomy.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+                    },
+
+                    onWarning : function () {
+
+                    },
+
+                    onFail : function () {
+                        var sError = "";
+
+                        if (bEnabled) {
+                            sError = "Failed to enable indexing.";
+                        } else {
+                            sError = "Failed to disable indexing.";
+                        }
+
+                        iomy.common.showError(sError, "Error",
+                            function () {
+                                oController.ToggleControls(true);
+                            }
+                        );
+
+                    }
+                });
+
+                //----------------------------------------------------------------//
+                // Populate the queue with requests to toggle indexing for each
+                // data table.
+                //----------------------------------------------------------------//
+                for (var i = 0; i < aDataTables.length; i++) {
+                    sDBTable = aDataTables[i];
+
+                    if (bEnabled) {
+                        sCommand = sDBTable + "_Add";
+                    } else {
+                        sCommand = sDBTable + "_Remove";
+                    }
+
+                    oDBIndexingQueue.addRequest({
+                        library : "php",
+                        url : iomy.apiphp.APILocation("serveradmin"),
+                        data : {
+                            Mode : "ChangeOptionalDBIndices",
+                            Command : sCommand,
+                            Access : JSON.stringify({
+                                URI         : "localhost",
+                                Port        : 3306,
+                                Username    : sDBUsername,
+                                Password    : sDBPassword
+                            })
+                        }
+                    });
+                }
+
+                //-- Run the requests --//
+                oDBIndexingQueue.execute();
+
+            } catch (e) {
+                $.sap.log.error("Error attempting to add and execute requests ("+e.name+"): " + e.message);
+            }
         }
     }
     
