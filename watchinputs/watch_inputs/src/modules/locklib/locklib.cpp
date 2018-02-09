@@ -32,7 +32,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/commonlib/commonlib.h"
 #include "locklib.h"
 #include "locklibpriv.h"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 
@@ -67,7 +66,6 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_LockLib_jnigetm
 
 #define DEBUGLIB_DEPIDX 0
 #define CMDSERVERLIB_DEPIDX 1
-#define COMMONSERVERLIB_DEPIDX 2
 
 static locklib_ifaceptrs_ver_1_t locklib_ifaceptrs_ver_1={
   locklib_pthread_mutex_lock,
@@ -95,12 +93,6 @@ static moduledep_ver_1_t locklib_deps[]={
     "cmdserverlib",
     nullptr,
     CMDSERVERLIBINTERFACE_VER_1,
-    0
-  },
-  {
-    "commonserverlib",
-    nullptr,
-    COMMONSERVERLIBINTERFACE_VER_1,
     0
   },
   {
@@ -192,11 +184,11 @@ int locklib_pthread_mutex_unlock(pthread_mutex_t *mutex, const char *mutexname, 
   Returns: A CMDLISTENER definition depending on the result
 */
 static int locklib_processcommand(const char *buffer, int clientsock) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) locklib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=(cmdserverlib_ifaceptrs_ver_1_t *) locklib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
   size_t len;
   std::string tmpstring;
 
-  if (!commonserverlibifaceptr) {
+  if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
   len=strlen(buffer);
@@ -208,14 +200,14 @@ static int locklib_processcommand(const char *buffer, int clientsock) {
         std::ostringstream tmpostream;
 
         tmpostream << "Lock by mutex: " << glockinfoit.second.mutexname << " from file: " << glockinfoit.second.filename << ", function: " << glockinfoit.second.funcname << ", line: " << glockinfoit.second.lineno << std::endl;
-        commonserverlibifaceptr->serverlib_netputs(tmpostream.str().c_str(), clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpostream.str().c_str(), clientsock, NULL);
         ++lockcnt;
       }
     }
     pthread_mutex_unlock(&locklibmutex);
     std::ostringstream tmpostream;
     tmpostream << "Total number of locks: " << lockcnt << std::endl;
-    commonserverlibifaceptr->serverlib_netputs(tmpostream.str().c_str(), clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpostream.str().c_str(), clientsock, NULL);
   } else {
     return CMDLISTENER_NOTHANDLED;
   }
