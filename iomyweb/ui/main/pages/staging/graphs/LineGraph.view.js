@@ -67,11 +67,18 @@ sap.ui.jsview("pages.staging.graphs.LineGraph", {
 			title: "Line Graph",
 			header : iomy.widgets.getToolPageHeader( oController ),
 			sideContent : iomy.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
-				iomy.widgets.DeviceToolbar(oController, "Line Graph"),
-				new sap.ui.core.HTML ({
-                    content: "<div id=\"LineGraphPage_Main\" class=\"\" style=\"\"></div><div id=\"LineGraphPage_Main_Info\" class=\"PadAll5px PadLeft0px\" ></div>"
-                }).addStyleClass("")
+			mainContents: [
+                new sap.m.ScrollContainer ({
+					width: "100%",
+					height: "100%",
+					vertical : true,
+					content : [
+                        iomy.widgets.DeviceToolbar(oController, "Line Graph"),
+                        new sap.ui.core.HTML ({
+                            content: "<div id=\"LineGraphPage_Main\" class=\"\" style=\"\"></div><div id=\"LineGraphPage_Main_Info\" class=\"PadAll5px PadLeft0px\" ></div>"
+                        }).addStyleClass("")
+                    ]
+                })
 			]
 		}).addStyleClass("MainBackground");
         

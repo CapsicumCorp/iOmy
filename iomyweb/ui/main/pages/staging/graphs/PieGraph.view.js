@@ -55,11 +55,18 @@ sap.ui.jsview("pages.staging.graphs.PieGraph", {
 			title: "6-Hour Pie Graph",
 			header : iomy.widgets.getToolPageHeader( oController ),
 			sideContent : iomy.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
-				iomy.widgets.DeviceToolbar(oController, "Pie Graph"),
-				new sap.ui.core.HTML ({
-                    content: "<div id=\"PieGraphPage_Main\" class=\"\" style=\"min-width: 400px; padding-right: 5.5rem\" ></div><div id=\"PieGraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
-                }).addStyleClass("")
+			mainContents: [
+                new sap.m.ScrollContainer ({
+					width: "100%",
+					height: "100%",
+					vertical : true,
+					content : [
+                        iomy.widgets.DeviceToolbar(oController, "Pie Graph"),
+                        new sap.ui.core.HTML ({
+                            content: "<div id=\"PieGraphPage_Main\" class=\"\" style=\"min-width: 400px; padding-right: 5.5rem\" ></div><div id=\"PieGraphPage_Main_Info\" class=\"PadAll10px\" ></div>"
+                        }).addStyleClass("")
+                    ]
+                })
 			]
 		}).addStyleClass("MainBackground");
         
