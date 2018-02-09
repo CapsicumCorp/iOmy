@@ -717,10 +717,11 @@ public:
       hc.addHttpAuth(httpusername, httppassword);
     }
     hc.addHeader("Host", httpserver);
+    hc.addFormField("Version", "0.4.11");
     if (apiusername != "") {
-      hc.addFormField("AttemptLogin", "1");
-      hc.addFormField("username", apiusername);
-      hc.addFormField("password", apipassword);
+      std::ostringstream tmpstr;
+      tmpstr << "[\"" << apiusername << "\",\"" << apipassword << "\"]";
+      hc.addFormField("Access", tmpstr.str());
     }
     struct timespec curtime;
     clock_gettime(CLOCK_REALTIME, &curtime);
@@ -846,10 +847,9 @@ private:
       //Send to the webapi that a rule has been triggered
       reset_http_body();
 
-      hc.addFormField("Mode", "JustTriggered");
+      hc.addFormField("Mode", "RuleJustTriggeredAt");
       hc.addFormField("Id", rulesTriggeredIt->ruleId);
       hc.addFormField("Data", ruleTriggeredToJson(*rulesTriggeredIt));
-      hc.addFormField("Format", "json");
       std::ostream request_stream(&rulesTriggeredRequest_);
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending rule just triggered: %s\n", __func__, hc.toString().c_str());
       request_stream << hc.toString();
@@ -878,7 +878,6 @@ private:
 
       hc.addFormField("Mode", "UpdateRuleNextTS");
       hc.addFormField("Id", *rulesNeedNextRuntimeIt);
-      hc.addFormField("Format", "json");
       std::ostream request_stream(&rulesNeedNextRuntimeRequest_);
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending rule need next runtime request: %s\n", __func__, hc.toString().c_str());
       request_stream << hc.toString();
@@ -912,7 +911,6 @@ private:
       reset_http_body();
 
       hc.addFormField("Mode", "ListAllActiveRules");
-      hc.addFormField("Format", "json");
       std::ostream request_stream(&listAllActiveRulesRequest_);
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending request for all active rules: %s\n", __PRETTY_FUNCTION__, hc.toString().c_str());
       request_stream << hc.toString();
