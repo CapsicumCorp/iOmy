@@ -30,6 +30,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 	
 	iIOId               : 0,
 	iThingId			: 0,
+    sPeriod             : null,
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -47,19 +48,24 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 				//-- Enable/Disable Navigational Forward Button		--//
 				//----------------------------------------------------//
 				
-                oController.iIOId	= evt.data.IO_ID;
+                oController.iIOId       = evt.data.IO_ID;
 				oController.iThingId	= evt.data.ThingId;
                 
-                //oController.sPeriod = evt.data.TimePeriod;
-                oController.sPeriod = iomy.graph_jqplot.PeriodWeek;
+                oController.sPeriod = evt.data.TimePeriod;
+                
+                //-- Weekly view is the default --//
+                if (oController.sPeriod !== iomy.graph_jqplot.PeriodWeek &&
+                    oController.sPeriod !== iomy.graph_jqplot.PeriodYear)
+                {
+                    oController.sPeriod = iomy.graph_jqplot.PeriodWeek;
+                }
                 
 				var dateCurrentTime = new Date();
 				$("#GraphPage_Main").html("");
 				$("#GraphPage_Main_Info").html("");
 				
-                //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), iomy.graph_jqplot.PeriodWeek );
-                //oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), sPeriod );
-                oController.GetBarDataAndDrawGraph( oController.iIOId, 1501509599, oController.sPeriod );
+                oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), oController.sPeriod );
+                //oController.GetBarDataAndDrawGraph( oController.iIOId, 1501509599, oController.sPeriod );
 			}
 		});
 	},
@@ -90,9 +96,21 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         
 	},
     
+    /**
+     * Generates for 12 months to the current time the data that will be used to
+     * generate the start and end UTS for loading data for each period.
+     * 
+     * @param {type} iUTS           The current time
+     * @returns {Array}             Returns an array of data used for the bar graph.
+     */
     generateMonthData : function (iUTS) {
         var aMonths = [];
         
+        //--------------------------------------------------------------------//
+        // Create a date object to fetch the month number and current year,
+        // then grab the maximum number of days for each month and record the
+        // month number and the year.
+        //--------------------------------------------------------------------//
         try {
             var date    = new Date(iUTS * 1000);
             var iMonth  = date.getMonth() + 1;
@@ -108,6 +126,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
 
                 aMonths.push(mData);
 
+                //-- Move on to the previous month --//
                 iMonth--;
 
                 if (iMonth === 0) {
@@ -123,52 +142,93 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         }
     },
     
-    generateMonthlyTicks : function (iUTS) {
-        var oController = this;
+    /**
+     * Creates the start and end UTS periods to be used when calling the
+     * aggregation APIs to load the graph data for viewing annual data.
+     * 
+     * X-axis ticks will be generated after the timestamps have been created.
+     * 
+     * @param {type} iUTS       Current UTS
+     * @returns {Object}        UTS Data
+     */
+    generateMonthlyUTSPeriods : function (iUTS) {
         var mData       = {};
-        var mUTSData    = {};
-        var aMonthInfo  = oController.generateMonthData(iUTS);
-        var iDays       = 0;
-        var dateTmp     = null;
-        var iStart;
-        var iEnd;
         
-        for (var i = 0; i < aMonthInfo.length; i++) {
-            iDays += aMonthInfo[i].days;
-        }
-        
-        for (var i = 0; i < aMonthInfo.length; i++) {
-            iStart = iUTS - ( 86400 * (iDays - 1));
-            
-            dateTmp = new Date(iStart * 1000);
-            dateTmp.setMilliseconds(0);
-            dateTmp.setSeconds(0);
-            dateTmp.setMinutes(0);
-            dateTmp.setHours(0);
-            
-            if (aMonthInfo[i+1] !== undefined) {
-                iDays -= iomy.time.getMaximumDateInMonth( aMonthInfo[i].year, aMonthInfo[i].month );
-                
-                iEnd = iUTS - ( 86400 * iDays);
-            } else {
-                iEnd = iUTS;
+        try {
+            var oController = this;
+            var mUTSData    = {};
+            var aMonthInfo  = oController.generateMonthData(iUTS);
+            var iDays       = 0;
+            var dateTmp1    = new Date(iUTS * 1000);
+            var dateTmp2    = null;
+            var iStart;
+            var iEnd;
+
+            //-- The number of days will either be 365 or 366. --//
+            for (var i = 0; i < aMonthInfo.length; i++) {
+                iDays += aMonthInfo[i].days;
             }
             
-//            console.log("Start: " + dateTmp);
-//            console.log("End: " + new Date(iEnd * 1000) + "\n");
+            //-- Set the current date to the end of the month --//
+            dateTmp1 = new Date(iUTS * 1000);
+            dateTmp1.setMilliseconds(59);
+            dateTmp1.setSeconds(59);
+            dateTmp1.setMinutes(59);
+            dateTmp1.setHours(23);
+            dateTmp1.setDate( iomy.time.getMaximumDateInMonth( dateTmp1.getFullYear(), dateTmp1.getMonth() + 1 ) );
             
-            mUTSData["period"+i] = {
-                start : dateTmp.getTime() / 1000,
-                end : iEnd
-            };
+            iUTS = dateTmp1.getTime() / 1000;
+
+            //-- Start generating the two UTS times. --//
+            for (var i = 0; i < aMonthInfo.length; i++) {
+                iStart = iUTS - ( 86400 * (iDays - 1));
+
+                dateTmp2 = new Date(iStart * 1000);
+                dateTmp2.setDate(1);
+                dateTmp2.setHours(0);
+                dateTmp2.setMinutes(0);
+                dateTmp2.setSeconds(0);
+                dateTmp2.setMilliseconds(0);
+
+                //-- Recalculate the remaining days if there are no months after the current one. --//
+                if (aMonthInfo[i+1] !== undefined) {
+                    iDays -= iomy.time.getMaximumDateInMonth( aMonthInfo[i].year, aMonthInfo[i].month );
+
+                    iEnd = iUTS - ( 86400 * iDays);
+                } else {
+                    iEnd = iUTS;
+                }
+                
+                console.log("Start: "+new Date(iStart * 1000));
+                console.log("End: "+new Date(iEnd * 1000));
+
+                //-- Create the data entry. --//
+                mUTSData["period"+(i+1)] = {
+                    start : dateTmp2.getTime() / 1000,
+                    end : iEnd
+                };
+            }
+
+            mData.ticks = oController.generateTicks(mUTSData);
+            mData.utsData = mUTSData;
+            
+            console.log(mUTSData);
+
+        } catch (e) {
+            $.sap.log.error("Error generating the start and end UTS times ("+e.name+"): " + e.message);
+            
+        } finally {
+            return mData;
         }
-        
-        mData.ticks = oController.generateTicks(mUTSData);
-        mData.utsData = mUTSData;
-        
-        return mData;
     },
     
+    /**
+     * Takes a map contains a set of periods and uses them to create the X-axis
+     * ticks depending on the period the graph is set to display for.
+     * 
+     * @param {type} mUTSData       Map containing the UTS API data
+     * @returns {Array}             Ticks
+     */
     generateTicks : function (mUTSData) {
         var oController = this;
         var aTicks      = [];
@@ -176,6 +236,9 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         $.each(mUTSData, function (sI, mUTS) {
             
             switch (oController.sPeriod) {
+                //------------------------------------------------------------//
+                // Generate the days of the week for the weekly view.
+                //------------------------------------------------------------//
                 case iomy.graph_jqplot.PeriodWeek:
                     var date = new Date(mUTS.start * 1000);
                     
@@ -204,9 +267,13 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     
                     break;
                     
+                //------------------------------------------------------------//
+                // Generate the names of the previous 12 months for the annual
+                // view.
+                //------------------------------------------------------------//
                 case iomy.graph_jqplot.PeriodYear:
                     //var date = new Date(iomy.time.GetStartStampForTimePeriod("month", Math.floor(mUTS.end) * 1000));
-                    var date = new Date(Math.floor(mUTS.start) * 1000);
+                    var date = new Date(mUTS.start * 1000);
                     
                     if (date.getMonth() === 0) {
                         aTicks.push('Jan');
@@ -249,7 +316,7 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     break;
             }
         });
-        console.log(aTicks);
+        //console.log(aTicks);
         
         return aTicks;
     },
@@ -272,7 +339,15 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
         // Create the map of UTS timestamps calculated for each period
         //--------------------------------------------------------------------//
         switch (sPeriodType) {
-            case iomy.graph_jqplot.PeriodWeek:
+            case iomy.graph_jqplot.PeriodYear:
+                var mData = oController.generateMonthlyUTSPeriods(iEndUTS);
+                
+                mUTSData = mData.utsData;
+                aTicks   = mData.ticks;
+                
+                break;
+                
+            default :
                 for (var i = 7; i > 0; i--) {
                     mUTSData["period"+(7 - (i - 1))] = {
                         start : iEndUTS - ( 86400 * i ),
@@ -283,18 +358,6 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                 aTicks = oController.generateTicks(mUTSData, sPeriodType);
                 
                 break;
-                
-            case iomy.graph_jqplot.PeriodYear:
-                var mData = oController.generateMonthlyTicks(iEndUTS);
-                
-                mUTSData = mData.utsData;
-                aTicks   = mData.ticks;
-                
-                break;
-                
-            default :
-                $.sap.log.error("Invalid period type");
-                return;
         }
         
         
@@ -378,6 +441,19 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                             "Color": "lightslategrey",
                             "Data":  aGraphData
                         };
+                        
+                        var sTitle      = "";
+                        var sAxisXLabel = "";
+                        
+                        if (oController.sPeriod === iomy.graph_jqplot.PeriodWeek) {
+                            sTitle      = "Weekly Usage for "+sDeviceName;
+                            sAxisXLabel = "Week";
+                            
+                        } else if (oController.sPeriod === iomy.graph_jqplot.PeriodYear) {
+                            sTitle      = "Yearly Usage for "+sDeviceName;
+                            sAxisXLabel = "Month";
+                            
+                        }
 
                         try {
                             iomy.graph_jqplot.CreateBarGraph( 
@@ -387,11 +463,11 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                                     aSeriesData
                                 ],
                                 {
-                                    "sTitle":       "Weekly Usage for "+sDeviceName,
+                                    "sTitle":       sTitle,
                                     "sType":        "Basic",
                                     "UseLegend":    false,
                                     "LegendPreset": 2,
-                                    "AxisX_Label":  "Week",
+                                    "AxisX_Label":  sAxisXLabel,
                                     "AxisY_Label":  sUOM,
                                     "AxisX_TickCategories": aTicks
                                 }
@@ -446,262 +522,6 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
             $.sap.log.error("Fatal error running the bar graph request queue ("+e.name+"): " + e.message);
             return;
         }
-
-        //----------------------------------------------------//
-        //-- 4.0 - Get the data for the appropriate Period  --//
-        //----------------------------------------------------//
-        /*switch( sPeriodType ) {
-            case "Week":
-                //--------------------------------//
-                //-- WORKOUT THE TIMESTAMPS     --//
-                var iDay1StartUTS = iEndUTS - ( 86400 * 7 );
-                var iDay1EndUTS   = iEndUTS - ( 86400 * 6 );
-				
-                var iDay2StartUTS = iEndUTS - ( 86400 * 6 );
-                var iDay2EndUTS   = iEndUTS - ( 86400 * 5 );
-				
-                var iDay3StartUTS = iEndUTS - ( 86400 * 5 );
-                var iDay3EndUTS   = iEndUTS - ( 86400 * 4 );
-				
-                var iDay4StartUTS = iEndUTS - ( 86400 * 4 );
-                var iDay4EndUTS   = iEndUTS - ( 86400 * 3 );
-				
-                var iDay5StartUTS = iEndUTS - ( 86400 * 3 );
-                var iDay5EndUTS   = iEndUTS - ( 86400 * 2 );
-				
-                var iDay6StartUTS = iEndUTS - ( 86400 * 2 );
-                var iDay6EndUTS   = iEndUTS - ( 86400 * 1 );
-				
-                var iDay7StartUTS = iEndUTS - ( 86400 * 1 );
-                var iDay7EndUTS   = iEndUTS;
-
-                //--------------------------------//
-                //-- PERFORM THE AJAX REQUESTS  --//
-                iomy.apiphp.AjaxRequest({
-                    url:  iomy.apiphp.APILocation( "aggregation" ),
-                    data: {
-                        Id:        iIOId,
-                        Mode:      "Min",
-                        StartUTS:  iDay1StartUTS,
-                        EndUTS:    iDay1EndUTS
-                    },
-                    onSuccess: function ( sResponseType, aData1Min ) {
-                        //--------------------------------//
-                        //-- DATA1 MAX                  --//
-                        iomy.apiphp.AjaxRequest({
-                            url:  iomy.apiphp.APILocation( "aggregation" ),
-                            data: {
-                                Id:       iIOId,
-                                Mode:     "Max",
-                                StartUTS: iDay1StartUTS,
-                                EndUTS:   iDay1EndUTS
-                            },
-                            onSuccess: function ( sResponseType, aData1Max ) {
-
-                                //--------------------------------//
-                                //-- DATA2 MAX                  --//
-                                iomy.apiphp.AjaxRequest({
-                                    url:  iomy.apiphp.APILocation( "aggregation" ),
-                                    data: {
-                                        Id:        iIOId,
-                                        Mode:      "Max",
-                                        StartUTS:  iDay2StartUTS,
-                                        EndUTS:    iDay2EndUTS
-                                    },
-                                    onSuccess: function ( sResponseType, aData2Max ) {
-
-                                        //--------------------------------//
-                                        //-- DATA3 MAX                  --//
-                                        iomy.apiphp.AjaxRequest({
-                                            url:  iomy.apiphp.APILocation( "aggregation" ),
-                                            data: {
-                                                Id:       iIOId,
-                                                Mode:     "Max",
-                                                StartUTS: iDay3StartUTS,
-                                                EndUTS:   iDay3EndUTS
-                                            },
-                                            onSuccess: function ( sResponseType, aData3Max ) {
-
-                                                //--------------------------------//
-                                                //-- DATA4 MAX                  --//
-                                                iomy.apiphp.AjaxRequest({
-                                                    url:  iomy.apiphp.APILocation( "aggregation" ),
-                                                    data: {
-                                                        Id:       iIOId,
-                                                        Mode:     "Max",
-                                                        StartUTS: iDay4StartUTS,
-                                                        EndUTS:   iDay4EndUTS
-                                                    },
-                                                    onSuccess: function ( sResponseType, aData4Max ) {
-
-                                                        //--------------------------------//
-                                                        //-- DATA5 MAX                  --//
-                                                        iomy.apiphp.AjaxRequest({
-                                                            url:  iomy.apiphp.APILocation( "aggregation" ),
-                                                            data: {
-                                                                Id:       iIOId,
-                                                                Mode:     "Max",
-                                                                StartUTS: iDay5StartUTS,
-                                                                EndUTS:   iDay5EndUTS
-                                                            },
-                                                            onSuccess: function ( sResponseType, aData5Max ) {
-
-                                                                //--------------------------------//
-                                                                //-- DATA6 MAX                  --//
-                                                                iomy.apiphp.AjaxRequest({
-                                                                    url:  iomy.apiphp.APILocation( "aggregation" ),
-                                                                    data: {
-                                                                        Id:       iIOId,
-                                                                        Mode:     "Max",
-                                                                        StartUTS: iDay6StartUTS,
-                                                                        EndUTS:   iDay6EndUTS
-                                                                    },
-                                                                    onSuccess: function ( sResponseType, aData6Max ) {
-
-                                                                        //--------------------------------//
-                                                                        //-- DATA7 MAX                  --//
-                                                                        iomy.apiphp.AjaxRequest({
-                                                                            url:  iomy.apiphp.APILocation( "aggregation" ),
-                                                                            data: {
-                                                                                Id:       iIOId,
-                                                                                Mode:     "Max",
-                                                                                StartUTS: iDay7StartUTS,
-                                                                                EndUTS:   iDay7EndUTS
-                                                                            },
-                                                                            onSuccess: function ( sResponseType, aData7Max ) {
-
-                                                                                try {
-                                                                                    var iSundayValue    = aData1Max['Value'] - aData1Min['Value'];
-                                                                                    var iMondayValue    = aData2Max['Value'] - aData1Max['Value'];
-                                                                                    var iTuesdayValue   = aData3Max['Value'] - aData2Max['Value'];
-                                                                                    var iWednesdayValue = aData4Max['Value'] - aData3Max['Value'];
-                                                                                    var iThursdayValue  = aData5Max['Value'] - aData4Max['Value'];
-                                                                                    var iFridayValue    = aData6Max['Value'] - aData5Max['Value'];
-                                                                                    var iSaturdayValue  = aData7Max['Value'] - aData6Max['Value'];
-																					var sDeviceName		= iomy.common.ThingList["_"+oController.iThingId].DisplayName;
-																					
-                                                                                    var aSeriesData = {
-                                                                                        "Label": sDeviceName,
-                                                                                        "Color": "lightslategrey",
-                                                                                        "Data":  [ iSundayValue, iMondayValue, iTuesdayValue, iWednesdayValue, iThursdayValue, iFridayValue, iSaturdayValue ]
-                                                                                    };
-
-
-                                                                                    var aTicks = [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ];
-
-                                                                                    try {
-                                                                                        iomy.graph_jqplot.CreateBarGraph( 
-                                                                                            oController,
-                                                                                            'GraphPage_Main',
-                                                                                            [
-                                                                                                aSeriesData
-                                                                                            ],
-                                                                                            {
-                                                                                                "sTitle":       "Weekly Usage for "+sDeviceName,
-                                                                                                "sType":        "Basic",
-                                                                                                "UseLegend":    false,
-                                                                                                "LegendPreset": 2,
-                                                                                                "AxisX_Label":  "Week",
-                                                                                                "AxisY_Label":  aData1Max.UOM_NAME,
-                                                                                                "AxisX_TickCategories": aTicks
-                                                                                            }
-                                                                                        );
-
-                                                                                        $('#GraphPage_Main').bind('jqplotDataHighlight', 
-                                                                                            function( ev, seriesIndex, iPointIndex, aData ) {
-                                                                                                //$('#GraphPage_Main_Info').html('series: '+seriesIndex+', point: '+pointIndex+', data: '+data);
-                                                                                                try {
-                                                                                                    $('#GraphPage_Main_Info').html(' '+aTicks[iPointIndex]+': '+aData[1]+' ');
-
-                                                                                                } catch( e1 ) {
-                                                                                                    $('#GraphPage_Main_Info').html( e1.message );
-                                                                                                }
-                                                                                            }
-                                                                                        );
-
-
-                                                                                        $('#GraphPage_Main').bind('jqplotDataUnhighlight', 
-                                                                                            function (ev) {
-                                                                                                $('#GraphPage_Main_Info').html('');
-                                                                                            }
-                                                                                        );
-                                                                                    
-                                                                                    } catch (e) {
-                                                                                        $.sap.log.error("An error occurred drawing the bar graph ("+e.name+"): " + e.message);
-                                                                                    }
-                                                                                    
-                                                                                } catch( e20 ) {
-                                                                                    $.sap.log.error( "Data1Min = "+JSON.stringify( aData1Max ) );
-                                                                                    $.sap.log.error( "Data1Max = "+JSON.stringify( aData1Max ) );
-                                                                                    $.sap.log.error( "Data2Max = "+JSON.stringify( aData2Max ) );
-                                                                                    $.sap.log.error( "Data3Max = "+JSON.stringify( aData3Max ) );
-                                                                                    $.sap.log.error( "Data4Max = "+JSON.stringify( aData4Max ) );
-                                                                                    $.sap.log.error( "Data5Max = "+JSON.stringify( aData5Max ) );
-                                                                                    $.sap.log.error( "Data6Max = "+JSON.stringify( aData6Max ) );
-                                                                                    $.sap.log.error( "Data7Max = "+JSON.stringify( aData7Max ) );
-
-                                                                                    $.sap.log.error("Critical Error! Bar Graph: "+e20.message );
-                                                                                }
-
-
-                                                                            },
-                                                                            onFail: function () {
-
-
-                                                                            }
-                                                                        });		//-- END of this Data7 Max Ajax request --//
-
-                                                                    },
-                                                                    onFail: function () {
-
-
-                                                                    }
-                                                                });		//-- END of this Data6 Max Ajax request --//
-
-
-                                                            },
-                                                            onFail: function () {
-
-
-                                                            }
-                                                        });		//-- END of this Data5 Max Ajax request --//
-
-                                                    },
-                                                    onFail: function () {
-
-
-                                                    }
-                                                });		//-- END of this Data4 Max Ajax request --//
-                                            },
-                                            onFail: function () {
-
-
-                                            }
-                                        });		//-- END of this Data3 Max Ajax request --//
-
-                                    },
-                                    onFail: function () {
-
-
-                                    }
-                                });		//-- END of this Data2 Max Ajax request --//
-
-
-                            },
-                            onFail: function () {
-
-
-                            }
-                        });		//-- END of this Data1 Max Ajax request --//
-
-
-                    },
-                    onFail: function () {
-
-                    }
-                });		//-- END of this Data1Min Ajax request --//
-                break;
-        }*/
     }
 	
 });

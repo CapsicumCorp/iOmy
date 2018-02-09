@@ -68,11 +68,18 @@ sap.ui.jsview("pages.staging.graphs.BarGraph", {
 			title: "Line Graph",
 			header : iomy.widgets.getToolPageHeader( oController ),
 			sideContent : iomy.widgets.getToolPageSideContent(oController),
-			mainContents: [ 
-				iomy.widgets.DeviceToolbar(oController, "Bar Graph"),
-				new sap.ui.core.HTML ({
-                    content: "<div id=\"GraphPage_Main\" class=\"\" style=\"min-width: 350px;\" ></div><div id=\"GraphPage_Main_Info\" class=\"PadAll5px PadLeft0px\" ></div>"
-                }).addStyleClass("")
+			mainContents: [
+                new sap.m.ScrollContainer ({
+					width: "100%",
+					height: "100%",
+					vertical : true,
+					content : [
+                        iomy.widgets.DeviceToolbar(oController, "Bar Graph"),
+                        new sap.ui.core.HTML ({
+                            content: "<div id=\"GraphPage_Main\" class=\"\" style=\"min-width: 350px;\" ></div><div id=\"GraphPage_Main_Info\" class=\"PadAll5px PadLeft0px\" ></div>"
+                        }).addStyleClass("")
+                    ]
+                })
 			]
 		}).addStyleClass("MainBackground");
 
@@ -85,7 +92,7 @@ sap.ui.jsview("pages.staging.graphs.BarGraph", {
 					var dateCurrentTime = new Date();
 					$("#GraphPage_Main").html("");
 					$("#GraphPage_Main_Info").html("");
-					oView.oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), "Week" );
+					oView.oController.GetBarDataAndDrawGraph( oController.iIOId, (dateCurrentTime.getTime() / 1000), oController.sPeriod );
 				}
 			}
 		);

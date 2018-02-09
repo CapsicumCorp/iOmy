@@ -410,7 +410,7 @@ sap.ui.controller("pages.staging.device.IOTiles", {
 								}
 							},
 							"Fragment": false
-						}
+						};
 						//----------------------------------------------------//
 						//-- ADD TO THE GLOBALS                             --//
 						//----------------------------------------------------//
