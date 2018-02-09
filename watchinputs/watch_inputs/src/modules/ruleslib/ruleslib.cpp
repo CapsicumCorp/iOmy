@@ -847,7 +847,7 @@ private:
       //Send to the webapi that a rule has been triggered
       reset_http_body();
 
-      hc.addFormField("Mode", "RuleJustTriggeredAt");
+      hc.addFormField("Mode", "RuleTriggeredAt");
       hc.addFormField("Id", rulesTriggeredIt->ruleId);
       hc.addFormField("Data", ruleTriggeredToJson(*rulesTriggeredIt));
       std::ostream request_stream(&rulesTriggeredRequest_);
