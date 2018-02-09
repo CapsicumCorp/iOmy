@@ -60,7 +60,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include "moduleinterface.h"
 #include "xbeelib.h"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/serialportlib/serialportlib.h"
@@ -300,10 +299,9 @@ int xbeelib_serial_device_removed(int serdevidx);
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
 #define SERIALPORTLIB_DEPIDX 1
-#define COMMONSERVERLIB_DEPIDX 2
-#define CMDSERVERLIB_DEPIDX 3
-#define COMMONLIB_DEPIDX 4
-#define ZIGBEELIB_DEPIDX 5
+#define CMDSERVERLIB_DEPIDX 2
+#define COMMONLIB_DEPIDX 3
+#define ZIGBEELIB_DEPIDX 4
 
 STATIC moduledep_ver_1_t xbeelib_deps[]={
   {
@@ -315,11 +313,6 @@ STATIC moduledep_ver_1_t xbeelib_deps[]={
     .modulename="serialportlib",
     .ifacever=SERIALPORTLIBINTERFACE_VER_1,
     .required=1
-  },
-  {
-    .modulename="commonserverlib",
-    .ifacever=COMMONSERVERLIBINTERFACE_VER_1,
-    .required=0
   },
   {
     .modulename="cmdserverlib",
@@ -2431,7 +2424,7 @@ int xbeelib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, c
   Returns: A CMDLISTENER definition depending on the result
 */
 STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=xbeelib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=xbeelib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
   char tmpstrbuf[100];
   int i, len, found;
   uint64_t addr;
@@ -2439,7 +2432,7 @@ STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
   xbeedevice_t *xbeedeviceptr;
   long xbeelocked=0;
 
-  if (!commonserverlibifaceptr) {
+  if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
   MOREDEBUG_ENTERINGFUNC();
@@ -2454,7 +2447,7 @@ STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
       xbeelib_send_xbee_form_network(&xbeelib_xbeedevices[found], XBEE_CHANMASK_STANDARD, &xbeelocked);
       xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "XBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2468,7 +2461,7 @@ STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
       xbeelib_send_xbee_form_network(&xbeelib_xbeedevices[found], XBEE_CHANMASK_NETVOX, &xbeelocked);
       xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "XBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2482,7 +2475,7 @@ STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
       xbeelib_send_xbee_leave_network(&xbeelib_xbeedevices[found], &xbeelocked);
       xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       xbeelib_unlockxbee();
       sprintf(tmpstrbuf, "XBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2523,33 +2516,33 @@ STATIC int xbeelib_processcommand(const char *buffer, int clientsock) {
       } else {
         sprintf(tmpstrbuf, "XBEE 64-bit ADDRESS: %016llX\n", (unsigned long long) addr);
       }
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Firmware version=%04hX\n", firmver);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Hardware version=%04hX\n", hwver);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Product Family=%s\n", xbeelib_get_product_family_string(hwver));
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Firmware Type=%s\n", xbeelib_get_firmware_type_string(firmver));
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Function Set=%s\n", xbeelib_get_function_set_string(firmver));
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
 
       sprintf(tmpstrbuf, "  Connected to Network: %s\n", (network_connected==1) ? "Yes" : "No");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Encrypted: %s\n", (encryptednetwork==1) ? "Yes" : "No");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       if (network_connected) {
         sprintf(tmpstrbuf, "  Channel=%02hhX\n", channel);
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
         sprintf(tmpstrbuf, "  Pan ID=%04hX\n", panid);
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
         sprintf(tmpstrbuf, "  Extended Pan ID=%016llX\n", (unsigned long long) extpanid);
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       }
     }
     if (!found) {
-      commonserverlibifaceptr->serverlib_netputs("NO XBEE DEVICES FOUND\n", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("NO XBEE DEVICES FOUND\n", clientsock, NULL);
     }
     xbeelib_unlockxbee();
   } else {
