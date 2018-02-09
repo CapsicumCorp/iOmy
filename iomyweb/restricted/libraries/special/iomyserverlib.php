@@ -1015,7 +1015,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "	RULE1_HUB_FK         bigint not null comment 'Foreign Key', \n";
 			$sSQL .= "	RULE1_NAME           varchar(128) not null comment 'This is used so the users can assign names to individual rules.', \n";
 			$sSQL .= "	RULE1_TIME           time not null comment 'This is used to store the time that gets converted into the next run unix timestamp.', \n";
-			$sSQL .= "	RULE1_PARAMETER      varchar(64) not null comment 'This is used to hold the parameters (like which device) in JSON string format.', \n";
+			$sSQL .= "	RULE1_PARAMETER      varchar(255) not null comment 'This is used to hold the parameters (like which device) in JSON string format.', \n";
 			$sSQL .= "	RULE1_ENABLED        tinyint(4) not null comment 'This is used to indicate if a rule is enabled or disabled.', \n";
 			$sSQL .= "	RULE1_LASTMODIFIED   int not null comment 'This is used to indicate when the \"Add Rule\" or \"Edit Rule\" modes was last used on this particular rule.', \n";
 			$sSQL .= "	RULE1_LASTMODIFIEDCODE varchar(32) not null comment 'This is a code used for debugging the rules system.', \n";
@@ -3255,7 +3255,49 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			
 			
 		/*============================================================
-		  == #6.02# - USERSCOMM                                     ==
+		  == #6.02# - USERSHUB                                      ==
+		  ============================================================*/
+		case "WatchInputsPremise":
+			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_PREMISE` AS \n";
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`USERS_PK` AS `USERS_PK`, \n";
+			$sSQL .= "	`HUB_PK` AS `HUB_PK`, \n";
+			$sSQL .= "	`HUB_PREMISE_FK` AS `HUB_PREMISE_FK`, \n";
+			$sSQL .= "	`HUB_NAME` AS `HUB_NAME`, \n";
+			$sSQL .= "	`HUB_SERIALNUMBER` AS `HUB_SERIALNUMBER`, \n";
+			$sSQL .= "	`HUB_IPADDRESS` AS `HUB_IPADDRESS`, \n";
+			$sSQL .= "	`PREMISE_PK` AS `PREMISE_PK`, \n";
+			$sSQL .= "	`PREMISE_NAME` AS `PREMISE_NAME`, \n";
+			$sSQL .= "	`PREMISE_DESCRIPTION` AS `PREMISE_DESCRIPTION`, \n";
+			$sSQL .= "	`PREMISEADDRESS_PK` AS `PREMISEADDRESS_PK`, \n";
+			$sSQL .= "	`PREMISEADDRESS_LINE1` AS `PREMISEADDRESS_LINE1`, \n";
+			$sSQL .= "	`PREMISEADDRESS_LINE2` AS `PREMISEADDRESS_LINE2`, \n";
+			$sSQL .= "	`PREMISEADDRESS_LINE3` AS `PREMISEADDRESS_LINE3`, \n";
+			$sSQL .= "	`PREMISEADDRESS_POSTCODE` AS `PREMISEADDRESS_POSTCODE`, \n";
+			$sSQL .= "	`PREMISEADDRESS_SUBREGION` AS `PREMISEADDRESS_SUBREGION`, \n";
+			$sSQL .= "	`LANGUAGE_PK` AS `LANGUAGE_PK`, \n";
+			$sSQL .= "	`LANGUAGE_NAME` AS `LANGUAGE_NAME`, \n";
+			$sSQL .= "	`LANGUAGE_ENCODING` AS `LANGUAGE_ENCODING`, \n";
+			$sSQL .= "	`REGION_PK` AS `REGION_PK`, \n";
+			$sSQL .= "	`REGION_NAME` AS `REGION_NAME`, \n";
+			$sSQL .= "	`REGION_NAME2` AS `REGION_NAME2`, \n";
+			$sSQL .= "	`TIMEZONE_PK` AS `TIMEZONE_PK`, \n";
+			$sSQL .= "	`TIMEZONE_CC` AS `TIMEZONE_CC`, \n";
+			$sSQL .= "	`TIMEZONE_LATITUDE` AS `TIMEZONE_LATITUDE`, \n";
+			$sSQL .= "	`TIMEZONE_LONGITUDE` AS `TIMEZONE_LONGITUDE`, \n";
+			$sSQL .= "	`TIMEZONE_TZ` AS `TIMEZONE_TZ` \n";
+			$sSQL .= "FROM `USERS` \n";
+			$sSQL .= "INNER JOIN `PERMHUB` ON `USERS`.`USERS_PK` = `PERMHUB`.`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `HUB` ON `HUB`.`HUB_PK` = `PERMHUB`.`PERMHUB_HUB_FK` \n";
+			$sSQL .= "LEFT JOIN `PREMISE` ON `HUB`.`HUB_PREMISE_FK` = `premise`.`PREMISE_PK` \n";
+			$sSQL .= "LEFT JOIN `PREMISEADDRESS` ON `PREMISE`.`PREMISE_PK` = `PREMISEADDRESS`.`PREMISEADDRESS_PREMISE_FK` \n";
+			$sSQL .= "LEFT JOIN `LANGUAGE` ON `PREMISEADDRESS`.`PREMISEADDRESS_LANGUAGE_FK` = `LANGUAGE`.`LANGUAGE_PK` \n";
+			$sSQL .= "LEFT JOIN `REGION` ON `PREMISEADDRESS`.`PREMISEADDRESS_REGION_FK` = `REGION`.`REGION_PK`  \n";
+			$sSQL .= "LEFT JOIN `TIMEZONE` ON `PREMISEADDRESS`.`PREMISEADDRESS_TIMEZONE_FK` = `TIMEZONE`.`TIMEZONE_PK`  \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `USERS_STATE` = -1;\n";
+			
+		/*============================================================
+		  == #6.03# - USERSCOMM                                     ==
 		  ============================================================*/
 		case "WatchInputsComm":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_COMM` AS\n";
@@ -3285,7 +3327,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			
 			
 		/*============================================================
-		  == #6.03# - USERSLINK                                     ==
+		  == #6.04# - USERSLINK                                     ==
 		  ============================================================*/
 		case "WatchInputsLink":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_LINK` AS \n";
@@ -3340,7 +3382,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #6.04# - USERSTHING                                    ==
+		  == #6.05# - USERSTHING                                    ==
 		  ============================================================*/
 		case "WatchInputsThing":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_THING` AS\n";
@@ -3383,7 +3425,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			break;
 			
 		/*============================================================
-		  == #6.05# - USERSIO                                       ==
+		  == #6.06# - USERSIO                                       ==
 		  ============================================================*/
 		case "WatchInputsIO":
 			$sSQL .= "CREATE SQL SECURITY INVOKER VIEW `".$sDBName."`.`VW_IO` AS\n";

@@ -672,60 +672,61 @@ if( $bError===false ) {
 				$aRuleListTemp = GetAllRules( false );
 				
 				if( $aRuleListTemp['Error']===false ) {
-					foreach( $aRuleListTemp['Data'] as $aRule ) {
-						//-- Setup Variables and Extract the values from the database result --//
-						$sTempTime      = $aRule['Time'];
-						$iTempRuleId    = $aRule['Id'];
-						$aTempParamData = json_decode( $aRule['Parameter'], true );
-						$iTempThingId   = null;
-						
-						if( $aTempParamData!==null && $aTempParamData!==false && isset( $aTempParamData['ThingId'] )) {
-							$iTempThingId = $aTempParamData['ThingId'];
+					if( count( $aRuleListTemp['Data'] ) >= 1 ) {
+						foreach( $aRuleListTemp['Data'] as $aRule ) {
+							//-- Setup Variables and Extract the values from the database result --//
+							$sTempTime      = $aRule['Time'];
+							$iTempRuleId    = $aRule['Id'];
+							$aTempParamData = json_decode( $aRule['Parameter'], true );
+							$iTempThingId   = null;
 							
-							
-							//----------------------------//
-							//-- IF AddRule             --//
-							if( $sPostMode==="AddRule" ) {
-								//-- Check to make sure ThingId and Time do not match --//
-								if( $sPostTime===$sTempTime && $iPostDataParamThingId===$iTempThingId ) {
-									//-- ERROR: Invalid Add Rule --//
-									$bError    = true;
-									$iErrCode  = 275;
-									$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-									$sErrMesg .= "Error: Problem occurred when attempting to add a new Rule!\n";
-									$sErrMesg .= "The desired rule conflicts with an existing rule! \n";
-									$sErrMesg .= "Please change the Time or pick a different Device.\n";
-									break;
-								}
+							if( $aTempParamData!==null && $aTempParamData!==false && isset( $aTempParamData['ThingId'] )) {
+								$iTempThingId = $aTempParamData['ThingId'];
 								
 								
-							//----------------------------//
-							//-- ELSEIF Edit Rule       --//
-							} else if( $sPostMode==="EditRule" ) {
-								//-- IF the RuleId is different than check that the Time and ThingId do no match --//
-								if( $iPostId!==$iTempRuleId ) {
+								//----------------------------//
+								//-- IF AddRule             --//
+								if( $sPostMode==="AddRule" ) {
+									//-- Check to make sure ThingId and Time do not match --//
 									if( $sPostTime===$sTempTime && $iPostDataParamThingId===$iTempThingId ) {
-										//-- ERROR: Invalid Edit Rule --//
+										//-- ERROR: Invalid Add Rule --//
 										$bError    = true;
-										$iErrCode  = 276;
+										$iErrCode  = 275;
 										$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-										$sErrMesg .= "Error: Problem occurred when attempting to edit an existing Rule!\n";
+										$sErrMesg .= "Error: Problem occurred when attempting to add a new Rule!\n";
 										$sErrMesg .= "The desired rule conflicts with an existing rule! \n";
-										$sErrMesg .= "Please change the Time or ThingId to a different value.\n";
+										$sErrMesg .= "Please change the Time or pick a different Device.\n";
 										break;
 									}
+									
+									
+								//----------------------------//
+								//-- ELSEIF Edit Rule       --//
+								} else if( $sPostMode==="EditRule" ) {
+									//-- IF the RuleId is different than check that the Time and ThingId do no match --//
+									if( $iPostId!==$iTempRuleId ) {
+										if( $sPostTime===$sTempTime && $iPostDataParamThingId===$iTempThingId ) {
+											//-- ERROR: Invalid Edit Rule --//
+											$bError    = true;
+											$iErrCode  = 276;
+											$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+											$sErrMesg .= "Error: Problem occurred when attempting to edit an existing Rule!\n";
+											$sErrMesg .= "The desired rule conflicts with an existing rule! \n";
+											$sErrMesg .= "Please change the Time or ThingId to a different value.\n";
+											break;
+										}
+									}
 								}
+								
+							} else {
+								//-- ERROR: Abort --//
+								$bError    = true;
+								$iErrCode  = 274;
+								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+								$sErrMesg .= "Error: Problem occurred when parsing existing rules!\n";
 							}
-							
-						} else {
-							//-- ERROR: Abort --//
-							$bError    = true;
-							$iErrCode  = 274;
-							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
-							$sErrMesg .= "Error: Problem occurred when parsing existing rules!\n";
-						}
-						
-					}	//-- ENDFOREACH Database Rule --//
+						}	//-- ENDFOREACH Database Rule --//
+					}
 				} else {
 					//-- ERROR: --//
 					$bError    = true;

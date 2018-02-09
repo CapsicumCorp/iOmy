@@ -227,6 +227,9 @@ function NonDataViewName($sViewType) {
 	//------------------------//
 	//-- WATCHINPUTS VIEWS  --//
 	//------------------------//
+	} else if( $sViewType==="VW_Premise" ) {
+		$aResult = array( "Error"=>false, "View"=>"VW_PREMISE" );
+		
 	} else if( $sViewType==="VW_Hub" ) {
 		$aResult = array( "Error"=>false, "View"=>"VW_HUB" );
 		
@@ -3257,6 +3260,129 @@ function dbSpecialGetAllPremises() {
 	}
 }
 
+
+function dbWatchInputsGetPremise( $iPremiseId ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();      //-- ARRAY:         --//
+	$sSQL               = "";           //-- STRING:        Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:       --//
+	$sErrMesg           = "";           //-- STRING:        --//
+	$sView              = "";           //-- STRING:        --//
+	
+	$aTemporaryView     = array();      //-- ARRAY:     A array to store information about which view to use like the viewname and columns. --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("VW_Premise");
+			if ( $aTemporaryView["Error"]===true ) {
+				//-- if an error has occurred --//
+				$bError = true;
+				$sErrMesg = $aTemporaryView["ErrMesg"];
+
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+
+				$sSQL .= "SELECT ";
+				$sSQL .= "    `PREMISE_PK`, ";
+				$sSQL .= "    `PREMISE_NAME`, ";
+				$sSQL .= "    `PREMISE_DESCRIPTION`, ";
+				$sSQL .= "    `PREMISEADDRESS_PK`, ";
+				$sSQL .= "    `PREMISEADDRESS_LINE1`, ";
+				$sSQL .= "    `PREMISEADDRESS_LINE2`, ";
+				$sSQL .= "    `PREMISEADDRESS_LINE3`, ";
+				$sSQL .= "    `PREMISEADDRESS_POSTCODE`, ";
+				$sSQL .= "    `PREMISEADDRESS_SUBREGION`, ";
+				$sSQL .= "    `REGION_PK`, ";
+				$sSQL .= "    `REGION_NAME`, ";
+				$sSQL .= "    `REGION_NAME2`, ";
+				$sSQL .= "    `LANGUAGE_PK`, ";
+				$sSQL .= "    `LANGUAGE_NAME`, ";
+				$sSQL .= "    `LANGUAGE_ENCODING`, ";
+				$sSQL .= "    `TIMEZONE_PK`, ";
+				$sSQL .= "    `TIMEZONE_CC`, ";
+				$sSQL .= "    `TIMEZONE_LATITUDE`, ";
+				$sSQL .= "    `TIMEZONE_LONGITUDE`, ";
+				$sSQL .= "    `TIMEZONE_TZ` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `PREMISE_PK` = :PremiseId ";
+				$sSQL .= "LIMIT 1 ";
+				
+				//-- Set the SQL Input Parameters --//
+				$aInputVals = array(
+					array( "Name"=>"PremiseId",		"type"=>"INT",		"value"=>$iPremiseId )
+				);
+				
+				
+				//-- Set the SQL Output Columns --//
+				$aOutputCols = array(
+					array( "Name"=>"PremiseId",						"type"=>"INT" ),
+					array( "Name"=>"PremiseName",					"type"=>"STR" ),
+					array( "Name"=>"PremiseDesc",					"type"=>"STR" ),
+					array( "Name"=>"AddressId",						"type"=>"INT" ),
+					array( "Name"=>"AddressLine1",					"type"=>"STR" ),
+					array( "Name"=>"AddressLine2",					"type"=>"STR" ),
+					array( "Name"=>"AddressLine3",					"type"=>"STR" ),
+					array( "Name"=>"Postcode",						"type"=>"STR" ),
+					array( "Name"=>"SubRegion",						"type"=>"STR" ),
+					array( "Name"=>"AddressRegionId",				"type"=>"INT" ),
+					array( "Name"=>"AddressRegionName",				"type"=>"STR" ),
+					array( "Name"=>"AddressRegionAbrv",				"type"=>"STR" ),
+					array( "Name"=>"AddressLanguageId",				"type"=>"INT" ),
+					array( "Name"=>"AddressLanguageName",			"type"=>"STR" ),
+					array( "Name"=>"AddressLanguageEncoding",		"type"=>"STR" ),
+					array( "Name"=>"AddressTimezoneId",				"type"=>"INT" ),
+					array( "Name"=>"AddressTimezoneCC",				"type"=>"STR" ),
+					array( "Name"=>"AddressTimezoneLatitude",		"type"=>"STR" ),
+					array( "Name"=>"AddressTimezoneLongitude",		"type"=>"STR" ),
+					array( "Name"=>"AddressTimezoneTZ",				"type"=>"STR" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1);
+			}
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch(Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false,	"Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true,	"ErrMesg"=>"WatchInputsGetPremise: ".$sErrMesg );
+	}
+}
 
 //========================================================================================================================//
 //== #6.0# - Rooms Functions                                                                                            ==//

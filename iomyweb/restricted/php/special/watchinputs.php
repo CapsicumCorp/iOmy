@@ -103,7 +103,8 @@ if($bError===false) {
 		array( "Name"=>'Mode',          "DataType"=>'STR' ),
 		array( "Name"=>'Version',       "DataType"=>'STR' ),
 		array( "Name"=>'Access',        "DataType"=>'STR' ),
-		array( "Name"=>'Data',          "DataType"=>'STR' )
+		array( "Name"=>'Data',          "DataType"=>'STR' ),
+		array( "Name"=>'Id',            "DataType"=>'INT' )
 	);
 	
 	$aHTTPData = FetchHTTPDataParameters( $aRequiredParmaters );
@@ -124,7 +125,13 @@ if($bError===false) {
 		
 		
 		//-- Display an error if the mode is unsupported --//
-		if( $sPostMode!=="AddComm" && $sPostMode!=="AddLink" && $sPostMode!=="AddThing" && $sPostMode!=="AddIO") {
+		if( 
+			$sPostMode!=="AddComm"            && $sPostMode!=="AddLink"            && 
+			$sPostMode!=="AddThing"           && $sPostMode!=="AddIO"              &&
+			$sPostMode!=="ListAllActiveRules" && $sPostMode!=="UpdateRuleNextTS"   &&
+			$sPostMode!=="RuleJustTriggered"  && $sPostMode!=="RuleTriggeredAt"    
+			
+		) {
 			$bError = true;
 			$iErrCode  = 101;
 			$sErrMesg .= "Error Code:'0101' \n";
@@ -147,27 +154,30 @@ if($bError===false) {
 	//----------------------------------------------------//
 	//-- 2.2.3 - Retrieve the API "Version"             --//
 	//----------------------------------------------------//
-	try {
-		$sPostVersion = $aHTTPData["Version"];
-		
-		//-- Verify that the mode is supported --//
-		if( $sPostVersion==="" ) {
-			$bError = true;
-			$iErrCode  = 103;
-			$sErrMesg .= "Error Code:'0103' \n";
-			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
-			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"AddLink\" \n\n";
+	if( $bError===false ) {
+		if( $sPostMode==="AddComm" || $sPostMode==="AddLink" || $sPostMode==="AddThing" || $sPostMode==="AddIO" ) {
+			try {
+				$sPostVersion = $aHTTPData["Version"];
+				//-- Verify that the mode is supported --//
+				if( $sPostVersion==="" ) {
+					$bError = true;
+					$iErrCode  = 103;
+					$sErrMesg .= "Error Code:'0103' \n";
+					$sErrMesg .= "Invalid \"Mode\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
+					$sErrMesg .= "eg. \n \"AddLink\" \n\n";
+				}
+				
+			} catch( Exception $e0104 ) {
+				$bError = true;
+				$iErrCode  = 104;
+				$sErrMesg .= "Error Code:'0104' \n";
+				$sErrMesg .= "No \"Mode\" parameter! \n";
+				$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
+				$sErrMesg .= "eg. \n \"AddLink\" \n\n";
+				//sErrMesg .= e0102.message;
+			}
 		}
-		
-	} catch( Exception $e0104 ) {
-		$bError = true;
-		$iErrCode  = 104;
-		$sErrMesg .= "Error Code:'0104' \n";
-		$sErrMesg .= "No \"Mode\" parameter! \n";
-		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"AddLink\" \n\n";
-		//sErrMesg .= e0102.message;
 	}
 	
 	
@@ -203,28 +213,65 @@ if($bError===false) {
 	//-- 2.2.4 - Extract the "Data" Parameter           --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		try {
-			//-- Retrieve the "Data" --//
-			$sPostData = $aHTTPData["Data"];
-			
-			if( $sPostData===false ) {
+		if( 
+			$sPostMode==="AddComm"            || $sPostMode==="AddLink"            || 
+			$sPostMode==="AddThing"           || $sPostMode==="AddIO"              || 
+			$sPostMode==="RuleTriggeredAt"    
+		) {
+			try {
+				//-- Retrieve the "Data" --//
+				$sPostData = $aHTTPData["Data"];
+				
+				if( $sPostData===false ) {
+					$bError    = true;
+					$iErrCode  = 107;
+					$sErrMesg .= "Error Code:'0107' \n";
+					$sErrMesg .= "Non string \"Data\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"Data\" parameter\n";
+				}
+				
+			} catch( Exception $e0108 ) {
 				$bError    = true;
-				$iErrCode  = 107;
-				$sErrMesg .= "Error Code:'0107' \n";
-				$sErrMesg .= "Non numeric \"Data\" parameter! \n";
-				$sErrMesg .= "Please use a valid \"Data\" parameter\n";
-				//$sErrMesg .= "eg. \n 1, 2, 3 \n\n";
+				$iErrCode  = 108;
+				$sErrMesg .= "Error Code:'0108' \n";
+				$sErrMesg .= "Incorrect \"Data\" parameter!";
+				$sErrMesg .= "Please use a valid \"Data\" parameter";
 			}
-			
-		} catch( Exception $e0108 ) {
-			$bError    = true;
-			$iErrCode  = 108;
-			$sErrMesg .= "Error Code:'0108' \n";
-			$sErrMesg .= "Incorrect \"Data\" parameter!";
-			$sErrMesg .= "Please use a valid \"Data\" parameter";
-			//$sErrMesg .= "eg. \n 1, 2, 3 \n\n";
 		}
 	}
+	
+	//----------------------------------------------------//
+	//-- 2.2.5 - Retrieve "Id"                          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( 
+			$sPostMode==="UpdateRuleNextTS" || $sPostMode==="RuleJustTriggered"  || 
+			$sPostMode==="RuleTriggeredAt"  
+		) {
+			try {
+				//-- Retrieve the "RuleId" --//
+				$iPostId = $aHTTPData["Id"];
+				
+				if( $iPostId===false ) {
+					$bError = true;
+					$iErrCode  = 109;
+					$sErrMesg .= "Error Code:'0109' \n";
+					$sErrMesg .= "Non numeric \"Id\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"Id\" parameter\n";
+					$sErrMesg .= "eg. \n \"1\", \"2\", \"3\" \n\n";
+				}
+				
+			} catch( Exception $e0110 ) {
+				$bError = true;
+				$iErrCode  = 110;
+				$sErrMesg .= "Error Code:'0110' \n";
+				$sErrMesg .= "Non numeric \"Id\" parameter! \n";
+				$sErrMesg .= "Please use a valid \"Id\" parameter\n";
+				$sErrMesg .= "eg. \n \"1\", \"2\", \"3\" \n\n";
+			}
+		}
+	}
+	
 }	//-- END of POST --//
 
 
@@ -238,6 +285,7 @@ if($bError===false) {
 		//== 3.1 - API SUPPORT LIBRARY SELECTION                        ==//
 		//================================================================//
 		//if( $bError===false ) {
+		if( $sPostMode==="AddComm" || $sPostMode==="AddLink" || $sPostMode==="AddThing" || $sPostMode==="AddIO" ) {
 			try {
 				//------------------------------------------------//
 				//-- EXTRACT THE VERSION DATA                   --//
@@ -308,7 +356,7 @@ if($bError===false) {
 				$sErrMesg .= "Problem when loading the \"Version\" module! \n";
 				$sErrMesg .= $e0205->getMessage();
 			}
-		//}
+		}
 		
 		
 		//================================================================//
@@ -427,27 +475,33 @@ if($bError===false) {
 		//== 3.4 - CONVERT JSON STRING "DATA" TO AN ARRAY               ==//
 		//================================================================//
 		if( $bError===false ) {
-			try {
-				//------------------------------------------------//
-				//-- "ACCESS" JSON PARSING                      --//
-				//------------------------------------------------//
-				$aPostData = json_decode( $sPostData, true );
-				
-				//------------------------------------------------//
-				//-- IF "null" or a false like value            --//
-				//------------------------------------------------//
-				if( $aPostData===null || $aPostData==false ) {
+			if(
+				$sPostMode==="AddComm"            || $sPostMode==="AddLink"            || 
+				$sPostMode==="AddThing"           || $sPostMode==="AddIO"              || 
+				$sPostMode==="RuleTriggeredAt"    
+			) {
+				try {
+					//------------------------------------------------//
+					//-- "ACCESS" JSON PARSING                      --//
+					//------------------------------------------------//
+					$aPostData = json_decode( $sPostData, true );
+					
+					//------------------------------------------------//
+					//-- IF "null" or a false like value            --//
+					//------------------------------------------------//
+					if( $aPostData===null || $aPostData==false ) {
+						$bError    = true;
+						$iErrCode  = 208;
+						$sErrMesg .= "Error Code:'0208' \n";
+						$sErrMesg .= "Invalid POST \"Data\" \n";
+					}
+					
+				} catch( Exception $e0209 ) {
 					$bError    = true;
-					$iErrCode  = 208;
-					$sErrMesg .= "Error Code:'0208' \n";
-					$sErrMesg .= "Invalid POST \"Data\" \n";
+					$iErrCode  = 209;
+					$sErrMesg .= "Error Code:'0209' \n";
+					$sErrMesg .= $e0209->getMessage();
 				}
-				
-			} catch( Exception $e0209 ) {
-				$bError    = true;
-				$iErrCode  = 209;
-				$sErrMesg .= "Error Code:'0209' \n";
-				$sErrMesg .= $e0209->getMessage();
 			}
 		}
 		
@@ -459,6 +513,162 @@ if($bError===false) {
 	}
 }
 
+
+//====================================================================//
+//== 4.0 - PREPARE                                                  ==//
+//====================================================================//
+if( $bError===false ) {
+	try {
+		//------------------------------------------------------------//
+		//-- 4.1 - Extract JSON Data                                --//
+		//------------------------------------------------------------//
+		if( $bError===false ) {
+			
+			//----------------------------------------------------//
+			//-- 4.1.6 - Extract Parameter                      --//
+			//----------------------------------------------------//
+			if( $bError===false ) {
+				if( $sPostMode==="RuleTriggeredAt" ) {
+					try {
+						if( isset( $aPostData['TriggeredUnixTS'] ) ) {
+							$iPostDataLastRunUnixTS = $aPostData['TriggeredUnixTS'];
+							
+							if( $iPostDataLastRunUnixTS > time() ) {
+								//------------------------------------//
+								//-- ERROR: Invalid Timestamp       --//
+								$bError    = true;
+								$iErrCode  = 212;
+								$sErrMesg .= "Error Code:'0212' \n";
+								$sErrMesg .= "Error: The 'TriggeredUnixTS' value in the 'Data' JSON parameter is not supported!\n";
+								$sErrMesg .= "The Unix timestamp has not occurred yet.";
+							}
+						} else {
+							//------------------------------------//
+							//-- ERROR: Missing Parameter       --//
+							$bError    = true;
+							$iErrCode  = 211;
+							$sErrMesg .= "Error Code:'0211' \n";
+							$sErrMesg .= "Error: The 'TriggeredUnixTS' value in the 'Data' JSON parameter is not supported!\n";
+						}
+					} catch( Exception $e0211 ) {
+						$bError = true;
+						$iErrCode  = 211;
+						$sErrMesg .= "Error Code:'0211' \n";
+						$sErrMesg .= "Error: Problem extracting the 'TriggeredUnixTS' value in the 'Data' JSON parameter!\n";
+					}
+				}
+			}
+		}
+		
+		//------------------------------------------------------------//
+		//-- 4.2 - Lookup the Rule Data                             --//
+		//------------------------------------------------------------//
+		if( $bError===false ) {
+			if( 
+				$sPostMode==="UpdateRuleNextTS" || $sPostMode==="RuleJustTriggered"  || 
+				$sPostMode==="RuleTriggeredAt"  
+			) {
+				//-- Lookup Rule --//
+				$aRuleTemp = GetRuleFromRuleId( $iPostId );
+				
+				if( $aRuleTemp['Error']===false ) {
+					$iPostHubId = $aRuleTemp['Data']['HubId'];
+					
+					//--------------------------------------------//
+					//-- IF Edit Mode                           --//
+					//--------------------------------------------//
+					if( $sPostMode==="UpdateRuleNextTS" || $sPostMode==="RuleJustTriggered" || $sPostMode==="RuleTriggeredAt" ) {
+						//-- Extract values --//
+						$iPlannedNextRunUnixTS = $aRuleTemp['Data']['NextRunUTS'];
+						$sPostTime = $aRuleTemp['Data']['Time'];
+						
+					}
+				} else {
+					//-- ERROR: Problem with the results of the desired rule --//
+					$bError    = true;
+					$iErrCode  = 221+$aRuleTemp['ErrCode'];
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Issue with looking up the desired Rule!\n";
+					$sErrMesg .= $aRuleTemp['ErrMesg'];
+				}
+			}
+		}
+		
+		
+		//------------------------------------------------------------//
+		//-- 4.3 - Lookup the timezone from HubId                   --//
+		//------------------------------------------------------------//
+		if( $bError===false ) {
+			if( 
+				$sPostMode==="UpdateRuleNextTS" || $sPostMode==="RuleJustTriggered"  || 
+				$sPostMode==="RuleTriggeredAt"  
+			) {
+				//------------------------------------------------//
+				//-- 4.2.1 - Lookup Hub Data for Rule           --//
+				//------------------------------------------------//
+				if( $bError===false ) {
+					$aHubTemp  = WatchInputsHubRetrieveInfoAndPermission( $iPostHubId );
+					
+					if( $aHubTemp['Error']===true ) {
+						$bError    = true;
+						$iErrCode  = 240;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Problem looking up the Hub information for the HubId parameter.\n";
+						$sErrMesg .= $aHubTemp['ErrMesg'];
+					}
+				}
+				
+				//------------------------------------------------//
+				//-- 4.2.2 - Lookup PremiseAddress              --//
+				//------------------------------------------------//
+				if( $bError===false ) {
+					$aPremiseAddressTemp = WatchInputsGetPremise( $aHubTemp['Data']['PremiseId'] );
+					
+					if( $aPremiseAddressTemp['Error']===false ) {
+						$sTimezone = $aPremiseAddressTemp['Data']['AddressTimezoneTZ'];
+						
+					} else {
+						$bError    = true;
+						$iErrCode  = 250+$aPremiseAddressTemp['ErrCode'];
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Problem looking up the Timezone information for the Rule!\n";
+						$sErrMesg .= $aPremiseAddressTemp['ErrMesg'];
+					}
+				}
+			}
+		}
+		
+		//------------------------------------------------------------//
+		//-- 4.4 - Lookup the Calculate Next RunTime                --//
+		//------------------------------------------------------------//
+		if( $bError===false ) {
+			if( 
+				$sPostMode==="UpdateRuleNextTS" || $sPostMode==="RuleJustTriggered"  || 
+				$sPostMode==="RuleTriggeredAt"  
+			) {
+				$aNextUnixTS = FindNextUTSFromTime( $sTimezone, $sPostTime, 60 );
+				
+				if( $aNextUnixTS['Error']===false ) {
+					$iNextRun = $aNextUnixTS['UnixTS']; 
+					
+					//-- TODO: Error checking --//
+				} else {
+					$bError    = true;
+					$iErrCode  = 260+$aNextUnixTS['ErrCode'];
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Problem when calculating the next timestamp to run the rule at.\n";
+					$sErrMesg .= $aNextUnixTS['ErrMesg'];
+				}
+			}
+		}
+	} catch( Exception $e0200 ) {
+		$bError = true;
+		$iErrCode  = 200;
+		$sErrMesg .= "Error Code:'0200' \n";
+		$sErrMesg .= "Critical Error Occurred!\n";
+		$sErrMesg .= "Problem occurred when preparing for the main function.\n";
+	}
+}
 
 
 //====================================================================//
@@ -714,19 +924,133 @@ if($bError===false) {
 				$sErrMesg .= $e4400->getMessage();
 			}
 			
+			
+		//================================================================//
+		//== 5.4 - MODE: Rules                                          ==//
+		//================================================================//
+		} else if( 
+			$sPostMode==="ListHubActiveRules" || $sPostMode==="UpdateRuleNextTS"   ||
+			$sPostMode==="RuleJustTriggered"  || $sPostMode==="RuleTriggeredAt" 
+		) {
+			
+			//----------------------------------------------------//
+			//-- 5.1.A - ELSEIF Active Only Rules               --//
+			//----------------------------------------------------//
+			if( $sPostMode==="ListAllActiveRules" ) {
+				$aResult = GetAllRules( true, true );
+				
+			//----------------------------------------------------//
+			//-- 5.1.B - ELSEIF UpdateRuleNextTS                --//
+			//----------------------------------------------------//
+			} else if( $sPostMode==="UpdateRuleNextTS" ) {
+				$aTempFunctionResult4 = RuleNextRunUpdate( $iPostId, $iNextRun );
+					
+				if( $aTempFunctionResult4['Error']===false ) {
+					$aResult = GetRuleFromRuleId( $iPostId );
+				} else {
+					$bError     = true;
+					$iErrCode   = 6401;
+					$sErrMesg  .= "Error Code:'6401' \n";
+					$sErrMesg  .= "Error: Problem in the main section of the \"".$sPostMode."\" Mode!\n";
+					$sErrMesg  .= $aResult['ErrMesg'];
+				} 
+				
+				
+			//----------------------------------------------------//
+			//-- 5.1.C - ELSEIF Rule Just Trigged               --//
+			//----------------------------------------------------//
+			} else if( $sPostMode==="RuleJustTriggered" || $sPostMode==="RuleTriggeredAt" ) {
+				//--------------------------------------------------------//
+				//-- 5.7.1 - Prepare                                    --//
+				//--------------------------------------------------------//
+				
+				//------------------------------------//
+				//-- IF Mode is RuleJustTriggered   --//
+				//------------------------------------//
+				if( $sPostMode==="RuleJustTriggered" ) {
+					//-- Set the Triggered UnixTS as the current timestamp --//
+					$iPostDataLastRunUnixTS = time();
+					
+				//------------------------------------//
+				//-- ELSE Mode is RuleTriggeredAt   --//
+				//------------------------------------//
+				} else {
+					//----------------------------------------//
+					//-- Validate that Triggered UnixTS     --//
+					//-- is newer than the previous         --//
+					//----------------------------------------//
+					if( $iPostDataLastRunUnixTS <= $aRuleTemp['Data']['LastRunUTS'] ) {
+						//--------------------------------//
+						//-- ERROR: Invalid UnixTS      --//
+						//--------------------------------//
+						$bError    = true;
+						$iErrCode  = 7401;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Problem with the 'TriggeredUnixTS' !\n";
+						$sErrMesg .= "The new UnixTS is not newer than the previous UnixTS.";
+					}
+				}
+				
+				//--------------------------------------------------------//
+				//-- 5.7.2 - Calculate next run event time              --//
+				//--------------------------------------------------------//
+				if( $bError===false ) {
+					//------------------------------------------------//
+					//-- IF The Rule is a re-occuring type          --//
+					//------------------------------------------------//
+					if( $aRuleTemp['Data']['TypeId']===3 || $aRuleTemp['Data']['TypeId']===4 ) {
+						//------------------------------------------------//
+						//-- Update the Rule                            --//
+						//------------------------------------------------//
+						$aResult = RuleMarkAsRan( $iPostId, $iNextRun, $iPostDataLastRunUnixTS, $aRuleTemp['Data']['HubId'] );
+						
+						if( $aResult['Error']===true ) {
+							$bError    = true;
+							$iErrCode  = 7430;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Problem marking that the rule has been executed and calculating the next timestamp that it will run at!\n";
+							$sErrMesg .= $aResult['ErrMesg'];
+						}
+						
+					//------------------------------------------------//
+					//-- ELSE The Rule is a run once type           --//
+					//------------------------------------------------//
+					} else {
+						//------------------------------------------------//
+						//-- Update the Rule                            --//
+						//------------------------------------------------//
+						$aResult = RuleMarkAsRan( $iPostId, $aRuleTemp['Data']['NextRunUTS'], $iPostDataLastRunUnixTS, $aRuleTemp['Data']['HubId'] );
+						
+						if( $aResult['Error']===true ) {
+							$bError    = true;
+							$iErrCode  = 7440;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Problem marking that the rule has been executed!\n";
+							$sErrMesg .= $aResult['ErrMesg'];
+						}
+						
+						//------------------------------------------------//
+						//-- Disable the Rule                           --//
+						//------------------------------------------------//
+						$aTempFunctionResult3 = UpdateRuleEnabledStatus( $iPostId, 0 );
+						
+					}
+				}
+			}
+			
 		//================================================================//
 		//== 5.? - ERROR: UNSUPPORTED MODE                              ==//
 		//================================================================//
 		} else {
 			$bError    = true;
-			$iErrCode  = 0401;
+			$iErrCode  = 401;
 			$sErrMesg .= "Error Code:'0401' \n";
 			$sErrMesg .= "Unsupported Mode! \n";
 		}
 		
 	} catch( Exception $e0400 ) {
 		$bError    = true;
-		$iErrCode  = 0400;
+		$iErrCode  = 400;
 		$sErrMesg .= "Error Code:'0400' \n";
 		$sErrMesg .= $e0400->getMessage();
 	}

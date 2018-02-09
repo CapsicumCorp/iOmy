@@ -2053,7 +2053,7 @@ function GetPremiseFromHubId( $iHubId ) {
 	
 	if( $aResult["Error"]===true ) {
 		//-- Display an Error --//
-		$aResult = array( "Error"=>true, "ErrMesg"=>"Premise wasn't found! \nPremise either doesn't exist or you do not have permission to access it!\n" );
+		$aResult = array( "Error"=>true, "ErrCode"=>0, "ErrMesg"=>"Premise wasn't found! \nPremise either doesn't exist or you do not have permission to access it!\n" );
 	} 
 	
 	//-- Return the results --//
@@ -2585,6 +2585,14 @@ function WatchInputsGetFirstRoomIdFromPremiseId( $iPremiseId ) {
 	return $aResult;
 }
 
+
+function WatchInputsGetPremise( $iPremiseId ) {
+	//-- Retrieve the Premise Info --//
+	$aResult = dbWatchInputsGetPremise( $iPremiseId );
+	
+	//-- Return the results --//
+	return $aResult;
+}
 
 
 function SpecialGetAllRooms() {
