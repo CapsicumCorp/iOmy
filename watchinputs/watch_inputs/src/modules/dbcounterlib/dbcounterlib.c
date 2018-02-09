@@ -54,7 +54,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/dblib/dblib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/commonlib/commonlib.h"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 
 #define DBCOUNTERLIB_MIN_UPDATE_INTVAL 1 //Minimum update interval allowed for a counter
@@ -170,8 +169,7 @@ int dbcounterlib_checkifindexvalid(int index, int expected_countertype);
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
 #define DBLIB_DEPIDX 1
-#define COMMONSERVERLIB_DEPIDX 2
-#define CMDSERVERLIB_DEPIDX 3
+#define CMDSERVERLIB_DEPIDX 2
 
 static dbcounterlib_ifaceptrs_ver_1_t dbcounterlib_ifaceptrs_ver_1={
   .init=dbcounterlib_init,
@@ -207,11 +205,6 @@ static moduledep_ver_1_t dbcounterlib_deps[]={
     .modulename="dblib",
     .ifacever=DBLIBINTERFACE_VER_1,
     .required=1
-  },
-  {
-    .modulename="commonserverlib",
-    .ifacever=COMMONSERVERLIBINTERFACE_VER_1,
-    .required=0
   },
   {
     .modulename="cmdserverlib",
@@ -591,11 +584,11 @@ static void *dbcounterlib_MainThreadLoop(void *thread_val) {
   Returns: A CMDLISTENER definition depending on the result
 */
 static int dbcounterlib_processcommand(const char *buffer, int clientsock) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=dbcounterlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=dbcounterlib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
   char tmpstrbuf[100];
   int len;
 
-  if (!commonserverlibifaceptr) {
+  if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
   len=strlen(buffer);
@@ -610,13 +603,13 @@ static int dbcounterlib_processcommand(const char *buffer, int clientsock) {
     ltimejumpedforwardlargecnt=dbcounterlib_timejumpedforwardlargecnt;
     PTHREAD_UNLOCK(&dbcounterlibmutex);
     sprintf(tmpstrbuf, "Time has jumped back by a small amount: %ld times\n", ltimejumpedbacksmallcnt);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     sprintf(tmpstrbuf, "Time has jumped back by a large amount: %ld times\n", ltimejumpedbacklargecnt);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     sprintf(tmpstrbuf, "Time has jumped forward by a small amount: %ld times\n", ltimejumpedforwardsmallcnt);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     sprintf(tmpstrbuf, "Time has jumped forward by a large amount: %ld times\n", ltimejumpedforwardlargecnt);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
   } else {
     return CMDLISTENER_NOTHANDLED;
   }
