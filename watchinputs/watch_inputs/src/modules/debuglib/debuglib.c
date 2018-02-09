@@ -51,7 +51,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "moduleinterface.h"
 #include "debuglib.h"
 #include "modules/commonlib/commonlib.h"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 
 #define SMALLBUF_SIZE 128
@@ -89,8 +88,7 @@ int debuglib_vprintf(int loglevel, const char *fmt, va_list argptr);
 int debuglib_printf(int loglevel, const char *fmt, ...);
 
 //Module Interface Definitions
-#define COMMONSERVERLIB_DEPIDX 0
-#define CMDSERVERLIB_DEPIDX 1
+#define CMDSERVERLIB_DEPIDX 0
 
 static debuglib_ifaceptrs_ver_1_t debuglib_ifaceptrs_ver_1={
   debuglib_enable,
@@ -110,12 +108,6 @@ static moduleiface_ver_1_t debuglib_ifaces[]={
 };
 
 static moduledep_ver_1_t debuglib_deps[]={
-  {
-    "commonserverlib",
-    NULL,
-    COMMONSERVERLIBINTERFACE_VER_1,
-    0
-  },
   {
     "cmdserverlib",
     NULL,
@@ -417,7 +409,7 @@ jint Java_com_capsicumcorp_iomy_libraries_watchinputs_DebugLib_jniprintf( JNIEnv
 #endif
 
 static void debuglib_outputlines() {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=debuglib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=debuglib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
 
   pthread_mutex_lock(&debuglibmutex);
   if (gmaxdebuglines>0) {
@@ -444,7 +436,7 @@ static void debuglib_outputlines() {
       gdebuglines[tmpidx]=NULL;
       _debuglib_steplineoutidx();
       if (tmpstr) {
-        if (commonserverlibifaceptr) {
+        if (cmdserverlibifaceptr) {
           for (i=0; i<MAX_DEBUG_NETSESSIONS; i++) {
             if (debuglib_debugclientsockets[i]!=-1) {
               int clientsocket;
@@ -454,7 +446,7 @@ static void debuglib_outputlines() {
               pthread_mutex_unlock(&debuglibmutex);
 
               //Output debug line to this client socket
-              commonserverlibifaceptr->serverlib_netputs(tmpstr, clientsocket, NULL);
+              cmdserverlibifaceptr->cmdserverlib_netputs(tmpstr, clientsocket, NULL);
 
               pthread_mutex_lock(&debuglibmutex);
             }
@@ -477,11 +469,11 @@ static void debuglib_outputlines() {
   Returns: A CMDLISTENER definition depending on the result
 */
 static int debuglib_processcommand(const char *buffer, int clientsock) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=debuglib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=debuglib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
   char tmpstrbuf[100];
   int i, result;
 
-  if (!commonserverlibifaceptr) {
+  if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
   if (strncmp(buffer, "debug enable", 12)==0) {
@@ -498,7 +490,7 @@ static int debuglib_processcommand(const char *buffer, int clientsock) {
     } else {
       sprintf(tmpstrbuf, "Debug enable returned error code: %d\n", result);
     }
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
 
     //Wake up the network debug output thread to output debug lines
     sem_post(&debuglib_networkdebugoutputthreadsleepsem);
@@ -509,7 +501,7 @@ static int debuglib_processcommand(const char *buffer, int clientsock) {
     } else {
       sprintf(tmpstrbuf, "Debug disable returned error code: %d\n", result);
     }
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
   } else if (strncmp(buffer, "debug output show", 17)==0) {
     //Need to lock here since there can be multiple cmd client threads running this code
     pthread_mutex_lock(&debuglibmutex);
@@ -532,12 +524,12 @@ static int debuglib_processcommand(const char *buffer, int clientsock) {
       } else {
         sprintf(tmpstrbuf, "Can't enable debug output: The maximum number of debug output slots: %d has been reached\n", MAX_DEBUG_NETSESSIONS);
       }
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
 
       //Wake up the network debug output thread to output debug lines
       sem_post(&debuglib_networkdebugoutputthreadsleepsem);
     } else {
-      commonserverlibifaceptr->serverlib_netputs("Debug output is already being displayed\n", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("Debug output is already being displayed\n", clientsock, NULL);
     }
     pthread_mutex_unlock(&debuglibmutex);
   } else if (strncmp(buffer, "debug output hide", 17)==0) {
@@ -550,10 +542,10 @@ static int debuglib_processcommand(const char *buffer, int clientsock) {
       }
     }
     if (i==MAX_DEBUG_NETSESSIONS) {
-      commonserverlibifaceptr->serverlib_netputs("Debug output is already not being displayed\n", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("Debug output is already not being displayed\n", clientsock, NULL);
     } else {
       debuglib_debugclientsockets[i]=-1;
-      commonserverlibifaceptr->serverlib_netputs("Debug output is no longer being displayed\n", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("Debug output is no longer being displayed\n", clientsock, NULL);
     }
     pthread_mutex_unlock(&debuglibmutex);
   } else {
@@ -567,7 +559,7 @@ static int debuglib_processcommand(const char *buffer, int clientsock) {
   Input: clientsock The client socket that is closing
 */
 void debuglib_networkclientclose(int clientsock) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=debuglib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=debuglib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
   int i;
 
   pthread_mutex_lock(&debuglibmutex);
@@ -577,9 +569,9 @@ void debuglib_networkclientclose(int clientsock) {
       break;
     }
   }
-  if (i!=MAX_DEBUG_NETSESSIONS && commonserverlibifaceptr) {
+  if (i!=MAX_DEBUG_NETSESSIONS && cmdserverlibifaceptr) {
     debuglib_debugclientsockets[i]=-1;
-    commonserverlibifaceptr->serverlib_netputs("Debug output is no longer being displayed\n", clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs("Debug output is no longer being displayed\n", clientsock, NULL);
   }
   pthread_mutex_unlock(&debuglibmutex);
 }
