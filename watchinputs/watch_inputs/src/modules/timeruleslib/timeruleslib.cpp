@@ -61,7 +61,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/dblib/dblib.h"
 #include "modules/commonlib/commonlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
-#include "modules/commonserverlib/commonserverlib.h"
 
 #ifdef DEBUG
 #pragma message("TIMERULESLIB_PTHREAD_LOCK and TIMERULESLIB_PTHREAD_UNLOCK debugging has been enabled")
@@ -213,7 +212,6 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_TimeRulesLib_jn
 #define DEBUGLIB_DEPIDX 0
 #define DBLIB_DEPIDX 1
 #define CMDSERVERLIB_DEPIDX 2
-#define COMMONSERVERLIB_DEPIDX 3
 
 static timeruleslib_ifaceptrs_ver_1_t timeruleslib_ifaceptrs_ver_1={
   timeruleslib_setrulesfilename,
@@ -259,12 +257,6 @@ moduledep_ver_1_t timeruleslib_deps[]={
     nullptr,
     CMDSERVERLIBINTERFACE_VER_1,
     0
-  },
-  {
-    "commonserverlib",
-    NULL,
-    COMMONSERVERLIBINTERFACE_VER_1,
-    1
   },
   {
     nullptr, nullptr, 0, 0
@@ -577,10 +569,10 @@ static int timeruleslib_setrulesfilename(const char *rulesfile) {
 }
 
 static int timeruleslib_processreloadcommand(const char *UNUSED(buffer), int clientsock) {
-  auto const commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) timeruleslib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  auto const cmdserverlibifaceptr=(cmdserverlib_ifaceptrs_ver_1_t *) timeruleslib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
 
   if (timeruleslib_getneedtoquit()) {
-    commonserverlibifaceptr->serverlib_netputs("Unable to reload during shutdown\n", clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs("Unable to reload during shutdown\n", clientsock, NULL);
     return CMDLISTENER_NOERROR;
   }
   timeruleslib_lock();
@@ -588,7 +580,7 @@ static int timeruleslib_processreloadcommand(const char *UNUSED(buffer), int cli
   sem_post(&timeruleslib_mainthreadsleepsem);
   timeruleslib_unlock();
 
-  commonserverlibifaceptr->serverlib_netputs("Reloading of time rules file has been scheduled\n", clientsock, NULL);
+  cmdserverlibifaceptr->cmdserverlib_netputs("Reloading of time rules file has been scheduled\n", clientsock, NULL);
 
   return CMDLISTENER_NOERROR;
 }
