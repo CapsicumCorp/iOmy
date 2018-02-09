@@ -72,7 +72,6 @@ NOTE: We have seen the following RapidHA firmware versions:
 #endif
 #include "moduleinterface.h"
 #include "rapidhalib.h"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/serialportlib/serialportlib.h"
@@ -313,11 +312,6 @@ STATIC moduledep_ver_1_t rapidhalib_deps[]={
     .modulename="serialportlib",
     .ifacever=SERIALPORTLIBINTERFACE_VER_1,
     .required=1
-  },
-  {
-    .modulename="commonserverlib",
-    .ifacever=COMMONSERVERLIBINTERFACE_VER_1,
-    .required=0
   },
   {
     .modulename="cmdserverlib",
@@ -2870,14 +2864,14 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
   Returns: A CMDLISTENER definition depending on the result
 */
 STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=rapidhalib_getmoduledepifaceptr("commonserverlib", COMMONSERVERLIBINTERFACE_VER_1);
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=rapidhalib_getmoduledepifaceptr("cmdserverlib", CMDSERVERLIBINTERFACE_VER_1);
   char tmpstrbuf[100];
   int i, len, found;
   uint64_t addr;
   int numrapidhadevices;
   long rapidhalocked=0;
 
-  if (!commonserverlibifaceptr) {
+  if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
   MOREDEBUG_ENTERINGFUNC();
@@ -2891,7 +2885,7 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
       rapidhalib_send_rapidha_network_comissioning_join_network(&rapidhalib_rapidhadevices[found], &rapidhalocked);
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2905,7 +2899,7 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
       rapidhalib_send_rapidha_network_comissioning_form_network(&rapidhalib_rapidhadevices[found], ZIGBEE_CHANMASK_STANDARD, &rapidhalocked);
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2919,7 +2913,7 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
       rapidhalib_send_rapidha_network_comissioning_form_network(&rapidhalib_rapidhadevices[found], ZIGBEE_CHANMASK_NETVOX, &rapidhalocked);
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2933,7 +2927,7 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
       rapidhalib_send_rapidha_network_comissioning_leave_network(&rapidhalib_rapidhadevices[found], &rapidhalocked);
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2961,7 +2955,7 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
         case 3: sprintf(tmpstrbuf+57, "Reduced Function Sleep\n");
                 break;
       }
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -3010,28 +3004,28 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
           break;
       }
       sprintf(tmpstrbuf, "RAPIDHA ADDRESS: %016llX : %04hX\n", (unsigned long long) addr, (unsigned short) netaddr);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       if (needtoremove) {
         sprintf(tmpstrbuf, "  Scheduled to be removed\n");
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       }
       sprintf(tmpstrbuf, "  Firmware Version=%d.%d.%d\n", firmmaj, firmmin, firmbuild);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
-      commonserverlibifaceptr->serverlib_netputs("  Network State=", clientsock, NULL);
-      commonserverlibifaceptr->serverlib_netputs(rapidhalib_get_network_state_string(network_state), clientsock, NULL);
-      commonserverlibifaceptr->serverlib_netputs("\n  Device Type=", clientsock, NULL);
-      commonserverlibifaceptr->serverlib_netputs(rapidhalib_get_device_type_string(device_type), clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("  Network State=", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(rapidhalib_get_network_state_string(network_state), clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("\n  Device Type=", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(rapidhalib_get_device_type_string(device_type), clientsock, NULL);
       sprintf(tmpstrbuf, "\n  Configuration State: %s", cfgstatestr);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "\n  Channel=%02hhX\n", channel);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Pan ID=%04hX\n", panid);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Extended Pan ID=%016llX\n", (unsigned long long) extpanid);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     }
     if (!found) {
-      commonserverlibifaceptr->serverlib_netputs("NO RAPIDHA DEVICES FOUND\n", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("NO RAPIDHA DEVICES FOUND\n", clientsock, NULL);
     }
     rapidhalib_unlockrapidha();
   } else {
@@ -3044,7 +3038,7 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
 
 //Format: rapidha_firmware_upgrade <64-bit addr> <path_to_filename>
 static int rapidhalib_process_firmware_upgrade_command(const char *buffer, int clientsock) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=rapidhalib_getmoduledepifaceptr("commonserverlib", COMMONSERVERLIBINTERFACE_VER_1);
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=rapidhalib_getmoduledepifaceptr("cmdserverlib", CMDSERVERLIBINTERFACE_VER_1);
 
   if (strncmp(buffer, "rapidha_firmware_upgrade ", 25)==0 && strlen(buffer)>=43) {
     char tmpstrbuf[300];
@@ -3059,7 +3053,7 @@ static int rapidhalib_process_firmware_upgrade_command(const char *buffer, int c
       if (rapidhalib_rapidhadevices[found].firmware_file) {
         sprintf(tmpstrbuf, "RapidHA device: %016" PRIX64 " is already updating with file: %s\n", addr, rapidhalib_rapidhadevices[found].firmware_file);
         rapidhalib_unlockrapidha();
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       } else {
         struct stat stat_buf;
         int statresult, localerrno;
@@ -3079,12 +3073,12 @@ static int rapidhalib_process_firmware_upgrade_command(const char *buffer, int c
             sprintf(tmpstrbuf, "Upgrade scheduled for RapidHA device: %016" PRIX64 " using file: \"%s\"\n", addr, buffer+42);
           }
         }
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       }
     } else {
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016" PRIX64 " not found\n", addr);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     }
     return CMDLISTENER_NOERROR;
   }
@@ -3093,7 +3087,7 @@ static int rapidhalib_process_firmware_upgrade_command(const char *buffer, int c
 
 //Format: rapidha_cancel_firmware_upgrade <64-bit addr> <path_to_filename>
 static int rapidhalib_process_cancel_firmware_upgrade_command(const char *buffer, int clientsock) {
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=rapidhalib_getmoduledepifaceptr("commonserverlib", COMMONSERVERLIBINTERFACE_VER_1);
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=rapidhalib_getmoduledepifaceptr("cmdserverlib", CMDSERVERLIBINTERFACE_VER_1);
 
   if (strncmp(buffer, "rapidha_cancel_firmware_upgrade ", 32)==0 && strlen(buffer)>=48) {
     char tmpstrbuf[100];
@@ -3120,11 +3114,11 @@ static int rapidhalib_process_cancel_firmware_upgrade_command(const char *buffer
         rapidhalib_unlockrapidha();
         sprintf(tmpstrbuf, "RAPIDHA: Firmware upgrade for RapidHA device: %016" PRIX64 " has been cancelled\n", addr);
       }
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       rapidhalib_unlockrapidha();
       sprintf(tmpstrbuf, "RAPIDHA: NOT FOUND %016" PRIX64 "\n", addr);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     }
     return CMDLISTENER_NOERROR;
   }
