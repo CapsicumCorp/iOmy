@@ -137,7 +137,7 @@ if($bError===false) {
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"AddLink\", \"AddThing\", \"AddIO\" & \"AddComm\" \n\n";
+			$sErrMesg .= "eg. \n \"AddLink\", \"AddThing\", \"AddIO\", \"AddComm\", \"RuleJustTriggered\" & \"RuleTriggeredAt\" \n\n";
 		}
 		
 	} catch( Exception $e0102 ) {
@@ -146,7 +146,7 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"AddLink\", \"AddThing\", \"AddIO\" & \"AddComm\" \n\n";
+		$sErrMesg .= "eg. \n \"AddLink\", \"AddThing\", \"AddIO\", \"AddComm\", \"RuleJustTriggered\" & \"RuleTriggeredAt\" \n\n";
 		//sErrMesg .= e0102.message;
 	}
 	
@@ -629,7 +629,7 @@ if( $bError===false ) {
 						
 					} else {
 						$bError    = true;
-						$iErrCode  = 250+$aPremiseAddressTemp['ErrCode'];
+						$iErrCode  = 250;
 						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 						$sErrMesg .= "Problem looking up the Timezone information for the Rule!\n";
 						$sErrMesg .= $aPremiseAddressTemp['ErrMesg'];
