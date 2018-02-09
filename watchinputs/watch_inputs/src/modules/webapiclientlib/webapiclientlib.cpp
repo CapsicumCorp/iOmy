@@ -597,7 +597,7 @@ public:
 			hc.addHttpAuth(httpusername, httppassword);
 		}
 		hc.addHeader("Host", httpserver);
-		hc.addFormField("Version", "0.6");
+		hc.addFormField("Version", "0.4.11");
 		if (apiusername != "") {
 			std::ostringstream tmpstr;
 			tmpstr << "[\"" << apiusername << "\",\"" << apipassword << "\"]";
