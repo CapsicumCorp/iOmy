@@ -59,7 +59,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/configlib/configlib.h"
 #include "modules/timeruleslib/timeruleslib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/commonlib/commonlib.h"
 
 #if defined(_WIN64) || defined(_WIN32) || defined(__CYGWIN__)
@@ -120,10 +119,9 @@ static void *mainlib_MainThreadLoop(void *thread_val);
 
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
-#define COMMONSERVERLIB_DEPIDX 1
-#define CMDSERVERLIB_DEPIDX 2
-#define CONFIGLIB_DEPIDX 3
-#define TIMERULESLIB_DEPIDX 4
+#define CMDSERVERLIB_DEPIDX 1
+#define CONFIGLIB_DEPIDX 2
+#define TIMERULESLIB_DEPIDX 3
 
 static const mainlib_ifaceptrs_ver_1_t mainlib_ifaceptrs_ver_1={
   mainlib_loadsymbol,
@@ -147,12 +145,6 @@ static moduledep_ver_1_t mainlib_deps[]={
     NULL,
     DEBUGLIBINTERFACE_VER_1,
     1
-  },
-  {
-    "commonserverlib",
-    NULL,
-    COMMONSERVERLIBINTERFACE_VER_1,
-    0
   },
   {
     "cmdserverlib",
@@ -1339,33 +1331,33 @@ void Java_com_capsicumcorp_iomy_libraries_watchinputs_MainLib_jnicleanup( JNIEnv
   Returns: A CMDLISTENER definition depending on the result
 */
 static int mainlib_process_cmdserver_command(const char *buffer, int clientsock) {
-  const commonserverlib_ifaceptrs_ver_1_t * const commonserverlibifaceptr=mainlib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  const cmdserverlib_ifaceptrs_ver_1_t * const cmdserverlibifaceptr=mainlib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
   char tmpstrbuf[500];
   int i;
 
-  if (!commonserverlibifaceptr) {
+  if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
   if (strncmp(buffer, "shutdown", 8)==0) {
 		mainlib_setneedtoquit(1);
-		commonserverlibifaceptr->serverlib_netputs("Program shutdown has been scheduled\n", clientsock, NULL);
+		cmdserverlibifaceptr->cmdserverlib_netputs("Program shutdown has been scheduled\n", clientsock, NULL);
 		//TODO: Implement shutdown here
 	} else if (strncmp(buffer, "versioninfo", 11)==0) {
 #ifndef __ANDROID__
     sprintf(tmpstrbuf, "Watch Inputs %s\n", WATCH_INPUTS_VERSION);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
 #else
     sprintf(tmpstrbuf, "Watch Inputs %s\n", ANDROID_WATCH_INPUTS_VERSION);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     sprintf(tmpstrbuf, "  Version Code: %s\n", ANDROID_WATCH_INPUTS_VERSIONCODE);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
 #endif
     sprintf(tmpstrbuf, "Build Date: %s %s\n", __TIME__, __DATE__);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
   } else if (strncmp(buffer, "modulesinfo", 11)==0) {
     PTHREAD_LOCK(&mainlibmutex);
     sprintf(tmpstrbuf, "Number of modules loaded: %d\n", mainlib_nummodules);
-    commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     for (i=0; i<mainlib_nummodules; i++) {
       tmpstrbuf[0]=0;
       if (mainlib_modules[i].moduleinfoptr) {
@@ -1376,7 +1368,7 @@ static int mainlib_process_cmdserver_command(const char *buffer, int clientsock)
         }
       }
       if (tmpstrbuf[0]) {
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       }
     }
     PTHREAD_UNLOCK(&mainlibmutex);
