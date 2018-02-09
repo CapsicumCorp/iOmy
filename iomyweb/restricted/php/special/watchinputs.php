@@ -929,7 +929,7 @@ if($bError===false) {
 		//== 5.4 - MODE: Rules                                          ==//
 		//================================================================//
 		} else if( 
-			$sPostMode==="ListHubActiveRules" || $sPostMode==="UpdateRuleNextTS"   ||
+			$sPostMode==="ListAllActiveRules" || $sPostMode==="UpdateRuleNextTS"   ||
 			$sPostMode==="RuleJustTriggered"  || $sPostMode==="RuleTriggeredAt" 
 		) {
 			
