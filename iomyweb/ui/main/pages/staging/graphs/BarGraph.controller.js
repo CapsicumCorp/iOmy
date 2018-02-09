@@ -199,8 +199,8 @@ sap.ui.controller("pages.staging.graphs.BarGraph", {
                     iEnd = iUTS;
                 }
                 
-                console.log("Start: "+new Date(iStart * 1000));
-                console.log("End: "+new Date(iEnd * 1000));
+//                console.log("Start: "+dateTmp2);
+//                console.log("End: "+new Date(iEnd * 1000));
 
                 //-- Create the data entry. --//
                 mUTSData["period"+(i+1)] = {

@@ -185,21 +185,25 @@ sap.ui.controller("pages.staging.Device", {
         var oController = this;
         var oView       = this.getView();
         
-        oView.byId("DeviceList").destroyItems();
-        oView.byId("DeviceList").addItem(
-            new sap.m.ObjectListItem (oView.createId("loading"), {        
-                title: "Loading Devices...",
-                type: "Active",
-                attributes : [],
-            })
-        );
-        
-        iomy.common.RefreshCoreVariables({
-            onSuccess : function () {
-                oController.BuildDeviceListUI();
-                oController.RefreshAjaxDataForUI();
-            }
-        });
+        try {
+            oView.byId("DeviceList").destroyItems();
+            oView.byId("DeviceList").addItem(
+                new sap.m.ObjectListItem (oView.createId("loading"), {        
+                    title: "Loading Devices...",
+                    type: "Active",
+                    attributes : [],
+                })
+            );
+
+            iomy.common.RefreshCoreVariables({
+                onSuccess : function () {
+                    oController.BuildDeviceListUI();
+                    oController.RefreshAjaxDataForUI();
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to launch the device list loading ("+e.name+"): " + e.message);
+        }
     },
     
     BuildDeviceListUI : function () {
@@ -210,421 +214,429 @@ sap.ui.controller("pages.staging.Device", {
 //        var bEditing        = oController.bEditing;
         var sPageId         = "";
         
-        // Wipe the loading entry.
-        wList.destroyItems();
-        
-        // Fetch the list from the core variables.
-        oController.aaDeviceList = iomy.functions.createDeviceListData({
-            filter : {
-                roomID : oController.iLastRoomId,
-                premiseID : oController.iLastPremiseId
-            }
-        });
-        
-        //--------------------------------------------------------------------//
-        // Construct the Device List
-        //--------------------------------------------------------------------//
-        $.each(oController.aaDeviceList, function (sI, mTypeBlock) {
-            
-            bHasDevices = true;
-            
-            //----------------------------------------------------------------//
-            // Create the Group Header
-            //----------------------------------------------------------------//
-            wList.addItem(
-                new sap.m.GroupHeaderListItem ({
-                    title: mTypeBlock.Name
-                })
-            );
-        
-            //----------------------------------------------------------------//
-            // Create the items under that grouping
-            //----------------------------------------------------------------//
-            $.each(mTypeBlock.Devices, function (sJ, mDevice) {
-                var iState = iomy.common.ThingList["_"+mDevice.DeviceId];
-                
-                switch (mDevice.DeviceTypeId) {
-                    //--------------------------------------------------------//
-                    // Zigbee Smart Plug UI Entry
-                    //--------------------------------------------------------//
-                    case iomy.devices.zigbeesmartplug.ThingTypeId:
-                        
-                        wList.addItem(
-                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
-                                title: mDevice.DeviceName,
-                                type: "Active",
-                                number: "Loading...",
-                                numberUnit: "",
-                                attributes : [
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Toggle State",
-                                            press : function () {
-                                                oController.RunSwitch({
-                                                    "thingID" : mDevice.DeviceId,
-                                                    "switchWidget" : this,
-                                                    "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
-                                                });
-                                            }
-                                        })
-                                    }),
-                                    new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
-                                        text: "Status: " + (mDevice.DeviceStatus == 1 ? "On" : "Off")
-                                    }),
-                                    new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
-                                        text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
-                                    })
-                                ],
-                                press : function () {
-                                    if (oController.bEditing) {
-                                        sPageId = "pDeviceForm";
-                                    } else {
-                                        sPageId = "pTile";
-                                    }
-                                    
-                                    iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
-                                }
-                            })
-                        );
-                        break;
+        try {
+            // Wipe the loading entry.
+            wList.destroyItems();
 
-                    //--------------------------------------------------------//
-                    // Philips Hue UI Entry
-                    //--------------------------------------------------------//
-                    case iomy.devices.philipshue.ThingTypeId:
-                        
-                        wList.addItem(
-                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
-                                title: mDevice.DeviceName,
-                                type: "Active",
-                                number: "Loading...",
-                                numberUnit: "Current Colour",
-                                attributes : [
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Toggle State",
-                                            press : function () {
-                                                oController.RunSwitch({
-                                                    "thingID" : mDevice.DeviceId,
-                                                    "switchWidget" : this,
-                                                    "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
-                                                });
-                                            }
-                                        })
-                                    }),
-                                    new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
-                                        text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
-                                    }),
-                                    new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
-                                        text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
-                                    })
-                                ],
-                                press : function () {
-                                    if (oController.bEditing) {
-                                        sPageId = "pDeviceForm";
-                                    } else {
-                                        sPageId = "pRGBlight";
-                                    }
-                                    
-                                    iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
-                                }
-                            })
-                        );
-
-                        break;
-                        
-                    //--------------------------------------------------------//
-                    // CSR Mesh Light
-                    //--------------------------------------------------------//
-                    case iomy.devices.csrmesh.ThingTypeId:
-                        
-                        wList.addItem(
-                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
-                                title: mDevice.DeviceName,
-                                type: "Active",
-                                number: "Loading...",
-                                numberUnit: "Current Colour",
-                                attributes : [
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Toggle State",
-                                            press : function () {
-                                                oController.RunSwitch({
-                                                    "thingID" : mDevice.DeviceId,
-                                                    "switchWidget" : this,
-                                                    "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
-                                                });
-                                            }
-                                        })
-                                    }),
-                                    new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
-                                        text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
-                                    })
-                                ],
-                                press : function () {
-                                    if (oController.bEditing) {
-                                        sPageId = "pDeviceForm";
-                                    } else {
-                                        sPageId = "pRGBlight";
-                                    }
-                                    
-                                    iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
-                                }
-                            })
-                        );
-
-                        break;
-
-                    //--------------------------------------------------------//
-                    // Onvif Stream UI Entry
-                    //--------------------------------------------------------//
-                    case iomy.devices.onvif.ThingTypeId:
-                        
-                        wList.addItem(
-                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
-                                title: mDevice.DeviceName,
-                                type: "Active",
-                                number: "",
-                                numberUnit: "",//iomy.devices.getDeviceAddress(mDevice.DeviceId),
-                                attributes : [
-                                    new sap.m.ObjectAttribute ({
-                                        text: "link",
-                                        customContent : new sap.m.Link ({
-                                            text: "Take Screenshot",
-                                            press : function () {
-                                                iomy.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Thumbnail" } , false);
-                                                
-                                            }
-                                        })
-                                    }),
-                                    new sap.m.ObjectAttribute ({
-                                        text: "{/CameraTapInstructions}"
-                                    })
-                                ],
-                                
-                                press : function () {
-                                    
-                                    //----------------------------------------------------------//
-                                    // If were looking to edit a device, open the form,
-                                    // otherwise, open the stream popup
-                                    //----------------------------------------------------------//
-                                    if (oController.bEditing) {
-                                        iomy.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId } , false);
-                                        
-                                    } else {
-                                        try {
-                                            iomy.devices.onvif.getStreamURL({
-                                                ThingId : mDevice.DeviceId,
-
-                                                onSuccess : function(sUrl) {
-                                                    iomy.widgets.showOnvifStreamPopup({
-                                                        thingID         : mDevice.DeviceId,
-                                                        url             : sUrl
-                                                    });
-                                                },
-
-                                                onFail : function (response) {
-                                                    iomy.common.showError(response.responseText, "Couldn't load the stream");
-                                                }
-                                            });
-                                            
-                                            //iomy.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Player" } , false);
-                                            
-                                            
-                                        } catch (ex) {
-                                            iomy.common.showError(ex.message, "Couldn't load the stream");
-                                        }
-                                    }
-                                }
-                            })
-                        );
-
-                        break;
-
-                    //--------------------------------------------------------//
-                    // IP Webcam Stream UI Entry
-                    //--------------------------------------------------------//
-                    case iomy.devices.ipcamera.ThingTypeId:
-                        
-                        wList.addItem(
-                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
-                                title: mDevice.DeviceName,
-                                type: "Active",
-                                number: "",
-                                numberUnit: "",//iomy.devices.getDeviceAddress(mDevice.DeviceId),
-                                attributes : [
-                                    new sap.m.ObjectAttribute ({
-                                        text: "{/CameraTapInstructions}"
-                                    })
-//                                    new sap.m.ObjectAttribute ({
-//                                        text: "link",
-//                                        customContent : new sap.m.Link ({
-//                                            text: "Take Screenshot"
-//                                        })
-//                                    }),
-//                                    new sap.m.ObjectAttribute ({
-//                                        text: "link",
-//                                        customContent : new sap.m.Link ({
-//                                            text: "Record"
-//                                        })
-//                                    })
-                                ],
-                                press : function () {
-                                    if (oController.bEditing) {
-                                        sPageId = "pDeviceForm";
-                                    } else {
-                                        sPageId = "pMJPEG";
-                                    }
-                                    
-                                    iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
-                                }
-                            })
-                        );
-
-                        break;
-
-                    //--------------------------------------------------------//
-                    // Weather Feed UI Entry
-                    //--------------------------------------------------------//
-                    case iomy.devices.weatherfeed.ThingTypeId:
-                        
-                        wList.addItem(
-                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
-                                title: mDevice.DeviceName,
-                                type: "Active",
-                                number: "",
-                                numberUnit: "",
-                                attributes : [
-                                    new sap.m.ObjectAttribute (oView.createId("humidity"+mDevice.DeviceId), {
-                                        text: "Loading..."
-                                    }),
-                                    new sap.m.ObjectAttribute (oView.createId("outside"+mDevice.DeviceId), {
-                                        text: ""
-                                    })
-                                ],
-                                press : function () {
-                                    if (oController.bEditing) {
-                                        sPageId = "pDeviceForm";
-                                    } else {
-                                        sPageId = "pWeatherFeed";
-                                    }
-                                    
-                                    iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
-                                }
-                            })
-                        );
-
-                        break;
-
-                    //--------------------------------------------------------//
-                    // Motion Sensor UI Entry
-                    //--------------------------------------------------------//
-                    case iomy.devices.motionsensor.ThingTypeId:
-                        
-                        wList.addItem(
-                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
-                                title: mDevice.DeviceName,
-                                type: "Active",
-                                number: "Last Motion",
-                                numberUnit: "Loading...",
-                                attributes : [
-                                    new sap.m.ObjectAttribute ({
-                                        text: "{/MotionSensorInstructions}"
-                                    }),
-                                    new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
-                                        text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
-                                    })
-//                                    new sap.m.ObjectAttribute ({
-//                                        text: "link",
-//                                        customContent : new sap.m.Link ({
-//                                            text: "Enable Alarm"
-//                                        })
-//                                    }),
-//                                    new sap.m.ObjectAttribute ({
-//                                        text: "link",
-//                                        customContent : new sap.m.Link ({
-//                                            text: "Disable Alarm"
-//                                        })
-//                                    })
-                                ],
-                                press : function () {
-                                    if (oController.bEditing) {
-                                        sPageId = "pDeviceForm";
-                                    } else {
-                                        sPageId = "pMotionSensor";
-                                    }
-                                    
-                                    iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
-                                }
-                            })
-                        );
-
-                        break;
-                        
-                    //--------------------------------------------------------//
-                    // Temperature UI Entry
-                    //--------------------------------------------------------//
-                    case iomy.devices.temperature.ThingTypeId:
-                        
-                        wList.addItem(
-                            new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
-                                title: mDevice.DeviceName,
-                                type: "Active",
-                                number: "Loading...",
-                                numberUnit: "",
-                                attributes : [
-                                    new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
-                                        text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
-                                    })
-                                ],
-                                press : function () {
-                                    if (oController.bEditing) {
-                                        sPageId = "pDeviceForm";
-                                    } else {
-                                        sPageId = "pTile";
-                                    }
-                                    
-                                    iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
-                                }
-                            })
-                        );
-
-                        break;
-
-                    //--------------------------------------------------------//
-                    // Nothing that we have an entry for yet.
-                    //--------------------------------------------------------//
-                    default:
-                        break;
+            // Fetch the list from the core variables.
+            oController.aaDeviceList = iomy.functions.createDeviceListData({
+                filter : {
+                    roomID : oController.iLastRoomId,
+                    premiseID : oController.iLastPremiseId
                 }
             });
-            
-        });
-        
-        //--------------------------------------------------------------------//
-        // If there were no devices, give the option to add one.
-        //--------------------------------------------------------------------//
-        if (!bHasDevices) {
-            wList.addItem(
-                new sap.m.ObjectListItem ({        
-                    title: "No devices",
-                    type: "Active",
-                    attributes : [
-                        new sap.m.ObjectAttribute ({
-                            text: "Tap to add a device"
-                        })
-                    ],
-                    press : function () {
-                        iomy.common.NavigationChangePage( "pDeviceForm" , { 
-                            "RoomId"    : oController.iLastRoomId,
-                            "PremiseId" : oController.iLastPremiseId
-                        } , false);
+
+            //--------------------------------------------------------------------//
+            // Construct the Device List
+            //--------------------------------------------------------------------//
+            $.each(oController.aaDeviceList, function (sI, mTypeBlock) {
+
+                bHasDevices = true;
+
+                //----------------------------------------------------------------//
+                // Create the Group Header
+                //----------------------------------------------------------------//
+                wList.addItem(
+                    new sap.m.GroupHeaderListItem ({
+                        title: mTypeBlock.Name
+                    })
+                );
+
+                //----------------------------------------------------------------//
+                // Create the items under that grouping
+                //----------------------------------------------------------------//
+                $.each(mTypeBlock.Devices, function (sJ, mDevice) {
+                    //var iState = iomy.common.ThingList["_"+mDevice.DeviceId];
+
+                    switch (mDevice.DeviceTypeId) {
+                        //--------------------------------------------------------//
+                        // Zigbee Smart Plug UI Entry
+                        //--------------------------------------------------------//
+                        case iomy.devices.zigbeesmartplug.ThingTypeId:
+
+                            wList.addItem(
+                                new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                    title: mDevice.DeviceName,
+                                    type: "Active",
+                                    number: "Loading...",
+                                    numberUnit: "",
+                                    attributes : [
+                                        new sap.m.ObjectAttribute ({
+                                            text: "link",
+                                            customContent : new sap.m.Link ({
+                                                text: "Toggle State",
+                                                press : function () {
+                                                    oController.RunSwitch({
+                                                        "thingID" : mDevice.DeviceId,
+                                                        "switchWidget" : this,
+                                                        "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
+                                                    });
+                                                }
+                                            })
+                                        }),
+                                        new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
+                                            text: "Status: " + (mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                        }),
+                                        new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
+                                            text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
+                                        })
+                                    ],
+                                    press : function () {
+                                        if (oController.bEditing) {
+                                            sPageId = "pDeviceForm";
+                                        } else {
+                                            sPageId = "pTile";
+                                        }
+
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                    }
+                                })
+                            );
+                            break;
+
+                        //--------------------------------------------------------//
+                        // Philips Hue UI Entry
+                        //--------------------------------------------------------//
+                        case iomy.devices.philipshue.ThingTypeId:
+
+                            wList.addItem(
+                                new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                    title: mDevice.DeviceName,
+                                    type: "Active",
+                                    number: "Loading...",
+                                    numberUnit: "Current Colour",
+                                    attributes : [
+                                        new sap.m.ObjectAttribute ({
+                                            text: "link",
+                                            customContent : new sap.m.Link ({
+                                                text: "Toggle State",
+                                                press : function () {
+                                                    oController.RunSwitch({
+                                                        "thingID" : mDevice.DeviceId,
+                                                        "switchWidget" : this,
+                                                        "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
+                                                    });
+                                                }
+                                            })
+                                        }),
+                                        new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
+                                            text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                        }),
+                                        new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
+                                            text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
+                                        })
+                                    ],
+                                    press : function () {
+                                        if (oController.bEditing) {
+                                            sPageId = "pDeviceForm";
+                                        } else {
+                                            sPageId = "pRGBlight";
+                                        }
+
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                    }
+                                })
+                            );
+
+                            break;
+
+                        //--------------------------------------------------------//
+                        // CSR Mesh Light
+                        //--------------------------------------------------------//
+                        case iomy.devices.csrmesh.ThingTypeId:
+
+                            wList.addItem(
+                                new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                    title: mDevice.DeviceName,
+                                    type: "Active",
+                                    number: "Loading...",
+                                    numberUnit: "Current Colour",
+                                    attributes : [
+                                        new sap.m.ObjectAttribute ({
+                                            text: "link",
+                                            customContent : new sap.m.Link ({
+                                                text: "Toggle State",
+                                                press : function () {
+                                                    oController.RunSwitch({
+                                                        "thingID" : mDevice.DeviceId,
+                                                        "switchWidget" : this,
+                                                        "statusAttribute" : oView.byId("deviceStatus"+mDevice.DeviceId)
+                                                    });
+                                                }
+                                            })
+                                        }),
+                                        new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
+                                            text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                        })
+                                    ],
+                                    press : function () {
+                                        if (oController.bEditing) {
+                                            sPageId = "pDeviceForm";
+                                        } else {
+                                            sPageId = "pRGBlight";
+                                        }
+
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                    }
+                                })
+                            );
+
+                            break;
+
+                        //--------------------------------------------------------//
+                        // Onvif Stream UI Entry
+                        //--------------------------------------------------------//
+                        case iomy.devices.onvif.ThingTypeId:
+
+                            wList.addItem(
+                                new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                    title: mDevice.DeviceName,
+                                    type: "Active",
+                                    number: "",
+                                    numberUnit: "",//iomy.devices.getDeviceAddress(mDevice.DeviceId),
+                                    attributes : [
+                                        new sap.m.ObjectAttribute ({
+                                            text: "link",
+                                            customContent : new sap.m.Link ({
+                                                text: "Take Screenshot",
+                                                press : function () {
+                                                    iomy.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Thumbnail" } , false);
+
+                                                }
+                                            })
+                                        }),
+                                        new sap.m.ObjectAttribute ({
+                                            text: "{/CameraTapInstructions}"
+                                        })
+                                    ],
+
+                                    press : function () {
+
+                                        //----------------------------------------------------------//
+                                        // If were looking to edit a device, open the form,
+                                        // otherwise, open the stream popup
+                                        //----------------------------------------------------------//
+                                        if (oController.bEditing) {
+                                            iomy.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId } , false);
+
+                                        } else {
+                                            try {
+                                                iomy.devices.onvif.getStreamURL({
+                                                    ThingId : mDevice.DeviceId,
+
+                                                    onSuccess : function(sUrl) {
+                                                        iomy.widgets.showOnvifStreamPopup({
+                                                            thingID         : mDevice.DeviceId,
+                                                            url             : sUrl
+                                                        });
+                                                    },
+
+                                                    onFail : function (response) {
+                                                        iomy.common.showError(response.responseText, "Couldn't load the stream");
+                                                    }
+                                                });
+
+                                                //iomy.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Player" } , false);
+
+
+                                            } catch (ex) {
+                                                iomy.common.showError(ex.message, "Couldn't load the stream");
+                                            }
+                                        }
+                                    }
+                                })
+                            );
+
+                            break;
+
+                        //--------------------------------------------------------//
+                        // IP Webcam Stream UI Entry
+                        //--------------------------------------------------------//
+                        case iomy.devices.ipcamera.ThingTypeId:
+
+                            wList.addItem(
+                                new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                    title: mDevice.DeviceName,
+                                    type: "Active",
+                                    number: "",
+                                    numberUnit: "",//iomy.devices.getDeviceAddress(mDevice.DeviceId),
+                                    attributes : [
+                                        new sap.m.ObjectAttribute ({
+                                            text: "{/CameraTapInstructions}"
+                                        })
+    //                                    new sap.m.ObjectAttribute ({
+    //                                        text: "link",
+    //                                        customContent : new sap.m.Link ({
+    //                                            text: "Take Screenshot"
+    //                                        })
+    //                                    }),
+    //                                    new sap.m.ObjectAttribute ({
+    //                                        text: "link",
+    //                                        customContent : new sap.m.Link ({
+    //                                            text: "Record"
+    //                                        })
+    //                                    })
+                                    ],
+                                    press : function () {
+                                        if (oController.bEditing) {
+                                            sPageId = "pDeviceForm";
+                                        } else {
+                                            sPageId = "pMJPEG";
+                                        }
+
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                    }
+                                })
+                            );
+
+                            break;
+
+                        //--------------------------------------------------------//
+                        // Weather Feed UI Entry
+                        //--------------------------------------------------------//
+                        case iomy.devices.weatherfeed.ThingTypeId:
+
+                            wList.addItem(
+                                new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                    title: mDevice.DeviceName,
+                                    type: "Active",
+                                    number: "",
+                                    numberUnit: "",
+                                    attributes : [
+                                        new sap.m.ObjectAttribute (oView.createId("humidity"+mDevice.DeviceId), {
+                                            text: "Loading..."
+                                        }),
+                                        new sap.m.ObjectAttribute (oView.createId("outside"+mDevice.DeviceId), {
+                                            text: ""
+                                        })
+                                    ],
+                                    press : function () {
+                                        if (oController.bEditing) {
+                                            sPageId = "pDeviceForm";
+                                        } else {
+                                            sPageId = "pWeatherFeed";
+                                        }
+
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
+                                    }
+                                })
+                            );
+
+                            break;
+
+                        //--------------------------------------------------------//
+                        // Motion Sensor UI Entry
+                        //--------------------------------------------------------//
+                        case iomy.devices.motionsensor.ThingTypeId:
+
+                            wList.addItem(
+                                new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                    title: mDevice.DeviceName,
+                                    type: "Active",
+                                    number: "Last Motion",
+                                    numberUnit: "Loading...",
+                                    attributes : [
+                                        new sap.m.ObjectAttribute ({
+                                            text: "{/MotionSensorInstructions}"
+                                        }),
+                                        new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
+                                            text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
+                                        })
+    //                                    new sap.m.ObjectAttribute ({
+    //                                        text: "link",
+    //                                        customContent : new sap.m.Link ({
+    //                                            text: "Enable Alarm"
+    //                                        })
+    //                                    }),
+    //                                    new sap.m.ObjectAttribute ({
+    //                                        text: "link",
+    //                                        customContent : new sap.m.Link ({
+    //                                            text: "Disable Alarm"
+    //                                        })
+    //                                    })
+                                    ],
+                                    press : function () {
+                                        if (oController.bEditing) {
+                                            sPageId = "pDeviceForm";
+                                        } else {
+                                            sPageId = "pMotionSensor";
+                                        }
+
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
+                                    }
+                                })
+                            );
+
+                            break;
+
+                        //--------------------------------------------------------//
+                        // Temperature UI Entry
+                        //--------------------------------------------------------//
+                        case iomy.devices.temperature.ThingTypeId:
+
+                            wList.addItem(
+                                new sap.m.ObjectListItem (oView.createId("entry"+mDevice.DeviceId), {        
+                                    title: mDevice.DeviceName,
+                                    type: "Active",
+                                    number: "Loading...",
+                                    numberUnit: "",
+                                    attributes : [
+                                        new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
+                                            text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
+                                        })
+                                    ],
+                                    press : function () {
+                                        if (oController.bEditing) {
+                                            sPageId = "pDeviceForm";
+                                        } else {
+                                            sPageId = "pTile";
+                                        }
+
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
+                                    }
+                                })
+                            );
+
+                            break;
+
+                        //--------------------------------------------------------//
+                        // Nothing that we have an entry for yet.
+                        //--------------------------------------------------------//
+                        default:
+                            break;
                     }
-                })
-            );
+                });
+
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to draw the device list entries ("+e.name+"): " + e.message);
+        }
+        
+        try {
+            //--------------------------------------------------------------------//
+            // If there were no devices, give the option to add one.
+            //--------------------------------------------------------------------//
+            if (!bHasDevices) {
+                wList.addItem(
+                    new sap.m.ObjectListItem ({        
+                        title: "No devices",
+                        type: "Active",
+                        attributes : [
+                            new sap.m.ObjectAttribute ({
+                                text: "Tap to add a device"
+                            })
+                        ],
+                        press : function () {
+                            iomy.common.NavigationChangePage( "pDeviceForm" , { 
+                                "RoomId"    : oController.iLastRoomId,
+                                "PremiseId" : oController.iLastPremiseId
+                            } , false);
+                        }
+                    })
+                );
+            }
+        } catch (e) {
+            $.sap.log.error("Failed to draw the entry to add a device ("+e.name+"): " + e.message);
         }
     },
     
@@ -640,45 +652,52 @@ sap.ui.controller("pages.staging.Device", {
      * @param {type} mSettings
      */
     RunSwitch : function (mSettings) {
+        var sThingIDMissing         = "Thing ID must be given.";
+        var sSwitchWidgetMissing    = "Switch widget must be given.";
+        var sSwitchStatusMissing    = "Switch status attribute must be given.";
+        var aErrors                 = [];
+        
         var mThingIdInfo;
         var oCallingWidget;
         var oStatusAttribute;
         var iThingId;
-    
-        //--------------------------------------------------------------------//
-        // Fetch the Thing ID, switch button, and the status attribute widget.
-        //--------------------------------------------------------------------//
-        if (mSettings !== undefined) {
-            if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
-                mThingIdInfo = iomy.validation.isThingIDValid(mSettings.thingID);
-                
-                if (!mThingIdInfo.bIsValid) {
-                    throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
-                } else {
-                    iThingId = mSettings.thingID;
-                }
-                
-            } else {
-                throw new MissingArgumentException("Thing ID must be given.");
-            }
-            
-            if (mSettings.switchWidget !== undefined && mSettings.switchWidget !== null) {
-                oCallingWidget = mSettings.switchWidget;
-            } else {
-                throw new MissingArgumentException("Switch status attribute must be given.");
-            }
-            
-            if (mSettings.statusAttribute !== undefined && mSettings.statusAttribute !== null) {
-                oStatusAttribute = mSettings.statusAttribute;
-            } else {
-                throw new MissingArgumentException("Switch status attribute must be given.");
-            }
-            
-        } else {
-            throw new MissingSettingsMapException("Thing ID must be given.\nSwitch status attribute must be given.");
-        }
         
         try {
+            //--------------------------------------------------------------------//
+            // Fetch the Thing ID, switch button, and the status attribute widget.
+            //--------------------------------------------------------------------//
+            if (mSettings !== undefined) {
+                if (mSettings.thingID !== undefined && mSettings.thingID !== null) {
+                    mThingIdInfo = iomy.validation.isThingIDValid(mSettings.thingID);
+
+                    if (!mThingIdInfo.bIsValid) {
+                        throw new IllegalArgumentException(mThingIdInfo.aErrorMessages.join("\n"));
+                    } else {
+                        iThingId = mSettings.thingID;
+                    }
+
+                } else {
+                    throw new MissingArgumentException("Thing ID must be given.");
+                }
+
+                if (mSettings.switchWidget !== undefined && mSettings.switchWidget !== null) {
+                    oCallingWidget = mSettings.switchWidget;
+                } else {
+                    throw new MissingArgumentException("Switch widget must be given.");
+                }
+
+                if (mSettings.statusAttribute !== undefined && mSettings.statusAttribute !== null) {
+                    oStatusAttribute = mSettings.statusAttribute;
+                } else {
+                    throw new MissingArgumentException("Switch status attribute must be given.");
+                }
+
+            } else {
+                aErrors = [ sThingIDMissing, sSwitchWidgetMissing, sSwitchStatusMissing ];
+                
+                throw new MissingSettingsMapException(aErrors.join("\n\n"));
+            }
+            
             //--------------------------------------------------------------------//
             // Disable the calling widget and toggle the on/off status.
             //--------------------------------------------------------------------//
@@ -710,8 +729,13 @@ sap.ui.controller("pages.staging.Device", {
                 }
             });
         } catch (e) {
-            jQuery.sap.log.error("Error attempting to run a switch (Device ID "+iThingId+") ("+e.name+"): "+e1.message);
-            oCallingWidget.setEnabled(true);
+            jQuery.sap.log.error("Error attempting to run a switch (Device ID "+iThingId+") ("+e.name+"): "+e.message);
+            
+            iomy.common.showError(e.message, "Error",
+                function () {
+                    oCallingWidget.setEnabled(true);
+                }
+            );
         }
     },
     
@@ -1040,79 +1064,88 @@ sap.ui.controller("pages.staging.Device", {
         //--------------------------------------------------------//
         //-- 4.0 - Check if Ajax Request should be run            --//
         //--------------------------------------------------------//
-        iomy.apiphp.AjaxRequest({
-            "url": iomy.apiphp.APILocation("mostrecent"),
-            "data": {
-                "Mode":     "MostRecentValue",
-                "Id":       iIOId
-            },
-            "onSuccess": function ( sResponseType, aData ) {
-                try {
-                    if( aData!==undefined && aData!==null) {
-                        if(aData.UTS!==undefined && aData.UTS!==null) {
-                            //-- If the UTS is less than 10 minutes from the endstamp --//
-//                            if( iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData.UTS <= ( iUTS_End - iSampleRateLimit ) ) ) {
-//                                //-- Flag that the IO is offline --//
-//                                oController.byId( sIOLabel ).setText("IO Offline");
-//                                
-//                            } else {
-                                //-- Display the most recent value --//
-                                var oUI5Object = oController.byId( sIOLabel );
-                                if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
-                                    
-                                    //-- IF the Uom is present --//
-                                    if( typeof aData.UomName!=="undefined" && aData.UomName!==null && aData.UomName!==false && aData.UomName!=="") {
-                                        //----------------------------------------//
-                                        //-- Round to 3 decimal places          --//
-                                        //----------------------------------------//
-                                        var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
-    
-                                        //----------------------------------------//
-                                        //-- Show the Results                   --//
-                                        //----------------------------------------//
-                                        oUI5Object.setNumber( fCalcedValue );
-                                        oUI5Object.setNumberUnit( aData.UomName );
-                                        
-                                    } else {
-                                        //-- Set it to an empty text field --//
-                                        oUI5Object.setNumber("");
-                                        oUI5Object.setNumberUnit("");
-                                        
-                                    }
+        try {
+            iomy.apiphp.AjaxRequest({
+                "url": iomy.apiphp.APILocation("mostrecent"),
+                "data": {
+                    "Mode":     "MostRecentValue",
+                    "Id":       iIOId
+                },
+                "onSuccess": function ( sResponseType, aData ) {
+                    try {
+                        if( aData!==undefined && aData!==null) {
+                            if(aData.UTS!==undefined && aData.UTS!==null) {
+                                //-- If the UTS is less than 10 minutes from the endstamp --//
+    //                            if( iSampleRateLimit !== null && iSampleRateLimit>=1 && ( aData.UTS <= ( iUTS_End - iSampleRateLimit ) ) ) {
+    //                                //-- Flag that the IO is offline --//
+    //                                oController.byId( sIOLabel ).setText("IO Offline");
+    //                                
+    //                            } else {
+                                    //-- Display the most recent value --//
+                                    var oUI5Object = oController.byId( sIOLabel );
+                                    if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
 
-                                } else {
-                                    console.log("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
-                                }
-//                            }
+                                        //-- IF the Uom is present --//
+                                        if( typeof aData.UomName!=="undefined" && aData.UomName!==null && aData.UomName!==false && aData.UomName!=="") {
+                                            //----------------------------------------//
+                                            //-- Round to 3 decimal places          --//
+                                            //----------------------------------------//
+                                            var fCalcedValue = ( Math.round( aData.Value * 1000 ) ) / 1000;
+
+                                            //----------------------------------------//
+                                            //-- Show the Results                   --//
+                                            //----------------------------------------//
+                                            oUI5Object.setNumber( fCalcedValue );
+                                            oUI5Object.setNumberUnit( aData.UomName );
+
+                                        } else {
+                                            //-- Set it to an empty text field --//
+                                            oUI5Object.setNumber("");
+                                            oUI5Object.setNumberUnit("");
+
+                                        }
+
+                                    } else {
+                                        $.sap.log.error("Critical Error: PHP API (Most Recent) OnSuccess can't find "+sIOLabel);
+                                    }
+    //                            }
+                            } else {
+                                oController.byId( sIOLabel ).setText("IO Offline");
+                            }
                         } else {
                             oController.byId( sIOLabel ).setText("IO Offline");
                         }
-                    } else {
-                        oController.byId( sIOLabel ).setText("IO Offline");
+
+                    } catch( e5678) {
+                        $.sap.log.error( e5678.message );
                     }
-                    
-                } catch( e5678) {
-                    console.log( e5678.message );
+
+                    //-- Update the Last Ajax Request Date --//
+                    oController.dLastAjaxUpdate    = new Date();
+
+                    //-- Recursively check for more Tasks --//
+                    oController.RecursiveLoadAjaxData();
+                },
+                "onFail" : function (response) {
+                    iomy.common.showMessage({
+                        text : "There was an error retriving the value of IO "+iIOId,
+                        view : oController.getView()
+                    });
+                    // Add to the IO Error count
+                    oController.iIOErrorCount++;
+
+                    //-- Recursively check for more Tasks --//
+                    oController.RecursiveLoadAjaxData();
                 }
-                
-                //-- Update the Last Ajax Request Date --//
-                oController.dLastAjaxUpdate    = new Date();
-                
-                //-- Recursively check for more Tasks --//
-                oController.RecursiveLoadAjaxData();
-            },
-            "onFail" : function (response) {
-                iomy.common.showMessage({
-                    text : "There was an error retriving the value of IO "+iIOId,
-                    view : oController.getView()
-                });
-                // Add to the IO Error count
-                oController.iIOErrorCount++;
-                
-                //-- Recursively check for more Tasks --//
-                oController.RecursiveLoadAjaxData();
-            }
-        });
+            });
+        } catch (e) {
+            $.sap.log.error("Error looking up the most recent value ("+e.name+"): " + e.message);
+            
+            oController.dLastAjaxUpdate    = Date();
+            
+            //-- Recursively check for more Tasks --//
+            oController.RecursiveLoadAjaxData();
+        }
     
     },
     
@@ -1146,105 +1179,128 @@ sap.ui.controller("pages.staging.Device", {
         //--------------------------------------------------------//
         //-- 3.0 - Prepare for Ajax Request                        --//
         //--------------------------------------------------------//
-        iUTS_Start              = iomy.common.GetStartOfCurrentPeriod();
-        iUTS_End                = iomy.common.GetEndOfCurrentPeriod();
+        try {
+            iUTS_Start              = iomy.common.GetStartOfCurrentPeriod();
+            iUTS_End                = iomy.common.GetEndOfCurrentPeriod();
+            
+        } catch (e) {
+            $.sap.log.error("Failed to get the UTS times required ("+e.name+"): " + e.message);
+        }
         
         //--------------------------------------------------------//
         //-- 4.0 - Check if Ajax Request should be run            --//
         //--------------------------------------------------------//
         
-        //----------------------------//
-        //-- 4.1 - Maximum Value    --//
-        //----------------------------//
-        iomy.apiphp.AjaxRequest({
-            "url": iomy.apiphp.APILocation("aggregation"),
-            "data": {
-                "Id":        iIOId,
-                "Mode":        "Max",
-                "StartUTS":    iUTS_Start,
-                "EndUTS":    iUTS_End
-            },
-            "onSuccess": function ( sResponseType, aMaxData ) {
-                //----------------------------//
-                //-- 4.2 - Minimum Value    --//
-                //----------------------------//
-                iomy.apiphp.AjaxRequest({
-                    "url": iomy.apiphp.APILocation("aggregation"),
-                    "data": {
-                        "Id":        iIOId,
-                        "Mode":        "Min",
-                        "StartUTS":    iUTS_Start,
-                        "EndUTS":    iUTS_End
-                    },
-                    "onSuccess": function ( sResponseType, aMinData ) {
-                        //--------------------------------------------------------------------//
-                        //-- STEP 3: Minimum Value                                            --//
-                        //-- Make a guess at the kWh (minus Minimum from Maximum value)        --//
-                        //--------------------------------------------------------------------//
-                        
-                        if( aMaxData.Value!==undefined && aMaxData.Value!==null ) {
-                            if( aMinData.Value!==undefined && aMinData.Value!==null ) {
-                                
-                                var iValue        = ( Math.round( (aMaxData.Value - aMinData.Value) * 1000) ) / 1000;
-                                var sUoM        = aMaxData.UOM_NAME;
-                                
-                                var oUI5Object = oController.byId( sIOLabel );
-                                if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
-                                    if(aMaxData.UOM_NAME!==undefined && aMaxData.UOM_NAME!==null ) {
-                                        
-                                        oUI5Object.setNumber( iValue );
-                                        oUI5Object.setNumberUnit( sUoM );
-                                    } else {
-                                        oUI5Object.setNumber( iValue );
-                                        oUI5Object.setNumberUnit( sIOUoMName );
-                                    }
-                                } else {
-                                    console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel);
-                                }
-                                
-                                
-                            } else {
-                                //-- TODO: Write a better error message --//
-                                oController.byId( sIOLabel ).setText("IO Offline");
-                            }
-                        } else {
-                            //-- TODO: Write a better error message --//
-                            oController.byId( sIOLabel ).setText("IO Offline");
-                        }
+        try {
+            //----------------------------//
+            //-- 4.1 - Maximum Value    --//
+            //----------------------------//
+            iomy.apiphp.AjaxRequest({
+                "url": iomy.apiphp.APILocation("aggregation"),
+                "data": {
+                    "Id":        iIOId,
+                    "Mode":        "Max",
+                    "StartUTS":    iUTS_Start,
+                    "EndUTS":    iUTS_End
+                },
+                "onSuccess": function ( sResponseType, aMaxData ) {
+                    try {
+                        //----------------------------//
+                        //-- 4.2 - Minimum Value    --//
+                        //----------------------------//
+                        iomy.apiphp.AjaxRequest({
+                            "url": iomy.apiphp.APILocation("aggregation"),
+                            "data": {
+                                "Id":        iIOId,
+                                "Mode":        "Min",
+                                "StartUTS":    iUTS_Start,
+                                "EndUTS":    iUTS_End
+                            },
+                            "onSuccess": function ( sResponseType, aMinData ) {
+                                //--------------------------------------------------------------------//
+                                //-- STEP 3: Minimum Value                                            --//
+                                //-- Make a guess at the kWh (minus Minimum from Maximum value)        --//
+                                //--------------------------------------------------------------------//
 
-                        
-                        //-- Update the Last Ajax Request Date --//
-                        //me.aLastAjaxUpdatePerRoom["_"+me.roomID]    = Date();
-                        oController.dLastAjaxUpdate    = Date();
-                        
-                        //-- Recursively check for more Tasks --//
-                        oController.RecursiveLoadAjaxData();
-                    },
-                    "onFail": function (response) {
-                        oController.byId( sIOLabel ).setText("IO Offline");
-                        
-                        iomy.common.showMessage({
-                            text : "There was an error retriving the Totaled value",
-                            view : oController.getView()
+                                try {
+                                    if( aMaxData.Value!==undefined && aMaxData.Value!==null ) {
+                                        if( aMinData.Value!==undefined && aMinData.Value!==null ) {
+
+                                            var iValue        = ( Math.round( (aMaxData.Value - aMinData.Value) * 1000) ) / 1000;
+                                            var sUoM        = aMaxData.UOM_NAME;
+
+                                            var oUI5Object = oController.byId( sIOLabel );
+                                            if( oUI5Object!==undefined && oUI5Object!==null && oUI5Object!==false ) {
+                                                if(aMaxData.UOM_NAME!==undefined && aMaxData.UOM_NAME!==null ) {
+
+                                                    oUI5Object.setNumber( iValue );
+                                                    oUI5Object.setNumberUnit( sUoM );
+                                                    
+                                                } else {
+                                                    oUI5Object.setNumber( iValue );
+                                                    oUI5Object.setNumberUnit( sIOUoMName );
+                                                }
+                                            } else {
+                                                console.log("Critical Error: Odata OnSuccess can't find "+sIOLabel);
+                                            }
+
+
+                                        } else {
+                                            //-- TODO: Write a better error message --//
+                                            oController.byId( sIOLabel ).setText("IO Offline");
+                                        }
+                                    } else {
+                                        //-- TODO: Write a better error message --//
+                                        oController.byId( sIOLabel ).setText("IO Offline");
+                                    }
+                                } catch (e) {
+                                    $.sap.log.error("Error processing the totalled data ("+e.name+"): " + e.message);
+                                }
+
+
+                                //-- Update the Last Ajax Request Date --//
+                                //me.aLastAjaxUpdatePerRoom["_"+me.roomID]    = Date();
+                                oController.dLastAjaxUpdate    = Date();
+
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            },
+                            "onFail": function (response) {
+                                oController.byId( sIOLabel ).setText("IO Offline");
+
+                                $.sap.log.error("There was an error retrieving the Totalled value: " + response.responseText);
+
+                                //-- Update the Last Ajax Request Date --//
+                                //me.aLastAjaxUpdatePerRoom["_"+me.roomID]    = Date();
+                                oController.dLastAjaxUpdate    = Date();
+
+                                //-- Recursively check for more Tasks --//
+                                oController.RecursiveLoadAjaxData();
+                            }
                         });
                         
-                        //-- Update the Last Ajax Request Date --//
-                        //me.aLastAjaxUpdatePerRoom["_"+me.roomID]    = Date();
-                        oController.dLastAjaxUpdate    = Date();
-                        
-                        //-- Recursively check for more Tasks --//
-                        oController.RecursiveLoadAjaxData();
+                    } catch (e) {
+                        $.sap.log.error("Error running the min aggregation API ("+e.name+"): " + e.message);
                     }
-                });
-                
-            },
-            "onFail": function (response) {
-                iomy.common.showMessage({
-                    text : "There was an error retriving the Totaled value",
-                    view : oController.getView()
-                });
-            }
-        });
+
+                },
+                "onFail": function (response) {
+                    $.sap.log.error("There was an error retrieving the Totalled value: " + response.responseText);
+                    
+                    oController.dLastAjaxUpdate    = Date();
+                    
+                    //-- Recursively check for more Tasks --//
+                    oController.RecursiveLoadAjaxData();
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Error running the max aggregation API ("+e.name+"): " + e.message);
+            
+            oController.dLastAjaxUpdate    = Date();
+            
+            //-- Recursively check for more Tasks --//
+            oController.RecursiveLoadAjaxData();
+        }
     }
     
 });

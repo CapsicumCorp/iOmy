@@ -25,7 +25,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("pages.staging.Development.DBIndex", {
     aFormFragments  : {},
     
-    //bEditing    : false,
     bIndexingOn         : false,
     bControlsEnabled    : false,
     bLoading            : false,
@@ -97,6 +96,9 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
     CheckDBIndexing : function () {
         var oController     = this;
         
+        //--------------------------------------------------------------------//
+        // Attempt to find out if any data tables are indexed.
+        //--------------------------------------------------------------------//
         try {
             oController.bLoading = true;
             oController.ToggleControls(false);
