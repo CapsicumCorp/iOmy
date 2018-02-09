@@ -374,7 +374,7 @@ if( $bError===false ) {
 				if( $sPostMode==="AddRule" || $sPostMode==="EditRule" ) {
 					try {
 						if( isset( $aPostData['RuleTypeId'] ) ) {
-							$iPostRuleTypeId = $aPostData['RuleTypeId'];
+							$iPostRuleTypeId = intval( $aPostData['RuleTypeId'] );
 							
 							//------------------------------------//
 							//-- Perform validation             --//
@@ -724,6 +724,7 @@ if( $bError===false ) {
 								$iErrCode  = 274;
 								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 								$sErrMesg .= "Error: Problem occurred when parsing existing rules!\n";
+								break;
 							}
 						}	//-- ENDFOREACH Database Rule --//
 					}

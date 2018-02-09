@@ -926,7 +926,7 @@ if($bError===false) {
 			
 			
 		//================================================================//
-		//== 5.4 - MODE: Rules                                          ==//
+		//== 5.5 - MODE: Rules                                          ==//
 		//================================================================//
 		} else if( 
 			$sPostMode==="ListAllActiveRules" || $sPostMode==="UpdateRuleNextTS"   ||
@@ -934,13 +934,13 @@ if($bError===false) {
 		) {
 			
 			//----------------------------------------------------//
-			//-- 5.1.A - ELSEIF Active Only Rules               --//
+			//-- 5.5.A - ELSEIF Active Only Rules               --//
 			//----------------------------------------------------//
 			if( $sPostMode==="ListAllActiveRules" ) {
 				$aResult = GetAllRules( true, true );
 				
 			//----------------------------------------------------//
-			//-- 5.1.B - ELSEIF UpdateRuleNextTS                --//
+			//-- 5.5.B - ELSEIF UpdateRuleNextTS                --//
 			//----------------------------------------------------//
 			} else if( $sPostMode==="UpdateRuleNextTS" ) {
 				$aTempFunctionResult4 = RuleNextRunUpdate( $iPostId, $iNextRun );
@@ -957,11 +957,11 @@ if($bError===false) {
 				
 				
 			//----------------------------------------------------//
-			//-- 5.1.C - ELSEIF Rule Just Trigged               --//
+			//-- 5.5.C - ELSEIF Rule Just Trigged               --//
 			//----------------------------------------------------//
 			} else if( $sPostMode==="RuleJustTriggered" || $sPostMode==="RuleTriggeredAt" ) {
 				//--------------------------------------------------------//
-				//-- 5.7.1 - Prepare                                    --//
+				//-- 5.5.C.1 - Prepare                                  --//
 				//--------------------------------------------------------//
 				
 				//------------------------------------//
@@ -992,7 +992,7 @@ if($bError===false) {
 				}
 				
 				//--------------------------------------------------------//
-				//-- 5.7.2 - Calculate next run event time              --//
+				//-- 5.5.C.2 - Calculate next run event time            --//
 				//--------------------------------------------------------//
 				if( $bError===false ) {
 					//------------------------------------------------//
