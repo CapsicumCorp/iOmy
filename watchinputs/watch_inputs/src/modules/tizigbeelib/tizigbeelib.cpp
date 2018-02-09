@@ -69,7 +69,6 @@ Baud rate seems to be ignored on the TI Z-Stack firmware as it uses cdc_acm usb 
 #endif
 #include "moduleinterface.h"
 #include "tizigbeelibpriv.hpp"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/serialportlib/serialportlib.h"
@@ -332,12 +331,6 @@ static moduledep_ver_1_t gdeps[]={
     nullptr,
     SERIALPORTLIBINTERFACE_VER_1,
     1
-  },
-  {
-    "commonserverlib",
-    nullptr,
-    COMMONSERVERLIBINTERFACE_VER_1,
-    0
   },
   {
     "cmdserverlib",
@@ -2628,13 +2621,13 @@ static int isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx, co
   Returns: A CMDLISTENER definition depending on the result
 */
 static int processcommand(const char *buffer, int clientsock) {
-  const commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=reinterpret_cast<const commonserverlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("commonserverlib", DEBUGLIBINTERFACE_VER_1));
+  const cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=reinterpret_cast<const cmdserverlib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("cmdserverlib", CMDSERVERLIBINTERFACE_VER_1));
   char tmpstrbuf[100];
   int i, len, found;
   uint64_t addr;
   long tizigbeelocked=0;
 
-  if (!commonserverlibifaceptr) {
+  if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
   MOREDEBUG_ENTERINGFUNC();
@@ -2654,7 +2647,7 @@ static int processcommand(const char *buffer, int clientsock) {
 
       unlocktizigbee();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       unlocktizigbee();
       sprintf(tmpstrbuf, "TIZIGBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2673,7 +2666,7 @@ static int processcommand(const char *buffer, int clientsock) {
 
       unlocktizigbee();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       unlocktizigbee();
       sprintf(tmpstrbuf, "TIZIGBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2688,7 +2681,7 @@ static int processcommand(const char *buffer, int clientsock) {
       //tizigbee_leave_zigbee_network(gtizigbeedevices[found]);
       unlocktizigbee();
       sprintf(tmpstrbuf, "OKAY\n");
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
     } else {
       unlocktizigbee();
       sprintf(tmpstrbuf, "TIZIGBEE: NOT FOUND %016llX\n", (unsigned long long) addr);
@@ -2745,23 +2738,23 @@ static int processcommand(const char *buffer, int clientsock) {
           break;
       }
       sprintf(tmpstrbuf, "TIZIGBEE ADDRESS: %016" PRIX64 " : %04" PRIX16 "\n", addr, netaddr);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       if (needtoremove) {
         sprintf(tmpstrbuf, "  Scheduled to be removed\n");
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       }
       sprintf(tmpstrbuf, "  Firmware Version=%" PRId8 ".%" PRId8 ", HWRev=%" PRId8 "\n", firmmaj, firmmin, hwrev);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
-      commonserverlibifaceptr->serverlib_netputs("  Device Type=", clientsock, NULL);
-      commonserverlibifaceptr->serverlib_netputs(get_device_type_string(device_type), clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("  Device Type=", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(get_device_type_string(device_type), clientsock, NULL);
       sprintf(tmpstrbuf, "\n  Startup Status: %s", startup_statusstr);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "\n  Channel=%02" PRIX8 "\n", channel);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Pan ID=%04" PRIX16 "\n", panid);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       sprintf(tmpstrbuf, "  Extended Pan ID=%016" PRIX64 "\n", extpanid);
-      commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       if (needFormNetwork) {
         switch (formNetworkChanMask) {
           case ZIGBEE_CHANMASK_STANDARD:
@@ -2774,11 +2767,11 @@ static int processcommand(const char *buffer, int clientsock) {
             sprintf(tmpstrbuf, "  Form New Zigbee Network has been scheduled with channel mask: %08" PRIX16 "\n", formNetworkChanMask);
             break;
         }
-        commonserverlibifaceptr->serverlib_netputs(tmpstrbuf, clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstrbuf, clientsock, NULL);
       }
     }
     if (!found) {
-      commonserverlibifaceptr->serverlib_netputs("NO TIZIGBEE DEVICES FOUND\n", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("NO TIZIGBEE DEVICES FOUND\n", clientsock, NULL);
     }
     unlocktizigbee();
   } else {
