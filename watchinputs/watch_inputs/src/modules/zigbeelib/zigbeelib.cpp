@@ -78,7 +78,6 @@ NOTE: RapidHA seems to have a total in transit buffer limit of 5 packets which i
 #include "zigbeelib.h"
 #include "zigbeelibpriv.h"
 #include "modules/dbcounterlib/dbcounterlib.h"
-#include "modules/commonserverlib/commonserverlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/dblib/dblib.h"
@@ -587,12 +586,11 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_ZigbeeLib_jnige
 
 #define DEBUGLIB_DEPIDX 0
 #define DBCOUNTERLIB_DEPIDX 1
-#define COMMONSERVERLIB_DEPIDX 2
-#define CMDSERVERLIB_DEPIDX 3
-#define DBLIB_DEPIDX 4
-#define WEBAPICLIENTLIB_DEPIDX 5
-#define CONFIGLIB_DEPIDX 6
-#define LOCKLIB_DEPIDX 7
+#define CMDSERVERLIB_DEPIDX 2
+#define DBLIB_DEPIDX 3
+#define WEBAPICLIENTLIB_DEPIDX 4
+#define CONFIGLIB_DEPIDX 5
+#define LOCKLIB_DEPIDX 6
 
 static zigbeelib_ifaceptrs_ver_1_t zigbeelib_ifaceptrs_ver_1={
   zigbeelib_process_zdo_send_status,
@@ -679,12 +677,6 @@ static moduledep_ver_1_t zigbeelib_deps[]={
 		nullptr,
     DBCOUNTERLIBINTERFACE_VER_1,
     1
-  },
-  {
-    "commonserverlib",
-		nullptr,
-    COMMONSERVERLIBINTERFACE_VER_1,
-    0
   },
   {
     "cmdserverlib",
@@ -6194,7 +6186,7 @@ static int16_t zigbeelib_highlevel_set_onoff_zigbee_device(uint64_t zigbeeaddr, 
 */
 STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  commonserverlib_ifaceptrs_ver_1_t *commonserverlibifaceptr=(commonserverlib_ifaceptrs_ver_1_t *) zigbeelib_deps[COMMONSERVERLIB_DEPIDX].ifaceptr;
+  cmdserverlib_ifaceptrs_ver_1_t *cmdserverlibifaceptr=(cmdserverlib_ifaceptrs_ver_1_t *) zigbeelib_deps[CMDSERVERLIB_DEPIDX].ifaceptr;
   char tmpstrbuf[50];
 	std::string tmpstring;
 	std::string bufferstring;
@@ -6203,7 +6195,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
   uint64_t addr, zigbeeaddr=0;
   long localzigbeelocked=0, zigbeelocked=0;
 
-  if (!commonserverlibifaceptr) {
+  if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
   MOREDEBUG_ENTERINGFUNC();
@@ -6313,7 +6305,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
 			tmpstring="ERROR\n";
 		}
     zigbeelib_unlockzigbee();
-    commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
 	} else if (strncmp(buffer, "zigbee_leave_network ", 21)==0) {
     //Format: zigbee_leave_network <64-bit address> : Ask a Zigbee device to leave the network
 		int16_t zigbeeidx;
@@ -6357,7 +6349,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
 			tmpstring+=tmpstrbuf;
 		}
     zigbeelib_unlockzigbee();
-    commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
   } else if (strncmp(buffer, "get_zigbee_info", 15)==0) {
     localzigbeedevice_t *localzigbeedeviceptr;
     int foundzigbee=0;
@@ -6374,7 +6366,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
 			tmpstring+=" ADDRESS: ";
       sprintf(tmpstrbuf, "%016llX\n", (unsigned long long) localzigbeedeviceptr->addr);
 			tmpstring+=tmpstrbuf;
-      commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
 			for (auto &zigbeedeviceit : localzigbeedeviceptr->zigbeedevices) {
         uint16_t netaddr, manu;
         const char *devicetypestr, *rxonidlestr;
@@ -6390,7 +6382,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
 				tmpstring="  ZIGBEE ADDRESS: ";
         sprintf(tmpstrbuf, "%016" PRIX64 " : %04" PRIX16 "\n", zigbeeaddr, netaddr);
 				tmpstring+=tmpstrbuf;
-        commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
         if (zigbeedeviceit.second.havemanu) {
 					tmpstring="    Manufacturer: "+zigbeelib_get_zigbee_manufacturer_string(manu)+"(";
 					sprintf(tmpstrbuf, "%04" PRIX16 ")\n", manu);
@@ -6398,7 +6390,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
         } else {
           tmpstring="    Manufacturer: Unknown\n";
         }
-        commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
         switch (zigbeedeviceit.second.devicetype) {
           case 0: devicetypestr="Cordinator";
                   break;
@@ -6420,24 +6412,24 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
         tmpstring="    Device Type: ";
 				tmpstring+=devicetypestr;
 				tmpstring+='\n';
-        commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
         tmpstring="    Receiver On When Idle: ";
 				tmpstring+=rxonidlestr;
 				tmpstring+='\n';
-        commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
         if (!zigbeedeviceit.second.notconnected) {
           tmpstring="    Currently Connected\n";
         } else {
           tmpstring="    Currently Not Connected\n";
         }
-        commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+        cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
         zigbeelib_markzigbee_notinuse(&zigbeedeviceit.second);
       }
       zigbeelib_marklocalzigbee_notinuse(localzigbeedeviceptr);
     }
     zigbeelib_unlockzigbee();
     if (!foundzigbee) {
-      commonserverlibifaceptr->serverlib_netputs("NO ZIGBEE DEVICES FOUND\n", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("NO ZIGBEE DEVICES FOUND\n", clientsock, NULL);
     }
   } else if (strncmp(buffer, "refresh_zigbee_info ", 20)==0 && len>=36) {
     //Format: refresh_zigbee_info <64-bit addr>
@@ -6452,7 +6444,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
     }
     zigbeelib_unlockzigbee();
     if (found!=-1) {
-      commonserverlibifaceptr->serverlib_netputs("Removing cached list of ZigBee devices\n", clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs("Removing cached list of ZigBee devices\n", clientsock, NULL);
       zigbeelib_remove_all_zigbee_devices(found, &localzigbeelocked, &zigbeelocked);
 
       zigbeelib_marklocalzigbee_notinuse(&zigbeelib_localzigbeedevices[found]);
@@ -6461,7 +6453,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
       sprintf(tmpstrbuf, "%016llX", (unsigned long long) addr);
 			tmpstring+=tmpstrbuf;
 			tmpstring+=" NOT FOUND\n";
-      commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+      cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
     }
   } else if ((buffertokens[0]=="zigbee_switch_on" || buffertokens[0]=="zigbee_switch_off") && buffertokens.size()>=2) {
     //Format: zigbee_switch_on <64-bit addr> [port]
@@ -6489,7 +6481,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
       tmpstring+=tmpstrbuf;
       tmpstring+=")\n";
     }
-    commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
   } else if (buffertokens[0]=="zigbee_switch_status" && buffertokens.size()>=2) {
     //Format: zigbee_switch_status <64-bit addr> [port]
     uint64_t addr;
@@ -6524,7 +6516,7 @@ STATIC int zigbeelib_processcommand(const char *buffer, int clientsock) {
         tmpstring+=")\n";
       }
     }
-    commonserverlibifaceptr->serverlib_netputs(tmpstring.c_str(), clientsock, NULL);
+    cmdserverlibifaceptr->cmdserverlib_netputs(tmpstring.c_str(), clientsock, NULL);
   } else {
     return CMDLISTENER_NOTHANDLED;
   }
