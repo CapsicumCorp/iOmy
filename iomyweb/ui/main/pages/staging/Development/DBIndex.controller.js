@@ -270,6 +270,10 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                                 Username    : sDBUsername,
                                 Password    : sDBPassword
                             })
+                        },
+                        
+                        onFail : function (response) {
+                            $.sap.log.error("Error changing indexing state  ("+sCommand+"): " + response.responseText);
                         }
                     });
                 }
