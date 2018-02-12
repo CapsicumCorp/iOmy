@@ -96,167 +96,167 @@ var oApp = new sap.m.App("oApp");
 var aPages = [
 	{
 		"Id":			"pLogin",
-		"Location":		"pages.staging.Login",
+		"Location":		"pages.Login",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Login\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Login\" Page!\n"
 	},
 	{
 		"Id":			"pDevice",
-		"Location":		"pages.staging.Device",
+		"Location":		"pages.Device",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Device\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Device\" Page!\n"
 	},
 	{
 		"Id":			"pBlock",
-		"Location":		"pages.staging.Block",
+		"Location":		"pages.Block",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Block\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Block\" Page!\n"
 	},
 	{
 		"Id":			"pUserSettings",
-		"Location":		"pages.staging.user.UserSettings",
+		"Location":		"pages.user.UserSettings",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.UserSettings\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.UserSettings\" Page!\n"
 	},
 	{
 		"Id":			"pTile",
-		"Location":		"pages.staging.device.IOTiles",
+		"Location":		"pages.device.IOTiles",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.IOTiles\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.device.IOTiles\" Page!\n"
 	},
 	{
 		"Id":			"pPremise",
-		"Location":		"pages.staging.Premise",
+		"Location":		"pages.Premise",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Premise\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Premise\" Page!\n"
 	},
 	{
 		"Id":			"pRoomList",
-		"Location":		"pages.staging.Room",
+		"Location":		"pages.Room",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Room\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Room\" Page!\n"
 	},
 	{
 		"Id":			"pRGBlight",
-		"Location":		"pages.staging.device.RGBlight",
+		"Location":		"pages.device.RGBlight",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.RGBlight\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.device.RGBlight\" Page!\n"
 	},
 	{
 		"Id":			"pMJPEG",
-		"Location":		"pages.staging.device.Mjpeg",
+		"Location":		"pages.device.Mjpeg",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.Mjpeg\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.device.Mjpeg\" Page!\n"
 	},
 	{
 		"Id":			"pOnvifSnapshot",
-		"Location":		"pages.staging.device.OnvifCamera",
+		"Location":		"pages.device.OnvifCamera",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.OnvifCamera\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.device.OnvifCamera\" Page!\n"
 	},
 	{
 		"Id":			"pUserForm",
-		"Location":		"pages.staging.user.UserForm",
+		"Location":		"pages.user.UserForm",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.UserForm\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.user.UserForm\" Page!\n"
 	},
 	{
 		"Id":			"pNewUser",
-		"Location":		"pages.staging.user.NewUser",
+		"Location":		"pages.user.NewUser",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.NewUser\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.user.NewUser\" Page!\n"
 	},
 	{
 		"Id":			"pUserList",
-		"Location":		"pages.staging.user.UserList",
+		"Location":		"pages.user.UserList",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.user.UserList\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.user.UserList\" Page!\n"
 	},
 	{
 		"Id":			"pDeviceForm",
-		"Location":		"pages.staging.device.DeviceForm",
+		"Location":		"pages.device.DeviceForm",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.DeviceForm\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.device.DeviceForm\" Page!\n"
 	},
 	{
 		"Id":			"pPremiseForm",
-		"Location":		"pages.staging.premise.PremiseForm",
+		"Location":		"pages.premise.PremiseForm",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.premise.PremiseForm\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.premise.PremiseForm\" Page!\n"
 	},
 	{
 		"Id":			"pWeatherFeed",
-		"Location":		"pages.staging.device.WeatherFeed",
+		"Location":		"pages.device.WeatherFeed",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.WeatherFeed\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.device.WeatherFeed\" Page!\n"
 	},
 	{
 		"Id":			"pMotionSensor",
-		"Location":		"pages.staging.device.MotionSensor",
+		"Location":		"pages.device.MotionSensor",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.device.MotionSensor\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.device.MotionSensor\" Page!\n"
 	},
 	
 	{
 		"Id":			"pRulesList",
-		"Location":		"pages.staging.RulesList",
+		"Location":		"pages.RulesList",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.RulesList\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.RulesList\" Page!\n"
 	},
 	{
 		"Id":			"pTelnet",
-		"Location":		"pages.staging.telnet.Telnet",
+		"Location":		"pages.telnet.Telnet",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.telnet.Telnet\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.telnet.Telnet\" Page!\n"
 	},
     
 	{
 		"Id":			"pGraphLine",
-		"Location":		"pages.staging.graphs.LineGraph",
+		"Location":		"pages.graphs.LineGraph",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.LineGraph\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.graphs.LineGraph\" Page!\n"
 	},
 	{
 		"Id":			"pGraphBar",
-		"Location":		"pages.staging.graphs.BarGraph",
+		"Location":		"pages.graphs.BarGraph",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.BarGraph\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.graphs.BarGraph\" Page!\n"
 	},
 	{
 		"Id":			"pGraphPie",
-		"Location":		"pages.staging.graphs.PieGraph",
+		"Location":		"pages.graphs.PieGraph",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.graphs.PieGraph\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.graphs.PieGraph\" Page!\n"
 	},
 	{
 		"Id":			"pRoomForm",
-		"Location":		"pages.staging.room.RoomForm",
+		"Location":		"pages.room.RoomForm",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.room.RoomForm\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.room.RoomForm\" Page!\n"
 	},
 	{
 		"Id":			"pRulesForm",
-		"Location":		"pages.staging.rules.RulesForm",
+		"Location":		"pages.rules.RulesForm",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.rules.RulesForm\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.rules.RulesForm\" Page!\n"
 	},
 	{
 		"Id":			"pFFMPEG",
-		"Location":		"pages.staging.FFMPEG",
+		"Location":		"pages.FFMPEG",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.FFMPEG\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.FFMPEG\" Page!\n"
 	},
 	{
 		"Id":			"pServerInfo",
-		"Location":		"pages.staging.Development.ServerInfo",
+		"Location":		"pages.Development.ServerInfo",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.ServerInfo\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.ServerInfo\" Page!\n"
 	},
 	{
 		"Id":			"pDBIndex",
-		"Location":		"pages.staging.Development.DBIndex",
+		"Location":		"pages.Development.DBIndex",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.staging.Development.DBIndex\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.DBIndex\" Page!\n"
 	}
 
 ];
