@@ -224,6 +224,20 @@ sap.ui.controller("pages.staging.Development.DBIndex", {
                     },
 
                     onWarning : function () {
+                        var sMessage = "";
+
+                        if (bEnabled) {
+                            sMessage = "Database indexing enabled ";
+                        } else {
+                            sMessage = "Database indexing disabled ";
+                        }
+
+                        iomy.common.showWarning(sMessage + "for some tables. Failed to toggle for some tables.", "Warning",
+                            function () {
+                                iomy.common.NavigationChangePage( "pServerInfo" ,  {} , false);
+                                
+                            }
+                        );
 
                     },
 
