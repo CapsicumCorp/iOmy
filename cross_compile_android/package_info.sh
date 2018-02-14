@@ -228,25 +228,25 @@ LIGHTTPDNEED_WEB_BROWSER=0
 LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.43.diff"
 
 PHPTITLE="php"
-PHPVER="5.6.30"
-PHPPKG="php-5.6.30.tar.xz"
-PHPCOMPILEDIR="php-5.6.30"
+PHPVER="7.1.14"
+PHPPKG="php-7.1.14.tar.xz"
+PHPCOMPILEDIR="php-7.1.14"
 PHPHOMEPAGE="http://php.net/"
 PHPLICENSE="PHP-3"
 PHPBASEURL="http://php.net/distributions/"
 PHPGENTOOPKG="dev-lang/php"
-PHPGENTOOVER="5.6.30"
+PHPGENTOOVER="7.1.14"
 PHPNEED_WEB_BROWSER=0
 
 MYSQLTITLE="mysql"
-MYSQLVER="5.6.36"
-MYSQLPKG="mysql-5.6.36.tar.gz"
-MYSQLCOMPILEDIR="mysql-5.6.36"
+MYSQLVER="5.6.39"
+MYSQLPKG="mysql-5.6.39.tar.gz"
+MYSQLCOMPILEDIR="mysql-5.6.39"
 MYSQLHOMEPAGE="http://www.mysql.com/"
 MYSQLLICENSE="GPL-2"
 MYSQLBASEURL="http://cdn.mysql.com/Downloads/MySQL-5.6/"
 MYSQLGENTOOPKG="dev-db/mysql"
-MYSQLGENTOOVER="5.6.36"
+MYSQLGENTOOVER="5.6.39"
 MYSQLNEED_WEB_BROWSER=0
 MYSQLPATCHES="mysql_change_s_iread_and_s_iwrite_to_s_irusr_and_s_iwusr.patch mysql_define_ushort.patch mysql_skip_wchar_iso_10646_check.patch"
 
@@ -288,13 +288,13 @@ BUSYBOXX86BASEURL="http://download.iomy.org/download.php?file="
 BUSYBOXX86NEED_WEB_BROWSER=1
 
 PHPMYADMINTITLE="phpMyAdmin"
-PHPMYADMINVER="4.7.0"
-PHPMYADMINPKG="phpMyAdmin-4.7.0-english.tar.xz"
-PHPMYADMINCOMPILEDIR="phpMyAdmin-4.7.0-english"
+PHPMYADMINVER="4.7.7"
+PHPMYADMINPKG="phpMyAdmin-4.7.7-english.tar.xz"
+PHPMYADMINCOMPILEDIR="phpMyAdmin-4.7.7-english"
 PHPMYADMINHOMEPAGE="https://www.phpmyadmin.net/"
 PHPMYADMINLICENSE="GPL-2"
-PHPMYADMINBASEURL="https://files.phpmyadmin.net/phpMyAdmin/4.7.0/"
+PHPMYADMINBASEURL="https://files.phpmyadmin.net/phpMyAdmin/4.7.7/"
 PHPMYADMINGENTOOPKG="dev-db/phpmyadmin"
-PHPMYADMINGENTOOVER="4.7.0"
+PHPMYADMINGENTOOVER="4.7.7"
 PHPMYADMINNEED_WEB_BROWSER=0
 
