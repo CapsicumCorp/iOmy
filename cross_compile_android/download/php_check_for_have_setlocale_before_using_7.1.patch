@@ -1,0 +1,82 @@
+diff -Naur php-7.1.14/ext/fileinfo/libmagic/funcs.c php-7.1.14-2/ext/fileinfo/libmagic/funcs.c
+--- php-7.1.14/ext/fileinfo/libmagic/funcs.c	2018-01-31 05:05:33.000000000 +1000
++++ php-7.1.14-2/ext/fileinfo/libmagic/funcs.c	2018-02-14 15:29:24.093989758 +1000
+@@ -436,8 +436,9 @@
+ 	zval repl;
+ 	int  rep_cnt = 0;
+ 
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "C");
+-
++#endif
+ 	opts |= PCRE_MULTILINE;
+ 	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
+ 	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
+@@ -462,7 +463,9 @@
+ 	zend_string_release(res);
+ 
+ out:
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "");
++#endif
+ 	return rep_cnt;
+ }
+ 
+diff -Naur php-7.1.14/ext/fileinfo/libmagic/readcdf.c php-7.1.14-2/ext/fileinfo/libmagic/readcdf.c
+--- php-7.1.14/ext/fileinfo/libmagic/readcdf.c	2018-01-31 05:05:33.000000000 +1000
++++ php-7.1.14-2/ext/fileinfo/libmagic/readcdf.c	2018-02-14 15:27:16.516696813 +1000
+@@ -119,13 +119,17 @@
+ 	size_t i;
+ 	const char *rv = NULL;
+ 
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "C");
++#endif
+ 	for (i = 0; nv[i].pattern != NULL; i++)
+ 		if (strcasestr(vbuf, nv[i].pattern) != NULL) {
+ 			rv = nv[i].mime;
+ 			break;
+ 		}
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "");
++#endif
+ 	return rv;
+ }
+ 
+diff -Naur php-7.1.14/ext/fileinfo/libmagic/softmagic.c php-7.1.14-2/ext/fileinfo/libmagic/softmagic.c
+--- php-7.1.14/ext/fileinfo/libmagic/softmagic.c	2018-01-31 05:05:33.000000000 +1000
++++ php-7.1.14-2/ext/fileinfo/libmagic/softmagic.c	2018-02-14 15:30:29.219140587 +1000
+@@ -387,7 +387,9 @@
+ 	if (strchr(m->desc, '%') == NULL)
+ 		return 0;
+ 
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "C");
++#endif
+ 	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
+ 	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options)) == NULL) {
+ 		rv = -1;
+@@ -395,7 +397,9 @@
+ 	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
+ 	}
+ 	zend_string_release(pattern);
++#ifdef HAVE_SETLOCALE
+ 	(void)setlocale(LC_CTYPE, "");
++#endif
+ 	return rv;
+ }
+ 
+diff -Naur php-7.1.14/ext/standard/basic_functions.c php-7.1.14-2/ext/standard/basic_functions.c
+--- php-7.1.14/ext/standard/basic_functions.c	2018-01-31 05:05:32.000000000 +1000
++++ php-7.1.14-2/ext/standard/basic_functions.c	2018-02-14 15:31:03.191193442 +1000
+@@ -3820,8 +3820,10 @@
+ 	/* Check if locale was changed and change it back
+ 	 * to the value in startup environment */
+ 	if (BG(locale_changed)) {
++#ifdef HAVE_SETLOCALE
+ 		setlocale(LC_ALL, "C");
+ 		setlocale(LC_CTYPE, "");
++#endif
+ 		zend_update_current_locale();
+ 		if (BG(locale_string)) {
+ 			zend_string_release(BG(locale_string));

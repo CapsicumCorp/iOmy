@@ -1,0 +1,12 @@
+diff -Naur php-7.1.14/ext/posix/posix.c php-7.1.14-2/ext/posix/posix.c
+--- php-7.1.14/ext/posix/posix.c	2018-01-31 05:05:29.000000000 +1000
++++ php-7.1.14-2/ext/posix/posix.c	2018-02-14 15:25:35.375467002 +1000
+@@ -1163,7 +1163,7 @@
+ 	add_assoc_string(return_value, "passwd",    pw->pw_passwd);
+ 	add_assoc_long  (return_value, "uid",       pw->pw_uid);
+ 	add_assoc_long  (return_value, "gid",		pw->pw_gid);
+-	add_assoc_string(return_value, "gecos",     pw->pw_gecos);
++	add_assoc_string(return_value, "gecos",     "");
+ 	add_assoc_string(return_value, "dir",       pw->pw_dir);
+ 	add_assoc_string(return_value, "shell",     pw->pw_shell);
+ 	return 1;

@@ -1,0 +1,28 @@
+diff -Naur php-7.1.14/ext/mysqli/mysqli_warning.c php-7.1.14-2/ext/mysqli/mysqli_warning.c
+--- php-7.1.14/ext/mysqli/mysqli_warning.c	2018-01-31 05:05:36.000000000 +1000
++++ php-7.1.14-2/ext/mysqli/mysqli_warning.c	2018-02-14 14:39:01.543749675 +1000
+@@ -131,7 +131,7 @@
+ 
+ 	for (;;) {
+ 		zval *entry;
+-		int errno;
++		int lerrno;
+ 
+ 		mysqlnd_fetch_into(result, MYSQLND_FETCH_NUM, &row, MYSQLND_MYSQLI);
+ 		if (Z_TYPE(row) != IS_ARRAY) {
+@@ -145,13 +145,13 @@
+ 		/* 1. Here comes the error no */
+ 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
+ 		convert_to_long_ex(entry);
+-		errno = Z_LVAL_P(entry);
++		lerrno = Z_LVAL_P(entry);
+ 		zend_hash_move_forward(Z_ARRVAL(row));
+ 
+ 		/* 2. Here comes the reason */
+ 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
+ 
+-		w = php_new_warning(entry, errno);
++		w = php_new_warning(entry, lerrno);
+ 		/*
+ 		  Don't destroy entry, because the row destroy will decrease
+ 		  the refcounter. Decreased twice then mysqlnd_free_result()
