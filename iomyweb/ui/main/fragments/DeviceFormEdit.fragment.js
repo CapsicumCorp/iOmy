@@ -9,7 +9,8 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
         
         var oRoomItemTemplate = new sap.ui.core.Item({
             key : "{RoomId}",
-            text : "{RoomName}"
+            text : "{RoomName}",
+            enabled : "{Enabled}"
         });
         
 		var oFragContent = new sap.ui.layout.form.Form( oView.createId("DevTypeBlock_Form"),{

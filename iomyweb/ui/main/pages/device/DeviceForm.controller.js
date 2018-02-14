@@ -146,6 +146,8 @@ sap.ui.controller("pages.device.DeviceForm", {
             if (oController.bNoRooms) {
                 oView.byId("EditThingRoomSelector").setVisible(false);
             }
+            
+            oController.ToggleSubmitButton();
 
             //oController.bDeviceOptionSelectorDrawn = false;
         } else {
@@ -442,6 +444,7 @@ sap.ui.controller("pages.device.DeviceForm", {
         
         $.each(aRoomList, function (sI, mRoom) {
             iUnassignedRoomId = mRoom.RoomId;
+            mRoom.Enabled = true;
             
             if (mRoom.RoomName === "Unassigned") {
                 if (iRoomCount === 1) {
@@ -470,7 +473,7 @@ sap.ui.controller("pages.device.DeviceForm", {
             oController.bNoRooms = false;
             
             if (bHasUnassigned) {
-                delete aRoomList["_"+iUnassignedRoomId];
+                aRoomList["_"+iUnassignedRoomId].Enabled = false;
             }
         }
         
@@ -855,16 +858,10 @@ sap.ui.controller("pages.device.DeviceForm", {
         var iOldRoomID              = iomy.common.ThingList["_"+iThingID].RoomId;
         var oCurrentFormData        = oView.getModel().getProperty( "/CurrentDevice/" );
         var iRoomId                 = oCurrentFormData.RoomId;
-        var sThingText;
+        var sThingText              = oCurrentFormData.ThingName;
         
 		var bDifferentThingName     = sOldThingText !== sThingText;
-        var bDifferentRoom;
-            
-        if (iOldRoomID == 1) {
-            bDifferentRoom = true;
-        } else {
-            bDifferentRoom = iOldRoomID != iRoomId;
-        }
+        var bDifferentRoom          = iOldRoomID != iRoomId;
         
         return (bDifferentThingName || bDifferentRoom);
     },
