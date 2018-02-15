@@ -74,106 +74,126 @@ sap.ui.controller("pages.premise.PremiseForm", {
         var oView           = this.getView();
         var oPremiseObject  = oView.getModel().getProperty("/Information/");
         
-        $.each(oPremiseObject, function (sKey) {
-            if (oView.byId("Select"+sKey) !== undefined) {
-                oView.byId("Select"+sKey).setEnabled(bEnabled);
-            }
-            
-            if (oView.byId("Input"+sKey) !== undefined) {
-                oView.byId("Input"+sKey).setEnabled(bEnabled);
-            }
-        });
+        try {
+            $.each(oPremiseObject, function (sKey) {
+                if (oView.byId("Select"+sKey) !== undefined) {
+                    oView.byId("Select"+sKey).setEnabled(bEnabled);
+                }
+
+                if (oView.byId("Input"+sKey) !== undefined) {
+                    oView.byId("Input"+sKey).setEnabled(bEnabled);
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Error toggling premise information controls: " + e.message);
+        }
     },
     
     TogglePremiseAddressControls : function (bEnabled) {
         var oView           = this.getView();
         var oPremiseObject  = oView.getModel().getProperty("/Address/");
         
-        $.each(oPremiseObject, function (sKey) {
-            if (oView.byId("Select"+sKey) !== undefined) {
-                oView.byId("Select"+sKey).setEnabled(bEnabled);
-            }
-            
-            if (oView.byId("Input"+sKey) !== undefined) {
-                oView.byId("Input"+sKey).setEnabled(bEnabled);
-            }
-        });
+        try {
+            $.each(oPremiseObject, function (sKey) {
+                if (oView.byId("Select"+sKey) !== undefined) {
+                    oView.byId("Select"+sKey).setEnabled(bEnabled);
+                }
+
+                if (oView.byId("Input"+sKey) !== undefined) {
+                    oView.byId("Input"+sKey).setEnabled(bEnabled);
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Error toggling premise address controls: " + e.message);
+        }
     },
     
     loadLocaleInfo : function (mSettings) {
         var oController = this;
         var fnComplete = function () {};
         
-        if (mSettings !== undefined && mSettings !== null) {
-            if (mSettings.onComplete !== undefined && mSettings.onComplete !== null) {
-                fnComplete = mSettings.onComplete;
+        try {
+            if (mSettings !== undefined && mSettings !== null) {
+                if (mSettings.onComplete !== undefined && mSettings.onComplete !== null) {
+                    fnComplete = mSettings.onComplete;
+                }
             }
-        }
-        
-        iomy.apiodata.AjaxRequest({
-            Url : iomy.apiodata.ODataLocation("premiselocation"),
-            Columns : ["REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
-                        "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
-                        "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
-                        "PREMISEADDRESS_LINE3", "PREMISEADDRESS_PK"],
-            WhereClause : ["PREMISE_PK eq "+oController.iPremiseId],
-            OrderByClause : [],
 
-            onSuccess : function (responseType, data) {
-                var data = data[0];
-                oController.mPremiseAddress = {
-                    "AddressId"         : data.PREMISEADDRESS_PK,
-                    "RegionId"          : data.REGION_PK,
-                    "RegionName"        : data.REGION_NAME,
-                    "LanguageId"        : data.LANGUAGE_PK,
-                    "LanguageName"      : data.LANGUAGE_NAME,
-                    "PostCode"          : data.PREMISEADDRESS_POSTCODE,
-                    "Subregion"         : data.PREMISEADDRESS_SUBREGION,
-                    "TimezoneId"        : data.TIMEZONE_PK,
-                    "TimezoneName"      : data.TIMEZONE_TZ,
-                    "AddressLine1"      : data.PREMISEADDRESS_LINE1,
-                    "AddressLine2"      : data.PREMISEADDRESS_LINE2,
-                    "AddressLine3"      : data.PREMISEADDRESS_LINE3
-                };
-                
-                oController.RefreshModel();
-                fnComplete();
-            },
+            iomy.apiodata.AjaxRequest({
+                Url : iomy.apiodata.ODataLocation("premiselocation"),
+                Columns : ["REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
+                            "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
+                            "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
+                            "PREMISEADDRESS_LINE3", "PREMISEADDRESS_PK"],
+                WhereClause : ["PREMISE_PK eq "+oController.iPremiseId],
+                OrderByClause : [],
+
+                onSuccess : function (responseType, data) {
+                    var data = data[0];
+                    oController.mPremiseAddress = {
+                        "AddressId"         : data.PREMISEADDRESS_PK,
+                        "RegionId"          : data.REGION_PK,
+                        "RegionName"        : data.REGION_NAME,
+                        "LanguageId"        : data.LANGUAGE_PK,
+                        "LanguageName"      : data.LANGUAGE_NAME,
+                        "PostCode"          : data.PREMISEADDRESS_POSTCODE,
+                        "Subregion"         : data.PREMISEADDRESS_SUBREGION,
+                        "TimezoneId"        : data.TIMEZONE_PK,
+                        "TimezoneName"      : data.TIMEZONE_TZ,
+                        "AddressLine1"      : data.PREMISEADDRESS_LINE1,
+                        "AddressLine2"      : data.PREMISEADDRESS_LINE2,
+                        "AddressLine3"      : data.PREMISEADDRESS_LINE3
+                    };
+
+                    oController.RefreshModel();
+                    fnComplete();
+                },
+
+                onFail : function (response) {
+                    iomy.common.showError(response.responseText, "Failed to load premise address",
+                        function () {
+                            oController.RefreshModel();
+                            fnComplete();
+                        }
+                    );
+
+                    jQuery.sap.log.error(JSON.stringify(response));
+                }
+            });
             
-            onFail : function (response) {
-                iomy.common.showError(response.responseText, "Failed to load premise address",
-                    function () {
-                        oController.RefreshModel();
-                        fnComplete();
-                    }
-                );
-            
-                jQuery.sap.log.error(JSON.stringify(response));
-            }
-        });
+        } catch (e) {
+            $.sap.log.error("Error attempting to load the address information ("+e.name+"): " + e.message);
+        }
     },
     
     RefreshModel : function () {
         var oController = this;
         var oView       = oController.getView();
         var mPremise    = JSON.parse( JSON.stringify(iomy.common.PremiseList["_"+oController.iPremiseId]) );
-        var oModel      = new sap.ui.model.json.JSONModel({
-            "Information"   : mPremise,
-            "Address"       : oController.mPremiseAddress,
-            "Options"       : {
-                "BedroomCount"  : iomy.common.PremiseBedroomsOptions,
-                "FloorCount"    : iomy.common.PremiseFloorsOptions,
-                "OccupantCount" : iomy.common.PremiseOccupantsOptions,
-                "RoomCount"     : iomy.common.PremiseRoomsOptions,
-
-                "Regions"   : iomy.common.Regions,
-                "Languages" : iomy.common.Languages,
-                "Timezones" : iomy.common.Timezones
-            }
-        })
+        var oModel      = {};
         
-        oModel.setSizeLimit(420);
-        oView.setModel(oModel);
+        try {
+            oModel = new sap.ui.model.json.JSONModel({
+                "Information"   : mPremise,
+                "Address"       : oController.mPremiseAddress,
+                "Options"       : {
+                    "BedroomCount"  : iomy.common.PremiseBedroomsOptions,
+                    "FloorCount"    : iomy.common.PremiseFloorsOptions,
+                    "OccupantCount" : iomy.common.PremiseOccupantsOptions,
+                    "RoomCount"     : iomy.common.PremiseRoomsOptions,
+
+                    "Regions"   : iomy.common.Regions,
+                    "Languages" : iomy.common.Languages,
+                    "Timezones" : iomy.common.Timezones
+                }
+            });
+            
+            oModel.setSizeLimit(420);
+            oView.setModel(oModel);
+            
+        } catch (e) {
+            $.sap.log.error("Error refreshing the model ("+e.name+"): " + e.message);
+        }
 
     },
     
@@ -231,46 +251,58 @@ sap.ui.controller("pages.premise.PremiseForm", {
         
         oController.TogglePremiseInfoControls(false);
         
-        oController.editPremiseInformation({
-            premiseID       : oController.iPremiseId,
-            name            : oFormData.Name,
-            description     : oFormData.Desc,
-            bedrooms        : oFormData.BedroomCountId,
-            floors          : oFormData.FloorCountId,
-            occupants       : oFormData.OccupantCountId,
-            rooms           : oFormData.RoomCountId,
-            
-            onSuccess : function () {
-                iomy.common.RefreshCoreVariables({
-                    
-                    onSuccess : function () {
-                        iomy.common.showMessage({
-                            text : "Premise Information successfully updated."
-                        });
+        try {
+            oController.editPremiseInformation({
+                premiseID       : oController.iPremiseId,
+                name            : oFormData.Name,
+                description     : oFormData.Desc,
+                bedrooms        : oFormData.BedroomCountId,
+                floors          : oFormData.FloorCountId,
+                occupants       : oFormData.OccupantCountId,
+                rooms           : oFormData.RoomCountId,
 
-                        oController.RefreshModel();
-                        oController.ToggleButtonsAndView( oController, "ShowInfo" );
+                onSuccess : function () {
+                    try {
+                        iomy.common.RefreshCoreVariables({
+
+                            onSuccess : function () {
+                                iomy.common.showMessage({
+                                    text : "Premise information successfully updated."
+                                });
+
+                                oController.RefreshModel();
+                                oController.ToggleButtonsAndView( oController, "ShowInfo" );
+                            }
+
+                        });
+                    } catch (e) {
+                        $.sap.log.error("Error attempting to reload the core variables ("+e.name+"): " + e.message);
                     }
-                    
-                });
-            },
-            
-            onWarning : function (sErrMessage) {
-                iomy.common.showWarning(sErrMessage, "Some fields couldn't be updated",
-                    function () {
-                        oController.TogglePremiseInfoControls(true);
-                    }
-                );
-            },
-            
-            onFail : function (sErrMessage) {
-                iomy.common.showError(sErrMessage, "Failed to update premise",
-                    function () {
-                        oController.TogglePremiseInfoControls(true);
-                    }
-                );
-            }
-        });
+                },
+
+                onWarning : function (sErrMessage) {
+                    iomy.common.showWarning(sErrMessage, "Some fields couldn't be updated",
+                        function () {
+                            oController.TogglePremiseInfoControls(true);
+                        }
+                    );
+                },
+
+                onFail : function (sErrMessage) {
+                    iomy.common.showError(sErrMessage, "Failed to update premise",
+                        function () {
+                            oController.TogglePremiseInfoControls(true);
+                        }
+                    );
+                }
+            });
+        } catch (e) {
+            iomy.common.showError(e.message, "Error",
+                function () {
+                    oController.TogglePremiseInfoControls(true);
+                }
+            );
+        }
     },
     
     SubmitPremiseAddress : function () {
@@ -280,40 +312,53 @@ sap.ui.controller("pages.premise.PremiseForm", {
         
         oController.TogglePremiseAddressControls(false);
         
-        oController.editPremiseAddress({
-            premiseID           : oController.iPremiseId,
-            addressLine1        : oFormData.AddressLine1,
-            addressLine2        : oFormData.AddressLine2,
-            addressLine3        : oFormData.AddressLine3,
-            regionID            : oFormData.RegionId,
-            subregion           : oFormData.Subregion,
-            postCode            : oFormData.PostCode,
-            timezoneID          : oFormData.TimezoneId,
-            languageID          : oFormData.LanguageId,
-            
-            onSuccess : function () {
-                iomy.common.RefreshCoreVariables({
-                    
-                    onSuccess : function () {
-                        iomy.common.showMessage({
-                            text : "Premise address successfully updated."
-                        });
+        try {
+            oController.editPremiseAddress({
+                premiseID           : oController.iPremiseId,
+                addressLine1        : oFormData.AddressLine1,
+                addressLine2        : oFormData.AddressLine2,
+                addressLine3        : oFormData.AddressLine3,
+                regionID            : oFormData.RegionId,
+                subregion           : oFormData.Subregion,
+                postCode            : oFormData.PostCode,
+                timezoneID          : oFormData.TimezoneId,
+                languageID          : oFormData.LanguageId,
 
-                        oController.ToggleButtonsAndView( oController, "ShowAddress" );
-                        oController.loadLocaleInfo();
+                onSuccess : function () {
+                    try {
+                        iomy.common.RefreshCoreVariables({
+
+                            onSuccess : function () {
+                                iomy.common.showMessage({
+                                    text : "Premise address successfully updated."
+                                });
+
+                                oController.RefreshModel();
+                                oController.ToggleButtonsAndView( oController, "ShowAddress" );
+                                oController.loadLocaleInfo();
+                            }
+
+                        });
+                    } catch (e) {
+                        $.sap.log.error("Error attempting to reload the core variables ("+e.name+"): " + e.message);
                     }
-                    
-                });
-            },
-            
-            onFail : function (sErrMessage) {
-                iomy.common.showError(sErrMessage, "Failed to update premise address",
-                    function () {
-                        oController.TogglePremiseAddressControls(true);
-                    }
-                );
-            }
-        });
+                },
+
+                onFail : function (sErrMessage) {
+                    iomy.common.showError(sErrMessage, "Failed to update premise address",
+                        function () {
+                            oController.TogglePremiseAddressControls(true);
+                        }
+                    );
+                }
+            });
+        } catch (e) {
+            iomy.common.showError(e.message, "Error",
+                function () {
+                    oController.TogglePremiseInfoControls(true);
+                }
+            );
+        }
     },
     
     editPremiseInformation : function (mSettings) {
@@ -694,30 +739,35 @@ sap.ui.controller("pages.premise.PremiseForm", {
             throw new MissingSettingsMapException(aErrorMessages.join('\n'));
         }
         
-        iomy.apiphp.AjaxRequest({
-            url : sUrl,
-            data : {
-                "Mode" : "EditPremiseAddress",
-                "Id" : iPremiseId,
-                "AddressLine1" : sAddressLine1,
-                "AddressLine2" : sAddressLine2,
-                "AddressLine3" : sAddressLine3,
-                "AddressRegion" : iRegionId,
-                "AddressSubRegion" : sSubRegion,
-                "AddressPostcode" : sPostCode,
-                "AddressTimezone" : iTimezoneId,
-                "AddressLanguage" : iLanguageId
-            },
-            onSuccess : function (type, data) {
-                if (data.Error !== true) {
-                    fnSuccess();
-                } else {
-                    fnFail(data.ErrMesg);
+        try {
+            iomy.apiphp.AjaxRequest({
+                url : sUrl,
+                data : {
+                    "Mode" : "EditPremiseAddress",
+                    "Id" : iPremiseId,
+                    "AddressLine1" : sAddressLine1,
+                    "AddressLine2" : sAddressLine2,
+                    "AddressLine3" : sAddressLine3,
+                    "AddressRegion" : iRegionId,
+                    "AddressSubRegion" : sSubRegion,
+                    "AddressPostcode" : sPostCode,
+                    "AddressTimezone" : iTimezoneId,
+                    "AddressLanguage" : iLanguageId
+                },
+                onSuccess : function (type, data) {
+                    if (data.Error !== true) {
+                        fnSuccess();
+                    } else {
+                        fnFail(data.ErrMesg);
+                    }
+                },
+                onFail : function (response) {
+                    fnFail(response.responseText);
                 }
-            },
-            onFail : function (response) {
-                fnFail(response.responseText);
-            }
-        });
+            });
+        } catch (e) {
+            $.sap.log.error("Error attempting to edit the address of the premise.");
+            
+        }
     }
 });

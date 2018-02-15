@@ -347,78 +347,83 @@ sap.ui.controller("pages.room.RoomForm", {
         
         oController.ToggleSubmitCancelButtons(false);
 
-        if (iNumOfDevices > 0) {
-            var sErrMessage = "There ";
+        try {
+            if (iNumOfDevices > 0) {
+                var sErrMessage = "There ";
 
-            if (iNumOfDevices === 1) {
-                sErrMessage += "is "+iNumOfDevices+" device";
-            } else {
-                sErrMessage += "are "+iNumOfDevices+" devices";
-            }
-
-            sErrMessage += " still assigned to this room.\n\n";
-            sErrMessage += "Move any devices from this room before deleting it.";
-
-            iomy.common.showError(sErrMessage, "Error",
-                function () {
-                    oController.ToggleSubmitCancelButtons(true);
+                if (iNumOfDevices === 1) {
+                    sErrMessage += "is "+iNumOfDevices+" device";
+                } else {
+                    sErrMessage += "are "+iNumOfDevices+" devices";
                 }
-            );
 
-        } else {
+                sErrMessage += " still assigned to this room.\n\n";
+                sErrMessage += "Move any devices from this room before deleting it.";
 
-            //-- Ask the user to confirm the deletion. --//
-            iomy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
-                function (oAction) {
-                    if (oAction === sap.m.MessageBox.Action.OK) {
-                        try {
-                            oController.deleteRoom({
-                                roomID      : oController.mRoomData.RoomId,
-
-                                onSuccess   : function () {
-                                    iomy.common.showMessage({
-                                        text : oController.mRoomData.RoomName + " successfully removed."
-                                    });
-
-                                    oController.ToggleSubmitCancelButtons(true);
-                                    iomy.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
-                                },
-
-                                onFail : function (sErrorMessage) {
-                                    iomy.common.showError(sErrorMessage, "Error",
-                                        function () {
-                                            oController.ToggleSubmitCancelButtons(true);
-                                        }
-                                    );
-                                }
-                            });
-
-                        } catch (err) {
-
-                            if (err.name === "DevicesStillInRoomException") {
-                                sDialogTitle = "Devices still assigned";
-
-                            } else if (err.name === "AttemptToDeleteOnlyRoomException") {
-                                // NOTE: This is probably not needed anymore with the way the "Unassigned" pseudo-room works.
-                                sDialogTitle = "Only room registered";
-
-                            } else {
-                                sDialogTitle = "Error";
-                            }
-
-                            iomy.common.showError(err.message, sDialogTitle,
-                                function () {
-                                    oController.ToggleSubmitCancelButtons(true);
-                                }
-                            );
-
-                        }
-
-                    } else {
+                iomy.common.showError(sErrMessage, "Error",
+                    function () {
                         oController.ToggleSubmitCancelButtons(true);
                     }
-                }
-            );
+                );
+
+            } else {
+
+                //-- Ask the user to confirm the deletion. --//
+                iomy.common.showConfirmQuestion("Do you wish to delete this room?", "Are you sure?",
+                    function (oAction) {
+                        if (oAction === sap.m.MessageBox.Action.OK) {
+                            try {
+                                oController.deleteRoom({
+                                    roomID      : oController.mRoomData.RoomId,
+
+                                    onSuccess   : function () {
+                                        iomy.common.showMessage({
+                                            text : oController.mRoomData.RoomName + " successfully removed."
+                                        });
+
+                                        oController.ToggleSubmitCancelButtons(true);
+                                        iomy.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
+                                    },
+
+                                    onFail : function (sErrorMessage) {
+                                        iomy.common.showError(sErrorMessage, "Error",
+                                            function () {
+                                                oController.ToggleSubmitCancelButtons(true);
+                                            }
+                                        );
+                                    }
+                                });
+
+                            } catch (err) {
+
+                                if (err.name === "DevicesStillInRoomException") {
+                                    sDialogTitle = "Devices still assigned";
+
+                                } else if (err.name === "AttemptToDeleteOnlyRoomException") {
+                                    // NOTE: This is probably not needed anymore with the way the "Unassigned" pseudo-room works.
+                                    sDialogTitle = "Only room registered";
+
+                                } else {
+                                    sDialogTitle = "Error";
+                                }
+
+                                iomy.common.showError(err.message, sDialogTitle,
+                                    function () {
+                                        oController.ToggleSubmitCancelButtons(true);
+                                    }
+                                );
+
+                            }
+
+                        } else {
+                            oController.ToggleSubmitCancelButtons(true);
+                        }
+                    }
+                );
+            }
+        } catch (e) {
+            $.sap.log.error("Error preparing to delete a room ("+e.name+"): " + e.message);
+            oController.ToggleSubmitCancelButtons(true);
         }
     },
 	

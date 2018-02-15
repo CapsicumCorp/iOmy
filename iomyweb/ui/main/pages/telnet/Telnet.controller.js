@@ -79,6 +79,7 @@ sap.ui.controller("pages.telnet.Telnet", {
 		
 		// Force it to scroll down to the bottom.
 		try {
+            // TODO: Find a far better way of doing it than this.
 			document.getElementById(oView.createId("telnetOutput-inner")).scrollTop = document.getElementById(oView.createId("telnetOutput-inner")).scrollHeight;
 		} catch (error) {
 			jQuery.sap.log.error(error.name + ": " +error.message);
@@ -92,11 +93,15 @@ sap.ui.controller("pages.telnet.Telnet", {
 		var oController = this;
 		var oView		= oController.getView();
 		
-		oView.wTextAreaOutput.setValue(
-			iomy.telnet.compileLog().join("\n------------------------------------\n")
-		);
-    
-		oController.ScrollTextAreaToBottom();
+        try {
+            oView.wTextAreaOutput.setValue(
+                iomy.telnet.compileLog().join("\n------------------------------------\n")
+            );
+
+            oController.ScrollTextAreaToBottom();
+        } catch (e) {
+            $.sap.log.error("Error appending output ("+e.name+"): " + e.message);
+        }
 	},
 	
 	/**
@@ -108,21 +113,25 @@ sap.ui.controller("pages.telnet.Telnet", {
 	ExecuteCommand : function (sCommand) {
 		var oController = this;
 
-        iomy.telnet.RunCommand({
-            hubID   : 1,
-            command : sCommand,
+        try {
+            iomy.telnet.RunCommand({
+                hubID   : 1,
+                command : sCommand,
 
-            onSuccess : function () {
-                oController.AppendOutput();
-            },
+                onSuccess : function () {
+                    oController.AppendOutput();
+                },
 
-            onFail : function (sOutput, sErrorMessage) {
-                oController.AppendOutput(sOutput);
-                jQuery.sap.log.error(sErrorMessage);
-            }
-        });
-		
-        oController.AppendOutput();
+                onFail : function (sOutput, sErrorMessage) {
+                    oController.AppendOutput(sOutput);
+                    jQuery.sap.log.error(sErrorMessage);
+                }
+            });
+
+            oController.AppendOutput();
+        } catch (e) {
+            $.sap.log.error("Failed to execute a command ("+e.name+"): " + e.message);
+        }
 	}
 	
 });

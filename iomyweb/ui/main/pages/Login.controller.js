@@ -112,29 +112,33 @@ sap.ui.controller("pages.Login", {
     
     DrawLoginLoading: function() {
 
-        //============================================//
-        //== 1.1 - Declare the Items                ==//
-        //============================================//
-        
-        //--------------------------------------------//
-        // Splash Logo
-        //--------------------------------------------//
-        var oLoginSplashImage = new sap.m.Image({
-            src: "resources/images/iomy_splash.png",
-            densityAware : false,
-            width: "200px"
-        }).addStyleClass("MarTop10px");
-        
-        var oLoginLoadingContainer = new sap.m.FlexBox( this.createId("SplashImage"), {
-            items: [
-                oLoginSplashImage
-            ],
-            direction: "Column"
-        });
-        
-        
-        //-- Add the Login Prompt --//
-        this.getView().byId("page").addContent(oLoginLoadingContainer);
+        try {
+            //============================================//
+            //== 1.1 - Declare the Items                ==//
+            //============================================//
+
+            //--------------------------------------------//
+            // Splash Logo
+            //--------------------------------------------//
+            var oLoginSplashImage = new sap.m.Image({
+                src: "resources/images/iomy_splash.png",
+                densityAware : false,
+                width: "200px"
+            }).addStyleClass("MarTop10px");
+
+            var oLoginLoadingContainer = new sap.m.FlexBox( this.createId("SplashImage"), {
+                items: [
+                    oLoginSplashImage
+                ],
+                direction: "Column"
+            });
+
+
+            //-- Add the Login Prompt --//
+            this.getView().byId("page").addContent(oLoginLoadingContainer);
+        } catch (e) {
+            $.sap.log.error("Error ");
+        }
         
     },
     
@@ -146,7 +150,7 @@ sap.ui.controller("pages.Login", {
         //-- Display loading status to the User                     --//
         //------------------------------------------------------------//
         oView.byId("page").destroyContent();
-        oController.DrawLoginLoading();
+        //oController.DrawLoginLoading();
 
         //------------------------------------------------------------//
         //-- Flag that the User is currently logged in              --//
@@ -159,10 +163,9 @@ sap.ui.controller("pages.Login", {
         //------------------------------------------------------------//
         iomy.common.RefreshCoreVariables( iomy.common.aRefreshCoreVariablesFirstRun );
 
-        //----------------------------------------------------------------------------//
+        //--------------------------------------------------------------------//
         // Load the user's display name and ID
-        //----------------------------------------------------------------------------//
-        //IOMy.functions.setCurrentUserNameForNavigation();
+        //--------------------------------------------------------------------//
 
         //iomy.common.NavigationChangePage( "pBlock" , {} , false);
         //oController.ToggleInputsAndButton(true);
@@ -260,7 +263,8 @@ sap.ui.controller("pages.Login", {
                 }
             }
         } catch (e1) {
-            jQuery.sap.log.error("Error with handling the login credentials:"+e1.message); 
+            jQuery.sap.log.error("Error with handling the login credentials:"+e1.message);
+            oController.ToggleInputsAndButton(true);
         }
     }
     

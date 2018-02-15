@@ -408,32 +408,36 @@ $.extend(iomy.common,{
             throw new MissingSettingsMapException(aErrorMessages.join('\n'));
         }
         
-        oCurrentView.expectingMessage = true;
+        try {
+            oCurrentView.expectingMessage = true;
 
-        me.mxToasts.synchronize({
-            task : function () {
-                if (oApp.getCurrentPage().expectingMessage === true) {
-                    // open a fully configured message toast
-                    sap.m.MessageToast.show(
-                        sMessage,
-                        {
-                            autoClose : bAutoClose || true,
-                            duration : iMilliseconds,
-                            onClose : function () {
-                                me.mxToasts.dequeue();
-                                
-                                if (!me.mxToasts.busy) {
-                                    oCurrentView.expectingMessage = false;
+            me.mxToasts.synchronize({
+                task : function () {
+                    if (oApp.getCurrentPage().expectingMessage === true) {
+                        // open a fully configured message toast
+                        sap.m.MessageToast.show(
+                            sMessage,
+                            {
+                                autoClose : bAutoClose || true,
+                                duration : iMilliseconds,
+                                onClose : function () {
+                                    me.mxToasts.dequeue();
+
+                                    if (!me.mxToasts.busy) {
+                                        oCurrentView.expectingMessage = false;
+                                    }
                                 }
                             }
-                        }
-                    );
+                        );
+                    }
                 }
+            });
+
+            if (!me.mxToasts.busy) {
+                me.mxToasts.dequeue();
             }
-        });
-        
-        if (!me.mxToasts.busy) {
-            me.mxToasts.dequeue();
+        } catch (e) {
+            $.sap.log.error("Failed to show the toast ("+e.name+"): " + e.message);
         }
 
     },
@@ -443,17 +447,21 @@ $.extend(iomy.common,{
         var callbackFn = fnCallback || function(){};
         var cssClass   = sCssClass || "";
         
-        // open a fully configured message box
-        sap.m.MessageBox.show(
-            sMessage,
-            {
-                icon: sap.m.MessageBox.Icon.INFORMATION,
-                title: sTitle,
-                actions: sap.m.MessageBox.Action.CLOSE,
-                onClose: fnCallback,
-                styleClass: cssClass
-            }
-        );
+        try {
+            // open a fully configured message box
+            sap.m.MessageBox.show(
+                sMessage,
+                {
+                    icon: sap.m.MessageBox.Icon.INFORMATION,
+                    title: sTitle,
+                    actions: sap.m.MessageBox.Action.CLOSE,
+                    onClose: callbackFn,
+                    styleClass : cssClass
+                }
+            );
+        } catch (e1) {
+            $.sap.log.error("Error with displaying the MessageBox: "+e1.message);
+        }
     },
     
     showWarning : function( sMessage, sTitle, fnCallback, sCssClass ){
@@ -461,17 +469,21 @@ $.extend(iomy.common,{
         var callbackFn = fnCallback || function(){};
         var cssClass   = sCssClass || "";
         
-        // open a fully configured message box
-        sap.m.MessageBox.show(
-            sMessage,
-            {
-                icon: sap.m.MessageBox.Icon.WARNING,
-                title: sTitle,
-                actions: sap.m.MessageBox.Action.CLOSE,
-                onClose: callbackFn,
-                styleClass : cssClass
-            }
-        );
+        try {
+            // open a fully configured message box
+            sap.m.MessageBox.show(
+                sMessage,
+                {
+                    icon: sap.m.MessageBox.Icon.WARNING,
+                    title: sTitle,
+                    actions: sap.m.MessageBox.Action.CLOSE,
+                    onClose: callbackFn,
+                    styleClass : cssClass
+                }
+            );
+        } catch (e1) {
+            $.sap.log.error("Error with displaying the MessageBox: "+e1.message);
+        }
     },
         
     showYesNoQuestion : function( sMessage, sTitle, fnCallback, sCssClass ){
@@ -479,16 +491,20 @@ $.extend(iomy.common,{
         var callbackFn = fnCallback || function(){};
         var cssClass = sCssClass || "";
         
-        // open a fully configured message box
-        sap.m.MessageBox.confirm(
-            sMessage,
-            {
-                title: sTitle,
-                onClose: callbackFn,
-                styleClass : cssClass,
-                actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO]
-            }
-        );
+        try {
+            // open a fully configured message box
+            sap.m.MessageBox.confirm(
+                sMessage,
+                {
+                    title: sTitle,
+                    onClose: callbackFn,
+                    styleClass : cssClass,
+                    actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO]
+                }
+            );
+        } catch (e1) {
+            $.sap.log.error("Error with displaying the MessageBox: "+e1.message);
+        }
     },
     
     // Confirm Question for Sign Out
@@ -497,15 +513,19 @@ $.extend(iomy.common,{
         var callbackFn = fnCallback || function(){};
         var cssClass = sCssClass || "";
         
-        // open a fully configured message box
-        sap.m.MessageBox.confirm(
-            sMessage,
-            {
-                title: sTitle,
-                onClose: callbackFn,
-                styleClass : cssClass
-            }
-        );
+        try {
+            // open a fully configured message box
+            sap.m.MessageBox.confirm(
+                sMessage,
+                {
+                    title: sTitle,
+                    onClose: callbackFn,
+                    styleClass : cssClass
+                }
+            );
+        } catch (e1) {
+            $.sap.log.error("Error with displaying the MessageBox: "+e1.message);
+        }
     },
     
     //================================================//

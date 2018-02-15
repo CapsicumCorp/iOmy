@@ -78,85 +78,95 @@ sap.ui.controller("pages.user.UserSettings", {
 		//------------------------------------------------//
 		var oView     = oController.getView();
 		var aUserData = {};
-        var oModel    = new sap.ui.model.json.JSONModel({});
+        var oModel    = {};
         
         //-- Make sure the previous data isn't shown before refresh. --//
-        oView.setModel( oModel );
+        oView.setModel( new sap.ui.model.json.JSONModel({}) );
         
-        iomy.common.RetrieveRoomAdminRoomList({
-            
-            onSuccess : function () {
-                try {
-                    var aRoomData = JSON.parse(JSON.stringify(iomy.common.RoomAdminRoomsList));
-                    aRoomData['_0'] = {
-                        RoomId: "0",
-                        RoomName: "All Rooms"
-                    };
-
-                    //------------------------------------------------//
-                    //-- Setup New UserData Array                   --//
-                    //------------------------------------------------//
-                    if( typeof iomy.common.UserInfo!=="undefined" ) {
-                        aUserData = JSON.parse(JSON.stringify(iomy.common.UserInfo ));
-                    }
-
-                    //------------------------------------------------//
-                    //-- Build and Bind Model to the View           --//
-                    //------------------------------------------------//
-                    oModel = new sap.ui.model.json.JSONModel({
-                        "Regions":               iomy.common.Regions,
-                        "Languages":             iomy.common.Languages,
-                        "Timezones":             iomy.common.Timezones,
-                        "Premises":              iomy.common.PremiseList,
-                        "Rooms":                 iomy.common.AllRoomsList,
-                        "RoomOptions":           aRoomData,
-                        "UserInfo":              aUserData,
-                        "Password":              {
-                            OldPassword         : "",
-                            NewPassword         : "",
-                            ConfirmPassword     : ""
-                        },
-
-                        "RoomPermInfo": {
-                            "CurrentLevel"  : 2,
-                            "RoomId"        : 0,
-                            "PremiseId"     : 1
-                        },
-
-                        "PermLevels":            {
-                           "_1" : {
-                                "Key" : 1,
-                                "Text" : "No Access"
-                            },
-                            "_2" : {
-                                "Key" : 2,
-                                "Text" : "Read"
-                            },
-                            "_3" : {
-                                "Key" : 3,
-                                "Text" : "Read, Device Toggle"
-                            },
-                            "_4" : {
-                                "Key" : 4,
-                                "Text" : "Read/Write"
-                            }
-                        }
-                    });
-
-                    oModel.setSizeLimit(420);
-                    oView.setModel( oModel );
-
-                    //------------------------------------------------//
-                    //-- Trigger the onSuccess Event                --//
-                    //------------------------------------------------//
-                    if( oConfig.onSuccess ) {
-                        oConfig.onSuccess();
-                    }
-                } catch (e) {
-                    $.sap.log.error(e.name + ": " + e.message);
-                }
+        try {
+            //------------------------------------------------//
+            //-- Setup New UserData Array                   --//
+            //------------------------------------------------//
+            if( typeof iomy.common.UserInfo!=="undefined" ) {
+                aUserData = JSON.parse(JSON.stringify(iomy.common.UserInfo ));
             }
-        });
+            
+            //------------------------------------------------//
+            //-- Build and Bind Model to the View           --//
+            //------------------------------------------------//
+            oModel = new sap.ui.model.json.JSONModel({
+                "Regions":               iomy.common.Regions,
+                "Languages":             iomy.common.Languages,
+                "Timezones":             iomy.common.Timezones,
+                "Premises":              iomy.common.PremiseList,
+                "Rooms":                 iomy.common.AllRoomsList,
+                "UserInfo":              aUserData,
+                "Password":              {
+                    OldPassword         : "",
+                    NewPassword         : "",
+                    ConfirmPassword     : ""
+                },
+
+                "RoomPermInfo": {
+                    "CurrentLevel"  : 2,
+                    "RoomId"        : 0,
+                    "PremiseId"     : 1
+                },
+
+                "PermLevels":            {
+                   "_1" : {
+                        "Key" : 1,
+                        "Text" : "No Access"
+                    },
+                    "_2" : {
+                        "Key" : 2,
+                        "Text" : "Read"
+                    },
+                    "_3" : {
+                        "Key" : 3,
+                        "Text" : "Read, Device Toggle"
+                    },
+                    "_4" : {
+                        "Key" : 4,
+                        "Text" : "Read/Write"
+                    }
+                }
+            });
+            
+            iomy.common.RetrieveRoomAdminRoomList({
+
+                onSuccess : function () {
+                    try {
+                        var aRoomData = JSON.parse(JSON.stringify(iomy.common.RoomAdminRoomsList));
+                        aRoomData['_0'] = {
+                            RoomId: "0",
+                            RoomName: "All Rooms"
+                        };
+
+                        oModel.RoomOptions = aRoomData;
+
+                        oModel.setSizeLimit(420);
+                        oView.setModel( oModel );
+
+                        //------------------------------------------------//
+                        //-- Trigger the onSuccess Event                --//
+                        //------------------------------------------------//
+                        if( oConfig.onSuccess ) {
+                            oConfig.onSuccess();
+                        }
+                    } catch (e) {
+                        $.sap.log.error(e.name + ": " + e.message);
+                    }
+                },
+                
+                onFail : function (sError) {
+                    $.sap.log.error("Error loading the room options: "+sError);
+                }
+            });
+            
+        } catch (e) {
+            $.sap.log.error("Failed to refresh the model ("+e.name + "): " + e.message);
+        }
 		
 	},
     

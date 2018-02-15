@@ -60,7 +60,7 @@ sap.ui.controller("pages.Development.ServerInfo", {
         oData = {
             "ui5Version"        : oVersion.toString(),
             "dbVersion"         : iomy.common.DatabaseVersion,
-            "interfaceVersion"  : "0.4.11",              // TODO: Interface version is hardcoded. Each time a release is done, this will need to be updated.
+            "interfaceVersion"  : "0.4.13",              // TODO: Interface version is hardcoded. Each time a release is done, this will need to be updated.
             
             "indexingOn"        : oController.bIndexingOn,
             "editIndex"         : {

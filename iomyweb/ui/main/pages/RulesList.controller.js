@@ -70,20 +70,24 @@ sap.ui.controller("pages.RulesList", {
     LoadList : function () {
         var oController = this;
         
-        iomy.rules.loadRules({
-            hubID : 1,
-            
-            onSuccess : function () {
-                oController.RefreshModel(oController, {});
-            },
-            
-            onFail : function (sErrMessage) {
-                jQuery.sap.log.error("Unable to Load the rules list:"+e1.message);
-				iomy.common.showError(sErrMessage, "Error",
-                    function () {}
-                );
-            }
-        });
+        try {
+            iomy.rules.loadRules({
+                hubID : 1,
+
+                onSuccess : function () {
+                    oController.RefreshModel(oController, {});
+                },
+
+                onFail : function (sErrMessage) {
+                    jQuery.sap.log.error("Unable to Load the rules list: "+sErrMessage);
+                    iomy.common.showError(sErrMessage, "Error",
+                        function () {}
+                    );
+                }
+            });
+        } catch (e) {
+            jQuery.sap.log.error("Unable to Load the rules list:"+e.message);
+        }
     },
     
     ToggleControls : function (bEnabled) {
@@ -136,26 +140,31 @@ sap.ui.controller("pages.RulesList", {
                     });
                 }
 			} catch (e1) {
-				jQuery.sap.log.error("Error with RefreshModel:"+e1.message); 
+				jQuery.sap.log.error("Error with adding a rule to the model:"+e1.message); 
 			}
         });
         
-		//------------------------------------------------//
-		//-- Build and Bind Model to the View           --//
-		//------------------------------------------------//
-		oModel = new sap.ui.model.json.JSONModel({
-            "RulesList"             : aRules,
-            "ControlButtonsEnabled" : true
-        });
-        
-        oView.setModel(oModel);
-		
-		//------------------------------------------------//
-		//-- Trigger the onSuccess Event                --//
-		//------------------------------------------------//
-		if( oConfig.onSuccess ) {
-			oConfig.onSuccess();
-		}
+        try {
+            //------------------------------------------------//
+            //-- Build and Bind Model to the View           --//
+            //------------------------------------------------//
+            oModel = new sap.ui.model.json.JSONModel({
+                "RulesList"             : aRules,
+                "ControlButtonsEnabled" : true
+            });
+
+            oView.setModel(oModel);
+
+            //------------------------------------------------//
+            //-- Trigger the onSuccess Event                --//
+            //------------------------------------------------//
+            if( oConfig.onSuccess ) {
+                oConfig.onSuccess();
+            }
+            
+        } catch (e) {
+            jQuery.sap.log.error("Error with RefreshModel:"+e.message); 
+        }
 		
 	},
     

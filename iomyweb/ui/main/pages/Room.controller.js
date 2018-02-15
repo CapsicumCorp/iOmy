@@ -39,12 +39,6 @@ sap.ui.controller("pages.Room", {
             
         oView.addEventDelegate({
             onBeforeShow : function (oEvent) {
-                //----------------------------------------------------//
-                //-- Enable/Disable Navigational Forward Button        --//
-                //----------------------------------------------------//
-                
-                //-- Refresh the Navigational buttons --//
-                //-- IOMy.common.NavigationRefreshButtons( me ); --//
                 
                 //-- Checks the oEvent passed from navigation.js --//
                 try {
@@ -88,7 +82,7 @@ sap.ui.controller("pages.Room", {
 
                     oController.BuildRoomListUI();
                 } catch (e) {
-                    iomy.common.showError(e.message, "Unable to load rooms");
+                    $.sap.log.error("Unable to load rooms: " + e.message);
                 }
             }
         });

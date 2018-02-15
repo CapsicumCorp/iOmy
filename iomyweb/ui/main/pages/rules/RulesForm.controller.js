@@ -82,77 +82,83 @@ sap.ui.controller("pages.rules.RulesForm", {
         var oController         = this;
         var oView               = this.getView();
         var oModel              = {};
-        var aSupportedDevices   = JSON.parse(JSON.stringify(iomy.rules.loadSupportedDevices()));
         
-        var oData               = {
-            "SupportedDevices"      : aSupportedDevices,
-            "FormControlsEnabled"   : true
-        };
-        
-        //--------------------------------------------------------------------//
-        // Check if the update button should be enabled. 
-        //--------------------------------------------------------------------//
-        if (aSupportedDevices.length > 0) {
-            oController.bDevicesAvailable = true;
-            oData.UpdateEnabled = true;
-        } else {
-            oController.bDevicesAvailable = false;
-            oData.UpdateEnabled = false;
-            oData.DeviceSBoxEnabled = false;
-            
-            aSupportedDevices.push({
-                "Id"            : -1,
-                "DisplayName"   : "No supported devices"
-            });
-        }
-        
-        //--------------------------------------------------------------------//
-        // Populate the model either with default data if we're adding a rule,
-        // or data from a selected if we're editing one.
-        //--------------------------------------------------------------------//
-        if (oController.iRuleId === null) {
-            oData.ToolbarTitle = "New Rule";
-            oData.DeviceSBoxEnabled = true;
-            
-            oData.Form = {
-                "Name"      : "",
-                "Time"      : "",
-                "TypeId"    : 1,
-                "ThingId"   : null,
-                "Enabled"   : true
-            };
-            
-            if (aSupportedDevices.length > 0) {
-                oData.Form.ThingId = aSupportedDevices[0].Id;
-            }
-        } else {
-            var mRule = JSON.parse(JSON.stringify(iomy.rules.RulesList["_"+oController.iRuleId]));
-            var iEnabled;
-            
-            if (mRule.Enabled === 1) {
-                iEnabled = true;
-            } else {
-                iEnabled = false;
-            }
-            
-            oData.ToolbarTitle = "Edit Rule";
-            oData.DeviceSBoxEnabled = false;
-            
-            oData.Form = {
-                "Name"      : mRule.Name,
-                "Time"      : mRule.Time,
-                "TypeId"    : mRule.TypeId,
-                "ThingId"   : JSON.parse(mRule.Parameter).ThingId,
-                "Enabled"   : iEnabled
-            };
-        }
-        
-        oModel = new sap.ui.model.json.JSONModel(oData);
-        
-        oView.setModel(oModel);
+        try {
+            var aSupportedDevices   = JSON.parse(JSON.stringify(iomy.rules.loadSupportedDevices()));
 
-        //-- Refresh Controls --//
-        oController.ToggleControls(true);
+            var oData               = {
+                "SupportedDevices"      : aSupportedDevices,
+                "FormControlsEnabled"   : true
+            };
+
+            //--------------------------------------------------------------------//
+            // Check if the update button should be enabled. 
+            //--------------------------------------------------------------------//
+            if (aSupportedDevices.length > 0) {
+                oController.bDevicesAvailable = true;
+                oData.UpdateEnabled = true;
+            } else {
+                oController.bDevicesAvailable = false;
+                oData.UpdateEnabled = false;
+                oData.DeviceSBoxEnabled = false;
+
+                aSupportedDevices.push({
+                    "Id"            : -1,
+                    "DisplayName"   : "No supported devices"
+                });
+            }
+
+            //--------------------------------------------------------------------//
+            // Populate the model either with default data if we're adding a rule,
+            // or data from a selected if we're editing one.
+            //--------------------------------------------------------------------//
+            if (oController.iRuleId === null) {
+                oData.ToolbarTitle = "New Rule";
+                oData.DeviceSBoxEnabled = true;
+
+                oData.Form = {
+                    "Name"      : "",
+                    "Time"      : "",
+                    "TypeId"    : 1,
+                    "ThingId"   : null,
+                    "Enabled"   : true
+                };
+
+                if (aSupportedDevices.length > 0) {
+                    oData.Form.ThingId = aSupportedDevices[0].Id;
+                }
+            } else {
+                var mRule = JSON.parse(JSON.stringify(iomy.rules.RulesList["_"+oController.iRuleId]));
+                var iEnabled;
+
+                if (mRule.Enabled === 1) {
+                    iEnabled = true;
+                } else {
+                    iEnabled = false;
+                }
+
+                oData.ToolbarTitle = "Edit Rule";
+                oData.DeviceSBoxEnabled = false;
+
+                oData.Form = {
+                    "Name"      : mRule.Name,
+                    "Time"      : mRule.Time,
+                    "TypeId"    : mRule.TypeId,
+                    "ThingId"   : JSON.parse(mRule.Parameter).ThingId,
+                    "Enabled"   : iEnabled
+                };
+            }
+
+            oModel = new sap.ui.model.json.JSONModel(oData);
+
+            oView.setModel(oModel);
+
+            //-- Refresh Controls --//
+            oController.ToggleControls(true);
+            
+        } catch (e) {
+            $.sap.log.error("Failed to refresh the model ("+e.name+"): " + e.message);
+        }
     },
     
     GoToRulesList : function () {

@@ -55,111 +55,128 @@ sap.ui.controller("pages.Premise", {
         // Fetch the list from the core variables.
         var aaPremiseList = iomy.common.PremiseList;
         
-        //--------------------------------------------------------------------//
-        // Construct the Premise List
-        //--------------------------------------------------------------------//
-        $.each(aaPremiseList, function (sJ, mPremise) {
+        try {
+            //--------------------------------------------------------------------//
+            // Construct the Premise List
+            //--------------------------------------------------------------------//
+            $.each(aaPremiseList, function (sJ, mPremise) {
+
+                wList.addItem(
+                    new sap.m.ObjectListItem (oView.createId("entry"+mPremise.Id), {        
+                        title: mPremise.Name,
+                        type: "Active",
+                        number: iomy.functions.getNumberOfDevicesInPremise(mPremise.Id),
+                        numberUnit: "Devices",
+                        attributes : [
+                            new sap.m.ObjectAttribute ({
+                                text: "Address:"
+                            }),
+                            new sap.m.ObjectAttribute (oView.createId("PremiseAddress"+mPremise.Id), {
+                                text: "Loading..."
+                            })
+
+                        ],
+                        press : function () {
+                            iomy.common.NavigationChangePage( "pDevice" , {PremiseId : mPremise.Id} , false);
+                        }
+                    })
+                );
+
+            });
+
+            if (JSON.stringify(aaPremiseList) !== "{}") {
+                this.LoadPremiseAddresses();
+            }
             
-            wList.addItem(
-                new sap.m.ObjectListItem (oView.createId("entry"+mPremise.Id), {        
-                    title: mPremise.Name,
-                    type: "Active",
-                    number: iomy.functions.getNumberOfDevicesInPremise(mPremise.Id),
-                    numberUnit: "Devices",
-                    attributes : [
-                        new sap.m.ObjectAttribute ({
-                            text: "Address:"
-                        }),
-                        new sap.m.ObjectAttribute (oView.createId("PremiseAddress"+mPremise.Id), {
-                            text: "Loading..."
-                        })
-
-                    ],
-                    press : function () {
-                        iomy.common.NavigationChangePage( "pDevice" , {PremiseId : mPremise.Id} , false);
-                    }
-                })
-            );
-
-        });
-        
-        this.LoadPremiseAddresses();
+        } catch (e) {
+            $.sap.log.error("Error loading premise list ("+e.name+"): " + e.message);
+        }
     },
     
     LoadPremiseAddresses : function () {
         var oController = this;
         
-        iomy.apiodata.AjaxRequest({
-            Url : iomy.apiodata.ODataLocation("premiselocation"),
-            Columns : ["PREMISE_PK", "REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
-                        "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
-                        "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
-                        "PREMISEADDRESS_LINE3", "PREMISEADDRESS_PK"],
-            WhereClause : [],
-            OrderByClause : [],
+        try {
+            iomy.apiodata.AjaxRequest({
+                Url : iomy.apiodata.ODataLocation("premiselocation"),
+                Columns : ["PREMISE_PK", "REGION_NAME", "REGION_PK", "LANGUAGE_PK", "LANGUAGE_NAME", 
+                            "PREMISEADDRESS_POSTCODE", "PREMISEADDRESS_SUBREGION",
+                            "TIMEZONE_PK", "TIMEZONE_TZ", "PREMISEADDRESS_LINE1", "PREMISEADDRESS_LINE2",
+                            "PREMISEADDRESS_LINE3", "PREMISEADDRESS_PK"],
+                WhereClause : [],
+                OrderByClause : [],
 
-            onSuccess : function (responseType, data) {
-                var oView       = oController.getView();
-                var iEntries    = data.length;
-                var sAddress    = "";
-                var mEntry;
-                
-                for (var i = 0; i < iEntries; i++) {
-                    mEntry = data[i];
-                    
-                    //--------------------------------------------------------//
-                    // Construct the Address Display String.
-                    //--------------------------------------------------------//
-                    if (mEntry.PREMISEADDRESS_LINE1 !== null && mEntry.PREMISEADDRESS_LINE1 !== "") {
-                        sAddress += mEntry.PREMISEADDRESS_LINE1;
-                    }
-                    
-                    if (mEntry.PREMISEADDRESS_LINE2 !== null && mEntry.PREMISEADDRESS_LINE2 !== "") {
-                        if (sAddress.length > 0) {
-                            sAddress += ", ";
+                onSuccess : function (responseType, data) {
+                    var oView       = oController.getView();
+                    var iEntries    = data.length;
+                    var sAddress    = "";
+                    var mEntry;
+
+                    for (var i = 0; i < iEntries; i++) {
+                        try {
+                            mEntry = data[i];
+
+                            //--------------------------------------------------------//
+                            // Construct the Address Display String.
+                            //--------------------------------------------------------//
+                            if (mEntry.PREMISEADDRESS_LINE1 !== null && mEntry.PREMISEADDRESS_LINE1 !== "") {
+                                sAddress += mEntry.PREMISEADDRESS_LINE1;
+                            }
+
+                            if (mEntry.PREMISEADDRESS_LINE2 !== null && mEntry.PREMISEADDRESS_LINE2 !== "") {
+                                if (sAddress.length > 0) {
+                                    sAddress += ", ";
+                                }
+
+                                sAddress += mEntry.PREMISEADDRESS_LINE2;
+                            }
+
+                            if (mEntry.PREMISEADDRESS_LINE3 !== null && mEntry.PREMISEADDRESS_LINE3 !== "") {
+                                if (sAddress.length > 0) {
+                                    sAddress += ", ";
+                                }
+
+                                sAddress += mEntry.PREMISEADDRESS_LINE3;
+                            }
+
+                            if (mEntry.PREMISEADDRESS_SUBREGION !== null && mEntry.PREMISEADDRESS_SUBREGION !== "") {
+                                if (sAddress.length > 0) {
+                                    sAddress += ", ";
+                                }
+
+                                sAddress += mEntry.PREMISEADDRESS_SUBREGION;
+                            }
+
+                            if (mEntry.PREMISEADDRESS_POSTCODE !== null && mEntry.PREMISEADDRESS_POSTCODE !== "") {
+                                if (sAddress.length > 0) {
+                                    sAddress += " ";
+                                }
+
+                                sAddress += mEntry.PREMISEADDRESS_POSTCODE;
+                            }
+
+                            //--------------------------------------------------------//
+                            // Display the address
+                            //--------------------------------------------------------//
+                            oView.byId("PremiseAddress"+mEntry.PREMISE_PK).setText(sAddress);
+
+                            sAddress = "";
+                        } catch (e) {
+                            $.sap.log.error("Error processing the address ("+e.name+"): " + e.message);
                         }
-                        
-                        sAddress += mEntry.PREMISEADDRESS_LINE2;
                     }
-                    
-                    if (mEntry.PREMISEADDRESS_LINE3 !== null && mEntry.PREMISEADDRESS_LINE3 !== "") {
-                        if (sAddress.length > 0) {
-                            sAddress += ", ";
-                        }
-                        
-                        sAddress += mEntry.PREMISEADDRESS_LINE3;
-                    }
-                    
-                    if (mEntry.PREMISEADDRESS_SUBREGION !== null && mEntry.PREMISEADDRESS_SUBREGION !== "") {
-                        if (sAddress.length > 0) {
-                            sAddress += ", ";
-                        }
-                        
-                        sAddress += mEntry.PREMISEADDRESS_SUBREGION;
-                    }
-                    
-                    if (mEntry.PREMISEADDRESS_POSTCODE !== null && mEntry.PREMISEADDRESS_POSTCODE !== "") {
-                        if (sAddress.length > 0) {
-                            sAddress += " ";
-                        }
-                        
-                        sAddress += mEntry.PREMISEADDRESS_POSTCODE;
-                    }
-                    
-                    //--------------------------------------------------------//
-                    // Display the address
-                    //--------------------------------------------------------//
-                    oView.byId("PremiseAddress"+mEntry.PREMISE_PK).setText(sAddress);
-                    
-                    sAddress = "";
+                },
+
+                onFail : function (response) {
+                    iomy.common.showError("There was an unexpected error loading the premise address.");
+                    jQuery.sap.log.error(JSON.stringify(response));
                 }
-            },
+            });
             
-            onFail : function (response) {
-                iomy.common.showError("There was an unexpected error loading the premise address.");
-                jQuery.sap.log.error(JSON.stringify(response));
-            }
-        });
+        } catch (e) {
+            $.sap.log.error("Error attempting to load premise addresses ("+e.name+"): " + e.message);
+            
+        }
     }
     
 });
