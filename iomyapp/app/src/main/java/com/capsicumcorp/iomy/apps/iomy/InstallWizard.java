@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -171,6 +172,7 @@ public class InstallWizard {
         boolean hasANumber              = false;
         boolean hasAnUpperCaseLetter    = false;
         boolean hasALowerCaseLetter     = false;
+        boolean hasNoWeirdCharacters    = false;
         int expectedPasswordLength      = 8;
         int passwordLength              = password.length();
         int symbols                     = 0;
@@ -178,6 +180,8 @@ public class InstallWizard {
         int letters                     = 0;
         int upperCaseLetters            = 0;
         int lowerCaseLetters            = 0;
+        int invalidChars                = 0;
+        int asciiNumber                 = -1;
         String errorMessage             = "";
 
         //----------------------------------//
@@ -202,14 +206,16 @@ public class InstallWizard {
         // Go through every single character, analyse each one to see if it's a letter, number, or symbol.
         //------------------------------------------------------------------------------------------------//
         for (int i = 0; i < passwordLength; i++) {
+//            Log.d("Character", password.charAt(i) + ", ASCII: "+(int) password.charAt(i));
             if (continueCheck == true) {
                 break;
             }
+
             // Is it a number?
             if (Character.isDigit(password.charAt(i))) {
                 numbers++;
 
-                // Is it a letter?
+            // Is it a letter?
             } else if (Character.isLetter(password.charAt(i))) {
                 // Is it upper or lower case.
                 if (Character.isUpperCase(password.charAt(i))) {
@@ -219,9 +225,16 @@ public class InstallWizard {
                 }
                 letters++;
 
-                // So it must be some sort of symbol.
+            // No! It must be some sort of symbol!
             } else {
                 symbols++;
+
+                // Check that it's not one of those characters like newlines, or tabs.
+//                asciiNumber = password.charAt(i);
+//
+//                if (asciiNumber >= 0 && asciiNumber < 32) {
+//                    invalidChars++;
+//                }
             }
         }
 
@@ -250,10 +263,14 @@ public class InstallWizard {
             hasASymbol = true;
         }
 
+        if (invalidChars == 0) {
+            hasNoWeirdCharacters = true;
+        }
+
         //----------------------------------------------------------------------------------------//
         // Verify validity and generate error messages when not all of the conditions are met.
         //----------------------------------------------------------------------------------------//
-        if (eightChars && hasAnUpperCaseLetter && hasALowerCaseLetter && hasANumber && hasASymbol) {
+        if (eightChars && hasAnUpperCaseLetter && hasALowerCaseLetter && hasANumber && hasASymbol && hasNoWeirdCharacters) {
 
             valid = true;
 

@@ -43,6 +43,7 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- Username -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -53,9 +54,9 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/owner_username"
-                android:capitalize="sentences"
                 android:singleLine="true" />
 
+            <!-- Password -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -70,6 +71,7 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:id="@+id/owner_password"
                 android:singleLine="true" />
 
+            <!-- Confirm Password -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
