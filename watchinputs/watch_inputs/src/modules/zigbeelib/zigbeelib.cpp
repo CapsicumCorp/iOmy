@@ -2587,7 +2587,7 @@ STATIC void __zigbeelib_send_queue_send_next_packet(int localzigbeeindex, long *
 }
 
 //Add a packet to a Zigbee send queue or reject the packet if the queue is full
-STATIC int __zigbeelib_add_packet_to_send_queue(int localzigbeeindex, uint8_t *packet, uint8_t packetlen, uint8_t packettype, char waitforresponse, uint16_t send_netaddr, uint16_t send_cluster, uint16_t recv_netaddr, uint16_t recv_cluster, long *localzigbeelocked, long *zigbeelocked) {
+static int __zigbeelib_add_packet_to_send_queue(int localzigbeeindex, const uint8_t * const packet, uint8_t packetlen, uint8_t packettype, char waitforresponse, uint16_t send_netaddr, uint16_t send_cluster, uint16_t recv_netaddr, uint16_t recv_cluster, long *localzigbeelocked, long *zigbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   localzigbeedevice_t *localzigbeedeviceptr;
   int i, pos;
