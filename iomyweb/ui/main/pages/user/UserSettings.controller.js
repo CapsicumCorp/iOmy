@@ -133,6 +133,8 @@ sap.ui.controller("pages.user.UserSettings", {
                 }
             });
             
+            oModel.setSizeLimit(420);
+            
             iomy.common.RetrieveRoomAdminRoomList({
 
                 onSuccess : function () {
@@ -145,7 +147,6 @@ sap.ui.controller("pages.user.UserSettings", {
 
                         oModel.RoomOptions = aRoomData;
 
-                        oModel.setSizeLimit(420);
                         oView.setModel( oModel );
 
                         //------------------------------------------------//
@@ -161,6 +162,14 @@ sap.ui.controller("pages.user.UserSettings", {
                 
                 onFail : function (sError) {
                     $.sap.log.error("Error loading the room options: "+sError);
+                    oView.setModel( oModel );
+                    
+                    //------------------------------------------------//
+                    //-- Trigger the onSuccess Event (TEMPORARY)    --//
+                    //------------------------------------------------//
+                    if( oConfig.onSuccess ) {
+                        oConfig.onSuccess();
+                    }
                 }
             });
             
