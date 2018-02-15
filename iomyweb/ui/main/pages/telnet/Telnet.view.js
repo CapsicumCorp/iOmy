@@ -198,6 +198,40 @@ sap.ui.jsview("pages.telnet.Telnet", {
                                             }
                                         })
 									]
+								}).addStyleClass("TextCenter"),
+                                
+                                //-- Row 3 --//
+                                new sap.m.HBox({
+									layoutData : new sap.m.FlexItemData({
+										growFactor : 1
+									}),
+									items : [
+                                        //-- Get RapidHA Information --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Form Network",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("rapidha_form_network");
+                                            }
+                                        }),
+                                        
+                                        //-- Get Zigbee Information --//
+										new sap.m.Button({
+                                            layoutData : new sap.m.FlexItemData({
+                                                growFactor : 1
+                                            }),
+                                            type:"Default",
+                                            text: "Form Network (Netvox)",
+
+                                            press : function () {
+                                                oController.ExecuteCommand("rapidha_form_network_netvoxchan");
+                                            }
+                                        })
+									]
 								}).addStyleClass("TextCenter")
 							]
 						})					
