@@ -2932,8 +2932,32 @@ $.extend(iomy.common,{
         // certain pages.
         //------------------------------------------------------------------------//
         try {
+            //-- Add/Edit Room --//
+            if (sPageName === "pRoomForm") {
+                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms()) {
+                    aErrorMessages.push("You don't have sufficient privileges for room management.");
+                }
+                
+            //-- Add/Edit Device --//
+            } else if (sPageName === "pDeviceForm") {
+                if (!iomy.functions.permissions.isCurrentUserAbleToAddOrEditDevices()) {
+                    aErrorMessages.push("You don't have sufficient privileges to create or modify devices.");
+                }
+                
+            //-- Edit Premise --//
+            } else if (sPageName === "pPremiseForm") {
+                if (!iomy.functions.permissions.isCurrentUserAbleToEditPremise()) {
+                    aErrorMessages.push("You don't have sufficient privileges to change premise details.");
+                }
+            
+            //-- Database Indexing --//
+            } else if (sPageName === "pDBIndex") {
+                if (!iomy.functions.permissions.isCurrentUserAbleToToggleDBIndexing()) {
+                    aErrorMessages.push("You don't have sufficient privileges to create or modify devices.");
+                }
+            
             //-- User List --//
-            if (sPageName === "pUserList" || sPageName === "pUserForm" || sPageName === "pNewUser") {
+            } else if (sPageName === "pUserList" || sPageName === "pUserForm" || sPageName === "pNewUser") {
                 if (iomy.common.UserInfo.PermUserAdmin != 1) {
                     aErrorMessages.push("You don't have sufficient privileges to manage users.");
                 }

@@ -1729,6 +1729,132 @@ $.extend(iomy.functions, {
             };
         },
         
+        isCurrentUserAbleToAddOrEditDevices : function () {
+            var bAble = false;
+                
+            try {
+                //-----------------------------------------------------------------//
+                // Only proceed if the user has a premise accessible.
+                //-----------------------------------------------------------------//
+                if (JSON.stringify(iomy.common.RoomsList) !== "{}") {
+                    
+                    //-----------------------------------------------------------------//
+                    // Enter the premise level of the variable.
+                    //-----------------------------------------------------------------//
+                    $.each(iomy.common.RoomsList, function (sI, mPremise) {
+                        try {
+                            //-----------------------------------------------------------------//
+                            // Enter the room level to evaluate the 'PermWrite' flag.
+                            //-----------------------------------------------------------------//
+                            var bFound = false;
+
+                            $.each(mPremise, function (sJ, mRoom) {
+                                try {
+                                    bAble = mRoom.PermWrite == 1;
+
+                                    if (bAble) {
+                                        bFound = true;
+                                        return false;
+                                    }
+                                } catch (e) {
+                                    $.sap.log.error("Error checking the edit room permission ("+e.name+"): " + e.message);
+                                }
+                            });
+
+                            //-- We've found that a device can be created or modified. End the loop. --//
+                            if (bFound) {
+                                return false;
+                            }
+                        } catch (e) {
+                            $.sap.log.error("Error processing a premise ("+e.name+"): " + e.message);
+                        }
+                    });
+                }
+            } catch (e) {
+                $.sap.log.error("Error finding out whether the user is able to manage devices ("+e.name+"): " + e.message);
+            }
+            
+            return bAble;
+        },
+        
+        isCurrentUserAbleToManageRooms : function () {
+            var bAble = false;
+                
+            try {
+                if (JSON.stringify(iomy.common.PremiseList) !== "{}") {
+                    $.each(iomy.common.PremiseList, function (sI, mPremise) {
+
+                        try {
+                            bAble = iomy.functions.permissions.isUserRoomAdminForPremise(mPremise.Id);
+
+                            if (bAble) {
+                                return false;
+                            }
+                        } catch (e) {
+                            $.sap.log.error("Error checking the room management permission ("+e.name+"): " + e.message);
+                        }
+
+                    });
+                }
+            } catch (e) {
+                $.sap.log.error("Error finding out whether the user is able to manage rooms ("+e.name+"): " + e.message);
+            }
+            
+            return bAble;
+        },
+        
+        isCurrentUserAbleToEditPremise : function () {
+            var bAble = false;
+                
+            try {
+                if (JSON.stringify(iomy.common.PremiseList) !== "{}") {
+                    $.each(iomy.common.PremiseList, function (sI, mPremise) {
+
+                        try {
+                            bAble = mPremise.PermWrite == 1;
+
+                            if (bAble) {
+                                return false;
+                            }
+                        } catch (e) {
+                            $.sap.log.error("Error checking the room management permission ("+e.name+"): " + e.message);
+                        }
+
+                    });
+                }
+            } catch (e) {
+                $.sap.log.error("Error finding out whether the user is able to manage rooms ("+e.name+"): " + e.message);
+            }
+            
+            return bAble;
+        },
+        
+        isCurrentUserAbleToToggleDBIndexing : function () {
+            var bAble = false;
+                
+            try {
+                if (JSON.stringify(iomy.common.PremiseList) !== "{}") {
+                    $.each(iomy.common.PremiseList, function (sI, mPremise) {
+
+                        try {
+                            bAble = iomy.functions.permissions.isUserPremiseOwner(mPremise.Id);
+
+                            if (bAble) {
+                                return false;
+                            }
+                        } catch (e) {
+                            $.sap.log.error("Error checking the premise owner flag ("+e.name+"): " + e.message);
+                        }
+
+                    });
+                }
+            } catch (e) {
+                $.sap.log.error("Error finding out whether the user is able to toggle database indexing ("+e.name+"): " + e.message);
+            }
+            
+            return bAble;
+        },
+        
         isUserRoomAdminForPremise : function (iPremiseId) {
             var mPremiseValidation;
             var bIsAdmin = false;
