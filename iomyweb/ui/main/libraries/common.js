@@ -2857,6 +2857,11 @@ $.extend(iomy.common,{
     NavigationChangePage: function( sPageName, aPageData, bResetNavArray ) {
         var bCreatingPage   = true;
         var aErrorMessages  = [];
+        
+        var sNoRightToAddDevice         = "You don't have sufficient privileges to create a new device.";
+        var sNoRightToEditDevice        = "You don't have sufficient privileges to change device information.";
+        var sNoRightToAddRoom           = "You don't have sufficient privileges to create rooms.";
+        var sNoRightToEditRoom          = "You don't have sufficient privileges to edit room details or delete a room.";
 
         //-- Declare aPageData as an associative array if undefined --//
         aPageData = aPageData || {};
@@ -2935,13 +2940,21 @@ $.extend(iomy.common,{
             //-- Add/Edit Room --//
             if (sPageName === "pRoomForm") {
                 if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms()) {
-                    aErrorMessages.push("You don't have sufficient privileges for room management.");
+                    if (aPageData.bEditing === true) {
+                        aErrorMessages.push(sNoRightToEditRoom);
+                    } else {
+                        aErrorMessages.push(sNoRightToAddRoom);
+                    }
                 }
                 
             //-- Add/Edit Device --//
             } else if (sPageName === "pDeviceForm") {
                 if (!iomy.functions.permissions.isCurrentUserAbleToAddOrEditDevices()) {
-                    aErrorMessages.push("You don't have sufficient privileges to create or modify devices.");
+                    if (aPageData.bEditing === true) {
+                        aErrorMessages.push(sNoRightToEditDevice);
+                    } else {
+                        aErrorMessages.push(sNoRightToAddDevice)
+                    }
                 }
                 
             //-- Edit Premise --//
@@ -2953,7 +2966,7 @@ $.extend(iomy.common,{
             //-- Database Indexing --//
             } else if (sPageName === "pDBIndex") {
                 if (!iomy.functions.permissions.isCurrentUserAbleToToggleDBIndexing()) {
-                    aErrorMessages.push("You don't have sufficient privileges to create or modify devices.");
+                    aErrorMessages.push("You don't have sufficient privileges to toggle database indexing.");
                 }
             
             //-- User List --//
@@ -2973,6 +2986,19 @@ $.extend(iomy.common,{
                 if (iomy.common.LookupFirstHubToUseWithTelnet() == 0) {
                     aErrorMessages.push("Only the owner of a premise can use the telnet console.");
                 }
+                
+            //-- Device List (for editing) --//
+            } else if (sPageName === "pDevice" && aPageData.bEditing === true) {
+                if (!iomy.functions.permissions.isCurrentUserAbleToAddOrEditDevices()) {
+                    aErrorMessages.push(sNoRightToEditDevice);
+                }
+                
+            //-- Room List (for editing) --//
+            } else if (sPageName === "pRoomList" && aPageData.bEditing === true) {
+                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms()) {
+                    aErrorMessages.push(sNoRightToEditRoom);
+                }
+                
             }
             
             if (aErrorMessages.length > 0) {
