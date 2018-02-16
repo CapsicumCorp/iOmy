@@ -134,6 +134,7 @@ sap.ui.controller("pages.user.UserSettings", {
             });
             
             oModel.setSizeLimit(420);
+            oView.setModel( oModel );
             
             iomy.common.RetrieveRoomAdminRoomList({
 
@@ -279,25 +280,23 @@ sap.ui.controller("pages.user.UserSettings", {
 											//------------------------------------------------//
 											//-- STEP 6 - Update the Controller Model       --//
 											//------------------------------------------------//
-											oController.RefreshModel( oController, {
-												onSuccess: $.proxy( function() {
-													//------------------------------------------------//
-													//-- STEP 8 - Load the Display Fragment         --//
-													//------------------------------------------------//
-                                                    iomy.common.showMessage({
-                                                        text : "User Information successfully updated."
-                                                    });
-                                                    
-                                                    if (oView.byId("openMenu") !== undefined) {
-                                                        var sDisplayName = iomy.common.UserInfo.Displayname || iomy.common.UserInfo.Username;
-                                                        oView.byId("openMenu").setText("Hi, "+sDisplayName);
-                                                    }
-                                                    
-													oController.ToggleButtonsAndView( oController, "ShowInfo" );
-														
-														
-													}, oController )
-												});    //-- END RefreshControllerModel (STEP 6) --//
+											oController.RefreshModel( oController, {});
+                                            
+                                            //------------------------------------------------//
+                                            //-- STEP 8 - Load the Display Fragment         --//
+                                            //------------------------------------------------//
+                                            iomy.common.showMessage({
+                                                text : "User information successfully updated."
+                                            });
+
+                                            if (oView.byId("openMenu") !== undefined) {
+                                                var sDisplayName = iomy.common.UserInfo.Displayname || iomy.common.UserInfo.Username;
+                                                oView.byId("openMenu").setText("Hi, "+sDisplayName);
+                                            }
+
+                                            oController.ToggleButtonsAndView( oController, "ShowInfo" );
+                                            
+                                            //-- END RefreshControllerModel (STEP 6) --//
 										}, oController )
 									});    //-- END LandPackagesList (STEP 5) --//
 									
@@ -384,16 +383,18 @@ sap.ui.controller("pages.user.UserSettings", {
 											//------------------------------------------------//
 											//-- STEP 6 - Update the Controller Model       --//
 											//------------------------------------------------//
-											oController.RefreshModel( oController, {
-												onSuccess: $.proxy( function() {
-													//------------------------------------------------//
-													//-- STEP 8 - Load the Display Fragment         --//
-													//------------------------------------------------//
-													oController.ToggleButtonsAndView( oController, "ShowAddress" );
-													
-														
-                                                }, oController )
-                                            });    //-- END RefreshControllerModel (STEP 6) --//
+											oController.RefreshModel( oController, {});
+                                            
+                                            //------------------------------------------------//
+                                            //-- STEP 8 - Load the Display Fragment         --//
+                                            //------------------------------------------------//
+                                            oController.ToggleButtonsAndView( oController, "ShowAddress" );
+                                            
+                                            iomy.common.showMessage({
+                                                text : "User address successfully updated."
+                                            });
+                                            
+                                            //-- END RefreshControllerModel (STEP 6) --//
 										}, oController )
 									});    //-- END LandPackagesList (STEP 5) --//
 									
@@ -703,12 +704,12 @@ sap.ui.controller("pages.user.UserSettings", {
                     iomy.common.RefreshCoreVariables({
 
                         onSuccess : function () {
+                            oController.RefreshModel( oController, {} );
+                            oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
+                            
                             iomy.common.showMessage({
                                 "text" : "Updated permissions successfully"
                             });
-
-                            oController.RefreshModel( oController, {} );
-                            oController.ToggleButtonsAndView( oController, "ShowRoomPermissions" );
 
                         }
 
