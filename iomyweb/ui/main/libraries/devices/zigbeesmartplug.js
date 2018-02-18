@@ -26,18 +26,20 @@ iomy.devices.zigbeesmartplug = new sap.ui.base.Object();
 
 $.extend(iomy.devices.zigbeesmartplug,{
     
-    CommTypeId : 3,                         // This SHOULD NOT change!
+    // These SHOULD NOT change!
+    CommTypeId : 3,
     LinkTypeId : 2,
     ThingTypeId : 2,
     
     iSelectedCommID : null,
     
-    ConnectedZigbeeModems : {},             // Associative Array of all the Connected dongles
-    bJoinModeToggleCoolingDown : false,
-    bJoinModeToggleCoolDownPeriod : 5000, // 5 second cooldown (in milliseconds)
-    intervalCooldown : null,
-    wTelnetLogArea : null,
-    bRunningCommand : false,
+    bZigbeeModemsFound              : false,
+    ConnectedZigbeeModems           : {},       // Associative Array of all the Connected dongles
+    bJoinModeToggleCoolingDown      : false,
+    bJoinModeToggleCoolDownPeriod   : 5000,     // 5 second cooldown (in milliseconds)
+    intervalCooldown                : null,
+    wTelnetLogArea                  : null,
+    bRunningCommand                 : false,
     
     //========================================================================//
     // TELNET FUNCTIONALITY                                                   //

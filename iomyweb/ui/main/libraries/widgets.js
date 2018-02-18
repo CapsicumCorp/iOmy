@@ -1413,6 +1413,9 @@ $.extend( iomy.widgets, {
         var fnSuccess;
         var fnFail;
         
+        //--------------------------------------------------------------------//
+        // Process the ID and settings map.
+        //--------------------------------------------------------------------//
         if (typeof sId === "string") {
             sID = sId;
             
@@ -1441,6 +1444,9 @@ $.extend( iomy.widgets, {
             throw new IllegalArgumentException("Element ID is not a valid type. Must be a string. Type given: '"+typeof sId+"'.");
         }
         
+        //--------------------------------------------------------------------//
+        // Process the parameters found in the settings map.
+        //--------------------------------------------------------------------//
         if (mSettings !== undefined) {
             if (mSettings.template !== undefined && mSettings.template !== null && mSettings.template !== false) {
                 var mTemplateSettings = mSettings.template;
@@ -1512,12 +1518,16 @@ $.extend( iomy.widgets, {
                     });
 
                     if (iModemCount > 0) {
+                        iomy.devices.zigbeesmartplug.bZigbeeModemsFound = true;
+                        
                         oSBox.setSelectedKey(iFirstModem);
 
                         oSBox.setEnabled(true);
                         fnSuccess();
 
                     } else {
+                        iomy.devices.zigbeesmartplug.bZigbeeModemsFound = false;
+                        
                         oSBox.addItem(
                             new sap.ui.core.Item({
                                 key : -1,
@@ -1532,8 +1542,7 @@ $.extend( iomy.widgets, {
             return oSBox;
 
         } catch (e) {
-            e.message = "Error in iomy.widgets.selectBoxZigbeeModem(): "+e.message;
-            throw e;
+            $.sap.log.error("Error in iomy.widgets.selectBoxZigbeeModem(): "+e.message);
         }
     },
     

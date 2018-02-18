@@ -180,7 +180,7 @@ sap.ui.controller("pages.device.DeviceForm", {
         
         oView.byId("CustomTelnetInput").setEnabled(bEnabled);
         oView.byId("CustomTelnetButton").setEnabled(bEnabled);
-        oView.byId("JoinDevicesButton").setEnabled(bEnabled);
+        oView.byId("JoinDevicesButton").setEnabled(bEnabled && iomy.devices.zigbeesmartplug.bZigbeeModemsFound);
     },
     
     ToggleSubmitCancelButtons : function (bEnabled) {
