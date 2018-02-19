@@ -1736,7 +1736,7 @@ $.extend(iomy.functions, {
                 //-----------------------------------------------------------------//
                 // Only proceed if the user has a premise accessible.
                 //-----------------------------------------------------------------//
-                if (JSON.stringify(iomy.common.RoomsList) !== "{}") {
+                if (JSON.stringify(iomy.common.RoomsList) !== "{}" && JSON.stringify(iomy.common.PremiseList) !== "{}") {
                     
                     //-----------------------------------------------------------------//
                     // Enter the premise level of the variable.
