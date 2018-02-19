@@ -100,7 +100,7 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         baseparams.put("DBName", installWizard.databaseSchema);
 
         final Map<String, String> addHubParams = new HashMap<String, String>(baseparams);
-        String addHubDataString="{\"InsertType\":\"NewAll\",\"OwnerUsername\":\""+installWizard.ownerUsername+"\",\"OwnerPassword\":\""+installWizard.ownerPassword+"\",\"PremiseName\":\""+installWizard.premiseName+"\",\"PremiseDesc\":\"\",\"HubName\":\""+installWizard.hubName+"\",\"HubType\":\"2\",\"WatchInputsUsername\":\""+installWizard.watchInputsUsername+"\",\"WatchInputsPassword\":\""+installWizard.watchInputsPassword+"\"";
+        String addHubDataString="{\"InsertType\":\"NewAll\",\"OwnerUsername\":\""+installWizard.ownerUsername+"\",\"OwnerPassword\":\""+installWizard.ownerPassword+"\",\"PremiseName\":\""+installWizard.premiseName+"\",\"PremiseDesc\":\"\",\"HubName\":\""+installWizard.hubName+"\",\"HubType\":\"2\",\"HubUsername\":\""+installWizard.hubUsername+"\",\"HubPassword\":\""+installWizard.hubPassword+"\",\"WatchInputsUsername\":\""+installWizard.watchInputsUsername+"\",\"WatchInputsPassword\":\""+installWizard.watchInputsPassword+"\"";
 
         // NOTE: According to https://android-developers.googleblog.com/2011/03/identifying-app-installations.html ,
         //   there are other ways to get a unique serial, but for Android >= 2.3 Build.SERIAL should be fairly unique
@@ -109,7 +109,7 @@ public class UserPremiseHubProgressPage extends ProgressPage {
         }
         addHubDataString+="}";
 
-        baseparams.put("Data", "{\"InsertType\":\"NewAll\",\"OwnerUsername\":\""+installWizard.ownerUsername+"\",\"OwnerPassword\":\""+installWizard.ownerPassword+"\",\"PremiseName\":\""+installWizard.premiseName+"\",\"PremiseDesc\":\"\",\"HubName\":\""+installWizard.hubName+"\",\"HubType\":\"2\",\"WatchInputsUsername\":\""+installWizard.watchInputsUsername+"\",\"WatchInputsPassword\":\""+installWizard.watchInputsPassword+"\"}");
+        baseparams.put("Data", "{\"InsertType\":\"NewAll\",\"OwnerUsername\":\""+installWizard.ownerUsername+"\",\"OwnerPassword\":\""+installWizard.ownerPassword+"\",\"PremiseName\":\""+installWizard.premiseName+"\",\"PremiseDesc\":\"\",\"HubName\":\""+installWizard.hubName+"\",\"HubType\":\"2\",\"HubUsername\":\""+installWizard.hubUsername+"\",\"HubPassword\":\""+installWizard.hubPassword+"\",\"WatchInputsUsername\":\""+installWizard.watchInputsUsername+"\",\"WatchInputsPassword\":\""+installWizard.watchInputsPassword+"\"}");
         addHubParams.put("Data", addHubDataString);
 
         final String modeAddHub             = "03_AddHub";

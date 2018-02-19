@@ -32,9 +32,6 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".PremiseAndHubSetup">
 
-    <!-- PREMISE FIELD -->
-
-    <!-- HUB FIELD -->
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -46,6 +43,7 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- Premise -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -59,6 +57,7 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:text="Home"
                 android:singleLine="true" />
 
+            <!-- Hub Name -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -71,14 +70,38 @@ along with iOmy. If not, see <http://www.gnu.org/licenses/>.
                 android:layout_height="wrap_content"
                 android:text="iOmyHub"
                 android:singleLine="true" />
+
+            <!-- Hub Username -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hub Username"
+                android:id="@+id/premiseHubUsernameLabel" />
+
+            <EditText
+                android:id="@+id/premiseHubUsernameField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="root"
+                android:singleLine="true" />
+
+            <!-- Hub Password -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hub Password"
+                android:id="@+id/premiseHubPasswordLabel" />
+
+            <EditText
+                android:id="@+id/premiseHubPasswordField"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:text=""
+                android:singleLine="true" />
+
         </LinearLayout>
     </ScrollView>
-
-    <!-- USERNAME FIELD -->
-
-    <!-- PASSWORD FIELD -->
-
-    <!-- CONFIRM PASSWORD FIELD -->
 
     <Button
         android:layout_width="fill_parent"

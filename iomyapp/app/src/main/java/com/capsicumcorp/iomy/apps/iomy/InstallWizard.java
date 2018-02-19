@@ -73,6 +73,8 @@ public class InstallWizard {
     public String databaseSchema        = null;
     public String premiseName           = null;
     public String hubName               = null;
+    public String hubUsername           = null;
+    public String hubPassword           = null;
     public String ownerUsername         = null;
     public String ownerPassword         = null;
     public String confirmOwnerPassword  = null;

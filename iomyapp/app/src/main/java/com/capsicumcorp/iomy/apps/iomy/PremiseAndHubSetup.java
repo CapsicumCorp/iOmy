@@ -62,8 +62,15 @@ public class PremiseAndHubSetup extends AppCompatActivity {
         //------------------------------------------------------------//
         EditText et = (EditText) findViewById(R.id.premiseNameField);
         installWizard.premiseName = et.getText().toString();
+
         et = (EditText) findViewById(R.id.premiseHubNameField);
         installWizard.hubName = et.getText().toString();
+
+        et = (EditText) findViewById(R.id.premiseHubUsernameField);
+        installWizard.hubUsername = et.getText().toString();
+
+        et = (EditText) findViewById(R.id.premiseHubPasswordField);
+        installWizard.hubPassword = et.getText().toString();
 
         //------------------------------------------------------------//
         // Proceed to Page 2 of the premise setup. Set up the owner.
@@ -155,6 +162,25 @@ public class PremiseAndHubSetup extends AppCompatActivity {
             valid = false;
             this.installWizard.validationErrorMessages.add("Hub name must be longer than 3 characters.");
         }
+
+        //----------------------------------------------------------------------------------------//
+        // Hub username must be given.
+        //----------------------------------------------------------------------------------------//
+        if (installWizard.hubUsername.trim().length() == 0) {
+            valid = false;
+            this.installWizard.validationErrorMessages.add("Hub username must be filled out.");
+
+        }
+
+        //----------------------------------------------------------------------------------------//
+        // Hub password must be given and secure.
+        //----------------------------------------------------------------------------------------//
+        if (installWizard.hubPassword.length() == 0) {
+            valid = false;
+            installWizard.validationErrorMessages.add("Hub password must be entered.");
+        }
+
+        valid = installWizard.isValidPassword(installWizard.hubPassword) && valid;
 
         return valid;
     }
