@@ -94,6 +94,7 @@ static pthread_mutex_t mainlibmutex;
 static pthread_mutex_t mainlibmutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
+static sem_t *thislib_parentsleepsem; //Used for caller if this library sleeping
 static sem_t mainlib_mainthreadsleepsem; //Used for main thread sleeping
 
 static int modulesinited=0;
@@ -958,6 +959,7 @@ void mainlib_setneedtoquit(int val) {
 	PTHREAD_LOCK(&mainlibmutex);
 	needtoquit=val;
   sem_post(&mainlib_mainthreadsleepsem);
+  sem_post(thislib_parentsleepsem);
 	PTHREAD_UNLOCK(&mainlibmutex);
 }
 
@@ -1126,13 +1128,16 @@ static void mainlib_init_signals() {
 	sigprocmask(SIG_BLOCK, &set, NULL);
 }
 
-int mainlib_main() {
+int mainlib_main(sem_t *parentsleepsem) {
   mainlib_module_t module;
 
 #ifdef DEBUG
 	printf("DEBUG: In the main library\n");
 	printf("DEBUG: Loading modules from directory: %s\n", modules_dir);
 #endif
+
+	//Store a copy of parent sleep sem
+	thislib_parentsleepsem=parentsleepsem;
 
   //Store module info for mainlib
   //NOTE: The module name comes from mainlib_moduleinfo_ver_1

@@ -21,6 +21,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+//NOTE: POSIX_C_SOURCE is needed for the following
+//  sem_timedwait
+#define _POSIX_C_SOURCE 200112L
+
 //NOTE: _XOPEN_SOURCE is needed for the following
 //  strdup
 #define _XOPEN_SOURCE 500L
@@ -31,6 +35,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
+#include <semaphore.h>
 #include <getopt.h>
 #include "watch_inputs.h"
 #include "mainlib.h"
@@ -150,6 +155,7 @@ static void getcmdopts(int argc, char **argv) {
 int main(int argc, char **argv) {
   int result;
   char *tmpstr;
+  static sem_t sleepsem; //Used for main sleeping
 
   printf("Watch Inputs %s\n", WATCH_INPUTS_VERSION);
   printf(WATCH_INPUTS_COPYRIGHT);
@@ -169,12 +175,25 @@ int main(int argc, char **argv) {
 	//This always seems to return 0 for the main thread
   mainthread=pthread_self();
 
-	if (mainlib_main()==0) {
+  if (sem_init(&sleepsem, 0, 0)==-1) {
+    //Can't initialise semaphore
+    printf("DEBUG: Exiting %s: Can't initialise main thread sleep semaphore\n", __func__);
+    return 1;
+  }
+	if (mainlib_main(&sleepsem)==0) {
     while (!mainlib_getneedtoquit()) {
-      sleep(1);
+      time_t curtime;
+      struct timespec waittime;
+
+      curtime=time(NULL);
+      waittime.tv_nsec=0;
+      waittime.tv_sec=curtime+120;
+      sem_timedwait(&sleepsem, &waittime);
     }
   }
   mainlib_cleanup();
+
+  sem_destroy(&sleepsem);
 
   if (cfg_filename) {
     free(cfg_filename);

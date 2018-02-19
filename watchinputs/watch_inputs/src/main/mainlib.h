@@ -24,6 +24,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MAINLIB_H
 #define MAINLIB_H
 
+#include <semaphore.h>
+
 #pragma pack(push)
 #pragma pack(1) //Pack the structures to 1 byte boundary as pointers to the structure variables will be passed around between multiple libraries
 
@@ -40,7 +42,7 @@ typedef struct {
 
 //Needed by watch_inputs.c
 int mainlib_getneedtoquit();
-int mainlib_main();
+int mainlib_main(sem_t *sleepsem);
 void mainlib_cleanup();
 
 #define MAINLIBINTERFACE_VER_1 1 //A version number for the mainlib interface version
