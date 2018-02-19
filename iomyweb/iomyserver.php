@@ -780,7 +780,7 @@ if($bError===false) {
 								}
 								
 								//-- Check the 'HubName' isn't invalid --//
-								if( !( strlen( trim( $sHubName ) ) > 3 ) ) {
+								if( !( strlen( trim( $sHubName ) ) > 1 ) ) {
 									//-- Flag an error --//
 									$bError = true;
 									$iErrCode  = 0;
@@ -789,8 +789,15 @@ if($bError===false) {
 								}
 								
 								//-- Check to make sure that "HubType" is numeric and above 1 --//
-								if( is_numeric($sHubTypeId) && $sHubTypeId>=1 ) {
+								if( is_numeric($sHubTypeId)  ) {
 									$iHubTypeId = intval( $sHubTypeId );
+									
+									if( !($iHubTypeId>=1 ) ) {
+										$bError = true;
+										$iErrCode  = 0;
+										$sErrMesg .= "Error Code:'7318' \n";
+										$sErrMesg .= "Problem with the 'HubName' from the 'Data' parameter! \n";
+									}
 								} else {
 									//-- Flag an error --//
 									$bError = true;
@@ -804,6 +811,45 @@ if($bError===false) {
 									$sHubAddress = $aPostData['HubAddress'];
 								} else {
 									$sHubAddress = "127.0.0.1";
+								}
+								
+								//------------------------------------//
+								//-- Hub Username                   --//
+								//------------------------------------//
+								if( isset( $aPostData['HubUsername'] ) ) {
+									if( is_string( $aPostData['HubUsername'] ) ) {
+										if( strlen( trim( $aPostData['HubUsername'] ) ) >= 1 ) {
+											$sHubUsername = $aPostData['HubUsername'];
+											
+										} else {
+											$sHubUsername = "";
+										}
+									} else {
+										$sHubUsername = "";
+									}
+								} else {
+									$sHubUsername = "";
+								}
+								
+								//------------------------------------//
+								//-- Hub Password                   --//
+								//------------------------------------//
+								if( isset( $aPostData['HubPassword'] ) ) {
+									if( is_string( $aPostData['HubPassword'] ) ) {
+										if( strlen( $aPostData['HubPassword'] ) ) {
+											$sHubPassword = $aPostData['HubPassword'];
+											
+										} else {
+											$sHubPassword = "";
+											
+										}
+									} else {
+										$sHubPassword = "";
+										
+									}
+								} else {
+									$sHubPassword = "";
+									
 								}
 								
 							} else {
@@ -1084,7 +1130,7 @@ if($bError===false) {
 						//-- Tables         --//
 						//--------------------//
 						case "02_CreateTables1":
-							$aTemp   = DB_CreateTables( $sPostDatabaseName, array("Core", "CoreAddon", "Region", "Currency", "Language", "Timezone") );
+							$aTemp   = DB_CreateTables( $sPostDatabaseName, array( "Core", "CoreAddon", "Region", "Currency", "Language", "Timezone" ) );
 							
 							//-- Insert the Core Values --//
 							if( $aTemp['Error']===false ) {
@@ -1102,7 +1148,7 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateTables3":
-							$aResult = DB_CreateTables( $sPostDatabaseName, array( "PremiseInfo1", "PremiseInfo2", "Rooms", "Hub", "Comm") );
+							$aResult = DB_CreateTables( $sPostDatabaseName, array( "PremiseInfo1", "PremiseInfo2", "Rooms", "Hub", "HubInfo", "Comm") );
 							break;
 							
 						case "02_CreateTables4":
@@ -1352,7 +1398,6 @@ if($bError===false) {
 					}
 				}
 				
-				
 			} catch( Exception $e6400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
@@ -1416,6 +1461,8 @@ if($bError===false) {
 							$iErrCode  = 7403;
 							$sErrMesg .= "Error Code:'7403' \n";
 							$sErrMesg .= "Problem creating the database user! \n";
+							$sErrMesg .= "This is usually caused by the database user is already setup! \n";
+							
 						}
 					}
 					
@@ -1433,8 +1480,6 @@ if($bError===false) {
 							$sErrMesg .= "Problem when trying to start the transaction! \n";
 						}
 					}
-					
-					
 					
 					//-----------------------------------------------------------------------------//
 					//-- 5.7.3.6.A.4 - Add the Premise, PremiseInfo & Hub                        --//
@@ -1504,6 +1549,16 @@ if($bError===false) {
 											//-- Extract the RoomId --//
 											$iRoomId = $aTempResult3D['LastId'];
 											
+											//-- Insert the Hub Security --//
+											$aTempResult3E = DB_InsertHubSec( $sPostDatabaseName, $iHubId, $sHubUsername, $sHubPassword );
+											
+											if( $aTempResult3E['Error']===true ) {
+												$bError    = true;
+												$iErrCode  = 7412;
+												$sErrMesg .= "Error Code:'7412' \n";
+												$sErrMesg .= "Problem inserting the HubSecurity! \n";
+												$sErrMesg .= $aTempResult3E['ErrMesg'];
+											}
 										}
 									}
 								}

@@ -512,7 +512,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "   primary key (HUB_PK)\n";
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table `".$sDBName."`.`HUB` comment 'Used to store sources that submit to the Database. Eg. Andro';\n";
-
+			
 			$sSQL .= "create table `".$sDBName."`.`HUBTYPE` \n";
 			$sSQL .= "(\n";
 			$sSQL .= "   HUBTYPE_PK           bigint not null auto_increment comment 'Primary Key', \n";
@@ -521,7 +521,22 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
 			$sSQL .= "alter table `".$sDBName."`.`HUBTYPE` comment 'Labels for the HubTypeId in the Hub Table';\n";
 			break;
-
+		
+		/*==============================================================*/
+		/* Table: HUBSEC                                                */
+		/*==============================================================*/
+		case 'HubInfo':
+			$sSQL .= "create table `".$sDBName."`.`HUBSEC` \n";
+			$sSQL .= "(\n";
+			$sSQL .= "   HUBSEC_PK            bigint not null auto_increment comment 'Primary Key', \n";
+			$sSQL .= "   HUBSEC_HUB_FK        bigint not null comment 'Foreign Key', \n";
+			$sSQL .= "   HUBSEC_USERNAME      varchar(64) not null, \n";
+			$sSQL .= "   HUBSEC_PASSWORD      varchar(128) not null, \n";
+			$sSQL .= "   primary key (HUBSEC_PK)\n";
+			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset.";\n";
+			$sSQL .= "alter table `".$sDBName."`.`HUBSEC` comment 'Stores secure information about the Hub that is usually reserved for premise owners';\n";
+			break;
+		
 		/*==============================================================*/
 		/* Table: COMM & COMMTYPE                                       */
 		/*==============================================================*/
@@ -5663,10 +5678,10 @@ function DB_CreateDatabaseUser( $sDBName, $sUsername, $sLocation, $sPassword ) {
 			//-- Run the SQL Query and save the results --//
 			$aResultInsert = $oRestrictedDB->InputBindNonCommittedCreateQuery( $sSQL1, $aInputValsInsert );
 			
-			
 			if( $aResultInsert["Error"]===true ) {
 				$bError    = true;
 				$sErrMesg .= $aResultInsert["ErrMesg"];
+				
 			}
 			
 			if( $bError===false ) {
@@ -5697,6 +5712,7 @@ function DB_CreateDatabaseUser( $sDBName, $sUsername, $sLocation, $sPassword ) {
 		try {
 			if( $aResult["Error"]===true ) {
 				$bError    = true;
+				$sErrMesg .= "Problem inserting the User Permissions. \n";
 				$sErrMesg .= $aResult["ErrMesg"];
 			}
 		} catch( Exception $e3) {
@@ -6602,7 +6618,7 @@ function DB_InsertHub( $sDBName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSeria
 			$sSQL .= "    :PremiseId,   :HubTypeId, ";
 			$sSQL .= "    :HubName,     :HubSerialCode, ";
 			$sSQL .= "    :HubIPAddress ";
-			$sSQL .= ") ";
+			$sSQL .= "); ";
 			
 			//----------------------------------------//
 			//-- Input binding                      --//
@@ -6653,6 +6669,89 @@ function DB_InsertHub( $sDBName, $iPremiseId, $iHubTypeId, $sHubName, $sHubSeria
 	}
 }
 
+
+function DB_InsertHubSec( $sDBName, $iHubId, $sUsername, $sPassword ) {
+	//------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                       --//
+	//--    This function is used to add the default data to the database.  --//
+	//------------------------------------------------------------------------//
+	
+	//----------------------------------------------------//
+	//-- 1.0 - Declare Variables                        --//
+	//----------------------------------------------------//
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedDB;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught. --//
+	$aInputValsInsert   = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aResultInsert      = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function. --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	
+	//----------------------------------------------------//
+	//-- 2.0 - SQL Preperation                          --//
+	//----------------------------------------------------//
+	if($bError===false) {
+		try {
+			//----------------------------------------//
+			//-- SQL Query - Create Hub             --//
+			//----------------------------------------//
+			$sSQL .= "INSERT INTO `".$sDBName."`.`HUBSEC` ";
+			$sSQL .= "( ";
+			$sSQL .= "    `HUBSEC_HUB_FK`,   `HUBSEC_USERNAME`, ";
+			$sSQL .= "    `HUBSEC_PASSWORD`  ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :HubId,       :HubUsername, ";
+			$sSQL .= "    :HubPassword ";
+			$sSQL .= "); ";
+			
+			//----------------------------------------//
+			//-- Input binding                      --//
+			//----------------------------------------//
+			$aInputValsInsert = array(
+				array( "Name"=>"HubId",             "type"=>"INT",          "value"=>$iHubId              ),
+				array( "Name"=>"HubUsername",       "type"=>"STR",          "value"=>$sUsername           ),
+				array( "Name"=>"HubPassword",       "type"=>"STR",          "value"=>$sPassword           )
+			);
+			
+			//-- Run the SQL Query and save the results --//
+			$aResultInsert = $oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputValsInsert );
+			
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	
+	//----------------------------------------------------//
+	//-- 4.0 - Error Check                              --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResultInsert["Error"]===true ) {
+				$bError    = true;
+				$sErrMesg .= $aResultInsert["ErrMesg"];
+			}
+		} catch( Exception $e3) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message          --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		//-- Return that it was successful --//
+		return $aResultInsert;
+		
+	} else {
+		//var_dump( $oRestrictedDB->QueryLogs );
+		return array( "Error"=>true, "ErrMesg"=>"InsertHubSec: ".$sErrMesg );
+	}
+}
 
 
 function DB_InsertRoom( $sDBName, $iPremiseId ) {
