@@ -1803,6 +1803,36 @@ $.extend(iomy.functions, {
             return bAble;
         },
         
+        isCurrentUserAbleToEditRoom : function (iRoomId) {
+            var bAble = false;
+            var mRoom = null;
+            
+            try {
+                mRoom = iomy.functions.getRoom(iRoomId);
+                bAble = mRoom.PermWrite == 1;
+                
+            } catch (e) {
+                $.sap.log.error("Error finding out whether the user is able to manage a given room ("+e.name+"): " + e.message);
+            }
+            
+            return bAble;
+        },
+        
+        isCurrentUserAbleToEditDevice : function (iThingId) {
+            var bAble   = false;
+            var mDevice = null;
+            
+            try {
+                mDevice = iomy.common.ThingList["_"+iThingId];
+                bAble   = iomy.functions.permissions.isCurrentUserAbleToEditRoom(mDevice.RoomId);
+                
+            } catch (e) {
+                $.sap.log.error("Error finding out whether the user is able to manage a given room ("+e.name+"): " + e.message);
+            }
+            
+            return bAble;
+        },
+        
         isCurrentUserAbleToEditPremise : function () {
             var bAble = false;
                 

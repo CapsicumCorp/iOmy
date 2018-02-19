@@ -62,7 +62,7 @@ sap.ui.jsfragment("fragments.AddRoomPermission", {
 								}),
 								new sap.ui.core.Item ({
 									key: "3",
-									text:"Read/DeviceToggle"
+									text:"Read/Device Toggle"
 								}),
 								new sap.ui.core.Item ({
 									key: "4",

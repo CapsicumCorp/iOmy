@@ -826,6 +826,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                     },
 
                     onFail : function () {
+                        oController.ToggleSubmitCancelButtons(true);
                         oController.ToggleEditIPWebcamControls(true);
                     }
                 });
@@ -910,6 +911,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                         iomy.common.showError(sErrorMessage, "Failed to update settings",
                             function () {
                                 oController.ToggleEditIPWebcamControls(true);
+                                oController.ToggleSubmitCancelButtons(true);
                             }
                         );
                     }

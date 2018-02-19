@@ -2860,8 +2860,11 @@ $.extend(iomy.common,{
         
         var sNoRightToAddDevice         = "You don't have sufficient privileges to create a new device.";
         var sNoRightToEditDevice        = "You don't have sufficient privileges to change device information.";
+        var sNoRightToEditGivenDevice   = "You don't have sufficient privileges to change information about this device.";
+        
         var sNoRightToAddRoom           = "You don't have sufficient privileges to create rooms.";
         var sNoRightToEditRoom          = "You don't have sufficient privileges to edit room details or delete a room.";
+        var sNoRightToEditGivenRoom     = "You don't have sufficient privileges to edit this room.";
 
         //-- Declare aPageData as an associative array if undefined --//
         aPageData = aPageData || {};
@@ -2939,21 +2942,37 @@ $.extend(iomy.common,{
         try {
             //-- Add/Edit Room --//
             if (sPageName === "pRoomForm") {
-                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms()) {
+                //-- Check that you are able to manage rooms at all. --//
+                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms() &&
+                    !iomy.functions.permissions.isCurrentUserAbleToEditAnyRoom())
+                {
                     if (aPageData.bEditing === true) {
                         aErrorMessages.push(sNoRightToEditRoom);
                     } else {
                         aErrorMessages.push(sNoRightToAddRoom);
                     }
+                    
+                //-- If so, check that this particular room can be edited. --//
+                } else {
+                    if (aPageData.bEditing === true && !iomy.functions.permissions.isCurrentUserAbleToEditRoom(aPageData.RoomId)) {
+                        aErrorMessages.push(sNoRightToEditGivenRoom);
+                    }
                 }
                 
             //-- Add/Edit Device --//
             } else if (sPageName === "pDeviceForm") {
+                //-- Check that you are able to manage devices at all. --//
                 if (!iomy.functions.permissions.isCurrentUserAbleToAddOrEditDevices()) {
                     if (aPageData.bEditing === true) {
                         aErrorMessages.push(sNoRightToEditDevice);
                     } else {
                         aErrorMessages.push(sNoRightToAddDevice)
+                    }
+                    
+                //-- If so, check that this particular device can be edited. --//
+                } else {
+                    if (aPageData.bEditing === true && !iomy.functions.permissions.isCurrentUserAbleToEditDevice(aPageData.ThingId)) {
+                        aErrorMessages.push(sNoRightToEditGivenDevice);
                     }
                 }
                 
