@@ -412,7 +412,11 @@ static int serverlib_waitForConnection_with_quitpipe(int sock, int (* const getA
       fds[1].fd=quitpipefd;
       fds[1].events=POLLIN;
     }
-    result=poll(fds, nfds, 1000);
+    if (quitpipefd!=-1) {
+      result=poll(fds, nfds, 5000);
+    } else {
+      result=poll(fds, nfds, 100);
+    }
     lerrno=errno;
     if (result==0 || (result==-1 && lerrno==EINTR)) {
       //Timeout
