@@ -1605,6 +1605,9 @@ static boost::atomic<bool> needtoquit(false);
 
 static void setneedtoquit(bool val) {
   needtoquit.store(val);
+
+  //Trigger stop in the main async loop
+  gasyncloop.stop();
 }
 
 static bool getneedtoquit() {
