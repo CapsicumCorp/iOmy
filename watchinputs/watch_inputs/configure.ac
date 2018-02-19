@@ -104,6 +104,8 @@ AC_ARG_ENABLE([zigbeelib_debugwithoutdatabase], AS_HELP_STRING([--enable-zigbeel
 AC_ARG_ENABLE([locklib_lockdebug], AS_HELP_STRING([--enable-locklib_lockdebug], [Build with locklib lock debugging]), [locklib_lockdebug=true])
 AC_ARG_ENABLE([ruleslib_lockdebug], AS_HELP_STRING([--enable-ruleslib_lockdebug], [Build with ruleslib lock debugging]), [ruleslib_lockdebug=true])
 AC_ARG_ENABLE([ruleslib_moredebug], AS_HELP_STRING([--enable-ruleslib_moredebug], [Build with ruleslib more debugging]), [ruleslib_moredebug=true])
+AC_ARG_ENABLE([cameralib_lockdebug], AS_HELP_STRING([--enable-cameralib_lockdebug], [Build with cameralib lock debugging]), [cameralib_lockdebug=true])
+AC_ARG_ENABLE([cameralib_moredebug], AS_HELP_STRING([--enable-cameralib_moredebug], [Build with cameralib more debugging]), [cameralib_moredebug=true])
 
 # Custom Messages
 AS_IF([test "x$MYSQLPLUGIN" = xtrue], [
@@ -191,6 +193,17 @@ AS_IF([test "x$ruleslib_moredebug" = xtrue], [
   AC_MSG_RESULT([ruleslib more debugging: disabled])
 ])
 
+AS_IF([test "x$cameralib_lockdebug" = xtrue], [
+  AC_MSG_RESULT([cameralib lock debugging: enabled])
+], [
+  AC_MSG_RESULT([cameralib lock debugging: disabled])
+])
+AS_IF([test "x$cameralib_moredebug" = xtrue], [
+  AC_MSG_RESULT([cameralib more debugging: enabled])
+], [
+  AC_MSG_RESULT([cameralib more debugging: disabled])
+])
+
 AS_IF([test "x$ADVSERDETECT" != "xtrue"], [
   AC_MSG_WARN([Advanced serial port detection isn't available.  This allows the serial library to detect device files that aren't real serial ports.  Without it all serial device files will be opened even if they aren't mapped to a serial port.])
 ])
@@ -215,6 +228,8 @@ AM_CONDITIONAL([ZIGBEELIB_DEBUGWITHOUTDATABASE], [test x$zigbeelib_debugwithoutd
 AM_CONDITIONAL([LOCKLIB_LOCKDEBUG], [test x$locklib_lockdebug = xtrue])
 AM_CONDITIONAL([RULESLIB_LOCKDEBUG], [test x$ruleslib_lockdebug = xtrue])
 AM_CONDITIONAL([RULESLIB_MOREDEBUG], [test x$ruleslib_moredebug = xtrue])
+AM_CONDITIONAL([CAMERALIB_LOCKDEBUG], [test x$cameralib_lockdebug = xtrue])
+AM_CONDITIONAL([CAMERALIB_MOREDEBUG], [test x$cameralib_moredebug = xtrue])
 
 # Optional plugins to enable
 AM_CONDITIONAL([LINK_MYSQLPLUGIN], [test x$MYSQLPLUGIN = xtrue])
@@ -269,4 +284,5 @@ AS_IF([test "x$MYSQLPLUGIN" = xtrue], [
 AC_CONFIG_FILES([src/modules/timeruleslib/Makefile])
 AC_CONFIG_FILES([src/modules/tizigbeelib/Makefile])
 AC_CONFIG_FILES([src/modules/ruleslib/Makefile])
+AC_CONFIG_FILES([src/modules/cameralib/Makefile])
 AC_OUTPUT

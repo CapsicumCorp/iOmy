@@ -47,6 +47,7 @@ model {
                     project ':ndkbluetoothhwandroidlib'
                     project ':ndktizigbeelib'
                     project ':ndkruleslib'
+                    project ':ndkcameralib'
                     project ':ndkwatchinputs'
                 }
             }

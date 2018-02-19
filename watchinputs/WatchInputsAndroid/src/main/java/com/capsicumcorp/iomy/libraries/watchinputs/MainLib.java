@@ -58,6 +58,7 @@ public class MainLib {
     private BluetoothHWAndroidLib mBluetoothHWAndroidLib;
     private TIZigBeeLib mTIZigBeeLib;
     private RulesLib mRulesLib;
+    private CameraLib mCameraLib;
 
     public native int jniinit();
     public native int jniloadModule(long module);
@@ -105,6 +106,7 @@ public class MainLib {
         }
         mTIZigBeeLib=new TIZigBeeLib(AppName);
         mRulesLib=new RulesLib(AppName);
+        mCameraLib=new CameraLib(AppName);
     }
 
     public int init() {
@@ -270,6 +272,13 @@ public class MainLib {
         result=jniloadModule(modulesinfo);
         if (result!=0) {
             Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: ruleslib");
+            return -1;
+        }
+        //Add Camera library
+        modulesinfo=mCameraLib.jnigetmodulesinfo();
+        result=jniloadModule(modulesinfo);
+        if (result!=0) {
+            Log.println(Log.INFO, AppName, "MainLib.loadModules: Failed to load module: cameralib");
             return -1;
         }
         return 0;
