@@ -857,8 +857,8 @@ sap.ui.controller("pages.device.DeviceForm", {
 		var sOldThingText           = iomy.common.ThingList["_"+iThingID].DisplayName;
         var iOldRoomID              = iomy.common.ThingList["_"+iThingID].RoomId;
         var oCurrentFormData        = oView.getModel().getProperty( "/CurrentDevice/" );
-        var iRoomId                 = oCurrentFormData.RoomId;
-        var sThingText              = oCurrentFormData.ThingName;
+        var iRoomId                 = oView.byId("DeviceRoom").getSelectedKey();
+        var sThingText              = oView.byId("DeviceName").getValue();
         
 		var bDifferentThingName     = sOldThingText !== sThingText;
         var bDifferentRoom          = iOldRoomID != iRoomId;
