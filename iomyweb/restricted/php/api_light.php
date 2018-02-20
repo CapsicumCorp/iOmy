@@ -116,16 +116,16 @@ if($bError===false) {
 	//----------------------------------------------------//
 	try {
 		$sPostMode = $aHTTPData["Mode"];
-		//-- NOTE: Valid modes are going to be "ChangeColorBrightness" --//
+		//-- NOTE: Valid modes are going to be "ChangeColorRGB" --//
 		
 		//-- Verify that the mode is supported --//
-		if( $sPostMode!=="ChangeColorBrightness" ) {
+		if( $sPostMode!=="ChangeColorRGB" ) {
 			$bError    = true;
 			$iErrCode  = 101;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"ChangeColorBrightness\" or \"\" \n\n";
+			$sErrMesg .= "eg. \n \"ChangeColorRGB\" or \"\" \n\n";
 		}
 		
 	} catch( Exception $e0102 ) {
@@ -134,14 +134,14 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"ChangeColorBrightness\" or \"\" \n\n";
+		$sErrMesg .= "eg. \n \"ChangeColorRGB\" or \"\" \n\n";
 	}
 	
 	//----------------------------------------------------//
 	//-- 2.2.2 - Retrieve "ThingId"                     --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="ChangeColorBrightness" ) {
+		if( $sPostMode==="ChangeColorRGB" ) {
 			try {
 				//-- Retrieve the "ThingId" --//
 				$iPostThingId = $aHTTPData["ThingId"];
@@ -171,7 +171,7 @@ if($bError===false) {
 	//-- 2.2.3 - Retrieve "Data"                        --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="ChangeColorBrightness" ) {
+		if( $sPostMode==="ChangeColorRGB" ) {
 			try {
 				//-- Retrieve the json "Data" --//
 				$sPostData = $aHTTPData["Data"];
@@ -221,7 +221,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 4.1 - Lookup details on what type of device                ==//
 		//================================================================//
-		if( $sPostMode==="ChangeColorBrightness" ) {
+		if( $sPostMode==="ChangeColorRGB" ) {
 			
 			//----------------------------------------------------------------------------//
 			//-- STEP 1: Lookup the details of that particular "Thing".                 --//
@@ -371,9 +371,9 @@ if( $bError===false ) {
 if( $bError===false ) {
 	try {
 		//================================================================//
-		//== 5.1 - MODE: Change the Hue Sat Brightness                  ==//
+		//== 5.1 - MODE: Change the RGB                                 ==//
 		//================================================================//
-		if( $sPostMode==="ChangeColorBrightness" ) {
+		if( $sPostMode==="ChangeColorRGB" ) {
 			try {
 				//----------------------------------------------------------------//
 				//-- Change the Colour Brightness                               --//
@@ -383,15 +383,15 @@ if( $bError===false ) {
 					//-- Extract the Values --//
 					if( isset( $aPostData['NewValue'] ) ) {
 						//if( isset( $aPostData['NewValue']['Mode'] ) && isset( $aPostData['NewValue']['Hue'] ) && isset( $aPostData['NewValue']['Saturation'] ) && isset( $aPostData['NewValue']['Brightness'] ) ) {
-							if( isset( $aPostData['NewValue']['Hue'] ) && isset( $aPostData['NewValue']['Saturation'] ) && isset( $aPostData['NewValue']['Brightness'] ) ) {
+						if( isset( $aPostData['NewValue']['Red'] ) && isset( $aPostData['NewValue']['Green'] ) && isset( $aPostData['NewValue']['Blue'] ) ) {
 							//$iNewMode       = $aPostData['NewValue']['Mode'];
-							$iNewHue        = $aPostData['NewValue']['Hue'];
-							$iNewSaturation = $aPostData['NewValue']['Saturation'];
-							$iNewBrightness = $aPostData['NewValue']['Brightness'];
+							$iNewRed    = $aPostData['NewValue']['Red'];
+							$iNewGreen  = $aPostData['NewValue']['Green'];
+							$iNewBlue   = $aPostData['NewValue']['Blue'];
 							
 							//-- Pass the parameters to the object --//
 							//$aResult = $oSpecialPHPObject->ChangeHueSaturation( $iNewMode, $iNewHue, $iNewSaturation, $iNewBrightness );
-							$aResult = $oSpecialPHPObject->ChangeHueSaturation( $iNewHue, $iNewSaturation, $iNewBrightness );
+							$aResult = $oSpecialPHPObject->ChangeColorRGB( $iNewRed, $iNewGreen, $iNewBlue );
 							
 							if( $aResult['Error']===true ) {
 								//-- Error --//
@@ -405,6 +405,7 @@ if( $bError===false ) {
 							$bError     = true;
 							$iErrCode   = 1401;
 							$sErrMesg  .= "Error Code:'1401' \n";
+							$sErrMesg  .= "Problem finding the 'Red', 'Green', or 'Blue' in the 'NewValue' array in the 'Data' Parameter! \n";
 							//$sErrMesg  .= "Problem finding the 'Mode', 'Hue', 'Saturation', or 'Brightness' in the 'NewValue' array in the 'Data' Parameter! \n";
 						}
 						

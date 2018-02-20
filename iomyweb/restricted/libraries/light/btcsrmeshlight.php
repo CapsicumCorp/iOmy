@@ -420,6 +420,232 @@ class BTCSRMeshLight {
 			);
 		}
 	}
+	
+	
+	
+	public function ChangeColorRGB( $iNewRed, $iNewGreen, $iNewBlue ) {
+		//----------------------------------------------------------------//
+		//-- 1.0 - INITIALISE                                           --//
+		//----------------------------------------------------------------//
+		
+		//----------------------------------------------------//
+		//-- 1.1 - Declare Variables                        --//
+		//----------------------------------------------------//
+		$bError                  = false;        //-- BOOLEAN:   Used to flag if an error has occurred --//
+		$iErrCode                = 0;            //-- INTEGER:   --//
+		$sErrMesg                = "";           //-- STRING:    --//
+		
+		$aIOs                    = array();      //-- ARRAY:     --//
+		$iModeIOId               = -1;           //-- INTEGER:   --//
+		$iRedIOId                = -1;           //-- INTEGER:   --//
+		$iGreenIOId              = -1;           //-- INTEGER:   --//
+		$iBlueIOId               = -1;           //-- INTEGER:   --//
+		
+		$iModeRSTypeId           = 0;            //-- INTEGER:   --//
+		$iRedRSTypeId            = 0;            //-- INTEGER:   --//
+		$iGreenRSTypeId          = 0;            //-- INTEGER:   --//
+		$iBlueRSTypeId           = 0;            //-- INTEGER:   --//
+		
+		$aTempFunctionResult1    = array();
+		$aTempFunctionResult2    = array();
+		$aTempFunctionResult3    = array();
+		$aTempFunctionResult4    = array();
+		
+		
+		//----------------------------------------------------//
+		//-- 1.2 - Get Constants                            --//
+		//----------------------------------------------------//
+		$iModeRSTypeId           = LookupFunctionConstant("ModeRSTypeId");
+		$iRedRSTypeId            = LookupFunctionConstant("LightRedRSTypeId");
+		$iGreenRSTypeId          = LookupFunctionConstant("LightGreenRSTypeId");
+		$iBlueRSTypeId           = LookupFunctionConstant("LightBlueRSTypeId");
+		
+		//----------------------------------------------------------------//
+		//-- 3.0 - GET THE IOS                                          --//
+		//----------------------------------------------------------------//
+		if( $bError===false ) {
+			try {
+				//----------------------------------------------------//
+				//-- 3.1 - Get the IOs                              --//
+				//----------------------------------------------------//
+				$aIOs = $this->aIOs;
+				
+				//----------------------------------------------------//
+				//-- 3.2 - Check to make sure each of the IOs exist --//
+				//----------------------------------------------------//
+				foreach( $aIOs as $aIO ) {
+					//-- IF RSType is Mode --//
+					//if( $aIO['RSTypeId']===$iModeRSTypeId ) {
+					//	$iModeIOId = $aIO['IOId'];
+						
+					//-- ELSEIF RSType is Red --//
+					//} else if( $aIO['RSTypeId']===$iRedRSTypeId ) {
+					if( $aIO['RSTypeId']===$iRedRSTypeId ) {
+						$iRedIOId = $aIO['IOId'];
+						
+					//-- ELSEIF RSType is Green --//
+					} else if( $aIO['RSTypeId']===$iGreenRSTypeId ) {
+						$iGreenIOId = $aIO['IOId'];
+						
+					//-- ELSEIF RSType is Blue --//
+					} else if( $aIO['RSTypeId']===$iBlueRSTypeId ) {
+						$iBlueIOId = $aIO['IOId'];
+						
+					}
+				}
+				
+				//----------------------------------------------------//
+				//-- 3.3 - Verify All IOs were found                --//
+				//----------------------------------------------------//
+				//if( !($iModeIOId>0) ) {
+				//	$bError    = true;
+				//	$iErrCode  = 3;
+				//	$sErrMesg .= "Can not find the 'Mode' IO.\n";
+					
+				//} else if( !($iRedIOId>0) ) {
+				if( !($iRedIOId>0) ) {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Can not find the 'Red' IO.\n";
+					
+				} else if( !($iGreenIOId>0) ) {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Can not find the 'Green' IO.\n";
+					
+				} else if( !($iBlueIOId>0) ) {
+					$bError    = true;
+					$iErrCode  = 3;
+					$sErrMesg .= "Can not find the 'Blue' IO.\n";
+				}
+				
+				//----------------------------------------------------//
+				//-- 3.4 - Perform Validation on the values         --//
+				//----------------------------------------------------//
+				
+				//-- Make sure the Red is valid --//
+				if( $iNewRed<0 || $iNewRed>255 ) {
+					$bError    = true;
+					$iErrCode  = 4;
+					$sErrMesg .= "Please use a valid number for the 'Red' value!\n";
+					$sErrMesg .= "Eg. 0-359!\n";
+				}
+				
+				//-- Make sure the Green is valid --//
+				if( $iNewGreen<0 || $iNewGreen>255 ) {
+					$bError    = true;
+					$iErrCode  = 5;
+					$sErrMesg .= "Please use a valid number for the 'Green' value!\n";
+					$sErrMesg .= "Eg. 0-255!\n";
+				}
+				
+				//-- Make sure the Blue is valid --//
+				if( $iNewBlue<0 || $iNewBlue>255 ) {
+					$bError    = true;
+					$iErrCode  = 6;
+					$sErrMesg .= "Please use a valid number for the 'Blue' value!\n";
+					$sErrMesg .= "Eg. 0-255!\n";
+				}
+				
+			} catch( Exception $e03 ) {
+				$bError    = true;
+				$iErrCode  = 2;
+				$sErrMesg .= "Critical Error whith the IOs or their new values! \n";
+				$sErrMesg .= "Problem when looking up the IOs or the ";
+			}
+		}
+		
+		//----------------------------------------------------------------//
+		//-- 4.0 - UPDATE THE VALUES                                    --//
+		//----------------------------------------------------------------//
+		if( $bError===false ) {
+			try {
+				//--------------------------------//
+				//-- CREATE UNIX TIMESTAMP      --//
+				$iUTS = time();
+				
+				//--------------------------------//
+				//-- MODE                       --//
+				//if( $bError===false ) {
+				//	$aTempFunctionResult1 = InsertNewIODataValue( $iModeIOId, $iUTS, $iNewMode );
+					
+				//	if( $aTempFunctionResult1['Error']===true ) {
+				//		$bError     = true;
+				//		$iErrCode   = 11;
+				//		$sErrMesg  .= "Critical Error updating the \"Mode\" value!\n";
+				//		$sErrMesg  .= $aTempFunctionResult1['ErrMesg'];
+				//	}
+				//}
+				
+				//--------------------------------//
+				//-- RED                        --//
+				if( $bError===false ) {
+					$aTempFunctionResult2 = InsertNewIODataValue( $iRedIOId, $iUTS, $iNewRed );
+					
+					if( $aTempFunctionResult2['Error']===true ) {
+						$bError     = true;
+						$iErrCode   = 12;
+						$sErrMesg  .= "Critical Error updating the \"Red\" value!\n";
+						$sErrMesg  .= $aTempFunctionResult2['ErrMesg'];
+					}
+				}
+				
+				//--------------------------------//
+				//-- GREEN                      --//
+				if( $bError===false ) {
+					$aTempFunctionResult3 = InsertNewIODataValue( $iGreenIOId, $iUTS, $iNewGreen );
+					
+					if( $aTempFunctionResult3['Error']===true ) {
+						$bError     = true;
+						$iErrCode   = 13;
+						$sErrMesg  .= "Critical Error updating the \"Green\" value!\n";
+						$sErrMesg  .= $aTempFunctionResult3['ErrMesg'];
+					}
+				}
+				
+				//--------------------------------//
+				//-- BLUE                       --//
+				if( $bError===false ) {
+					$aTempFunctionResult4 = InsertNewIODataValue( $iBlueIOId, $iUTS, $iNewBlue );
+					
+					if( $aTempFunctionResult4['Error']===true ) {
+						$bError     = true;
+						$iErrCode   = 14;
+						$sErrMesg  .= "Critical Error updating the \"Blue\" value!\n";
+						$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+					}
+				}
+				
+				
+				
+			} catch( Exception $e10 ) {
+				$bError     = true;
+				$iErrCode   = 10;
+				$sErrMesg  .= "Critical Error inserting the new database IO values!\n";
+				$sErrMesg  .= $e10->getMessage();
+			}
+		}
+		
+		
+		//----------------------------------------------------------------//
+		//-- 9.0 - RETURN THE RESULTS                                   --//
+		//----------------------------------------------------------------//
+		if( $bError===false ) {
+			return array(
+				"Error"   => false,
+				"Result"  => "Success"
+			);
+			
+		} else {
+			return array(
+				"Error"   => true,
+				"ErrCode" => $iErrCode,
+				"ErrMesg" => $sErrMesg
+			);
+		}
+	}
+	
+	
 }
 
 ?>
