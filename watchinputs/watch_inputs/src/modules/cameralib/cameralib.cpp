@@ -121,7 +121,58 @@ static const int WEBAPI_ACCESS_INTERVAL=5; //Number of seconds between web api a
 
 using boost::asio::ip::tcp;
 
+class CameraStream {
+private:
+  boost::recursive_mutex mtx_;
+  int32_t streamId=0; //A unique id to identify this stream
+  bool runningProcess=false; //A process is currently running to capture this stream
+  pid_t pid=0; //Pid of the camera capture process for this stream
+  std::string cmd; //Command of the camera capture process
+  std::vector<std::string> args; //Arguments of the camera capture process
+public:
+  CameraStream(int32_t streamId);
+  CameraStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
+  ~CameraStream();
+  void setCommand(std::string cmd);
+  void setCommand(std::string cmd, std::vector<std::string> args);
+  int32_t getStreamId();
+  std::string getCommand();
+  std::vector<std::string> getArgs();
+  int startCapture(); //Start a camera capturing process
+  int waitCapture(int timeOut); //Wait for a csmera capturing process to finish
+  int stopCapture(); //Stop a camera capturing process immediately
+  bool isCapturing(); //Check if a stream is currently capturing
+};
+
+class Camera {
+private:
+  boost::recursive_mutex mtx_;
+  int32_t camid=0; //Database ID of the Camera
+  std::map<int32_t, CameraStream *> cameraStreams;
+public:
+  Camera(int32_t camid);
+  ~Camera();
+
+  int waitAllCapture(int timeOut); //Wait for all camera capturing processes to finish
+  int stopAllCapture(); //Stop all camera capturing processes immediately
+
+  int addStream(int32_t streamId);
+  int addStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
+  std::vector<int32_t> getStreamIds();
+  int setStreamCommand(int32_t streamId, std::string cmd);
+  int setStreamCommand(int32_t streamId, std::string cmd, std::vector<std::string> args);
+  std::string getStreamCommand(int32_t streamId);
+  std::vector<std::string> getStreamArgs(int32_t streamId);
+  int startStreamCapture(int32_t streamId); //Start a camera capturing process
+  int waitStreamCapture(int32_t streamId, int timeOut); //Wait for a csmera capturing process to finish
+  int stopStreamCapture(int32_t streamId); //Stop a camera capturing process immediately
+  bool isStreamCapturing(int32_t streamId); //Check if a stream is currently capturing
+};
+
 static boost::recursive_mutex thislibmutex;
+
+//camid, Camera class
+static std::map<int32_t, Camera> gcameras;
 
 static int ginuse=0; //Only shutdown when inuse = 0
 static int gshuttingdown=0;
@@ -286,6 +337,177 @@ static void setneedmoreinfo(bool needmoreinfo) {
 //----------------------
 //Class/Struct functions
 //----------------------
+
+CameraStream::CameraStream(int32_t streamId) {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  this->streamId=streamId;
+  this->cmd="";
+  this->args.clear();
+}
+CameraStream::CameraStream(int32_t streamId, std::string cmd, std::vector<std::string> args) {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  this->streamId=streamId;
+  this->cmd=cmd;
+  this->args=args;
+}
+
+CameraStream::~CameraStream() {
+  //Do nothing
+}
+
+void CameraStream::setCommand(std::string cmd) {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  this->cmd=cmd;
+}
+
+void CameraStream::setCommand(std::string cmd, std::vector<std::string> args) {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  this->cmd=cmd;
+  this->args=args;
+}
+
+int32_t CameraStream::getStreamId() {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  return this->streamId;
+}
+
+std::string CameraStream::getCommand() {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  return this->cmd;
+}
+
+std::vector<std::string> CameraStream::getArgs() {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  return this->args;
+}
+
+int CameraStream::startCapture() {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  //TODO: Check if everything has been set correctly
+  //TODO: Start camera capture thread
+  return 0;
+}
+
+//Wait for a csmera capturing process to finish
+int CameraStream::waitCapture(int timeOut) {
+  pid_t pid;
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+    pid=this->pid;
+  }
+  //TODO: Wait for process but only until timeOut expires
+  return 0;
+}
+
+//Stop a camera capturing process immediately
+int CameraStream::stopCapture() {
+  //TODO: Kill a process
+
+  return 0;
+}
+
+//Check if a stream is currently capturing
+bool CameraStream::isCapturing() {
+  //TODO: Implement checking if the capture process is currently running
+  return true;
+}
+
+Camera::Camera(int32_t camid) {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  this->camid=camid;
+}
+
+Camera::~Camera() {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  for (auto &cameraStreamIt : this->cameraStreams) {
+    delete cameraStreamIt.second;
+  }
+  cameraStreams.clear();
+}
+
+//Wait for all camera capturing processes to finish
+//Returns 0 for success, 1 if timeOut exceeded for at least one process, or negative value for other error
+int Camera::waitAllCapture(int timeOut) {
+  bool timeOutExceeded=false;
+  bool error=false;
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  for (auto &cameraStreamIt : this->cameraStreams) {
+    int result;
+
+    result=cameraStreamIt.second->waitCapture(timeOut);
+    if (result==1) {
+      timeOutExceeded=true;
+    }
+    else if (result<0) {
+      error=true;
+    }
+  }
+  if (timeOutExceeded==true) {
+    return 1;
+  } else if (error) {
+    return -1;
+  }
+  return 0;
+}
+
+//Stop all camera capturing processes immediately
+//Returns 0 for success or negative value on error
+int Camera::stopAllCapture() {
+  bool error=false;
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+
+  for (auto &cameraStreamIt : this->cameraStreams) {
+    int result;
+
+    result=cameraStreamIt.second->stopCapture();
+    if (result<0) {
+      error=true;
+    }
+  }
+  if (error) {
+    return -1;
+  }
+  return 0;
+}
+
+//Added a new camera stream with no command or arguments yet
+//Returns 0 on success or negative value on error
+int Camera::addStream(int32_t streamId) {
+  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+  try {
+    if (cameraStreams.at(streamId)->getStreamId()==streamId) {
+      //Camera Stream already added
+      return -1;
+    }
+  } catch (std::out_of_range& e) {
+    cameraStreams[streamId]=new CameraStream(streamId);
+  }
+  return 0;
+}
+
+/*int addStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
+std::vector<int32_t> getStreamIds();
+int setStreamCommand(int32_t streamId, std::string cmd);
+int setStreamCommand(int32_t streamId, std::string cmd, std::vector<std::string> args);
+std::string getStreamCommand(int32_t streamId);
+std::vector<std::string> getStreamArgs(int32_t streamId);
+int startStreamCapture(int32_t streamId); //Start a camera capturing process
+int waitStreamCapture(int32_t streamId, int timeOut); //Wait for a csmera capturing process to finish
+int stopStreamCapture(int32_t streamId); //Stop a camera capturing process immediately
+bool isStreamCapturing(int32_t streamId); //Check if a stream is currently capturing*/
+
 
 //----------------------
 
