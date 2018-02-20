@@ -887,7 +887,7 @@ static void csrmeshSetDeviceOnOff(int32_t deviceId, bool state) {
 }
 
 //Set the color of a device
-static void csrmeshSetDeviceColor(int32_t deviceId, int32_t hue, int32_t saturation, int32_t brightness) {
+static void csrmeshSetDeviceColor(int32_t deviceId, int32_t red, int32_t green, int32_t blue) {
 #ifdef __ANDROID__
   JNIEnv *env;
   jmethodID methodid;
@@ -897,7 +897,7 @@ static void csrmeshSetDeviceColor(int32_t deviceId, int32_t hue, int32_t saturat
     return;
   }
   methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "csrMeshSetDeviceColor", "(IIII)V");
-  env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, deviceId, hue, saturation, brightness);
+  env->CallStaticVoidMethod(gbluetoothhwandroidlib_class, methodid, deviceId, red, green, blue);
   JNIDetachThread(wasdetached);
 #endif
 }
@@ -957,37 +957,37 @@ static void csrmeshAddDeviceToDatabase(int32_t uuidHash, int32_t deviceId) {
     {
       webapiclient_io io;
 
-      //Hue
-      io.rstype=3901;
+      //Red
+      io.rstype=3906;
       io.uom=1;
       io.iotype=2;
       io.samplerate=300;
       io.baseconvert=1;
-      io.name="Hue";
+      io.name="Red";
       csrmeshthing.io.push_back(io);
     }
     {
       webapiclient_io io;
 
-      //Saturation
-      io.rstype=3902;
+      //Gween
+      io.rstype=3907;
       io.uom=1;
       io.iotype=2;
       io.samplerate=300;
       io.baseconvert=1;
-      io.name="Saturation";
+      io.name="Green";
       csrmeshthing.io.push_back(io);
     }
     {
       webapiclient_io io;
 
-      //Brightness
-      io.rstype=3903;
+      //Blue
+      io.rstype=3908;
       io.uom=1;
       io.iotype=2;
       io.samplerate=300;
       io.baseconvert=1;
-      io.name="Brightness";
+      io.name="Blue";
       csrmeshthing.io.push_back(io);
     }
   } else {
@@ -1146,26 +1146,26 @@ static void csrmeshSyncIdentifyDevices(void) {
           gcsrmeshdeviceit.second.attrs["On/Off"]->dbinfieldinitialinterval=1;
           gcsrmeshdeviceit.second.attrs["On/Off"]->dbinfieldinterval=5;
 
-          gcsrmeshdeviceit.second.attrs["Hue"]=new dataintattr_t();
-          gcsrmeshdeviceit.second.attrs["Hue"]->name="Hue";
-          gcsrmeshdeviceit.second.attrs["Hue"]->dbfieldtype=DBCOUNTERLIB_COUNTER_WATTUSE_SENSOR_DATAINT;
-          gcsrmeshdeviceit.second.attrs["Hue"]->dbfieldname="Hue";
-          gcsrmeshdeviceit.second.attrs["Hue"]->dbinfieldinitialinterval=1;
-          gcsrmeshdeviceit.second.attrs["Hue"]->dbinfieldinterval=5;
+          gcsrmeshdeviceit.second.attrs["Red"]=new dataintattr_t();
+          gcsrmeshdeviceit.second.attrs["Red"]->name="Red";
+          gcsrmeshdeviceit.second.attrs["Red"]->dbfieldtype=DBCOUNTERLIB_COUNTER_WATTUSE_SENSOR_DATAINT;
+          gcsrmeshdeviceit.second.attrs["Red"]->dbfieldname="Red";
+          gcsrmeshdeviceit.second.attrs["Red"]->dbinfieldinitialinterval=1;
+          gcsrmeshdeviceit.second.attrs["Red"]->dbinfieldinterval=5;
 
-          gcsrmeshdeviceit.second.attrs["Saturation"]=new dataintattr_t();
-          gcsrmeshdeviceit.second.attrs["Saturation"]->name="Saturation";
-          gcsrmeshdeviceit.second.attrs["Saturation"]->dbfieldtype=DBCOUNTERLIB_COUNTER_WATTUSE_SENSOR_DATAINT;
-          gcsrmeshdeviceit.second.attrs["Saturation"]->dbfieldname="Saturation";
-          gcsrmeshdeviceit.second.attrs["Saturation"]->dbinfieldinitialinterval=1;
-          gcsrmeshdeviceit.second.attrs["Saturation"]->dbinfieldinterval=5;
+          gcsrmeshdeviceit.second.attrs["Green"]=new dataintattr_t();
+          gcsrmeshdeviceit.second.attrs["Green"]->name="Green";
+          gcsrmeshdeviceit.second.attrs["Green"]->dbfieldtype=DBCOUNTERLIB_COUNTER_WATTUSE_SENSOR_DATAINT;
+          gcsrmeshdeviceit.second.attrs["Green"]->dbfieldname="Green";
+          gcsrmeshdeviceit.second.attrs["Green"]->dbinfieldinitialinterval=1;
+          gcsrmeshdeviceit.second.attrs["Green"]->dbinfieldinterval=5;
 
-          gcsrmeshdeviceit.second.attrs["Brightness"]=new dataintattr_t();
-          gcsrmeshdeviceit.second.attrs["Brightness"]->name="Brightness";
-          gcsrmeshdeviceit.second.attrs["Brightness"]->dbfieldtype=DBCOUNTERLIB_COUNTER_WATTUSE_SENSOR_DATAINT;
-          gcsrmeshdeviceit.second.attrs["Brightness"]->dbfieldname="Brightness";
-          gcsrmeshdeviceit.second.attrs["Brightness"]->dbinfieldinitialinterval=1;
-          gcsrmeshdeviceit.second.attrs["Brightness"]->dbinfieldinterval=5;
+          gcsrmeshdeviceit.second.attrs["Blue"]=new dataintattr_t();
+          gcsrmeshdeviceit.second.attrs["Blue"]->name="Blue";
+          gcsrmeshdeviceit.second.attrs["Blue"]->dbfieldtype=DBCOUNTERLIB_COUNTER_WATTUSE_SENSOR_DATAINT;
+          gcsrmeshdeviceit.second.attrs["Blue"]->dbfieldname="Blue";
+          gcsrmeshdeviceit.second.attrs["Blue"]->dbinfieldinitialinterval=1;
+          gcsrmeshdeviceit.second.attrs["Blue"]->dbinfieldinterval=5;
         }
       }
       if (gcsrmeshdeviceit.second.devicetype!=CSRMESH_DEVICETYPE_UNKNOWN) {
@@ -1263,18 +1263,18 @@ static void csrmeshSyncDevicesWithDatabase(void) {
       }
     }
     if (updateColor==true) {
-      int32_t hue, saturation, brightness;
-      time_t hue_indbvaltime, sat_indbvaltime, bright_indbvaltime;
+      int32_t red, green, blue;
+      time_t red_indbvaltime, green_indbvaltime, blue_indbvaltime;
 
-      hue=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Hue"])->val;
-      saturation=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Saturation"])->val;
-      brightness=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Brightness"])->val;
-      hue_indbvaltime=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Hue"])->indbvaltime;
-      sat_indbvaltime=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Saturation"])->indbvaltime;
-      bright_indbvaltime=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Brightness"])->indbvaltime;
-      if (hue_indbvaltime>0 && sat_indbvaltime>0 && bright_indbvaltime>0) {
+      red=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Red"])->val;
+      green=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Green"])->val;
+      blue=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Blue"])->val;
+      red_indbvaltime=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Red"])->indbvaltime;
+      green_indbvaltime=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Green"])->indbvaltime;
+      blue_indbvaltime=dynamic_cast<dataintattr_t *>(gcsrmeshdeviceit.second.attrs["Blue"])->indbvaltime;
+      if (red_indbvaltime>0 && green_indbvaltime>0 && blue_indbvaltime>0) {
         //Only change the color if all the values have been retrieved
-        csrmeshSetDeviceColor(gcsrmeshdeviceit.second.deviceId, hue, saturation, brightness);
+        csrmeshSetDeviceColor(gcsrmeshdeviceit.second.deviceId, red, green, blue);
       }
     }
   }

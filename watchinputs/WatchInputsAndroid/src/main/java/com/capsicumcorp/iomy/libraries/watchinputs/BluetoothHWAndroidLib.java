@@ -477,15 +477,10 @@ public class BluetoothHWAndroidLib implements AssociationListener {
             getInstance().setLightPower(deviceId, PowerModelApi.PowerState.ON);
         }
     }
-    public static void csrMeshSetDeviceColor(int deviceId, int hue, int saturation, int brightness) {
+    public static void csrMeshSetDeviceColor(int deviceId, int red, int green, int blue) {
         int color;
 
-        float[] hsv = new float[3];
-        hsv[0]=hue;
-        hsv[1]=((float) saturation) / 255.0f;
-        hsv[2]=((float) brightness) / 255.0f;
-        color=Color.HSVToColor(hsv);
-        getInstance().setLightColorRGB(deviceId, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, brightness);
+        getInstance().setLightColorRGB(deviceId, red & 0xFF, green & 0xFF, blue, 255);
     }
     public void deviceAssociated(boolean success, String message) {
         //Disable discovery once a device is associated
