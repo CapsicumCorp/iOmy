@@ -2966,7 +2966,7 @@ $.extend(iomy.common,{
                     if (aPageData.bEditing === true) {
                         aErrorMessages.push(sNoRightToEditDevice);
                     } else {
-                        aErrorMessages.push(sNoRightToAddDevice)
+                        aErrorMessages.push(sNoRightToAddDevice);
                     }
                     
                 //-- If so, check that this particular device can be edited. --//

@@ -204,7 +204,7 @@ sap.ui.controller("pages.device.DeviceForm", {
         var oView = this.getView();
         
         oView.byId("DeviceName").setEnabled(bEnabled);
-        oView.byId("SelectRoom").setEnabled(bEnabled);
+        oView.byId("DeviceRoom").setEnabled(bEnabled);
         oView.byId("InputCamType").setEnabled(bEnabled);
         oView.byId("InputIPProtocol").setEnabled(bEnabled);
         oView.byId("InputIPAddress").setEnabled(bEnabled);
@@ -473,7 +473,11 @@ sap.ui.controller("pages.device.DeviceForm", {
             oController.bNoRooms = false;
             
             if (bHasUnassigned) {
-                aRoomList["_"+iUnassignedRoomId].Enabled = false;
+                if (bEditing) {
+                    aRoomList["_"+iUnassignedRoomId].Enabled = false;
+                } else {
+                    delete aRoomList["_"+iUnassignedRoomId];
+                }
             }
         }
         
