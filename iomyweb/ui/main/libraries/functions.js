@@ -1729,7 +1729,12 @@ $.extend(iomy.functions, {
             };
         },
         
-        isCurrentUserAbleToAddOrEditDevices : function () {
+        /**
+         * Determines if the current user is able to edit device details at all.
+         * 
+         * @returns {Boolean}       Whether they have permissions or not
+         */
+        isCurrentUserAbleToEditDevices : function () {
             var bAble = false;
                 
             try {
@@ -1777,6 +1782,11 @@ $.extend(iomy.functions, {
             return bAble;
         },
         
+        /**
+         * Determines if the current user is able to manage rooms on a premise.
+         * 
+         * @returns {Boolean}       Whether they have permissions or not
+         */
         isCurrentUserAbleToManageRooms : function () {
             var bAble = false;
                 
@@ -1803,6 +1813,12 @@ $.extend(iomy.functions, {
             return bAble;
         },
         
+        /**
+         * Determines if the current user is able to edit a particular room.
+         * 
+         * @param {type} iRoomId    ID of the room.
+         * @returns {Boolean}       Whether they have permissions or not
+         */
         isCurrentUserAbleToEditRoom : function (iRoomId) {
             var bAble = false;
             var mRoom = null;
@@ -1818,6 +1834,12 @@ $.extend(iomy.functions, {
             return bAble;
         },
         
+        /**
+         * Determines if the current user is able to edit a particular device.
+         * 
+         * @param {type} iThingId   ID of the device
+         * @returns {Boolean}       Whether they have permissions or not
+         */
         isCurrentUserAbleToEditDevice : function (iThingId) {
             var bAble   = false;
             var mDevice = null;
@@ -1833,6 +1855,11 @@ $.extend(iomy.functions, {
             return bAble;
         },
         
+        /**
+         * Determines if the current user is able to edit the premise.
+         * 
+         * @returns {Boolean}       Whether they have permissions or not
+         */
         isCurrentUserAbleToEditPremise : function () {
             var bAble = false;
                 
@@ -1859,6 +1886,12 @@ $.extend(iomy.functions, {
             return bAble;
         },
         
+        /**
+         * Determines if the current user is able to enable or disable database
+         * indexing.
+         * 
+         * @returns {Boolean}       Whether they have permissions or not
+         */
         isCurrentUserAbleToToggleDBIndexing : function () {
             var bAble = false;
                 

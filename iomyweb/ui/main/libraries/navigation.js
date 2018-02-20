@@ -66,14 +66,14 @@ $.extend( iomy.navigation, {
                         text: "Add Device",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            if (oApp.getCurrentPage().getId() === "pDeviceForm") {
-                                var oController = oApp.getCurrentPage().getController();
-                                
-                                oController.bEditExisting   = false;
-                                oController.iThingId        = null;
-                                
-                                oController.loadDeviceForm();
-                            }
+//                            if (oApp.getCurrentPage().getId() === "pDeviceForm") {
+//                                var oController = oApp.getCurrentPage().getController();
+//                                
+//                                oController.bEditExisting   = false;
+//                                oController.iThingId        = null;
+//                                
+//                                oController.loadDeviceForm();
+//                            }
                             
                             iomy.common.NavigationChangePage( "pDeviceForm" , {} , false);
                         }
@@ -82,14 +82,14 @@ $.extend( iomy.navigation, {
                         text: "Add Room",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            if (oApp.getCurrentPage().getId() === "pRoomForm") {
-                                var oController = oApp.getCurrentPage().getController();
-                                
-                                oController.bEditing    = false;
-                                oController.mPageData   = {};
-                                
-                                oController.loadRoomForm();
-                            }
+//                            if (oApp.getCurrentPage().getId() === "pRoomForm") {
+//                                var oController = oApp.getCurrentPage().getController();
+//                                
+//                                oController.bEditing    = false;
+//                                oController.mPageData   = {};
+//                                
+//                                oController.loadRoomForm();
+//                            }
                             
                             iomy.common.NavigationChangePage( "pRoomForm" ,  {"bEditing": false} , false);
                         }
@@ -160,15 +160,6 @@ $.extend( iomy.navigation, {
                         text: "Edit Device",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            if (oApp.getCurrentPage().getId() === "pDevice") {
-                                var oController = oApp.getCurrentPage().getController();
-                                
-                                oController.bEditing = true;
-                                oController.IndicateWhetherInEditModeOrNot();
-                                oController.RefreshModel();
-                                
-                            }
-                            
                             iomy.common.NavigationChangePage( "pDevice" , {"bEditing": true} , true);
                         }
                     }),    
@@ -183,15 +174,6 @@ $.extend( iomy.navigation, {
                         text: "Edit Room",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-                            if (oApp.getCurrentPage().getId() === "pRoomList") {
-                                var oController = oApp.getCurrentPage().getController();
-                                
-                                oController.bEditing = true;
-                                oController.IndicateWhetherInEditModeOrNot();
-                                oController.RefreshModel()
-                                
-                            }
-                            
                             iomy.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , true);
                         }
                     }),

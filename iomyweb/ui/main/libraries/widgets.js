@@ -179,11 +179,11 @@ $.extend( iomy.widgets, {
 			icon: "sap-icon://it-system",
 			text: "Devices",
 			select : function () {
-                if (oApp.getCurrentPage().getId() === "pDevice") {
-                    var oController = oApp.getCurrentPage().getController();
-                    
-                    oController.RefreshPage({});
-                }
+//                if (oApp.getCurrentPage().getId() === "pDevice") {
+//                    var oController = oApp.getCurrentPage().getController();
+//                    
+//                    oController.RefreshPage({});
+//                }
                 
                 iomy.common.NavigationChangePage( "pDevice" , {} , true);
 			}
@@ -201,14 +201,14 @@ $.extend( iomy.widgets, {
 			icon: "sap-icon://idea-wall",
 			text: "Rooms",
 			select : function () {
-				if (oApp.getCurrentPage().getId() === "pRoomList") {
-                    var oController = oApp.getCurrentPage().getController();
-                    
-                    oController.bEditing = false;
-                    oController.IndicateWhetherInEditModeOrNot();
-                    oController.RefreshModel()
-
-                }
+//				if (oApp.getCurrentPage().getId() === "pRoomList") {
+//                    var oController = oApp.getCurrentPage().getController();
+//                    
+//                    oController.bEditing = false;
+//                    oController.IndicateWhetherInEditModeOrNot();
+//                    oController.RefreshModel()
+//
+//                }
                 
                 iomy.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
 			}

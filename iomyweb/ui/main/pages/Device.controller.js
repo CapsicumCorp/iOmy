@@ -288,7 +288,7 @@ sap.ui.controller("pages.Device", {
                                             sPageId = "pTile";
                                         }
 
-                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                     }
                                 })
                             );
@@ -333,7 +333,7 @@ sap.ui.controller("pages.Device", {
                                             sPageId = "pRGBlight";
                                         }
 
-                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                     }
                                 })
                             );
@@ -376,7 +376,7 @@ sap.ui.controller("pages.Device", {
                                             sPageId = "pRGBlight";
                                         }
 
-                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                     }
                                 })
                             );
@@ -417,7 +417,7 @@ sap.ui.controller("pages.Device", {
                                         // otherwise, open the stream popup
                                         //----------------------------------------------------------//
                                         if (oController.bEditing) {
-                                            iomy.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId } , false);
+                                            iomy.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
 
                                         } else {
                                             try {
@@ -484,7 +484,7 @@ sap.ui.controller("pages.Device", {
                                             sPageId = "pMJPEG";
                                         }
 
-                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId } , false);
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                     }
                                 })
                             );
@@ -517,7 +517,7 @@ sap.ui.controller("pages.Device", {
                                             sPageId = "pWeatherFeed";
                                         }
 
-                                        iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                     }
                                 })
                             );
@@ -562,7 +562,7 @@ sap.ui.controller("pages.Device", {
                                             sPageId = "pMotionSensor";
                                         }
 
-                                        iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                     }
                                 })
                             );
@@ -592,7 +592,7 @@ sap.ui.controller("pages.Device", {
                                             sPageId = "pTile";
                                         }
 
-                                        iomy.common.NavigationChangePage( sPageId , { "ThingId" : mDevice.DeviceId } , false);
+                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                     }
                                 })
                             );

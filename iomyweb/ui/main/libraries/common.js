@@ -2858,6 +2858,8 @@ $.extend(iomy.common,{
         var bCreatingPage   = true;
         var aErrorMessages  = [];
         
+        var oController     = null;     // Only used when an existing page needs to have actions performed for it.
+        
         var sNoRightToAddDevice         = "You don't have sufficient privileges to create a new device.";
         var sNoRightToEditDevice        = "You don't have sufficient privileges to change device information.";
         var sNoRightToEditGivenDevice   = "You don't have sufficient privileges to change information about this device.";
@@ -2962,11 +2964,15 @@ $.extend(iomy.common,{
             //-- Add/Edit Device --//
             } else if (sPageName === "pDeviceForm") {
                 //-- Check that you are able to manage devices at all. --//
-                if (!iomy.functions.permissions.isCurrentUserAbleToAddOrEditDevices()) {
+                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms() &&
+                    !iomy.functions.permissions.isCurrentUserAbleToEditDevices())
+                {
                     if (aPageData.bEditing === true) {
                         aErrorMessages.push(sNoRightToEditDevice);
                     } else {
-                        aErrorMessages.push(sNoRightToAddDevice);
+                        if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms()) {
+                            aErrorMessages.push(sNoRightToAddDevice);
+                        }
                     }
                     
                 //-- If so, check that this particular device can be edited. --//
@@ -3008,7 +3014,7 @@ $.extend(iomy.common,{
                 
             //-- Device List (for editing) --//
             } else if (sPageName === "pDevice" && aPageData.bEditing === true) {
-                if (!iomy.functions.permissions.isCurrentUserAbleToAddOrEditDevices()) {
+                if (!iomy.functions.permissions.isCurrentUserAbleToEditDevices()) {
                     aErrorMessages.push(sNoRightToEditDevice);
                 }
                 
@@ -3041,6 +3047,45 @@ $.extend(iomy.common,{
                     }
 
                     iomy.help.addHelpMessage(sPageName);
+                    
+                    //----------------------------------------------------------------------//
+                    // If the page exists, we may need to perform certain actions.
+                    //----------------------------------------------------------------------//
+                    oController = oApp.getPage(sPageName).getController();
+                    
+                    if (sPageName === "pDevice") {
+                        if (aPageData.bEditing === true) {
+                            oController.bEditing = true;
+                            oController.IndicateWhetherInEditModeOrNot();
+                            oController.RefreshModel();
+                        } else {
+                            oController.RefreshPage({});
+                        }
+
+                    } else if (sPageName === "pRoomList") {
+                        if (aPageData.bEditing === true) {
+                            oController.bEditing = true;
+                            oController.IndicateWhetherInEditModeOrNot();
+                            oController.RefreshModel();
+                        } else {
+                            oController.bEditing = false;
+                            oController.IndicateWhetherInEditModeOrNot();
+                            oController.RefreshModel();
+                        }
+                        
+                    } else if (sPageName === "pRoomForm") {
+                        oController.bEditing    = false;
+                        oController.mPageData   = {};
+
+                        oController.loadRoomForm();
+                        
+                    } else if (sPageName === "pDeviceForm") {
+                        oController.bEditExisting   = false;
+                        oController.iThingId        = null;
+
+                        oController.loadDeviceForm();
+                        
+                    }
                 }
 
                 //--------------------------------------------------------------------//

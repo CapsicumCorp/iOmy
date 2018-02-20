@@ -517,7 +517,7 @@ $.extend(iomy.devices,{
                                             } else {
                                                 sMessage = "Device couldn't be renamed to "+sThingText+", but is now located in "+sRoomText;
 
-                                                iomy.common.showWarning(sMessage, "", function () {
+                                                iomy.common.showWarning(sMessage, "New Location", function () {
                                                     fnWarning();
                                                 });
                                             }
@@ -549,7 +549,7 @@ $.extend(iomy.devices,{
                                             if (mThingChangeSettings.successful === true) {
                                                 sMessage = "Device renamed to "+sThingText+", but failed to move device to "+sRoomText;
 
-                                                iomy.common.showWarning(sMessage, "", function () {
+                                                iomy.common.showWarning(sMessage, "Device Renamed", function () {
                                                     fnWarning(sMessage);
                                                 });
 
@@ -557,7 +557,7 @@ $.extend(iomy.devices,{
                                             } else {
                                                 sMessage = "Device couldn't be renamed. Failed to move device to "+sRoomText;
 
-                                                iomy.common.showError(sMessage, "", function () {
+                                                iomy.common.showError(sMessage, "Error", function () {
                                                     fnFail();
                                                 });
 
@@ -655,7 +655,7 @@ $.extend(iomy.devices,{
                     //------------------------------------------------------------//
                     if (bChangingRoom && iRoomId !== null) {
                         fnRoomFail = function (sMessage) {
-                            iomy.common.showError(sMessage, "", function () {
+                            iomy.common.showError(sMessage, "Error", function () {
                                 fnFail();
                             });
                         };
