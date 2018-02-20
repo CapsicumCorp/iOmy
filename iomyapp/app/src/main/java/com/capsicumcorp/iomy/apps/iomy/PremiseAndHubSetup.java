@@ -66,12 +66,15 @@ public class PremiseAndHubSetup extends AppCompatActivity {
         et = (EditText) findViewById(R.id.premiseHubNameField);
         installWizard.hubName = et.getText().toString();
 
-        et = (EditText) findViewById(R.id.premiseHubUsernameField);
-        installWizard.hubUsername = et.getText().toString();
+//        et = (EditText) findViewById(R.id.premiseHubUsernameField);
+//        installWizard.hubUsername = et.getText().toString();
+//
+//        et = (EditText) findViewById(R.id.premiseHubPasswordField);
+//        installWizard.hubPassword = et.getText().toString();
 
-        et = (EditText) findViewById(R.id.premiseHubPasswordField);
-        installWizard.hubPassword = et.getText().toString();
-
+        installWizard.hubUsername = "telnet";
+        installWizard.hubPassword = installWizard.generateRandomPassword();
+        
         //------------------------------------------------------------//
         // Proceed to Page 2 of the premise setup. Set up the owner.
         //------------------------------------------------------------//
