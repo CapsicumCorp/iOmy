@@ -1036,7 +1036,7 @@ $.extend(iomy.devices,{
 
                 onSuccess : function (iHue, iSaturation, iLight) {
                     try {
-                        var sHexString = iomy.functions.convertHSL255ToHex( iHue, iSaturation, iLight );
+                        var sHexString = iomy.functions.convertHSLToHex( iHue, iSaturation, iLight );
 
                         fnSuccess(sHexString);
                     } catch (e) {
@@ -1168,9 +1168,9 @@ $.extend(iomy.devices,{
                 format : 'json',
 
                 onSuccess : function (response, data) {
-                    var iHue        = null;
-                    var iSaturation = null;
-                    var iLight      = null;
+                    var iRed        = null;
+                    var iGreen      = null;
+                    var iBlue       = null;
                     var bError      = false;
                     var sErrMessage = "";
                     
@@ -1180,32 +1180,32 @@ $.extend(iomy.devices,{
                             //----------------------------------------------------//
                             // If we're grabbing the HUE value
                             //----------------------------------------------------//
-                            if (data[i].RSTYPE_PK === 3901 && iHue === null) {
+                            if (data[i].RSTYPE_PK === 3906 && iRed === null) {
                                 //iHue = Math.round(data[i].CALCEDVALUE / fHueConversionRate);
-                                iHue = data[i].CALCEDVALUE;
+                                iRed = data[i].CALCEDVALUE;
                             }
 
                             //----------------------------------------------------//
                             // If we're grabbing the SATURATION value
                             //----------------------------------------------------//
-                            if (data[i].RSTYPE_PK === 3902 && iSaturation === null) {
+                            if (data[i].RSTYPE_PK === 3907 && iGreen === null) {
                                 //iSaturation = Math.round(data[i].CALCEDVALUE / fSaturationConversionRate);
-                                iSaturation = data[i].CALCEDVALUE;
+                                iGreen = data[i].CALCEDVALUE;
                             }
 
                             //----------------------------------------------------//
                             // If we're grabbing the LUMINANCE value
                             //----------------------------------------------------//
-                            if (data[i].RSTYPE_PK === 3903 && iLight === null) {
+                            if (data[i].RSTYPE_PK === 3908 && iBlue === null) {
                                 //iLight = Math.round(data[i].CALCEDVALUE / fLightConversionRate);
-                                iLight = data[i].CALCEDVALUE;
+                                iBlue = data[i].CALCEDVALUE;
                             }
 
                             //----------------------------------------------------//
                             // If we already have what we need, we can finish the
                             // loop.
                             //----------------------------------------------------//
-                            if (iHue !== null && iSaturation !== null && iLight !== null) {
+                            if (iRed !== null && iGreen !== null && iBlue !== null) {
                                 break;
                             } else {
                                 //-----------------------------------------------------//
@@ -1238,13 +1238,14 @@ $.extend(iomy.devices,{
                             //----------------------------------------------------//
                             //-- Convert the Values                             --//
                             //----------------------------------------------------//
-                            var mConvertedHSL = iomy.functions.convertHSL( "DB", "Normal", mThing.TypeId, iHue, iSaturation, iLight );
+                            var mConvertedHSL = iomy.functions.convertRGBToHSL( iRed, iGreen, iBlue );
 
-                            if( mConvertedHSL.Error===false ) {
-                                fnSuccess( mConvertedHSL.Hue, mConvertedHSL.Sat, mConvertedHSL.Lig );
-                            } else {
-                                fnFail("Failed to convert HSL data! "+mConvertedHSL.ErrMesg+".");
-                            }
+                            fnSuccess( mConvertedHSL.hue, mConvertedHSL.saturation, mConvertedHSL.light );
+//                            if( mConvertedHSL.Error===false ) {
+//                                fnSuccess( mConvertedHSL.hue, mConvertedHSL.saturation, mConvertedHSL.light );
+//                            } else {
+//                                fnFail("Failed to convert HSL data! "+mConvertedHSL.ErrMesg+".");
+//                            }
                             
                         } catch (e) {
                             sErrMessage = "Failed to process the light bulb data for "+mThing.DisplayName+" ("+e.name+"): " + e.message;

@@ -116,7 +116,7 @@ sap.ui.controller("pages.device.RGBlight", {
         iSaturation     = Math.floor(iSaturation / this.fSaturationConversionRate);
         iLight          = Math.floor(iLight / this.fLightConversionRate);
         
-        sColourString   = "hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")";
+        sColourString   = "rgb("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")";
         
         if (oView.byId("CPicker") !== undefined) {
             oView.byId("CPicker").setEnabled(iDeviceState == 1);
@@ -227,11 +227,17 @@ sap.ui.controller("pages.device.RGBlight", {
                     }
                 })
             );
-        
+
+            oController.ChangeColourInBox(
+                mSliderValues.hue,
+                mSliderValues.saturation,
+                mSliderValues.light
+            );
+            
             oController.RGBUiDraw();
             
             //-- Load the slider data. --//
-            oController.InitialDeviceInfoLoad();
+            //oController.InitialDeviceInfoLoad();
         }
     },
     
@@ -321,7 +327,7 @@ sap.ui.controller("pages.device.RGBlight", {
             iomy.devices.loadLightBulbInformation({
                 thingID : oController.iThingId,
 
-                onSuccess : function (iHue, iSaturation, iLight) {
+                onSuccess : function (iRed, iGreen, iBlue) {
                     var iDeviceState = iomy.common.ThingList["_"+oController.iThingId].Status;
                     
                     
@@ -330,15 +336,15 @@ sap.ui.controller("pages.device.RGBlight", {
                     //--------------------------------------------------------//
                     if (oController.bUsingAdvancedUI === true) {
                         //oController.RGBInit("hsv("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")");
-                        oController.RGBInit( iHue, iSaturation, iLight );
+                        oController.RGBInit( iRed, iGreen, iBlue );
                     } else {
                         //oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
-                        var mNewHSL = iomy.functions.convertHSL( "Normal", "SimpleSlider", oController.iThingTypeId, iHue, iSaturation, iLight );
+                        var mNewHSL = iomy.functions.convertRGBToHSL( iRed, iGreen, iBlue );
                         
                         if( mNewHSL.Error===false ) {
-                            oController.SetSliderValues( mNewHSL.Hue, mNewHSL.Sat, mNewHSL.Lig );
+                            oController.SetSliderValues( mNewHSL.hue, mNewHSL.saturation, mNewHSL.light );
                             //oController.ChangeColourInBox( Math.round(iHue), Math.round( iSaturation / 2.55 ), Math.round( iLight / 2.55 ));
-                            oController.ChangeColourInBox( mNewHSL.Hue, mNewHSL.Sat, mNewHSL.Lig );
+                            oController.ChangeColourInBox( mNewHSL.hue, mNewHSL.saturation, mNewHSL.light );
                         }
                     }
                     
@@ -524,18 +530,36 @@ sap.ui.controller("pages.device.RGBlight", {
 
                     //} else if (iDeviceType == iomy.devices.csrmesh.ThingTypeId) {
                     } else if(oController.iThingTypeId == iomy.devices.csrmesh.ThingTypeId) {
+                        var mRGB;
+                            
+                        if (oController.bUsingAdvancedUI) {
+                            mRGB = oView.byId("CPicker").getRGB();
+                            
+                            mRGB = {
+                                red     : mRGB.r,
+                                green   : mRGB.g,
+                                blue    : mRGB.b
+                            };
+                        } else {
+                            mRGB = iomy.functions.convertHSLToRGB(
+                                oView.byId("hueSlider").getValue(),
+                                oView.byId("satSlider").getValue(),
+                                oView.byId("briSlider").getValue()
+                            );
+                        }
+                        
                         mRequestData.url    = iomy.apiphp.APILocation("light");
                         mRequestData.data   = {
-                            "Mode" : "ChangeColorBrightness",
+                            "Mode" : "ChangeColorRGB",
                             "ThingId" : oController.iThingId,
                             "Data" : JSON.stringify({
                                 "NewValue" : {
                                     //"Hue" : iHue,
                                     //"Saturation" : iSat,
                                     //"Brightness" : iLight
-                                    "Hue":        iNewHue,
-                                    "Saturation": iNewSat,
-                                    "Brightness": iNewLig
+                                    "Red":   mRGB.red,
+                                    "Green": mRGB.green,
+                                    "Blue":  mRGB.blue
                                 }
                             })
                         };

@@ -95,14 +95,14 @@ $.extend(iomy.devices.csrmesh,{
                 "url"     : iomy.apiphp.APILocation("light"),
                 "method"  : "POST",
                 "data"    : {
-                    "Mode" : "ChangeColorBrightness",
+                    "Mode" : "ChangeColorRGB",
                     "ThingId" : iThingId,
                     "Data" : JSON.stringify({
                         "NewValue" : {
                             //-- HEX: #EFE96B --//
-                            "Hue" : Math.round(0.1591 * 360),
-                            "Saturation" : Math.round(55.23 * 2.55),
-                            "Brightness" : Math.round(93.73 * 2.55)
+                            "Red" : 239,
+                            "Green" : 233,
+                            "Blue" : 107
     //                        "Hue" : 180,
     //                        "Saturation" : 0,
     //                        "Brightness" : 255
@@ -123,7 +123,7 @@ $.extend(iomy.devices.csrmesh,{
                 },
 
                 "onFail" : function (response) {
-                    fnFail(response);
+                    fnFail(response.responseText);
                 }
             });
         
