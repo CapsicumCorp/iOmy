@@ -74,7 +74,7 @@ public class PremiseAndHubSetup extends AppCompatActivity {
 
         installWizard.hubUsername = "telnet";
         installWizard.hubPassword = installWizard.generateRandomPassword();
-        
+
         //------------------------------------------------------------//
         // Proceed to Page 2 of the premise setup. Set up the owner.
         //------------------------------------------------------------//
