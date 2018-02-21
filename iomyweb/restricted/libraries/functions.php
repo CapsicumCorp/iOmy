@@ -169,6 +169,15 @@ function LookupFunctionConstant( $sValue ) {
 		case "LightBrightnessRSTypeId":
 			return 3903;
 			
+		case "LightRedRSTypeId":
+			return 3906;
+			
+		case "LightGreenRSTypeId":
+			return 3907;
+			
+		case "LightBlueRSTypeId":
+			return 3908;
+			
 		case "StreamProtocolRSTypeId":
 			return 3965;
 			
