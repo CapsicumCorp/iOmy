@@ -59,9 +59,9 @@ sap.ui.controller("pages.device.RGBlight", {
                 oController.iThingTypeId = iTypeId;
                 if (oController.bUsingAdvancedUI) {
                     oController.SwitchToSimpleView();
-                } else {
+                } //else {
                     oController.InitialDeviceInfoLoad();
-                }
+                //}
                 oController.RGBUiDraw();
                 
                 if (iTypeId == iomy.devices.philipshue.ThingTypeId) {
@@ -112,11 +112,11 @@ sap.ui.controller("pages.device.RGBlight", {
         var iDeviceState    = iomy.common.ThingList["_"+oController.iThingId].Status;
         var sColourString;
         
-        iHue            = Math.floor(iHue / this.fHueConversionRate);
-        iSaturation     = Math.floor(iSaturation / this.fSaturationConversionRate);
-        iLight          = Math.floor(iLight / this.fLightConversionRate);
+//        iHue            = Math.floor(iHue / this.fHueConversionRate);
+//        iSaturation     = Math.floor(iSaturation / this.fSaturationConversionRate);
+//        iLight          = Math.floor(iLight / this.fLightConversionRate);
         
-        sColourString   = "rgb("+Math.round(iHue)+","+Math.round(iSaturation)+","+Math.round(iLight)+")";
+        sColourString   = "rgb("+iHue+","+iSaturation+","+iLight+")";
         
         if (oView.byId("CPicker") !== undefined) {
             oView.byId("CPicker").setEnabled(iDeviceState == 1);
@@ -236,6 +236,10 @@ sap.ui.controller("pages.device.RGBlight", {
             
             oController.RGBUiDraw();
             
+            if(oView.byId("ButtonWhiteLight") !== undefined) {
+                oView.byId("ButtonWhiteLight").setEnabled(true);
+            }
+            
             //-- Load the slider data. --//
             //oController.InitialDeviceInfoLoad();
         }
@@ -326,6 +330,7 @@ sap.ui.controller("pages.device.RGBlight", {
             
             iomy.devices.loadLightBulbInformation({
                 thingID : oController.iThingId,
+                colourFormat : "RGB",
 
                 onSuccess : function (iRed, iGreen, iBlue) {
                     var iDeviceState = iomy.common.ThingList["_"+oController.iThingId].Status;
@@ -341,11 +346,9 @@ sap.ui.controller("pages.device.RGBlight", {
                         //oController.ChangeColourInBox(Math.round(iHue), Math.round(iSaturation), Math.round(iLight));
                         var mNewHSL = iomy.functions.convertRGBToHSL( iRed, iGreen, iBlue );
                         
-                        if( mNewHSL.Error===false ) {
-                            oController.SetSliderValues( mNewHSL.hue, mNewHSL.saturation, mNewHSL.light );
-                            //oController.ChangeColourInBox( Math.round(iHue), Math.round( iSaturation / 2.55 ), Math.round( iLight / 2.55 ));
-                            oController.ChangeColourInBox( mNewHSL.hue, mNewHSL.saturation, mNewHSL.light );
-                        }
+                        oController.SetSliderValues( mNewHSL.hue, mNewHSL.saturation, mNewHSL.light );
+                        //oController.ChangeColourInBox( Math.round(iHue), Math.round( iSaturation / 2.55 ), Math.round( iLight / 2.55 ));
+                        oController.ChangeColourInBox( mNewHSL.hue, mNewHSL.saturation, mNewHSL.light );
                     }
                     
                     //--------------------------------------------------------//

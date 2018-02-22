@@ -1060,6 +1060,7 @@ $.extend(iomy.devices,{
         var bError              = false;
         var aErrorMessages      = [];
         var aIOFilter           = [];
+        var sColourFormat       = "HSL";
         var iThingId;
         var iTypeId;
         var mThing;
@@ -1114,6 +1115,10 @@ $.extend(iomy.devices,{
                 if (typeof fnFail !== "function") {
                     fnAppendError("Failure callback is not a function. Found '"+typeof fnFail+"' instead.");
                 }
+            }
+            
+            if (mSettings.colourFormat !== undefined && mSettings.colourFormat !== null) {
+                sColourFormat = mSettings.colourFormat;
             }
             
             if (bError) {
@@ -1215,7 +1220,7 @@ $.extend(iomy.devices,{
                                 // giving up.
                                 //-----------------------------------------------------//
                                 if (i === data.length - 1) {
-                                    this.Limit += 3;
+                                    this.Limit += 1;
                                     this.Retries++;
 
                                     if (this.Retries < this.RetryLimit) {
@@ -1235,12 +1240,17 @@ $.extend(iomy.devices,{
                     
                     if (!bError) {
                         try {
-                            //----------------------------------------------------//
-                            //-- Convert the Values                             --//
-                            //----------------------------------------------------//
-                            var mConvertedHSL = iomy.functions.convertRGBToHSL( iRed, iGreen, iBlue );
+                            if (sColourFormat === "RGB") {
+                                fnSuccess( iRed, iGreen, iBlue );
+                                
+                            } else {
+                                //----------------------------------------------------//
+                                //-- Convert the Values                             --//
+                                //----------------------------------------------------//
+                                var mConvertedHSL = iomy.functions.convertRGBToHSL( iRed, iGreen, iBlue );
 
-                            fnSuccess( mConvertedHSL.hue, mConvertedHSL.saturation, mConvertedHSL.light );
+                                fnSuccess( mConvertedHSL.hue, mConvertedHSL.saturation, mConvertedHSL.light );
+                            }
 //                            if( mConvertedHSL.Error===false ) {
 //                                fnSuccess( mConvertedHSL.hue, mConvertedHSL.saturation, mConvertedHSL.light );
 //                            } else {
