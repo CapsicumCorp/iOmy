@@ -79,6 +79,7 @@ sap.ui.controller("pages.user.UserSettings", {
 		var oView     = oController.getView();
 		var aUserData = {};
         var oModel    = {};
+        var oData     = {};
         
         //-- Make sure the previous data isn't shown before refresh. --//
         oView.setModel( new sap.ui.model.json.JSONModel({}) );
@@ -94,7 +95,7 @@ sap.ui.controller("pages.user.UserSettings", {
             //------------------------------------------------//
             //-- Build and Bind Model to the View           --//
             //------------------------------------------------//
-            oModel = new sap.ui.model.json.JSONModel({
+            oData = {
                 "Regions":               iomy.common.Regions,
                 "Languages":             iomy.common.Languages,
                 "Timezones":             iomy.common.Timezones,
@@ -131,7 +132,9 @@ sap.ui.controller("pages.user.UserSettings", {
                         "Text" : "Read/Write"
                     }
                 }
-            });
+            };
+            
+            oModel = new sap.ui.model.json.JSONModel(oData);
             
             oModel.setSizeLimit(420);
             oView.setModel( oModel );
@@ -146,8 +149,9 @@ sap.ui.controller("pages.user.UserSettings", {
                             RoomName: "All Rooms"
                         };
 
-                        oModel.RoomOptions = aRoomData;
+                        oData.RoomOptions = aRoomData;
 
+                        oModel = new sap.ui.model.json.JSONModel(oData);
                         oView.setModel( oModel );
 
                         //------------------------------------------------//
