@@ -97,11 +97,13 @@ $.extend(iomy.rules, {
      * @returns {object}        Associative array of supported devices.
      */
     loadSupportedDevices : function () {
-        var aDevices   = [];
+        var oModule     = this;
+        var aDevices    = [];
         
         try {
             $.each(iomy.common.ThingList, function (sI, mThing) {
-                if (mThing.TypeId == iomy.devices.zigbeesmartplug.ThingTypeId) {
+                if (oModule.isDeviceSupportedForRules(mThing.Id))
+                {
                     aDevices.push(mThing);
                 }
             });
@@ -112,6 +114,37 @@ $.extend(iomy.rules, {
             
         } finally {
             return aDevices;
+        }
+    },
+    
+    /**
+     * Checks a given device to see whether rules can be applied to it.
+     * 
+     * Currently, the type of devices supported are Zigbee Smart Plugs and
+     * Philips Hue light bulbs.
+     * 
+     * @param {type} iThingId       Device ID
+     * 
+     * @returns {Boolean}           Whether the rules system supports it.
+     */
+    isDeviceSupportedForRules : function (iThingId) {
+        var mThing = iomy.common.ThingList["_"+iThingId];
+        
+        try {
+            if (iThingId === undefined || iThingId === null) {
+                throw new MissingArgumentException("Device ID is missing");
+            }
+            
+            if (mThing.TypeId != iomy.devices.zigbeesmartplug.ThingTypeId ||
+                mThing.TypeId != iomy.devices.philipshue.ThingTypeId)
+            {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            $.sap.log.error("Error checking if a particular device has support for rules ("+e.name+"): " + e.message);
+            return false;
         }
     },
     
@@ -298,7 +331,6 @@ $.extend(iomy.rules, {
         var sRuleName;
         var iRuleTypeId;
 		var mHub;
-        var mThing;
         
         var sThingMissing   = "A Device (thingID) must be specified.";
         var sTimeMissing    = "A time must be given.";
@@ -347,10 +379,9 @@ $.extend(iomy.rules, {
                 var mThingInfo = iomy.validation.isThingIDValid(iThingId);
                 
                 if (mThingInfo.bIsValid) {
-                    mThing = iomy.common.ThingList["_"+iThingId];
                     mHub = iomy.functions.getHubConnectedToThing(iThingId);
 				
-                    if (mThing.TypeId != iomy.devices.zigbeesmartplug.ThingTypeId) {
+                    if (!oModule.isDeviceSupportedForRules(iThingId)) {
                         fnAppendError("The given device is not supported.");
                     }
                     
