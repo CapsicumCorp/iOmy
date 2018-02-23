@@ -3804,6 +3804,39 @@ function WatchInputsGetThingInfo($iThingId) {
 	}
 }
 
+function WatchInputsGetThingsFromLinkId( $iLinkId ) {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: This function is used to fetch all the IOs that are attached to a certain Thing.  --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbWatchInputsGetThingsFromLinkId( $iLinkId );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		return array( "Error"=>true, "ErrMesg"=>"No Things Found! \nCouldn't find Things on that particular Link.\n");
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
 //========================================================================================================================//
 //== #11.0# - IO Functions                                                                                              ==//

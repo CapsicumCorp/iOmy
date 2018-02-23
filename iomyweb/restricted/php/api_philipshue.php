@@ -57,6 +57,16 @@ $iPostRoomId                = 0;            //-- INTEGER:       This is used to 
 $iLinkId                    = 0;            //-- INTEGER:       Used to hold the Link Id of the newly created Philips Hue Bridge in the database --//
 $iThingTypeId               = 0;            //-- INTEGER:       Stores the ThingTypeId to verify if they are --//
 
+$iPostRed                   = 0;            //-- INTEGER:       --//
+$iPostGreen                 = 0;            //-- INTEGER:       --//
+$iPostBlue                  = 0;            //-- INTEGER:       --//
+$iRedIOId                   = 0;            //-- INTEGER:       --//
+$iGreenIOId                 = 0;            //-- INTEGER:       --//
+$iBlueIOId                  = 0;            //-- INTEGER:       --//
+
+$iPostHue                   = 0;            //-- INTEGER:       --//
+$iPostSaturation            = 0;            //-- INTEGER:       --//
+$iPostBrightness            = 0;            //-- INTEGER:       --//
 $iHueIOId                   = 0;            //-- INTEGER:       --//
 $iSaturationIOId            = 0;            //-- INTEGER:       --//
 $iBrightnessIOId            = 0;            //-- INTEGER:       --//
@@ -92,7 +102,7 @@ $iBrightnessRSTypeId        = 0;            //-- INTEGER:       Used to store th
 require_once SITE_BASE.'/restricted/php/core.php';                                   //-- This should call all the additional libraries needed --//
 require_once SITE_BASE.'/restricted/libraries/philipshue.php';
 require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';
-
+require_once SITE_BASE.'/restricted/libraries/color.php';
 
 
 //------------------------------------------------------------//
@@ -104,6 +114,10 @@ $iHueThingTypeId         = LookupFunctionConstant("HueThingTypeId");
 $iHueRSTypeId            = LookupFunctionConstant("LightHueRSTypeId");
 $iSaturationRSTypeId     = LookupFunctionConstant("LightSaturationRSTypeId");
 $iBrightnessRSTypeId     = LookupFunctionConstant("LightBrightnessRSTypeId");
+
+$iRedRSTypeId            = LookupFunctionConstant("LightRedRSTypeId");
+$iGreenRSTypeId          = LookupFunctionConstant("LightGreenRSTypeId");
+$iBlueRSTypeId           = LookupFunctionConstant("LightBlueRSTypeId");
 
 //====================================================================//
 //== 2.0 - Retrieve POST                                            ==//
@@ -121,9 +135,7 @@ if($bError===false) {
 		array( "Name"=>'HubId',                     "DataType"=>'INT' ),
 		array( "Name"=>'RoomId',                    "DataType"=>'INT' ),
 		array( "Name"=>'ThingId',                   "DataType"=>'INT' ),
-		array( "Name"=>'Hue',                       "DataType"=>'INT' ),
-		array( "Name"=>'Saturation',                "DataType"=>'INT' ),
-		array( "Name"=>'Brightness',                "DataType"=>'INT' ),
+		array( "Name"=>'Data',                      "DataType"=>'STR' ),
 		array( "Name"=>'DisplayName',               "DataType"=>'STR' )
 	);
 	
@@ -143,13 +155,18 @@ if($bError===false) {
 		//-- NOTE: Valid modes are going to be "AddNewBridge", "ChangeHueSatLig", "Test" --//
 		
 		//-- Verify that the mode is supported --//
-		if( $sPostMode!=="AddNewBridge" && $sPostMode!=="ChangeHueSatLig" ) {
+		if( $sPostMode!=="AddNewBridge" && $sPostMode!=="ChangeColorHSL" && $sPostMode!=="ChangeColorHSV" && $sPostMode!=="ChangeColorHSB" && $sPostMode!=="ChangeColorRGB" ) {
 			$bError = true;
 			$iErrCode  = 101;
 			$sErrMesg .= "Error Code:'0101' \n";
 			$sErrMesg .= "Invalid \"Mode\" parameter! \n";
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-			$sErrMesg .= "eg. \n \"AddNewBridge\" or \"ChangeHueSatLig\" \n\n";
+			$sErrMesg .= "eg. \n \"AddNewBridge\", \"ChangeColorHSL\" or \"ChangeColorRGB\"  \n\n";
+		}
+		
+		//-- Set the Mode Aliases to the real modes --//
+		if( $sPostMode==="ChangeColorHSB" ) {
+			$sPostMode="ChangeColorHSV";
 		}
 		
 	} catch( Exception $e0102 ) {
@@ -158,7 +175,7 @@ if($bError===false) {
 		$sErrMesg .= "Error Code:'0102' \n";
 		$sErrMesg .= "No \"Mode\" parameter! \n";
 		$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
-		$sErrMesg .= "eg. \n \"AddNewBridge\" or  \"ChangeHueSatLig\" \n\n";
+		$sErrMesg .= "eg. \n \"AddNewBridge\", \"ChangeColorHSL\" or \"ChangeColorRGB\"  \n\n";
 		//sErrMesg .= e0102.message;
 	}
 	
@@ -201,8 +218,6 @@ if($bError===false) {
 		}
 	}
 	
-	
-	
 	//----------------------------------------------------//
 	//-- 2.2.3.A - Retrieve "DevicePort"                --//
 	//----------------------------------------------------//
@@ -226,15 +241,13 @@ if($bError===false) {
 		}
 	}
 	
-	
-	
 	//----------------------------------------------------//
-	//-- 2.2.4.A - Retrieve "Username"                  --//
+	//-- 2.2.4.A - Retrieve "DeviceUserToken"           --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		if( $sPostMode==="AddNewBridge" ) {
 			try {
-				//-- Retrieve the "DeviceUsername" --//
+				//-- Retrieve the "DeviceUserToken" --//
 				$sPostToken = $aHTTPData["DeviceUserToken"];
 				
 				if( $sPostToken===false ) {
@@ -243,8 +256,8 @@ if($bError===false) {
 			} catch( Exception $e0108 ) {
 				$bError = true;
 				$sErrMesg .= "Error Code:'0108' \n";
-				$sErrMesg .= "Incorrect \"Username\" parameter!\n";
-				$sErrMesg .= "Please use a valid \"Username\" parameter\n";
+				$sErrMesg .= "Incorrect \"DeviceUserToken\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"DeviceUserToken\" parameter\n";
 				$sErrMesg .= "eg. \n \"admin\" \n\n";
 			}
 		}
@@ -279,10 +292,10 @@ if($bError===false) {
 	
 	
 	//----------------------------------------------------//
-	//-- 2.2.5.A - Retrieve "ThingId"                   --//
+	//-- 2.2.5.B - Retrieve "ThingId"                   --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="ChangeHueSatLig" ) {
+		if( $sPostMode==="ChangeColorHSL" || $sPostMode==="ChangeColorHSV" || $sPostMode==="ChangeColorRGB" ) {
 			try {
 				//-- Retrieve the "ThingId" --//
 				$iPostThingId = $aHTTPData["ThingId"];
@@ -306,68 +319,8 @@ if($bError===false) {
 	}
 	
 	
-	
 	//----------------------------------------------------//
-	//-- 2.2.6.B - Retrieve "Hue"                       --//
-	//----------------------------------------------------//
-	if( $bError===false ) {
-		if( $sPostMode==="ChangeHueSatLig" ) {
-			try {
-				//-- Retrieve the "Hue" --//
-				$iPostHue = $aHTTPData["Hue"];
-				
-			} catch( Exception $e0114 ) {
-				$bError = true;
-				$sErrMesg .= "Error Code:'0114' \n";
-				$sErrMesg .= "Incorrect \"Hue\" parameter!\n";
-				$sErrMesg .= "Please use a valid \"Hue\" parameter\n";
-				$sErrMesg .= "eg. \n \"0\", \"25500\", \"46920\" \n\n";
-			}
-		}
-	}
-	
-	
-	//----------------------------------------------------//
-	//-- 2.2.7.B - Retrieve "Saturation"                --//
-	//----------------------------------------------------//
-	if( $bError===false ) {
-		if( $sPostMode==="ChangeHueSatLig" ) {
-			try {
-				//-- Retrieve the "Saturation" --//
-				$iPostSaturation = $aHTTPData["Saturation"];
-				
-			} catch( Exception $e0116 ) {
-				$bError = true;
-				$sErrMesg .= "Error Code:'0116' \n";
-				$sErrMesg .= "Incorrect \"Saturation\" parameter!\n";
-				$sErrMesg .= "Please use a valid \"Saturation\" parameter\n";
-				$sErrMesg .= "eg. \n \"1\", \"126\" or \"254\" \n\n";
-			}
-		}
-	}
-	
-	
-	//----------------------------------------------------//
-	//-- 2.2.8.B - Retrieve "Brightness"                --//
-	//----------------------------------------------------//
-	if( $bError===false ) {
-		if( $sPostMode==="ChangeHueSatLig" ) {
-			try {
-				//-- Retrieve the "Brightness" --//
-				$iPostBrightness = $aHTTPData["Brightness"];
-				
-			} catch( Exception $e0118 ) {
-				$bError = true;
-				$sErrMesg .= "Error Code:'0118' \n";
-				$sErrMesg .= "Incorrect \"Brightness\" parameter!\n";
-				$sErrMesg .= "Please use a valid \"Brightness\" parameter\n";
-				$sErrMesg .= "eg. \n \"1\", \"126\" or \"254\" \n\n";
-			}
-		}
-	}
-	
-	//----------------------------------------------------//
-	//-- 2.2.?.? - Retrieve Room Id                     --//
+	//-- 2.2.13.? - Retrieve Room Id                     --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		if( $sPostMode==="AddNewBridge" ) {
@@ -380,9 +333,9 @@ if($bError===false) {
 					$iPostRoomId = -1;
 				}
 				
-			} catch( Exception $e0120 ) {
+			} catch( Exception $e0128 ) {
 				$bError = true;
-				$sErrMesg .= "Error Code:'0120' \n";
+				$sErrMesg .= "Error Code:'0128' \n";
 				$sErrMesg .= "Incorrect \"RoomId\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"RoomId\" parameter\n";
 				$sErrMesg .= "eg. \n \"1\", \"2\" or \"3\" \n\n";
@@ -391,7 +344,7 @@ if($bError===false) {
 	}
 	
 	//----------------------------------------------------//
-	//-- 2.2.?.? - Retrieve "CameraName"                --//
+	//-- 2.2.14.? - Retrieve "CameraName"                --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		if( $sPostMode==="AddNewBridge" ) {
@@ -401,23 +354,66 @@ if($bError===false) {
 				
 				if( $sPostDisplayName===false ) {
 					$bError = true;
-					$sErrMesg .= "Error Code:'0121' \n";
+					$sErrMesg .= "Error Code:'029' \n";
 					$sErrMesg .= "Invalid \"DisplayName\" parameter! \n";
 					$sErrMesg .= "Please use a valid \"DisplayName\" parameter\n";
 					$sErrMesg .= "eg. \n \"Philips Hue Bridge\" \n\n";
 				}
 				
-			} catch( Exception $e0122 ) {
+			} catch( Exception $e0130 ) {
 				$bError = true;
-				$sErrMesg .= "Error Code:'0122' \n";
+				$sErrMesg .= "Error Code:'0130' \n";
 				$sErrMesg .= "Incorrect \"DisplayName\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"DisplayName\" parameter\n";
 				$sErrMesg .= "eg. \n \"Philips Hue Bridge\" \n\n";
 			}
 		}
 	}
+	
+	//----------------------------------------------------//
+	//-- 2.2.? - Retrieve "Data"                        --//
+	//----------------------------------------------------//
+	if( $bError===false ) {
+		if( 
+			$sPostMode==="ChangeColorHSL" || $sPostMode==="ChangeColorHSV" ||
+			$sPostMode==="ChangeColorRGB" 
+		) {
+			try {
+				//-- Retrieve the "Data" --//
+				$sPostData = $aHTTPData["Data"];
+				
+				if( $sPostData!=="" && $sPostData!==false && $sPostData!==null ) {
+					//------------------------------------------------//
+					//-- JSON Parsing                               --//
+					//------------------------------------------------//
+					$aPostData = json_decode( $sPostData, true );
+					
+					//------------------------------------------------//
+					//-- IF "null" or a false like value            --//
+					//------------------------------------------------//
+					if( $aPostData===null || $aPostData==false ) {
+						$bError    = true;
+						$iErrCode  = 145;
+						$sErrMesg .= "Error Code:'0145' \n";
+						$sErrMesg .= "Invalid POST \"Data\"! \n";
+						$sErrMesg .= "Couldn't extract JSON values from the \"Data\" parameter \n";
+					}
+				} else {
+					$bError    = true;
+					$iErrCode  = 145;
+					$sErrMesg .= "Error Code:'0145' \n";
+					$sErrMesg .= "Invalid POST \"Data\" parameter! \n";
+					$sErrMesg .= "Please use a valid data in the \"Data\" parameter \n";
+				}
+			} catch( Exception $e0146 ) {
+				$bError    = true;
+				$sErrMesg .= "Error Code:'0146' \n";
+				$sErrMesg .= "Incorrect \"Data\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"Data\" parameter.";
+			}
+		}
+	}
 }
-
 
 
 //====================================================================//
@@ -427,7 +423,6 @@ if( $bError===false ) {
 	try {
 		if( $sPostMode==="AddNewBridge" ) {
 			try {
-				
 				//----------------------------------------------------------------//
 				//-- STEP 1 - Lookup details for the Hub                        --//
 				//----------------------------------------------------------------//
@@ -503,7 +498,6 @@ if( $bError===false ) {
 						}
 					}
 				}
-				
 			} catch( Exception $e1201 ) {
 				$bError = true;
 				$iErrCode  = 1201;
@@ -512,39 +506,346 @@ if( $bError===false ) {
 				$sErrMesg .= "Problem occurred when preparing for the main function\n";
 			}
 			
+		//--------------------------------------------------------//
+		//-- 4.1.B ELSEIF One of the change color modes         --//
+		//--------------------------------------------------------//
+		} else if( $sPostMode==="ChangeColorHSL" || $sPostMode==="ChangeColorHSV" || $sPostMode==="ChangeColorRGB" ) {
+			//------------------------------------------------------------//
+			//-- STEP 1: Extract the values from JSON Array             --//
+			//------------------------------------------------------------//
+			if( $bError===false ) {
+				//----------------------------------------//
+				//-- (Optional) HUE MAX                 --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorHSL" || $sPostMode==="ChangeColorHSV" ) {
+					if( isset( $aPostData['HMax'] ) && is_numeric( $aPostData['HMax'] ) ) {
+						$fColorHueMax = floatval( $aPostData['HMax'] );
+						
+					} else {
+						//--------------------------------//
+						//-- DEFAULT: HUE MAX           --//
+						$fColorHueMax = 360;
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Required) HUE                     --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorHSL" || $sPostMode==="ChangeColorHSV" ) {
+					if( isset( $aPostData['H'] ) && is_numeric( $aPostData['H'] ) ) {
+						//-- Verify the Hue value --//
+						$fColorHue = floatval( $aPostData['H'] );
+						
+						if( $fColorHue<0 || $fColorHue>$fColorHueMax ) {
+							//-- ERROR: Hue is outside of boundries --//
+							$bError = true;
+							$iErrCode   = 3301;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+							$sErrMesg  .= "The \"H\" value (Hue) exceeds one of the allowed min/max limits. \n";
+						}
+						
+					} else {
+						//-- ERROR: Missing value --//
+						$bError = true;
+						$iErrCode   = 3302;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+						$sErrMesg  .= "Can't find the \"H\" value (Hue). \n";
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Optional) SATURATION MAX          --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorHSL" || $sPostMode==="ChangeColorHSV" ) {
+					if( isset( $aPostData['SatMax'] ) && is_numeric( $aPostData['SatMax'] ) ) {
+						$fColorSatMax = floatval( $aPostData['SatMax'] );
+						
+					} else {
+						//--------------------------------//
+						//-- DEFAULT: SATURATION MAX    --//
+						$fColorSatMax = 360;
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Required) SATURATION              --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorHSL" || $sPostMode==="ChangeColorHSV" ) {
+					if( isset( $aPostData['S'] ) && is_numeric( $aPostData['S'] ) ) {
+						//-- Verify the Sat value --//
+						$fColorSat = floatval( $aPostData['S'] );
+						
+						if( $fColorSat<0 || $fColorSat>$fColorSatMax ) {
+							//-- ERROR: Sat is outside of boundries --//
+							$bError = true;
+							$iErrCode   = 3303;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+							$sErrMesg  .= "The \"S\" value (Saturation) exceeds one of the allowed min/max limits. \n";
+						}
+					} else {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3304;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+						$sErrMesg  .= "Can't find the \"S\" value (Saturation). \n";
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Optional) LIGHT MAX               --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorHSL"  ) {
+					if( isset( $aPostData['LightMax'] ) && is_numeric( $aPostData['LightMax'] ) ) {
+						$fColorLightMax = floatval( $aPostData['LightMax'] );
+						
+					} else {
+						//--------------------------------//
+						//-- DEFAULT: LIGHT MAX         --//
+						$fColorLightMax = 360;
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Required) LIGHT                   --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorHSL" ) {
+					if( isset( $aPostData['L'] ) && is_numeric( $aPostData['L'] ) ) {
+						//-- Verify the Light value --//
+						$fColorLight = floatval( $aPostData['L'] );
+						
+						if( $fColorLight<0 || $fColorLight>$fColorLightMax ) {
+							//-- ERROR: Light is outside of boundries --//
+							$bError = true;
+							$iErrCode   = 3305;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+							$sErrMesg  .= "The \"L\" value (Light) exceeds one of the allowed min/max limits. \n";
+						}
+					} else {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3306;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+						$sErrMesg  .= "Can't find the \"L\" value (Light) value. \n";
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Optional) BRIGHTNESS MAX          --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorHSV" ) {
+					if( isset( $aPostData['BMax'] ) && is_numeric( $aPostData['BMax'] ) ) {
+						$fColorBrightnessMax = floatval( $aPostData['BMax'] );
+						
+					} else if( $aPostData['VMax'] && is_numeric( $aPostData['VMax'] ) ) {
+						$fColorBrightnessMax = floatval( $aPostData['VMax'] );
+						
+					} else {
+						//--------------------------------//
+						//-- DEFAULT: BRIGHTNESS MAX    --//
+						$fColorBrightnessMax = 360;
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Required) BRIGHTNESS              --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorHSV" ) {
+					if( isset( $aPostData['B'] ) && is_numeric( $aPostData['B'] ) ) {
+						//-- Verify the Brightness value --//
+						$fColorBrightness = floatval( $aPostData['B'] );
+						
+						if( $fColorBrightness<0 || $fColorBrightness>$fColorBrightnessMax ) {
+							//-- ERROR: Brightness is outside of boundries --//
+							$bError = true;
+							$iErrCode   = 3307;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+							$sErrMesg  .= "The \"B\" value (Brightness) exceeds one of the allowed min/max limits. \n";
+						}
+					} else if( isset( $aPostData['V'] ) && is_numeric( $aPostData['V'] ) ) {
+						//-- Verify the Brightness value --//
+						$fColorBrightness = floatval( $aPostData['V'] );
+						
+						if( $fColorBrightness<0 || $fColorBrightness>$fColorBrightnessMax ) {
+							//-- ERROR: Brightness is outside of boundries --//
+							$bError = true;
+							$iErrCode   = 3308;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+							$sErrMesg  .= "The \"V\" value (Brightness) exceeds one of the allowed min/max limits. \n";
+						}
+					} else {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3308;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+						$sErrMesg  .= "Can't find the \"B\" value (Brightness). \n";
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Optional) RED MAX                 --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorRGB"  ) {
+					if( isset( $aPostData['RMax'] ) && is_numeric( $aPostData['RMax'] ) ) {
+						$fColorRedMax = floatval( $aPostData['RMax'] );
+						
+					} else {
+						//--------------------------------//
+						//-- DEFAULT: RED MAX           --//
+						$fColorRedMax = 360;
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Required) RED                     --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorRGB" ) {
+					if( isset( $aPostData['R'] ) && is_numeric( $aPostData['R'] ) ) {
+						//-- Verify the Red value --//
+						$fColorRed = floatval( $aPostData['R'] );
+						
+						if( $fColorRed<0 || $fColorRed>$fColorRedMax ) {
+							//-- ERROR: Red is outside of boundries --//
+							$bError = true;
+							$iErrCode   = 3309;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+							$sErrMesg  .= "The \"R\" value (Red) exceeds one of the allowed min/max limits. \n";
+						}
+					} else {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3310;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+						$sErrMesg  .= "Can't find the \"R\" value (Red). \n";
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Optional) GREEN MAX               --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorRGB"  ) {
+					if( isset( $aPostData['GMax'] ) && is_numeric( $aPostData['GMax'] ) ) {
+						$fColorGreenMax = floatval( $aPostData['GMax'] );
+						
+					} else {
+						//--------------------------------//
+						//-- DEFAULT: GREEN MAX         --//
+						$fColorGreenMax = 360;
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Required) GREEN                   --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorRGB" ) {
+					if( isset( $aPostData['G'] ) && is_numeric( $aPostData['G'] ) ) {
+						//-- Verify the Green value --//
+						$fColorGreen = floatval( $aPostData['G'] );
+						
+						if( $fColorGreen<0 || $fColorGreen>$fColorGreenMax ) {
+							//-- ERROR: Green is outside of boundries --//
+							$bError = true;
+							$iErrCode   = 3311;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+							$sErrMesg  .= "The \"G\" value (Green) exceeds one of the allowed min/max limits. \n";
+						}
+					} else {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3312;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+						$sErrMesg  .= "Can't find the \"G\" value (Green). \n";
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Optional) BLUE MAX                --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorRGB"  ) {
+					if( isset( $aPostData['BMax'] ) && is_numeric( $aPostData['BMax'] ) ) {
+						$fColorBlueMax = floatval( $aPostData['BMax'] );
+						
+					} else {
+						//--------------------------------//
+						//-- DEFAULT: BLUE MAX          --//
+						$fColorBlueMax = 360;
+					}
+				}
+				
+				//----------------------------------------//
+				//-- (Required) BLUE                    --//
+				//----------------------------------------//
+				if( $sPostMode==="ChangeColorRGB" ) {
+					if( isset( $aPostData['B'] ) && is_numeric( $aPostData['B'] ) ) {
+						//-- Verify the Blue value --//
+						$fColorBlue = floatval( $aPostData['B'] );
+						
+						if( $fColorBlue<0 || $fColorBlue>$fColorBlueMax ) {
+							//-- ERROR: Blue is outside of boundries --//
+							$bError = true;
+							$iErrCode   = 3313;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+							$sErrMesg  .= "The \"B\" value (Blue) exceeds one of the allowed min/max limits. \n";
+						}
+					} else {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3314;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when extracting values from the \"Data\" JSON parameter!\n";
+						$sErrMesg  .= "Can't find the \"B\" value (Blue). \n";
+					}
+				}
+				
+				
+				
+			}
 			
-		} else if( $sPostMode==="ChangeHueSatLig" ) {
 			//------------------------------------------------------------//
 			//-- STEP 2: Lookup the details on that particular "Thing"  --//
 			//------------------------------------------------------------//
-			$aTempFunctionResult1 = GetThingInfo( $iPostThingId );
-			
-			
-			if( $aTempFunctionResult1['Error']===false ) {
-				$iThingTypeId   = $aTempFunctionResult1['Data']['ThingTypeId'];
-				$iLinkId        = $aTempFunctionResult1['Data']['LinkId'];
-				$iWritePerm     = $aTempFunctionResult1['Data']['PermWrite'];
+			if( $bError===false ) {
+				$aTempFunctionResult1 = GetThingInfo( $iPostThingId );
 				
-				//-- Display an error if the Thing Type is not a Philips Hue --//
-				//-- TODO: Add the correct ThingTypeId --//
-				if( $iThingTypeId!==$iHueThingTypeId ) {
-					//-- The ThingId that the user passed is not a Philips Hue --//
-					$bError     = true;
-					$iErrCode   = 3201;
-					$sErrMesg  .= "Error Code:'3201' \n";
-					$sErrMesg  .= "The specified device is not a Philips Hue!\n";
-					$sErrMesg  .= "Please use the ThingId of a valid Philips Hue.\n";
+				
+				if( $aTempFunctionResult1['Error']===false ) {
+					$iThingTypeId   = $aTempFunctionResult1['Data']['ThingTypeId'];
+					$iLinkId        = $aTempFunctionResult1['Data']['LinkId'];
+					$iWritePerm     = $aTempFunctionResult1['Data']['PermWrite'];
+					
+					//-- Display an error if the Thing Type is not a Philips Hue --//
+					//-- TODO: Add the correct ThingTypeId --//
+					if( $iThingTypeId!==$iHueThingTypeId ) {
+						//-- The ThingId that the user passed is not a Philips Hue --//
+						$bError     = true;
+						$iErrCode   = 3201;
+						$sErrMesg  .= "Error Code:'3201' \n";
+						$sErrMesg  .= "The specified device is not a Philips Hue!\n";
+						$sErrMesg  .= "Please use the ThingId of a valid Philips Hue.\n";
+					}
+					
+				} else {
+					//-- TODO: Add Error Message --//
+					$bError = true;
+					$iErrCode   = 3202;
+					$sErrMesg  .= "Error Code:'3202' \n";
+					$sErrMesg  .= "Problem when looking up the ThingInfo!\n";
+					$sErrMesg  .= $aTempFunctionResult1['ErrMesg'];
 				}
-				
-			} else {
-				//-- TODO: Add Error Message --//
-				$bError = true;
-				$iErrCode   = 3202;
-				$sErrMesg  .= "Error Code:'3202' \n";
-				$sErrMesg  .= "Problem when looking up the ThingInfo!\n";
-				$sErrMesg  .= $aTempFunctionResult1['ErrMesg'];
 			}
-			
 			
 			//----------------------------------------------------------------------------//
 			//-- STEP 3: Look up the details to the "Link" that belongs to that "Thing" --//
@@ -606,105 +907,310 @@ if( $bError===false ) {
 					//-- Verify that the 3 desired IO Ids are found and stored to their appropiate variables --//
 					//-----------------------------------------------------------------------------------------//
 					foreach( $aTempFunctionResult1['Data'] as $aIO ) {
-						//--------------------//
-						//-- Hue            --//
-						//--------------------//
+						//----------------------------//
+						//-- Mode 1: Hue            --//
+						//----------------------------//
 						if( $aIO['RSTypeId']===$iHueRSTypeId ) {
 							$iHueIOId = $aIO['IOId'];
 							
-						//--------------------//
-						//-- Saturation     --//
-						//--------------------//
+						//----------------------------//
+						//-- Mode 1: Saturation     --//
+						//----------------------------//
 						} else if( $aIO['RSTypeId']===$iSaturationRSTypeId ) {
 							$iSaturationIOId = $aIO['IOId'];
 							
-						//--------------------//
-						//-- Lightness      --//
-						//--------------------//
+						//----------------------------//
+						//-- Mode 1: Lightness      --//
+						//----------------------------//
 						} else if( $aIO['RSTypeId']===$iBrightnessRSTypeId ) {
 							$iBrightnessIOId = $aIO['IOId'];
 							
+							
+						//----------------------------//
+						//-- Mode 2: Red            --//
+						//----------------------------//
+						} else if( $aIO['RSTypeId']===$iRedRSTypeId ) {
+							$iRedIOId = $aIO['IOId'];
+							
+						//----------------------------//
+						//-- Mode 2: Green          --//
+						//----------------------------//
+						} else if( $aIO['RSTypeId']===$iGreenRSTypeId ) {
+							$iGreenIOId = $aIO['IOId'];
+							
+						//----------------------------//
+						//-- Mode 2: Blue           --//
+						//----------------------------//
+						} else if( $aIO['RSTypeId']===$iBlueRSTypeId ) {
+							$iBlueIOId = $aIO['IOId'];
+							
 						}
-					} //-- END Foreach --//
+						
+					} //-- END Foreach IO --//
 					
 					
 					//----------------------------------------------------//
 					//-- IF a IOId couldn't be retrieved                --//
 					//----------------------------------------------------//
-					if( !($iHueIOId>0) ) {
-						//-- Id isn't greater than zero --//
-						$bError = true;
-						$iErrCode  = 3210;
-						$sErrMesg .= "Error Code:'3210' \n";
-						$sErrMesg .= "Can not find the 'Hue' IO.\n";
+					$iSystemType = 0;
+					
+					//----------------------------------------//
+					//-- IF Using the new RGB System        --//
+					//----------------------------------------//
+					if( $iRedIOId>=1 && $iGreenIOId>=1 && $iBlueIOId>=1 ) {
+						$iSystemType = 2;
 						
-					} else if( !($iSaturationIOId>0) ) {
-						//-- Id isn't greater than zero --//
+						
+					//----------------------------------------//
+					//-- ELSEIF Using the old HSB System    --//
+					//----------------------------------------//
+					} else if( $iHueIOId>=1 && $iSaturationIOId>=1 && $iBrightnessIOId>=1 ) {
+						$iSystemType = 1;
+						
+						
+					//----------------------------------------//
+					//-- ELSE Missing IOs                   --//
+					//----------------------------------------//
+					} else {
 						$bError = true;
 						$iErrCode  = 3211;
 						$sErrMesg .= "Error Code:'3211' \n";
-						$sErrMesg .= "Can not find the 'Saturation' IO.\n";
-						
-					} else if( !($iBrightnessIOId>0) ) {
-						//-- Id isn't greater than zero --//
-						$bError = true;
-						$iErrCode  = 3212;
-						$sErrMesg .= "Error Code:'3212' \n";
-						$sErrMesg .= "Can not find the 'Brightness' IO.\n";
-						
-					//----------------------------------------------------//
-					//-- ELSE Assume that there isn't any errors        --//
-					//----------------------------------------------------//
-					} else {
-						//-- Check if the user has tried to update atleast one value --//
-						if( $iPostHue===false && $iPostSaturation===false && $iPostBrightness===false ) {
-							$bError = true;
-							$iErrCode  = 3213;
-							$sErrMesg .= "Error Code:'3213' \n";
-							$sErrMesg .= "Problem with the \"Hue\", \"Saturation\" and \"Brightness\" values!.\n";
-							
-						} else {
-							//----------------------------------------//
-							//-- Perform Validation on the values   --//
-							//----------------------------------------//
-							
-							//-- Make sure the Hue is valid --//
-							if( $iPostHue<0 || $iPostHue>65535 ) {
-								$bError = true;
-								$iErrCode  = 3215;
-								$sErrMesg .= "Error Code:'3215' \n";
-								$sErrMesg .= "Please use a valid number for the 'Hue' value!\n";
-								$sErrMesg .= "Eg. 0-65535!\n";
-							}
-							
-							//-- Make sure the Saturation is valid --//
-							if( $iPostSaturation<0 || $iPostSaturation>254 ) {
-								$bError = true;
-								$iErrCode  = 3216;
-								$sErrMesg .= "Error Code:'3216' \n";
-								$sErrMesg .= "Please use a valid number for the 'Saturation' value!\n";
-								$sErrMesg .= "Eg. 0-254!\n";
-							}
-							
-							//-- Make sure the Brightness is valid --//
-							if( $iPostBrightness<0 || $iPostBrightness>254 ) {
-								$bError = true;
-								$iErrCode  = 3217;
-								$sErrMesg .= "Error Code:'3217' \n";
-								$sErrMesg .= "Please use a valid number for the 'Brightness' value!\n";
-								$sErrMesg .= "Eg. 0-254!\n";
-							}
-						}
+						$sErrMesg .= "Can not find enough of the required IOs.\n";
+						$sErrMesg .= "The accepted IO combinations are as followed.\n";
+						$sErrMesg .= " RGB) \"Red\", \"Green\" & \"Blue\"  \n";
+						$sErrMesg .= " HSB) \"Hue\", \"Saturation\" & \"Brightness\" \n";
+						$sErrMesg .= "Please contact an administrator to rectify the issue.\n";
 					}
 				} else {
 					//-- Display the error --//
 					$bError = true;
-					$iErrCode  = 3220;
-					$sErrMesg .= "Error Code:'3220' \n";
+					$iErrCode  = 3210;
+					$sErrMesg .= "Error Code:'3210' \n";
 					$sErrMesg .= "Error when retrieving the IOs from the ThingId \n";
 					$sErrMesg .= $aTempFunctionResult1['ErrMesg'];
 				}
 			}
+			
+			//----------------------------------------------------------------------------//
+			//-- STEP 6: Validate the new values                                        --//
+			//----------------------------------------------------------------------------//
+			if( $bError===false ) {
+				
+				
+				//----------------------------------------------------------------//
+				//-- IF "ChangeRGB" mode                                        --//
+				//----------------------------------------------------------------//
+				if( $sPostMode==="ChangeColorRGB" ) {
+					
+					//------------------------------------------------//
+					//-- Generate the PhilipsHue HSB                --//
+					//------------------------------------------------//
+					$aTempPH_HSB = Color_RGB_to_HSV( $fColorRed, $fColorGreen, $fColorBlue, array(
+						"InputRedMax"    => $fColorRedMax,
+						"InputGreenMax"  => $fColorGreenMax,
+						"InputBlueMax"   => $fColorBlueMax,
+						"OutputHueMax"   => 65535,
+						"OutputSatMax"   => 254,
+						"OutputValMax"   => 254,
+						"OutputHueRound" => true,
+						"OutputSatRound" => true,
+						"OutputValRound" => true
+					));
+					
+					if( $aTempPH_HSB===null || $aTempPH_HSB===false ) {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3351;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when calculating the \"PH_HSB\" color values when using the \"RGB\" Mode!\n";
+						
+					} else if( $aTempPH_HSB['Error']===true ) {
+						//-- ERROR:  --//
+						$bError = true;
+						$iErrCode   = 3351;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when calculating the \"PH_HSB\" color values when using the \"RGB\" Mode!\n";
+						$sErrMesg  .= $aTempPH_HSB['ErrMsg']."\n";
+					}
+					
+					
+					//------------------------------------------------//
+					//-- Generate the RGB                           --//
+					//------------------------------------------------//
+					if( $bError===false ) {
+						$aTempDB_RGB = Color_RGB_Rescale( $fColorRed, $fColorGreen, $fColorBlue, array(
+							"InputRedMax"      => $fColorRedMax,
+							"InputGreenMax"    => $fColorGreenMax,
+							"InputBlueMax"     => $fColorBlueMax,
+							"OutputRedMax"     => 255,
+							"OutputGreenMax"   => 255,
+							"OutputBlueMax"    => 255,
+							"OutputRedRound"   => true,
+							"OutputGreenRound" => true,
+							"OutputBlueRound"  => true
+						));
+						
+						if( $aTempDB_RGB===null || $aTempDB_RGB===false ) {
+							//-- ERROR: --//
+							$bError = true;
+							$iErrCode   = 3352;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when calculating the \"DB_RGB\" color values when using the \"RGB\" Mode!\n";
+							
+						} else if( $aTempDB_RGB['Error']===true ) {
+							//-- ERROR:  --//
+							$bError = true;
+							$iErrCode   = 3352;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when calculating the \"DB_RGB\" color values when using the \"RGB\" Mode!\n";
+							$sErrMesg  .= $aTempDB_RGB['ErrMsg']."\n";
+						}
+					}
+					
+					
+					
+				//----------------------------------------------------------------//
+				//-- ELSEIF "HSV" mode                                          --//
+				//----------------------------------------------------------------//
+				} else if( $sPostMode==="ChangeColorHSV"  ) {
+					//------------------------------------------------//
+					//-- Calculate the RGB                          --//
+					//------------------------------------------------//
+					$aTempDB_RGB = Color_HSV_to_RGB( $fColorHue, $fColorSat, $fColorBrightness, array(
+						"InputHueMax"      => $fColorHueMax,
+						"InputSatMax"      => $fColorSatMax,
+						"InputValMax"      => $fColorBrightnessMax,
+						"OutputRedMax"     => 255,
+						"OutputGreenMax"   => 255,
+						"OutputBlueMax"    => 255,
+						"OutputRedRound"   => true,
+						"OutputGreenRound" => true,
+						"OutputBlueRound"  => true
+					));
+					
+					if( $aTempDB_RGB===null || $aTempDB_RGB===false ) {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3353;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when calculating the \"DB_RGB\" color values when using the \"HSV\" Mode!\n";
+						
+					} else if( $aTempDB_RGB['Error']===true ) {
+						//-- ERROR:  --//
+						$bError = true;
+						$iErrCode   = 3353;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when calculating the \"DB_RGB\" color values when using the \"HSV\" Mode!\n";
+						$sErrMesg  .= $aTempDB_RGB['ErrMsg']."\n";
+					}
+					
+					//------------------------------------------------//
+					//-- Generate the PhilipsHue HSB                --//
+					//------------------------------------------------//
+					if( $bError===false ) {
+						$aTempPH_HSB = Color_RGB_to_HSV( $aTempDB_RGB['Red'], $aTempDB_RGB['Green'], $aTempDB_RGB['Blue'], array(
+							"InputRedMax"    => 255,
+							"InputGreenMax"  => 255,
+							"InputBlueMax"   => 255,
+							"OutputHueMax"   => 65535,
+							"OutputSatMax"   => 254,
+							"OutputValMax"   => 254,
+							"OutputHueRound" => true,
+							"OutputSatRound" => true,
+							"OutputValRound" => true
+						));
+						
+						if( $aTempPH_HSB===null || $aTempPH_HSB===false ) {
+							//-- ERROR: --//
+							$bError = true;
+							$iErrCode   = 3351;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when calculating the \"PH_HSB\" color values when using the \"HSV\" Mode!\n";
+							
+						} else if( $aTempPH_HSB['Error']===true ) {
+							//-- ERROR:  --//
+							$bError = true;
+							$iErrCode   = 3351;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when calculating the \"PH_HSB\" color values when using the \"HSV\" Mode!\n";
+							$sErrMesg  .= $aTempPH_HSB['ErrMsg']."\n";
+						}
+					}
+					
+					
+				//----------------------------------------------------------------//
+				//-- ELSEIF "HSL" mode                                          --//
+				//----------------------------------------------------------------//
+				} else if( $sPostMode==="ChangeColorHSL"  ) {
+					//------------------------------------------------//
+					//-- Calculate the RGB                          --//
+					//------------------------------------------------//
+					$aTempDB_RGB = Color_HSL_to_RGB( $fColorHue, $fColorSat, $fColorLight, array(
+						"InputHueMax"      => $fColorHueMax,
+						"InputSatMax"      => $fColorSatMax,
+						"InputValMax"      => $fColorLightMax,
+						"OutputRedMax"     => 255,
+						"OutputGreenMax"   => 255,
+						"OutputBlueMax"    => 255,
+						"OutputRedRound"   => true,
+						"OutputGreenRound" => true,
+						"OutputBlueRound"  => true
+					));
+					
+					if( $aTempDB_RGB===null || $aTempDB_RGB===false ) {
+						//-- ERROR: --//
+						$bError = true;
+						$iErrCode   = 3353;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when calculating the \"DB_RGB\" color values when using the \"HSL\" Mode!\n";
+						
+					} else if( $aTempDB_RGB['Error']===true ) {
+						//-- ERROR:  --//
+						$bError = true;
+						$iErrCode   = 3353;
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg  .= "Problem when calculating the \"DB_RGB\" color values when using the \"HSL\" Mode!\n";
+						$sErrMesg  .= $aTempDB_RGB['ErrMsg']."\n";
+					}
+					
+					//------------------------------------------------//
+					//-- Generate the PhilipsHue HSB                --//
+					//------------------------------------------------//
+					if( $bError===false ) {
+						$aTempPH_HSB = Color_RGB_to_HSV( $aTempDB_RGB['Red'], $aTempDB_RGB['Green'], $aTempDB_RGB['Blue'], array(
+							"InputRedMax"    => 255,
+							"InputGreenMax"  => 255,
+							"InputBlueMax"   => 255,
+							"OutputHueMax"   => 65535,
+							"OutputSatMax"   => 254,
+							"OutputValMax"   => 254,
+							"OutputHueRound" => true,
+							"OutputSatRound" => true,
+							"OutputValRound" => true
+						));
+					
+						if( $aTempPH_HSB===null || $aTempPH_HSB===false ) {
+							//-- ERROR: --//
+							$bError = true;
+							$iErrCode   = 3351;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when calculating the \"PH_HSB\" color values when using the \"HSL\" Mode!\n";
+							
+						} else if( $aTempPH_HSB['Error']===true ) {
+							//-- ERROR:  --//
+							$bError = true;
+							$iErrCode   = 3351;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Problem when calculating the \"PH_HSB\" color values when using the \"HSL\" Mode!\n";
+							$sErrMesg  .= $aTempPH_HSB['ErrMsg']."\n";
+						}
+					}
+					
+				} else {
+					echo "Unexpected Else!";
+				}
+			} //-- ENDIF no errors have occurred --//
+			
 		}
 	} catch( Exception $e0200 ) {
 		$bError = true;
@@ -884,7 +1390,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 5.3 - MODE: Change Hue, Saturation, Brightness             ==//
 		//================================================================//
-		} else if( $sPostMode==="ChangeHueSatLig" ) {
+		} else if( $sPostMode==="ChangeColorHSL" || $sPostMode==="ChangeColorHSV" || $sPostMode==="ChangeColorRGB" ) {
 			try {
 				//----------------------------------------------------------------//
 				//-- 5.3.1 - UPDATE THE DEVICE                                  --//
@@ -909,7 +1415,9 @@ if( $bError===false ) {
 							//------------------------------------//
 							//-- CHANGE THE LIGHT'S HSL         --//
 							//------------------------------------//
-							$aResult = $oPHPPhilipsHue->ChangeLightHueSatBright( $sHWId, $iPostHue, $iPostSaturation, $iPostBrightness );
+							
+							$aResult = $oPHPPhilipsHue->ChangeLightHueSatBright( $sHWId, $aTempPH_HSB['Hue'], $aTempPH_HSB['Sat'], $aTempPH_HSB['Val'] );
+							//$aResult = $oPHPPhilipsHue->ChangeLightHueSatBright( $sHWId, $iPostHue, $iPostSaturation, $iPostBrightness );
 							
 							
 							if($aResult['Error']===true) {
@@ -969,63 +1477,115 @@ if( $bError===false ) {
 				//--------------------------------------------//
 				$iUTS = time();
 				
-				//--------------------------------------------//
-				//-- Insert the new Hue value               --//
-				//--------------------------------------------//
-				if( $bError===false ) {
-					if( $iPostHue!==false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iHueIOId, $iUTS, $iPostHue );
-						
-						if( $aTempFunctionResult4['Error']===true ) {
-							$bError     = true;
-							$iErrCode   = 3412;
-							$sErrMesg  .= "Error Code:'3412' \n";
-							$sErrMesg  .= "Critical Error updating the \"Hue\" value!\n";
-							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
-						}
-					}
-				}
 				
-				//--------------------------------------------//
-				//-- Insert the new Saturation value        --//
-				//--------------------------------------------//
 				if( $bError===false ) {
-					if( $iPostSaturation!==false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iSaturationIOId, $iUTS, $iPostSaturation );
-						
-						if( $aTempFunctionResult4['Error']===true ) {
-							$bError     = true;
-							$iErrCode   = 3413;
-							$sErrMesg  .= "Error Code:'3413' \n";
-							$sErrMesg  .= "Critical Error updating the \"Saturation\" value!\n";
-							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+					//--------------------------------------------//
+					//-- IF New IO system                       --//
+					//--------------------------------------------//
+					if( $iSystemType===2 ) {
+						//--------------------------------------------//
+						//-- Insert the new Red value               --//
+						//--------------------------------------------//
+						if( $bError===false ) {
+							$aTempFunctionResult4 = InsertNewIODataValue( $iRedIOId, $iUTS, $aTempDB_RGB['Red'] );
+							
+							if( $aTempFunctionResult4['Error']===true ) {
+								$bError     = true;
+								$iErrCode   = 3412;
+								$sErrMesg  .= "Error Code:'3412' \n";
+								$sErrMesg  .= "Critical Error updating the \"Red\" value!\n";
+								$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+							}
 						}
-					}
-				}
-				
-				//--------------------------------------------//
-				//-- Insert the new Brightness value        --//
-				//--------------------------------------------//
-				if( $bError===false ) {
-					if( $iPostBrightness!==false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iBrightnessIOId, $iUTS, $iPostBrightness );
 						
-						if( $aTempFunctionResult4['Error']===true ) {
-							$bError     = true;
-							$iErrCode   = 3414;
-							$sErrMesg  .= "Error Code:'3414' \n";
-							$sErrMesg  .= "Critical Error updating the \"Brightness\" value!\n";
-							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+						//--------------------------------------------//
+						//-- Insert the new Green value             --//
+						//--------------------------------------------//
+						if( $bError===false ) {
+							$aTempFunctionResult4 = InsertNewIODataValue( $iGreenIOId, $iUTS, $aTempDB_RGB['Green'] );
+							
+							if( $aTempFunctionResult4['Error']===true ) {
+								$bError     = true;
+								$iErrCode   = 3413;
+								$sErrMesg  .= "Error Code:'3413' \n";
+								$sErrMesg  .= "Critical Error updating the \"Green\" value!\n";
+								$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+							}
 						}
-					}
-				}
-				
+						
+						//--------------------------------------------//
+						//-- Insert the new Blue value              --//
+						//--------------------------------------------//
+						if( $bError===false ) {
+							$aTempFunctionResult4 = InsertNewIODataValue( $iBlueIOId, $iUTS, $aTempDB_RGB['Blue'] );
+							
+							if( $aTempFunctionResult4['Error']===true ) {
+								$bError     = true;
+								$iErrCode   = 3414;
+								$sErrMesg  .= "Error Code:'3414' \n";
+								$sErrMesg  .= "Critical Error updating the \"Blue\" value!\n";
+								$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+							}
+						}
+						
+					//--------------------------------------------//
+					//-- ELSE Old IO system                     --//
+					//--------------------------------------------//
+					} else {
+						
+						
+						//--------------------------------------------//
+						//-- Insert the new Hue value               --//
+						//--------------------------------------------//
+						if( $bError===false ) {
+							$aTempFunctionResult4 = InsertNewIODataValue( $iHueIOId, $iUTS, $aTempPH_HSB['Hue'] );
+							
+							if( $aTempFunctionResult4['Error']===true ) {
+								$bError     = true;
+								$iErrCode   = 3422;
+								$sErrMesg  .= "Error Code:'3422' \n";
+								$sErrMesg  .= "Critical Error updating the \"Hue\" value!\n";
+								$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+							}
+						}
+						
+						//--------------------------------------------//
+						//-- Insert the new Saturation value        --//
+						//--------------------------------------------//
+						if( $bError===false ) {
+							$aTempFunctionResult4 = InsertNewIODataValue( $iSaturationIOId, $iUTS, $aTempPH_HSB['Sat'] );
+							
+							if( $aTempFunctionResult4['Error']===true ) {
+								$bError     = true;
+								$iErrCode   = 3423;
+								$sErrMesg  .= "Error Code:'3423' \n";
+								$sErrMesg  .= "Critical Error updating the \"Saturation\" value!\n";
+								$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+							}
+						}
+						
+						//--------------------------------------------//
+						//-- Insert the new Brightness value        --//
+						//--------------------------------------------//
+						if( $bError===false ) {
+							$aTempFunctionResult4 = InsertNewIODataValue( $iBrightnessIOId, $iUTS, $aTempPH_HSB['Val'] );
+							
+							if( $aTempFunctionResult4['Error']===true ) {
+								$bError     = true;
+								$iErrCode   = 3424;
+								$sErrMesg  .= "Error Code:'3424' \n";
+								$sErrMesg  .= "Critical Error updating the \"Brightness\" value!\n";
+								$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+							}
+						}
+					} //-- ENDELSE Old System of IOs --//
+				} //-- ENDIF No errors have occurred --//
 				
 			} catch( Exception $e3415 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
 				$sErrMesg .= "Error Code:'3415' \n";
-				$sErrMesg .= "Critical Error in the main section of the \"ChangeHueSatLig\" Mode!\n";
+				$sErrMesg .= "Critical Error in the main section of the \"ChangeColor\" Mode!\n";
 				$sErrMesg .= $e3415->getMessage();
 			}
 		//================================================================//

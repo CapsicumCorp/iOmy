@@ -28,6 +28,7 @@ class PHPPhilipsHue {
 	protected $sNetworkPort         = '';           //-- STRING:    Holds the IP Port that is used for Onvif. --//
 	protected $sUserToken           = '';           //-- STRING:    --//
 	protected $sAPIUrl              = '';           //-- STRING:    --//
+	protected $sObjectState         = '';           //-- STRING:        Used to indicate what State that the Object is in. --//
 	public $bInitialised            = false;        //-- BOOLEAN:   --//
 	public $aErrorMessges           = array();      //-- ARRAY:     --//
 	public $aHueBridgeConfig        = array();      //-- ARRAY:     --//
@@ -37,7 +38,7 @@ class PHPPhilipsHue {
 	//========================================================================================================================//
 	//== #2.0# - CONSTRUCT & DESTRUCT FUNCTIONS                                                                             ==//
 	//========================================================================================================================//
-	public function __construct( $sNetworkAddress, $sIPPort="80", $sUserToken="admin" ) {
+	public function __construct( $sNetworkAddress, $sIPPort="80", $sUserToken="admin", $aObjectData=null ) {
 		//----------------------------------------------------//
 		//-- 1.0 - INITIALISE                               --//
 		//----------------------------------------------------//
@@ -48,6 +49,20 @@ class PHPPhilipsHue {
 		//-- CREATE THE API URL --//
 		//-- TODO: Change this into a function --//
 		$this->sAPIUrl				= 'http://'.$sNetworkAddress.':'.$sIPPort.'/api/'.$sUserToken;
+		
+		//-- Extract the ObjectState (if applicable) --//
+		if( $aObjectData!==null ) {
+			if( isset( $aObjectData['ObjectState'] )  ) {
+				$this->sObjectState = $aObjectData['ObjectState'];
+				
+			} else {
+				$this->sObjectState = "Normal";
+			}
+		} else {
+			$this->sObjectState = "Normal";
+		}
+		
+		
 		
 		//----------------------------------------------------//
 		//-- 3.0 - FETCH THE USER CONFIGURATION             --//
@@ -387,13 +402,12 @@ class PHPPhilipsHue {
 	//==  ==//
 	//================================================================================================//
 	public function AutoAddNewLights( $iLinkId ) {
-		//----------------------------------------------------------------//
-		//-- 1.0 - INITIALISE                                           --//
-		//----------------------------------------------------------------//
+		//------------------------------------------------------------------------//
+		//-- 1.0 - INITIALISE                                                   --//
+		//------------------------------------------------------------------------//
 		
 		//-- 1.1 - Declare Global variables --//
 		global $oRestrictedApiCore;
-		
 		
 		//-- 1.2 - Declare normal variables --//
 		$bError                 = false;            //-- BOOLEAN:   Used to indicate if an error has been caught. --//
@@ -413,13 +427,21 @@ class PHPPhilipsHue {
 		//-- 1.5 - Required Libraries --//
 		require_once SITE_BASE.'/restricted/libraries/special/dbinsertfunctions.php';
 		
-		//----------------------------------------------------------------//
-		//-- 2.0 - SETUP VARIABLES                                      --//
-		//----------------------------------------------------------------//
+		//------------------------------------------------------------------------//
+		//-- 2.0 - SETUP VARIABLES                                              --//
+		//------------------------------------------------------------------------//
 		
 		//-- Add the new lights into the database --//
 		$aDetectedLightsTemp    = $this->aLightList;
-		$aDatabaseLightsTemp    = GetThingsFromLinkId( $iLinkId );
+		
+		
+		//-- Check what to do for this ObjectState --//
+		if( $this->sObjectState==="WatchInputs" ) {
+			$aDatabaseLightsTemp    = WatchInputsGetThingsFromLinkId( $iLinkId );
+		} else {
+			$aDatabaseLightsTemp    = GetThingsFromLinkId( $iLinkId );
+		}
+		
 		
 		if( $aDatabaseLightsTemp['Error']===true ) {
 			if( $aDatabaseLightsTemp["ErrMesg"]!=="No Things Found! \nCouldn't find Things on that particular Link.\n" ) {
@@ -437,174 +459,209 @@ class PHPPhilipsHue {
 		}
 		
 		
-		//----------------------------------------------------------------//
-		//-- Get the list of all the other known Lights on the Bridge   --//
-		//----------------------------------------------------------------//
+		//------------------------------------------------------------------------//
+		//-- 5.0 - Get the list of all the other known Lights on the Bridge     --//
+		//------------------------------------------------------------------------//
 		if( $bError===false ) {
-			
-			$aResult = array (
-				"Error"		=> false,
-				"Data"		=> array()
-			);
-			
-			//----------------------------------------------------------------//
-			//-- Verify that all lights are added                           --//
-			//----------------------------------------------------------------//
-			foreach( $aDetectedLightsTemp as $sHWId => $aNewLight ) {
-				if( $bError===false ) {
-					//echo "\n Detected Id = ";
-					//var_dump( $sHWId );
-					
-					if( $sHWId>=0 ) {
-						//----------------------------------------------------//
-						//-- Reset Variables                                --//
-						//----------------------------------------------------//
-						$bFound = false;
+			if( $aDetectedLightsTemp!==null ) {
+				$aResult = array (
+					"Error"		=> false,
+					"Data"		=> array()
+				);
+				
+				//----------------------------------------------------------------//
+				//-- Verify that all lights are added                           --//
+				//----------------------------------------------------------------//
+				foreach( $aDetectedLightsTemp as $sHWId => $aNewLight ) {
+					if( $bError===false ) {
+						//echo "\n Detected Id = ";
+						//var_dump( $sHWId );
 						
-						//----------------------------------------------------//
-						//-- Check if it is found in the list of Lights     --//
-						//----------------------------------------------------//
-						foreach( $aDatabaseLights as $aThing ) {
-							if( $bFound===false ) {
-								//-- Check if the HWIds match --//
-								if( strval($aThing['ThingHWId'])===$sHWId ) {
-									$bFound = true;
-								} else if( $aThing['ThingHWId']===$sHWId ) {
-									$bFound = true;
+						if( $sHWId>=0 ) {
+							//----------------------------------------------------//
+							//-- Reset Variables                                --//
+							//----------------------------------------------------//
+							$bFound = false;
+							
+							//----------------------------------------------------//
+							//-- Check if it is found in the list of Lights     --//
+							//----------------------------------------------------//
+							foreach( $aDatabaseLights as $aThing ) {
+								if( $bFound===false ) {
+									//-- Check if the HWIds match --//
+									if( strval($aThing['ThingHWId'])===$sHWId ) {
+										$bFound = true;
+									} else if( $aThing['ThingHWId']===$sHWId ) {
+										$bFound = true;
+									}
+									//echo "\n DB Ids = ";
+									//var_dump( $aThing['ThingHWId'] );
 								}
-								//echo "\n DB Ids = ";
-								//var_dump( $aThing['ThingHWId'] );
 							}
-						}
-						
-						
-						//----------------------------------------------------//
-						//-- Add the new Light                              --//
-						//----------------------------------------------------//
-						if( $bFound===false ) {
 							
-							//------------------------//
-							//-- Hue Light Name     --//
-							//------------------------//
-							if( isset($aNewLight['name']) ) {
-								$sNewLightName = $aNewLight['name'];
+							
+							//----------------------------------------------------//
+							//-- Add the new Light                              --//
+							//----------------------------------------------------//
+							if( $bFound===false ) {
 								
-							} else {
-								$sNewLightName = "New Philips Hue ".$sHWId;
-							}
-							
-							
-							//------------------------//
-							//-- State              --//
-							//------------------------//
-							if( isset($aNewLight['state']) ) {
-								if( isset($aNewLight['state']['on']) ) {
-									if( $aNewLight['state']['on'] ) {
-										$iNewLightState = 1;
+								//------------------------//
+								//-- Hue Light Name     --//
+								//------------------------//
+								if( isset($aNewLight['name']) ) {
+									$sNewLightName = $aNewLight['name'];
+									
+								} else {
+									$sNewLightName = "New Philips Hue ".$sHWId;
+								}
+								
+								
+								//------------------------//
+								//-- State              --//
+								//------------------------//
+								if( isset($aNewLight['state']) ) {
+									if( isset($aNewLight['state']['on']) ) {
+										if( $aNewLight['state']['on'] ) {
+											$iNewLightState = 1;
+										} else {
+											$iNewLightState = 0;
+										}
+										
 									} else {
 										$iNewLightState = 0;
 									}
-									
 								} else {
 									$iNewLightState = 0;
 								}
-							} else {
-								$iNewLightState = 0;
-							}
-							
-							
-							//--------------------------------------------//
-							//-- Prepare the array for Inserting        --//
-							//--------------------------------------------//
-							$aThingData = array(
-								"Type"		=> "13",
-								"Name"		=> $sNewLightName,
-								"State"		=> $iNewLightState,
-								"HWId"		=> $sHWId,
-								"IOs"		=> array(
-									array(
-										"RSType"			=> "3901",
-										"UoM"				=> "1",
-										"Type"				=> "2",
-										"Name"				=> "Hue",
-										"BaseConvert"		=> "1",
-										"SampleRate"		=> "300",
-										"SampleRateMax"		=> "300",
-										"SampleRateLimit"	=> "1200"
-									),
-									array(
-										"RSType"			=> "3902",
-										"UoM"				=> "1",
-										"Type"				=> "2",
-										"Name"				=> "Saturation",
-										"BaseConvert"		=> "1",
-										"SampleRate"		=> "300",
-										"SampleRateMax"		=> "300",
-										"SampleRateLimit"	=> "1200"
-									),
-									array(
-										"RSType"			=> "3903",
-										"UoM"				=> "1",
-										"Type"				=> "2",
-										"Name"				=> "Brightness",
-										"BaseConvert"		=> "1",
-										"SampleRate"		=> "300",
-										"SampleRateMax"		=> "300",
-										"SampleRateLimit"	=> "1200"
+								
+								
+								//--------------------------------------------//
+								//-- Prepare the array for Inserting        --//
+								//--------------------------------------------//
+								$aThingData = array(
+									"Type"		=> "13",
+									"Name"		=> $sNewLightName,
+									"State"		=> $iNewLightState,
+									"HWId"		=> $sHWId,
+									"IOs"		=> array(
+									/*
+										array(
+											"RSType"			=> "3901",
+											"UoM"				=> "1",
+											"Type"				=> "2",
+											"Name"				=> "Hue",
+											"BaseConvert"		=> "1",
+											"SampleRate"		=> "300",
+											"SampleRateMax"		=> "300",
+											"SampleRateLimit"	=> "1200"
+										),
+										array(
+											"RSType"			=> "3902",
+											"UoM"				=> "1",
+											"Type"				=> "2",
+											"Name"				=> "Saturation",
+											"BaseConvert"		=> "1",
+											"SampleRate"		=> "300",
+											"SampleRateMax"		=> "300",
+											"SampleRateLimit"	=> "1200"
+										),
+										array(
+											"RSType"			=> "3903",
+											"UoM"				=> "1",
+											"Type"				=> "2",
+											"Name"				=> "Brightness",
+											"BaseConvert"		=> "1",
+											"SampleRate"		=> "300",
+											"SampleRateMax"		=> "300",
+											"SampleRateLimit"	=> "1200"
+										)
+									*/
+										array(
+											"RSType"			=> "3906",
+											"UoM"				=> "1",
+											"Type"				=> "2",
+											"Name"				=> "Red",
+											"BaseConvert"		=> "1",
+											"SampleRate"		=> "-1",
+											"SampleRateMax"		=> "-1",
+											"SampleRateLimit"	=> "-1"
+										),
+										array(
+											"RSType"			=> "3907",
+											"UoM"				=> "1",
+											"Type"				=> "1",
+											"Name"				=> "Green",
+											"BaseConvert"		=> "1",
+											"SampleRate"		=> "-1",
+											"SampleRateMax"		=> "-1",
+											"SampleRateLimit"	=> "-1"
+										),
+										array(
+											"RSType"			=> "3908",
+											"UoM"				=> "1",
+											"Type"				=> "1",
+											"Name"				=> "Blue",
+											"BaseConvert"		=> "1",
+											"SampleRate"		=> "-1",
+											"SampleRateMax"		=> "-1",
+											"SampleRateLimit"	=> "-1"
+										)
 									)
-								)
-							);
-							
-							//--------------------------------------------//
-							//-- Start the Transaction                  --//
-							//--------------------------------------------//
-							$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
-							
-							if( $bTransactionStarted===false ) {
-								$bError    = true;
-								$iErrCode  = 16;
-								$sErrMesg .= "Database Error! \n";
-								$sErrMesg .= "Problem when trying to start the transaction! \n";
-							}
-							
-							
-							//--------------------------------------------//
-							//-- Call the Insert Function               --//
-							//--------------------------------------------//
-							//-- Add the new thing --//
-							$aNewThingResult = PrepareAddNewThing( $iLinkId, $aThingData, 0, "", "" );
-							
-							
-							
-							//-- Check for errors --//
-							if( $aNewThingResult["Error"]===true ) {
-								//-- Display an Error Message --//
-								$bError    = true;
-								$iErrCode  = $aNewThingResult['ErrCode'];
-								$sErrMesg .= "Problem Adding a new thing! \n";
-								$sErrMesg .= $aNewThingResult["ErrMesg"];
-							} else {
-								$aNewThingResult['Data'][] = $aNewThingResult['Thing'];
-							}
-							
-							
-							//--------------------------------------------//
-							//-- End the Transaction                    --//
-							//--------------------------------------------//
-							if( $bError===false ) {
-								//-- Commit the changes --//
-								$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
+								);
 								
-							} else {
-								//-- Rollback changes --//
-								$oRestrictedApiCore->oRestrictedDB->dbRollback();
+								//--------------------------------------------//
+								//-- Start the Transaction                  --//
+								//--------------------------------------------//
+								$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 								
+								if( $bTransactionStarted===false ) {
+									$bError    = true;
+									$iErrCode  = 16;
+									$sErrMesg .= "Database Error! \n";
+									$sErrMesg .= "Problem when trying to start the transaction! \n";
+								}
+								
+								
+								//--------------------------------------------//
+								//-- Call the Insert Function               --//
+								//--------------------------------------------//
+								//-- Add the new thing --//
+								$aNewThingResult = PrepareAddNewThing( $iLinkId, $aThingData, 0, "", "" );
+								
+								
+								//-- Check for errors --//
+								if( $aNewThingResult["Error"]===true ) {
+									//-- Display an Error Message --//
+									$bError    = true;
+									$iErrCode  = $aNewThingResult['ErrCode'];
+									$sErrMesg .= "Problem Adding a new thing! \n";
+									$sErrMesg .= $aNewThingResult["ErrMesg"];
+								} else {
+									$aNewThingResult['Data'][] = $aNewThingResult['Thing'];
+								}
+								
+								
+								//--------------------------------------------//
+								//-- End the Transaction                    --//
+								//--------------------------------------------//
+								if( $bError===false ) {
+									//-- Commit the changes --//
+									$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
+									
+								} else {
+									//-- Rollback changes --//
+									$oRestrictedApiCore->oRestrictedDB->dbRollback();
+									
+								}
 							}
-						}
-					
-					}		//-- ENDIF New Light has been found. --/
-				}		//-- ENDIF Error has been flagged. --//
-			}		//-- ENDFORAECH Light in the Bridge's Light List --//
+						}		//-- ENDIF New Light has been found. --/
+					}		//-- ENDIF Error has been flagged. --//
+				}		//-- ENDFORAECH Light in the Bridge's Light List --//
+			} else {
+				$bError    = true;
+				$iErrCode  = 0;
+				$sErrMesg .= "Problem looking up the Philips Hue Bridge's light list! \n";
+			}
 		//-- ENDIF No Errors looking up the Database's Light List --//
 		} else {
 			//-- Display an Error Message --//
@@ -651,6 +708,16 @@ class PHPPhilipsHue {
 		$iLinkType		= 7;
 		$sInfoName		= "Philips Hue Bridge ".$sModelId;
 		
+		
+		
+		//----------------------------------------------------------------//
+		//-- 2.0 - Check ObjectState                                    --//
+		//----------------------------------------------------------------//
+		if( $this->sObjectState==="WatchInputs" ) {
+			$bError    = false;
+			$sErrMesg .= "The requested function is not supported this ObjectState!\n";
+		}
+			
 		//----------------------------------------------------------------//
 		//-- 4.0 - Make sure that the Bridge isn't in the database      --//
 		//----------------------------------------------------------------//

@@ -5516,11 +5516,14 @@ function DB_CreateDefaultData5( $sDBName ) {
 			/*============================================================
 			  == #6.9# - RULETYPE1                                      ==
 			  ============================================================*/
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 1, 'Turn On (Once only)' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 2, 'Turn Off (Once only)' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 3, 'Turn On (Reoccurring)' ); \n";
-			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 4, 'Turn Off (Reoccurring)' ); \n";
-			
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 1, 'Turn Thing On (Once only)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 2, 'Turn Thing Off (Once only)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 3, 'Turn Thing On (Reoccurring)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 4, 'Turn Thing Off (Reoccurring)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 5, 'Turn Thing On (Once only, API)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 6, 'Turn Thing Off (Once only, API)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 7, 'Turn Thing On (Reoccurring, API)' ); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 8, 'Turn Thing Off (Reoccurring, API)' ); \n";
 			/*============================================================
 			  == #6.9# - TARGETCOMP                                     ==
 			  ============================================================*/

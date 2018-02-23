@@ -126,10 +126,11 @@ if($bError===false) {
 		
 		//-- Display an error if the mode is unsupported --//
 		if( 
-			$sPostMode!=="AddComm"            && $sPostMode!=="AddLink"            && 
+			$sPostMode!=="AddComm"            && $sPostMode!=="AddLink"            &&
 			$sPostMode!=="AddThing"           && $sPostMode!=="AddIO"              &&
 			$sPostMode!=="ListAllActiveRules" && $sPostMode!=="UpdateRuleNextTS"   &&
-			$sPostMode!=="RuleJustTriggered"  && $sPostMode!=="RuleTriggeredAt"    
+			$sPostMode!=="RuleJustTriggered"  && $sPostMode!=="RuleTriggeredAt"    &&
+			$sPostMode!=="SetThingState"      
 			
 		) {
 			$bError = true;
@@ -213,10 +214,10 @@ if($bError===false) {
 	//-- 2.2.4 - Extract the "Data" Parameter           --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( 
+		if(
 			$sPostMode==="AddComm"            || $sPostMode==="AddLink"            || 
 			$sPostMode==="AddThing"           || $sPostMode==="AddIO"              || 
-			$sPostMode==="RuleTriggeredAt"    
+			$sPostMode==="RuleTriggeredAt"    || $sPostMode==="SetThingState"      
 		) {
 			try {
 				//-- Retrieve the "Data" --//
@@ -246,7 +247,7 @@ if($bError===false) {
 	if( $bError===false ) {
 		if( 
 			$sPostMode==="UpdateRuleNextTS" || $sPostMode==="RuleJustTriggered"  || 
-			$sPostMode==="RuleTriggeredAt"  
+			$sPostMode==="RuleTriggeredAt"  || $sPostMode==="SetThingState"
 		) {
 			try {
 				//-- Retrieve the "RuleId" --//
@@ -271,7 +272,6 @@ if($bError===false) {
 			}
 		}
 	}
-	
 }	//-- END of POST --//
 
 
@@ -478,7 +478,7 @@ if($bError===false) {
 			if(
 				$sPostMode==="AddComm"            || $sPostMode==="AddLink"            || 
 				$sPostMode==="AddThing"           || $sPostMode==="AddIO"              || 
-				$sPostMode==="RuleTriggeredAt"    
+				$sPostMode==="RuleTriggeredAt"    || $sPostMode==="SetThingState"      
 			) {
 				try {
 					//------------------------------------------------//
@@ -504,7 +504,6 @@ if($bError===false) {
 				}
 			}
 		}
-		
 	} catch( Exception $e0200 ) {
 		$bError    = true;
 		$iErrCode  = 200;
@@ -866,7 +865,6 @@ if($bError===false) {
 					}
 				}
 				
-				
 			} catch( Exception $e3400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
@@ -885,7 +883,6 @@ if($bError===false) {
 				//-- 5.4.4 - Begin the transaction                              --//
 				//----------------------------------------------------------------//
 				if( $bError===false ) {
-					
 					$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 					
 					if( $bTransactionStarted===false ) {
@@ -949,8 +946,8 @@ if($bError===false) {
 					$aResult = GetRuleFromRuleId( $iPostId );
 				} else {
 					$bError     = true;
-					$iErrCode   = 6401;
-					$sErrMesg  .= "Error Code:'6401' \n";
+					$iErrCode   = 5401;
+					$sErrMesg  .= "Error Code:'5401' \n";
 					$sErrMesg  .= "Error: Problem in the main section of the \"".$sPostMode."\" Mode!\n";
 					$sErrMesg  .= $aResult['ErrMesg'];
 				} 
@@ -984,7 +981,7 @@ if($bError===false) {
 						//-- ERROR: Invalid UnixTS      --//
 						//--------------------------------//
 						$bError    = true;
-						$iErrCode  = 7401;
+						$iErrCode  = 5401;
 						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 						$sErrMesg .= "Problem with the 'TriggeredUnixTS' !\n";
 						$sErrMesg .= "The new UnixTS is not newer than the previous UnixTS.";
@@ -1006,7 +1003,7 @@ if($bError===false) {
 						
 						if( $aResult['Error']===true ) {
 							$bError    = true;
-							$iErrCode  = 7430;
+							$iErrCode  = 5430;
 							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg .= "Problem marking that the rule has been executed and calculating the next timestamp that it will run at!\n";
 							$sErrMesg .= $aResult['ErrMesg'];
@@ -1023,7 +1020,7 @@ if($bError===false) {
 						
 						if( $aResult['Error']===true ) {
 							$bError    = true;
-							$iErrCode  = 7440;
+							$iErrCode  = 5440;
 							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg .= "Problem marking that the rule has been executed!\n";
 							$sErrMesg .= $aResult['ErrMesg'];
@@ -1038,6 +1035,247 @@ if($bError===false) {
 				}
 			}
 			
+		//================================================================//
+		//== 5.6 - MODE: Set Thing State                                ==//
+		//================================================================//
+		} else if( $sPostMode==="SetThingState" ) {
+			try {
+				//------------------------------------------------------------//
+				//-- 5.6.2 - Check what the "Desired Thing State"           --//
+				//------------------------------------------------------------//
+				if( $bError===false ) {
+					if( isset( $aPostData['NewState'] ) ) {
+						//--------------------------------------------//
+						//-- Check if the new state is valid        --//
+						//--------------------------------------------//
+						if( $aPostData['NewState']===1 || $aPostData['NewState']==="1" ) {
+							//-- Turn On --//
+							$iNewState = 1;
+							
+							
+						} else if( $aPostData['NewState']===0 || $aPostData['NewState']==="0" ) {
+							//-- Turn Off --//
+							$iNewState = 0;
+							
+							
+						} else {
+							//-- ERROR: Not recognised StateType --//
+							$bError    = true;
+							$iErrCode  = 6411;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "The provided \"NewState\" value in the \"Data\" JSON Parameter is not valid\"! \n";
+						}
+						
+					} else {
+						//-- ERROR: Failed to find the NewState Value --//
+						$bError    = true;
+						$iErrCode  = 6410;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Failed to find the \"NewState\" value in the \"Data\" JSON Parameter! \n";
+					}
+				}
+				
+				//------------------------------------------------------------//
+				//-- 5.6.3 - Lookup the required Information                --//
+				//------------------------------------------------------------//
+				if( $bError===false ) {
+					
+					//------------------------------------------------------------//
+					//-- 3.6.3.1 - Lookup Thing Information                     --//
+					//------------------------------------------------------------//
+					$aTempResult1 = WatchInputsGetThingInfo( $iPostId );
+						
+					if( $aTempResult1['Error']===false ) {
+						//-- Extract the ThingResults --//
+						$aThingInfo = $aTempResult1['Data'];
+						
+						//-- Lookup the current ThingState --//
+						$iOldThingState = $aTempResult1['Data']['ThingStatus'];
+						
+					} else {
+						//-- ERROR: Can't find the requested Thing --//
+						$bError    = true;
+						$iErrCode  = 6420;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Problem looking up the Thing Information! \n";
+					}
+					
+					
+					//------------------------------------------------------------//
+					//-- 3.6.3.2 - Lookup Link Information                      --//
+					//------------------------------------------------------------//
+					if( $bError===false ) {
+						$aTempResult2 = WatchInputsGetLinkInfo( $aThingInfo['LinkId'] );
+						
+						//-- Check for errors --//
+						if( $aTempResult2['Error']===false ) {
+							$aLinkInfo = $aTempResult2['Data'];
+							
+						} else {
+							//-- ERROR: Can't find the requested Link --//
+							$bError    = true;
+							$iErrCode  = 6424;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Problem looking up the Link Information! \n";
+						}
+					}
+					
+					
+					//------------------------------------------------------------//
+					//-- 3.6.3.3 - Lookup Comm Information                      --//
+					//------------------------------------------------------------//
+					if( $bError===false ) {
+						$aTempResult3 = WatchInputsGetCommInfo( $aLinkInfo['LinkCommId'] );
+						
+						//-- Check for errors --//
+						if( $aTempResult3['Error']===false ) {
+							$aCommInfo = $aTempResult3['Data'];
+							
+						} else {
+							//-- ERROR: Can't find the requested Comm --//
+							$bError    = true;
+							$iErrCode  = 6428;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Problem looking up the Comm Information! \n";
+							
+						}
+					}
+				}
+				
+				//------------------------------------------------------------//
+				//-- 5.6.4 - Change the "Desired Thing State"               --//
+				//------------------------------------------------------------//
+				if( $bError===false ) {
+					
+					//----------------------------------------//
+					//-- IF THE API MANAGES THE THING       --//
+					//----------------------------------------//
+					if( $aCommInfo['CommTypeId']===LookupFunctionConstant("APICommTypeId") ) {
+						
+						//----------------------------------------//
+						//-- PHILIPS HUE LIGHT                  --//
+						//----------------------------------------//
+						if( $aThingInfo['ThingTypeId']===LookupFunctionConstant("HueThingTypeId") ) {
+							
+							require_once SITE_BASE.'/restricted/libraries/philipshue.php';
+							
+							
+							//-- Prepare the Variables --//
+							$sNetworkAddress  = $aLinkInfo['LinkConnAddress'];
+							$sNetworkPort     = $aLinkInfo['LinkConnPort'];
+							$sUserToken       = $aLinkInfo['LinkConnUsername'];
+							$sHWId            = strval( $aThingInfo['ThingHWId'] );
+							
+							$bUsePHPObject     = true;
+							$oSpecialPHPObject = new PHPPhilipsHue( $sNetworkAddress, $sNetworkPort, $sUserToken );
+							
+							
+							if( $oSpecialPHPObject->bInitialised===true ) {
+								
+								$aTempFunctionResult4   = $oSpecialPHPObject->GetLightsList();
+								
+								//----------------------------//
+								//-- LOOKUP THING STATE     --//
+								//----------------------------//
+								if( isset($aTempFunctionResult4[$sHWId]) ) {
+									
+									$aTemp = $oSpecialPHPObject->GetThingState($sHWId);
+									
+									if( $aTemp['Error']===false ) {
+										
+										//--------------------------------------------//
+										//-- IF Lights need to be turned on         --//
+										//--------------------------------------------//
+										if( $aTemp['State']===false && $iNewState===1 ) {
+											//-- Turn "Thing" On --//
+											$oSpecialPHPObject->ChangeThingState( $sHWId, $iNewState );
+										
+										//--------------------------------------------//
+										//-- ELSEIF Light needs to be turned off    --//
+										//--------------------------------------------//
+										} else if( $aTemp['State']===true && $iNewState===0 ) {
+											//-- Turn "Thing" Off --//
+											$oSpecialPHPObject->ChangeThingState( $sHWId, $iNewState );
+											
+										//--------------------------------------------//
+										//-- ELSE Do nothing                        --//
+										//--------------------------------------------//
+										}
+									}
+									
+								} else {
+									//-- Flag an Error --//
+									$bError = true;
+									$iErrCode  = 6441;
+									$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+									$sErrMesg .= "Device is unknown! \n";
+									$sErrMesg .= "That particular Philips Hue device may have been disconnected or invalid credentials used!\n";
+									
+								}
+								
+								//--------------------------------------------------------//
+								//-- Check for new lights                               --//
+								//--------------------------------------------------------//
+								try {
+									//-- If the User has Write Permission --//
+									$aTempFunctionResult5 = $oSpecialPHPObject->AutoAddNewLights( $aThingInfo['LinkId'] );
+									
+								} catch( Exception $e6442 ) {
+									//echo "AutoAdd Error!";
+								}
+							} else {
+								$bError = true;
+								$iErrCode  = 6443;
+								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+								$sErrMesg .= "Failed to setup the Philips Hue Gateway!\n";
+							}
+						} else {
+							//-- API doesn't know what to do with that custom state --//
+							$bError = true;
+							$iErrCode  = 6444;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Internal API Error! \n";
+							$sErrMesg .= "This API hasn't been configured on what to do with this particular Thing Type!";
+							
+							echo "Actual Type: ".$aThingInfo['ThingTypeId']."\n";
+							echo "Expected HueType: ".LookupFunctionConstant("HueThingTypeId")." \n";
+						}
+						
+					//----------------------------------------//
+					//-- ELSE SOMETHING ELSE MANAGES IT     --//
+					//----------------------------------------//
+					}
+					
+					
+					//----------------------------------------------------------------//
+					//-- PART 5 - UPDATE THE THING'S STATE IN THE DATABASE          --//
+					//----------------------------------------------------------------//
+					if( $bError===false ) {
+						//-- Change the state --//
+						$aResult = ThingChangeState( $iPostId, $iNewState );
+						
+						//-- Check for errors --//
+						if( $aResult["Error"]===true ) {
+							//-- Display an Error message --//
+							$bError = true;
+							$iErrCode  = 6445;
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg .= "Internal API Error! \n";
+							$sErrMesg .= $aResult["ErrMesg"];
+						}
+					}
+					
+				} //-- ENDIF No errors have occurred --//
+				
+				
+			} catch( Exception $e6400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$iErrCode  = 6400;
+				$sErrMesg .= "Error Code:'6400' \n";
+				$sErrMesg .= $e6400->getMessage();
+			}
+				
 		//================================================================//
 		//== 5.? - ERROR: UNSUPPORTED MODE                              ==//
 		//================================================================//

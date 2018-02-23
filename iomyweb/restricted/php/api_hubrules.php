@@ -380,18 +380,46 @@ if( $bError===false ) {
 							//-- Perform validation             --//
 							//------------------------------------//
 							if( 
-								$iPostRuleTypeId!==1    && $iPostRuleTypeId!=="1"    && 
-								$iPostRuleTypeId!==2    && $iPostRuleTypeId!=="2"    && 
-								$iPostRuleTypeId!==3    && $iPostRuleTypeId!=="3"    && 
-								$iPostRuleTypeId!==4    && $iPostRuleTypeId!=="4"    
+								$iPostRuleTypeId!==1    && $iPostRuleTypeId!==2    && 
+								$iPostRuleTypeId!==3    && $iPostRuleTypeId!==4    && 
+								$iPostRuleTypeId!==5    && $iPostRuleTypeId!==6    && 
+								$iPostRuleTypeId!==7    && $iPostRuleTypeId!==8    
 							) {
-								//----------------------------------------//
-								//-- ERROR: Unsupported RuleType status --//
-								$bError    = true;
-								$iErrCode  = 208;
-								$sErrMesg .= "Error Code:'0208' \n";
-								$sErrMesg .= "Error: The 'RuleType' value in the 'Data' JSON parameter is not supported!\n";
-								$sErrMesg .= "Supported values are either '1', '2', '3' or '4'.\n";
+								switch( $iPostRuleTypeId ) {
+									case "1":
+										$iPostRuleTypeId=1;
+										break;
+									case "2":
+										$iPostRuleTypeId=2;
+										break;
+									case "3":
+										$iPostRuleTypeId=3;
+										break;
+									case "4":
+										$iPostRuleTypeId=4;
+										break;
+									case "5":
+										$iPostRuleTypeId=5;
+										break;
+									case "6":
+										$iPostRuleTypeId=6;
+										break;
+									case "7":
+										$iPostRuleTypeId=7;
+										break;
+									case "8":
+										$iPostRuleTypeId=8;
+										break;
+									default:
+										//----------------------------------------//
+										//-- ERROR: Unsupported RuleType status --//
+										//----------------------------------------//
+										$bError    = true;
+										$iErrCode  = 208;
+										$sErrMesg .= "Error Code:'0208' \n";
+										$sErrMesg .= "Error: The 'RuleType' value in the 'Data' JSON parameter is not supported!\n";
+										$sErrMesg .= "Supported values are either '1', '2', '3' or '4'.\n";
+								}
 							}
 						} else {
 							$bError    = true;
@@ -425,7 +453,7 @@ if( $bError===false ) {
 							//------------------------------------//
 							//-- IF a ThingRule                 --//
 							//------------------------------------//
-							if( $iPostRuleTypeId===1 || $iPostRuleTypeId===2 || $iPostRuleTypeId===3 || $iPostRuleTypeId===4 ) {
+							if( $iPostRuleTypeId>=1 && $iPostRuleTypeId<=8 ) {
 								//------------------------//
 								//-- IF ThingId         --//
 								//------------------------//
@@ -962,7 +990,10 @@ if( $bError===false ) {
 					//------------------------------------------------//
 					//-- IF The Rule is a re-occuring type          --//
 					//------------------------------------------------//
-					if( $aRuleTemp['Data']['TypeId']===3 || $aRuleTemp['Data']['TypeId']===4 ) {
+					if( 
+						$aRuleTemp['Data']['TypeId']===3 || $aRuleTemp['Data']['TypeId']===4 ||
+						$aRuleTemp['Data']['TypeId']===7 || $aRuleTemp['Data']['TypeId']===8
+					) {
 						//------------------------------------------------//
 						//-- Update the Rule                            --//
 						//------------------------------------------------//

@@ -7456,7 +7456,6 @@ function dbWatchInputsGetThingInfo( $iThingId ) {
 				$sSQL .= "SELECT ";
 				$sSQL .= "	`HUB_PREMISE_FK`, ";
 				$sSQL .= "	`HUB_PK`, ";
-				$sSQL .= "	`COMM_PK`, ";
 				$sSQL .= "	`LINK_PK`, ";
 				$sSQL .= "	`LINK_NAME`, ";
 				$sSQL .= "	`LINK_SERIALCODE`, ";
@@ -7464,6 +7463,7 @@ function dbWatchInputsGetThingInfo( $iThingId ) {
 				$sSQL .= "	`LINK_COMM_FK`, ";
 				$sSQL .= "	`LINK_STATE`, ";
 				$sSQL .= "	`LINK_STATECHANGECODE`, ";
+				$sSQL .= "	`LINK_ROOMS_FK`, ";
 				$sSQL .= "	`LINKTYPE_PK`, ";
 				$sSQL .= "	`LINKTYPE_NAME`, ";
 				$sSQL .= "	`THING_PK`, ";
@@ -7486,7 +7486,7 @@ function dbWatchInputsGetThingInfo( $iThingId ) {
 				
 				$aOutputCols = array(
 					array( "Name"=>"PremiseId",                 "type"=>"INT"),
-					array( "Name"=>"LinkRoomId",                "type"=>"INT"),
+					array( "Name"=>"HubId",                     "type"=>"INT"),
 					array( "Name"=>"LinkId",                    "type"=>"INT"),
 					array( "Name"=>"LinkName",                  "type"=>"STR"),
 					array( "Name"=>"LinkSerialCode",            "type"=>"STR"),
@@ -7494,6 +7494,7 @@ function dbWatchInputsGetThingInfo( $iThingId ) {
 					array( "Name"=>"LinkCommId",                "type"=>"INT"),
 					array( "Name"=>"LinkStatus",                "type"=>"INT"),
 					array( "Name"=>"LinkStatusCode",            "type"=>"STR"),
+					array( "Name"=>"RoomId",                    "type"=>"INT"),
 					array( "Name"=>"LinkTypeId",                "type"=>"INT"),
 					array( "Name"=>"LinkTypeName",              "type"=>"STR"),
 					array( "Name"=>"ThingId",                   "type"=>"INT"),
@@ -7520,6 +7521,128 @@ function dbWatchInputsGetThingInfo( $iThingId ) {
 				}
 			}
 		
+		} catch(Exception $e2) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	//--------------------------------------------------------------------//
+	//-- 9.0 - Return the Result of the function                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false) {
+		//-- Return the Results --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		
+		//-- Return an Error Message --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function dbWatchInputsGetThingsFromLinkId( $iLinkId ) {
+	//--------------------------------------------------------------------------------------------//
+	//-- DESCRIPTION:                                                                           --//
+	//--    This function is used to find all the IOs on a particular thing for other functions --//
+	//--    eg. Looking up the 
+	//--------------------------------------------------------------------------------------------//
+	
+	//--------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;                //-- BOOLEAN:   --//
+	$sErrMesg           = "";                   //-- STRING:    --//
+	$aResult            = array();
+	$aReturn            = array();
+	$sSQL               = "";
+	$aInputVals         = array();
+	$aTemporaryView     = array();
+	$sView              = "";
+	
+	//--------------------------------------------------------------------//
+	//-- 2.0 - SQL PREPARATION                                          --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			//-- Retrieve the View in an array --//
+			$aTemporaryView = NonDataViewName("VW_Thing");
+			
+			if( $aTemporaryView["Error"]===true) {
+				//-- VIEW ERROR --//
+				$bError     = true;
+				$sErrMesg   = "Unsupported View";
+			} else {
+				//-- store the view --//
+				$sView = $aTemporaryView["View"];
+				
+				$sSQL .= "SELECT ";
+				$sSQL .= "	`ROOMS_PK`, ";
+				$sSQL .= "	`LINK_PK`, ";
+				$sSQL .= "	`LINK_NAME`, ";
+				$sSQL .= "	`LINK_SERIALCODE`, ";
+				$sSQL .= "	`LINK_CONNECTED`, ";
+				$sSQL .= "	`LINK_COMM_FK`, ";
+				$sSQL .= "	`LINK_STATE`, ";
+				$sSQL .= "	`LINK_STATECHANGECODE`, ";
+				$sSQL .= "	`LINKTYPE_PK`, ";
+				$sSQL .= "	`LINKTYPE_NAME`, ";
+				$sSQL .= "	`THING_PK`, ";
+				$sSQL .= "	`THING_NAME`, ";
+				$sSQL .= "	`THING_HWID`, ";
+				$sSQL .= "	`THING_OUTPUTHWID`, ";
+				$sSQL .= "	`THING_STATE`, ";
+				$sSQL .= "	`THING_STATECHANGEID`, ";
+				$sSQL .= "	`THING_SERIALCODE`, ";
+				$sSQL .= "	`THINGTYPE_PK`, ";
+				$sSQL .= "	`THINGTYPE_NAME` ";
+				$sSQL .= "FROM `".$sView."` ";
+				$sSQL .= "WHERE `LINK_PK` = :LinkId ";
+				
+				//-- SQL Input Values --//
+				$aInputVals = array(
+					array( "Name"=>"LinkId",        "type"=>"INT",    "value"=>$iLinkId )
+				);
+				
+				$aOutputCols = array(
+					array( "Name"=>"LinkRoomId",                "type"=>"INT" ),
+					array( "Name"=>"LinkId",                    "type"=>"INT" ),
+					array( "Name"=>"LinkName",                  "type"=>"STR" ),
+					array( "Name"=>"LinkSerialCode",            "type"=>"STR" ),
+					array( "Name"=>"LinkConnected",             "type"=>"INT" ),
+					array( "Name"=>"LinkCommId",                "type"=>"INT" ),
+					array( "Name"=>"LinkStatus",                "type"=>"INT" ),
+					array( "Name"=>"LinkStatusCode",            "type"=>"STR" ),
+					array( "Name"=>"LinkTypeId",                "type"=>"INT" ),
+					array( "Name"=>"LinkTypeName",              "type"=>"STR" ),
+					array( "Name"=>"ThingId",                   "type"=>"INT" ),
+					array( "Name"=>"ThingName",                 "type"=>"STR" ),
+					array( "Name"=>"ThingHWId",                 "type"=>"INT" ),
+					array( "Name"=>"ThingOHWId",                "type"=>"INT" ),
+					array( "Name"=>"ThingStatus",               "type"=>"INT" ),
+					array( "Name"=>"ThingStatusCode",           "type"=>"STR" ),
+					array( "Name"=>"ThingSerialCode",           "type"=>"STR" ),
+					array( "Name"=>"ThingTypeId",               "type"=>"INT" ),
+					array( "Name"=>"ThingTypeName",             "type"=>"STR" )
+				);
+				
+				//-- Execute the SQL Query --//
+				$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 0 );
+				
+				try {
+					if( $aResult["Error"] === true) {
+						$bError = true;
+						$sErrMesg = $aResult["ErrMesg"];
+					}
+				} catch( Exception $e) {
+					//-- TODO: Write error message for when Database Library returns an unexpected result --//
+				}
+			}
+			
 		} catch(Exception $e2) {
 			$bError   = true;
 			$sErrMesg = $e2->getMessage();
