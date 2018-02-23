@@ -1783,6 +1783,79 @@ $.extend(iomy.functions, {
         },
         
         /**
+         * Determines if the current user is able to edit rooms at all.
+         * 
+         * @returns {Boolean}       Whether they have permissions or not
+         */
+        isCurrentUserAbleToEditRooms : function () {
+            var bAble = false;
+                
+            try {
+                //-----------------------------------------------------------------//
+                // Only proceed if the user has a premise accessible.
+                //-----------------------------------------------------------------//
+                if (JSON.stringify(iomy.common.RoomsList) !== "{}" && JSON.stringify(iomy.common.PremiseList) !== "{}") {
+                    
+                    //-----------------------------------------------------------------//
+                    // Enter the premise level of the variable.
+                    //-----------------------------------------------------------------//
+                    $.each(iomy.common.RoomsList, function (sI, mPremise) {
+                        try {
+                            //-----------------------------------------------------------------//
+                            // Enter the room level to evaluate the 'PermWrite' flag.
+                            //-----------------------------------------------------------------//
+                            var bFound = false;
+                            var mFirstRoom = null;
+
+                            $.each(mPremise, function (sJ, mRoom) {
+                                try {
+                                    //--------------------------------------------------------------//
+                                    // Unassigned room should not editable anyway so make sure we
+                                    // skip it.
+                                    //--------------------------------------------------------------//
+                                    var bSkipUnassignedRoom = false;
+                                    
+                                    if (mFirstRoom === null) {
+                                        mFirstRoom = mRoom;
+//                                        var iDeviceCount = iomy.functions.getNumberOfDevicesInRoom(mFirstRoom.RoomId);
+//                                        var iRoomCount = iomy.functions.getNumberOfRoomsInPremise(mFirstRoom.PremiseId);
+
+                                        if (mFirstRoom.RoomName === "Unassigned") {
+                                            bSkipUnassignedRoom = true;
+
+                                        }
+                                    }
+                                    
+                                    if (bSkipUnassignedRoom !== true) {
+                                        bAble = mRoom.PermWrite == 1;
+
+                                        if (bAble) {
+                                            bFound = true;
+                                            return false;
+                                        }
+                                    }
+                                } catch (e) {
+                                    $.sap.log.error("Error checking the edit room permission ("+e.name+"): " + e.message);
+                                }
+                            });
+
+                            //-- We've found that a device can be created or modified. End the loop. --//
+                            if (bFound) {
+                                return false;
+                            }
+                        } catch (e) {
+                            $.sap.log.error("Error processing a premise ("+e.name+"): " + e.message);
+                        }
+                    });
+                }
+            } catch (e) {
+                $.sap.log.error("Error finding out whether the user is able to manage devices ("+e.name+"): " + e.message);
+            }
+            
+            return bAble;
+        },
+        
+        /**
          * Determines if the current user is able to manage rooms on a premise.
          * 
          * @returns {Boolean}       Whether they have permissions or not

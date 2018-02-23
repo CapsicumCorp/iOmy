@@ -3011,7 +3011,9 @@ $.extend(iomy.common,{
                 
             //-- Room List (for editing) --//
             } else if (sPageName === "pRoomList" && aPageData.bEditing === true) {
-                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms()) {
+                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms() ||
+                    !iomy.functions.permissions.isCurrentUserAbleToEditRooms())
+                {
                     aErrorMessages.push(sNoRightToEditRoom);
                 }
                 

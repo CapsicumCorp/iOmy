@@ -55,7 +55,7 @@ $.extend(iomy.help,{
         
         "pTile" : "This page allows you to see the data for Zigbee devices, selecting a tile will allow you to change the period shown or generate a graph",
         
-        "pRGBlight" : "This page allows you to toggle the state or change the color of your RGB Lightbulb",
+        "pRGBlight" : "This page allows you to toggle the state or change the color of your RGB light bulb.",
         
         "pMJPEG" : "This page allows you to view your configured devices MJPEG stream",
         
