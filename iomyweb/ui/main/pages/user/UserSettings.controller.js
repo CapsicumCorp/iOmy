@@ -152,6 +152,7 @@ sap.ui.controller("pages.user.UserSettings", {
                         oData.RoomOptions = aRoomData;
 
                         oModel = new sap.ui.model.json.JSONModel(oData);
+                        oModel.setSizeLimit(420);
                         oView.setModel( oModel );
 
                         //------------------------------------------------//
