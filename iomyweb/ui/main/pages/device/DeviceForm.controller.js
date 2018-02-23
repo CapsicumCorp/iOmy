@@ -798,59 +798,70 @@ sap.ui.controller("pages.device.DeviceForm", {
     EditDevice : function () {
         var oController         = this;
         var oView               = oController.getView();
+        var bError              = false;
         var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
         
-        if (oController.areThereChanges()) {
-            oController.ToggleSubmitCancelButtons(false);
-            
-            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                oController.ToggleEditIPWebcamControls(false);
-            }
+        //--------------------------------------------------------------------//
+        // Check that the display name is filled out.
+        //--------------------------------------------------------------------//
+        if (oCurrentFormData.ThingName === "") {
+            bError = true;
+            iomy.common.showError("A device name must be given.", "Error");
+        }
+        
+        if (!bError) {
+            if (oController.areThereChanges()) {
+                oController.ToggleSubmitCancelButtons(false);
 
-            //--------------------------------------------------------------------//
-            // Run the request to edit an existing device.
-            //--------------------------------------------------------------------//
-            try {
-                iomy.devices.editThing({
-                    thingID     : oController.iThingId,
-                    thingName   : oCurrentFormData.ThingName,
-                    roomID      : oCurrentFormData.RoomId,
+                if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                    oController.ToggleEditIPWebcamControls(false);
+                }
 
-                    onSuccess : function () {
-                        if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                            oController.SubmitIPWebcamData();
-                        } else {
+                //--------------------------------------------------------------------//
+                // Run the request to edit an existing device.
+                //--------------------------------------------------------------------//
+                try {
+                    iomy.devices.editThing({
+                        thingID     : oController.iThingId,
+                        thingName   : oCurrentFormData.ThingName,
+                        roomID      : oCurrentFormData.RoomId,
+
+                        onSuccess : function () {
+                            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                                oController.SubmitIPWebcamData();
+                            } else {
+                                oController.ToggleSubmitCancelButtons(true);
+                                oController.CancelInput();
+                            }
+                        },
+
+                        onWarning : function () {
+                            oController.ToggleEditIPWebcamControls(true);
+                        },
+
+                        onFail : function () {
                             oController.ToggleSubmitCancelButtons(true);
-                            oController.CancelInput();
-                        }
-                    },
-
-                    onWarning : function () {
-                        oController.ToggleEditIPWebcamControls(true);
-                    },
-
-                    onFail : function () {
-                        oController.ToggleSubmitCancelButtons(true);
-                        oController.ToggleEditIPWebcamControls(true);
-                    }
-                });
-            } catch (e) {
-                iomy.common.showError(e.message, "Error",
-                    function () {
-                        oController.ToggleSubmitCancelButtons(true);
-                        
-                        if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                             oController.ToggleEditIPWebcamControls(true);
                         }
-                    }
-                );
-            }
-        } else {
-            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                oController.ToggleEditIPWebcamControls(false);
-                oController.SubmitIPWebcamData();
+                    });
+                } catch (e) {
+                    iomy.common.showError(e.message, "Error",
+                        function () {
+                            oController.ToggleSubmitCancelButtons(true);
+
+                            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                                oController.ToggleEditIPWebcamControls(true);
+                            }
+                        }
+                    );
+                }
             } else {
-                oController.ToggleSubmitCancelButtons(true);
+                if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                    oController.ToggleEditIPWebcamControls(false);
+                    oController.SubmitIPWebcamData();
+                } else {
+                    oController.ToggleSubmitCancelButtons(true);
+                }
             }
         }
     },
