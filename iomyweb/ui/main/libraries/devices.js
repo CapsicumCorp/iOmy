@@ -1220,7 +1220,7 @@ $.extend(iomy.devices,{
                                 // giving up.
                                 //-----------------------------------------------------//
                                 if (i === data.length - 1) {
-                                    this.Limit += 1;
+                                    this.Limit += 2;
                                     this.Retries++;
 
                                     if (this.Retries < this.RetryLimit) {

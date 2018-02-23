@@ -514,27 +514,41 @@ sap.ui.controller("pages.device.RGBlight", {
 
 
                 if (!oController.bAdvancedFirstRun) {
+                    var mRGB;
 
                     //if (iDeviceType == iomy.devices.philipshue.ThingTypeId) {
                     if (oController.iThingTypeId == iomy.devices.philipshue.ThingTypeId) {
+                        if (oController.bUsingAdvancedUI) {
+                            mRGB = oView.byId("CPicker").getRGB();
+                            
+                            mRGB = {
+                                red     : mRGB.r,
+                                green   : mRGB.g,
+                                blue    : mRGB.b
+                            };
+                        } else {
+                            mRGB = iomy.functions.convertHSLToRGB(
+                                oView.byId("hueSlider").getValue(),
+                                oView.byId("satSlider").getValue(),
+                                oView.byId("briSlider").getValue()
+                            );
+                        }
+                        
                         mRequestData.url    = iomy.apiphp.APILocation("philipshue");
                         mRequestData.data   = {
-                            "Mode" : "ChangeHueSatLig",
+                            "Mode" : "ChangeColorRGB",
                             "ThingId" : oController.iThingId,
-                            //"Hue" : iHue,
-                            //"Saturation" : iSat,
-                            //"Brightness" : iLight
-                            "Hue":        iNewHue,
-                            "Saturation": iNewSat,
-                            "Brightness": iNewLig
+                            "Data" : JSON.stringify({
+                                "R":mRGB.red    ,"RMax":255,
+                                "G":mRGB.green  ,"GMax":255,
+                                "B":mRGB.blue   ,"BMax":255
+                            })
                         };
 
                         iomy.apiphp.AjaxRequest(mRequestData);
 
                     //} else if (iDeviceType == iomy.devices.csrmesh.ThingTypeId) {
                     } else if(oController.iThingTypeId == iomy.devices.csrmesh.ThingTypeId) {
-                        var mRGB;
-                            
                         if (oController.bUsingAdvancedUI) {
                             mRGB = oView.byId("CPicker").getRGB();
                             
