@@ -65,6 +65,31 @@ $.extend(iomy.devices,{
     },
     
     /**
+     * Returns the current on/off status of a given device in the form of "On"
+     * or "Off".
+     * 
+     * @param {type} iThingId               ID of the device.
+     * @returns {String} Human-readable status
+     */
+    GetDeviceState : function (iThingId) {
+        var iStatus;
+        
+        try {
+            if (iThingId === null || iThingId === undefined) {
+                throw new MissingArgumentException("Thing ID must be specified.");
+            }
+            
+            iStatus = iomy.common.ThingList["_"+iThingId].Status;
+            
+        } catch (e) {
+            iStatus = 0;
+            
+        } finally {
+            return iStatus;
+        }
+    },
+    
+    /**
      * Turns a device on or off. The settings map takes the following
      * required parameters:
      * 

@@ -233,6 +233,10 @@ sap.ui.controller("pages.device.RGBlight", {
                 mSliderValues.saturation,
                 mSliderValues.light
             );
+        
+            if (oView.byId("LightSwitch") !== undefined) {
+                oView.byId("LightSwitch").setState(iomy.devices.GetDeviceState(oController.iThingId) === 1);
+            }
             
             oController.RGBUiDraw();
             
