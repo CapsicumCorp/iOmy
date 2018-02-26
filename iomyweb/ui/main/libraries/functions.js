@@ -2051,6 +2051,7 @@ $.extend(iomy.functions, {
             var sNoUserIDMessage        = "User ID is required (userID).";
             var sNoRoomIDMessage        = "Room ID is required (roomID).";
             var sNoPremiseIDMessage     = "Premise ID is required (premiseID).";
+            var sNoRoomAdminMessage     = "Room administration privileges are required to modify permissions for each room in the premise.";
             
             var fnAppendError = function (sErrorMessages) {
                 bError = true;
@@ -2083,21 +2084,26 @@ $.extend(iomy.functions, {
                     // rooms. Make sure the premise is specified and is valid.
                     //------------------------------------------------------------//
                     if (iRoomId == 0) {
-                        if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
-                            iPremiseId = mSettings.premiseID;
-                            
-                            var mPremiseIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
+                        if (JSON.stringify(iomy.common.PremiseList) !== "{}") {
+                            if (mSettings.premiseID !== undefined && mSettings.premiseID !== null) {
+                                iPremiseId = mSettings.premiseID;
+                                
+                                var mPremiseIDInfo = iomy.validation.isPremiseIDValid(iPremiseId);
 
-                            if (!mPremiseIDInfo.bIsValid) {
-                                aErrorMessages = aErrorMessages.concat(mPremiseIDInfo.aErrorMessages);
-                            } else {
-                                //-- Check that the user has room administration privileges for this premise. --//
-                                if (!self.isUserRoomAdminForPremise(iPremiseId)) {
-                                    fnAppendError("Room administration privileges are required to modify permissions for each room in the premise.");
+                                if (!mPremiseIDInfo.bIsValid) {
+                                    bError = true;
+                                    aErrorMessages = aErrorMessages.concat(mPremiseIDInfo.aErrorMessages);
+                                } else {
+                                    //-- Check that the user has room administration privileges for this premise. --//
+                                    if (!self.isUserRoomAdminForPremise(iPremiseId)) {
+                                        fnAppendError(sNoRoomAdminMessage);
+                                    }
                                 }
+                            } else {
+                                fnAppendError(sNoPremiseIDMessage);
                             }
                         } else {
-                            fnAppendError(sNoPremiseIDMessage);
+                            fnAppendError(sNoRoomAdminMessage);
                         }
                         
                     } else {
