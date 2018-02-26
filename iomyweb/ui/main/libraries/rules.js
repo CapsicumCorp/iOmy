@@ -135,8 +135,8 @@ $.extend(iomy.rules, {
                 throw new MissingArgumentException("Device ID is missing");
             }
             
-            if (mThing.TypeId != iomy.devices.zigbeesmartplug.ThingTypeId ||
-                mThing.TypeId != iomy.devices.philipshue.ThingTypeId)
+            if (mThing.TypeId == iomy.devices.zigbeesmartplug.ThingTypeId ||
+                mThing.TypeId == iomy.devices.philipshue.ThingTypeId)
             {
                 return true;
             } else {
