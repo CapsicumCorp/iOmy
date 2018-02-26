@@ -162,12 +162,22 @@ public:
   ~RuleTriggered();
 };
 
+//A thing state change
+class ThingStateChange {
+public:
+  int64_t dbThingPK=0; //The Thing PK of the device to change the state of
+  int thingState=-1; //New state to apply: 0 for Off or 1 for On
+  ThingStateChange(int64_t dbThingPK, int thingState);
+  ~ThingStateChange();
+};
+
 static boost::recursive_mutex thislibmutex;
 
 //ruleid, rule class
 static std::map<int32_t, Rule> grules;
 static std::list<RuleTriggered> gRulesTriggered;
 static std::list<int32_t> gRulesNeedNextRuntime; //A list of rule ids that need the next runtime to be updated by the webapi
+static std::list<ThingStateChange> gWebAPIThingStateChangesQueue;
 
 static sem_t gmainthreadsleepsem; //Used for main thread sleeping
 
@@ -192,6 +202,7 @@ static const zigbeelib_ifaceptrs_ver_2_t *zigbeelibifaceptr;
 static const configlib_ifaceptrs_ver_2_cpp_t *configlibifaceptr;
 
 //Static Function Declarations
+static void process_rules();
 
 //Function Declarations
 static void setneedtoquit(bool val);
@@ -393,6 +404,15 @@ RuleTriggered::~RuleTriggered() {
   //Do nothing at the moment
 }
 
+ThingStateChange::ThingStateChange(int64_t dbThingPK, int thingState) {
+  this->dbThingPK=dbThingPK;
+  this->thingState=thingState;
+}
+
+ThingStateChange::~ThingStateChange() {
+  //Do nothing at the moment
+}
+
 //----------------------
 
 //Process rules that were received from the Web API
@@ -424,6 +444,9 @@ void processReceivedRules(const boost::property_tree::ptree& pt) {
           switch (deviceType) {
             case 2:
               deviceType=DEVICETYPES::ZIGBEE_DEVICE;
+              break;
+            case 7:
+              deviceType=DEVICETYPES::PHILIPS_HUE_DEVICE;
               break;
             case 15:
               deviceType=DEVICETYPES::CSRMESH_DEVICE;
@@ -568,6 +591,17 @@ std::string ruleTriggeredToJson(const RuleTriggered& rule) {
   return streamstr.str();
 }
 
+std::string thingStateChangeToJson(const ThingStateChange& stateChange) {
+  using boost::property_tree::ptree;
+  ptree rulePt;
+
+  rulePt.put("NewState", stateChange.thingState);
+  std::ostringstream streamstr;
+  write_json(streamstr, rulePt);
+
+  return streamstr.str();
+}
+
 //Setup a http request
 //Only POST is supported at the moment
 class httpclient {
@@ -678,6 +712,7 @@ private:
 
   std::list<RuleTriggered>::iterator rulesTriggeredIt;
   std::list<int32_t>::iterator rulesNeedNextRuntimeIt;
+  std::list<ThingStateChange>::iterator thingStateChangesQueueIt;
 
   //See http://stackoverflow.com/questions/21120361/boostasioasync-write-and-buffers-over-65536-bytes
   //These variables need to stay allocated while the asio request is active so can't be local to a single function
@@ -685,6 +720,7 @@ private:
   boost::asio::streambuf listAllActiveRulesRequest_;
   boost::asio::streambuf rulesTriggeredRequest_;
   boost::asio::streambuf rulesNeedNextRuntimeRequest_;
+  boost::asio::streambuf rulesThingStateChangeRequest_;
 
 public:
   asioclient(boost::asio::io_service& io_service)
@@ -725,7 +761,7 @@ public:
     }
     struct timespec curtime;
     clock_gettime(CLOCK_REALTIME, &curtime);
-    bool skipGetAllRules=false, skipRulesTriggered=false, skipRulesNeedNextRuntime=false;
+    bool skipGetAllRules=false, skipRulesTriggered=false, skipRulesNeedNextRuntime=false, skipThingStateChange=false;
     {
       boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
       if (WEBAPI_REFRESH_ALL_RULES_INTERVAL+lastAllRuleRefreshTime>curtime.tv_sec) {
@@ -738,8 +774,11 @@ public:
       if (gRulesNeedNextRuntime.empty()) {
         skipRulesNeedNextRuntime=true;
       }
+      if (gWebAPIThingStateChangesQueue.empty()) {
+        skipThingStateChange=true;
+      }
     }
-    if (getneedtoquit() || (skipGetAllRules && skipRulesTriggered && skipRulesNeedNextRuntime)) {
+    if (getneedtoquit() || (skipGetAllRules && skipRulesTriggered && skipRulesNeedNextRuntime && skipThingStateChange)) {
       //No need to connect if nothing to process
       stop();
       return;
@@ -749,6 +788,7 @@ public:
       boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
       rulesTriggeredIt=gRulesTriggered.begin();
       rulesNeedNextRuntimeIt=gRulesNeedNextRuntime.begin();
+      thingStateChangesQueueIt=gWebAPIThingStateChangesQueue.begin();
     }
     // Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
@@ -884,6 +924,35 @@ private:
 
       requestmode=WEBAPI_REQUEST_MODES::UPDATE_NEXT_RUNTIME;
       boost::asio::async_write(socket_, rulesNeedNextRuntimeRequest_,
+          boost::bind(&asioclient::handle_write_request, this,
+            boost::asio::placeholders::error));
+    } else if (!getneedtoquit()) {
+      setThingState();
+    } else {
+      stop();
+    }
+  }
+
+  void setThingState() {
+    std::list<ThingStateChange>::iterator thingStateChangesQueueEndIt;
+    //Send the next thing state change or go on to the next item to process
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      thingStateChangesQueueEndIt=gWebAPIThingStateChangesQueue.end();
+    }
+    if (!getneedtoquit() && thingStateChangesQueueIt!=thingStateChangesQueueEndIt) {
+      //Send to the webapi that a rule has been triggered
+      reset_http_body();
+
+      hc.addFormField("Mode", "SetThingState");
+      hc.addFormField("Id", thingStateChangesQueueIt->dbThingPK);
+      hc.addFormField("Data", thingStateChangeToJson(*thingStateChangesQueueIt));
+      std::ostream request_stream(&rulesThingStateChangeRequest_);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending thing state change: %s\n", __func__, hc.toString().c_str());
+      request_stream << hc.toString();
+
+      requestmode=WEBAPI_REQUEST_MODES::SET_THING_STATE;
+      boost::asio::async_write(socket_, rulesThingStateChangeRequest_,
           boost::bind(&asioclient::handle_write_request, this,
             boost::asio::placeholders::error));
     } else if (!getneedtoquit()) {
@@ -1157,6 +1226,22 @@ private:
 
       //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
       stop();
+    } else if (requestmode==WEBAPI_REQUEST_MODES::SET_THING_STATE) {
+      std::list<ThingStateChange>::iterator thingStateChangeQueuePrevIt=thingStateChangesQueueIt;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Removing rule from need next runtime queue due to success\n", __func__);
+
+      //Step to next queue entry before erasing the one that just got processed
+      ++thingStateChangesQueueIt;
+
+      //Erase the entry that just got processed
+      {
+        boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+        gWebAPIThingStateChangesQueue.erase(thingStateChangeQueuePrevIt);
+      }
+      //Only send one request at a time for now until HTTP/1.1 with Chunked Transfer Encoding is implemented
+      stop();
     }
     if (stopped_) {
       //Send next request
@@ -1196,6 +1281,126 @@ private:
     }
   }
 };
+
+/*
+ * Remove rules that have been scheduled to be deleted
+ */
+static void remove_scheduled_to_delete_rules() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  //NOTE: We need to use a list to remove the rules as otherwise the main for loop may get confused if we remove items from underneath it
+  auto rulesitbegin=grules.begin();
+  auto rulesitend=grules.end();
+  std::list< std::map<int32_t, Rule>::iterator > rules_to_remove;
+  for (auto &it=rulesitbegin; it!=rulesitend; it++) {
+    if (it->second.needToRemove) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Removing rule: %s\n", __PRETTY_FUNCTION__, it->second.ruleName.c_str());
+      rules_to_remove.push_back(it);
+    }
+  }
+  for (auto const &it : rules_to_remove) {
+    grules.erase(it);
+  }
+}
+
+class asyncloop {
+private:
+  boost::mutex mtx_;
+  boost::asio::io_service io_service;
+  boost::asio::system_timer mainTimer;
+  boost::asio::system_timer webapiTimer;
+  asioclient client;
+
+public:
+  asyncloop()
+    : mainTimer(io_service), webapiTimer(io_service), client(io_service) {
+    }
+
+  void start() {
+    webapi_timer_loop();
+    main_timer_loop();
+    try {
+      io_service.run();
+      io_service.reset();
+    } catch (std::exception& e) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error while running service: %s\n", __PRETTY_FUNCTION__, e.what());
+    }
+  }
+
+  void stop() {
+    boost::lock_guard<boost::mutex> guard(mtx_);
+    client.stop();
+    mainTimer.expires_from_now(boost::chrono::seconds(0));
+    webapiTimer.expires_from_now(boost::chrono::seconds(0));
+  }
+  //Trigger a call to the webapi as soon as possible
+  void triggerWebApiLoop() {
+    webapiTimer.expires_from_now(boost::chrono::milliseconds(1));
+  }
+private:
+  void main_timer_loop() {
+    mainTimer.expires_from_now(boost::chrono::seconds(1)); //Process rules every second
+    mainTimer.async_wait(boost::bind(&asyncloop::main_timer_handler, this, boost::asio::placeholders::error));
+
+    process_rules();
+    remove_scheduled_to_delete_rules();
+  }
+
+  void webapi_timer_loop() {
+    boost::lock_guard<boost::mutex> guard(mtx_);
+    std::string webapihostname="", webapiport="80", webapiurl="", webapihttpuser="", webapihttppass="", webapiuser="", webapipass="";
+    bool result, missingval=false;
+    std::string hubpkstr;
+
+    result=configlibifaceptr->getnamevalue_cpp("general", "hubpk", hubpkstr);
+    if (!result) {
+      missingval=true;
+    }
+    ghubpk=std::atol(hubpkstr.c_str());
+
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hostname", webapihostname);
+    if (!result) {
+      missingval=true;
+    }
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "port", webapiport);
+    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hubrulesurl", webapiurl);
+    if (!result) {
+      missingval=true;
+    }
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httpusername", webapihttpuser);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httppassword", webapihttppass);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apiusername", webapiuser);
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apipassword", webapipass);
+    if (!missingval) {
+      webapiTimer.expires_from_now(boost::chrono::seconds(WEBAPI_ACCESS_INTERVAL)); //Restart every WEBAPI_ACCESS_INTERVAL seconds
+      webapiTimer.async_wait(boost::bind(&asyncloop::webapi_timer_handler, this, boost::asio::placeholders::error));
+
+      debuglibifaceptr->debuglib_printf(1, "%s: Starting client connection\n", __PRETTY_FUNCTION__);
+      client.start(webapihostname, webapiport, webapiurl, webapiuser, webapipass, webapihttpuser, webapihttppass);
+    } else {
+      webapiTimer.expires_from_now(boost::chrono::seconds(1)); //Restart every second when config isn't ready
+      webapiTimer.async_wait(boost::bind(&asyncloop::webapi_timer_handler, this, boost::asio::placeholders::error));
+
+      debuglibifaceptr->debuglib_printf(1, "%s: Configuration not yet ready\n", __PRETTY_FUNCTION__);
+    }
+  }
+
+  //Called every time the main timer triggers
+  void main_timer_handler(const boost::system::error_code& error) {
+    if (!getneedtoquit()) {
+      main_timer_loop();
+    }
+  }
+
+  //Called every time the webapi timer triggers
+  void webapi_timer_handler(const boost::system::error_code& error) {
+    if (!getneedtoquit()) {
+      webapi_timer_loop();
+    }
+  }
+};
+
+asyncloop gAsyncLoop;
 
 /*
  * Process the rules one by one
@@ -1260,6 +1465,14 @@ static void process_rules() {
             result=zigbeelibifaceptr->highlevel_set_onoff_zigbee_device(addr, rulesit.second.portId, *zigbeelibifaceptr->HIGH_LEVEL_ON);
           }
           debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:  Result=%d\n", __PRETTY_FUNCTION__, result);
+        } else if (rulesit.second.deviceType==DEVICETYPES::PHILIPS_HUE_DEVICE) {
+          //Apply the rule to a Philips Hue device
+          if (rulesit.second.ruleType==RULETYPES::TURN_OFF_ONCE_ONLY || rulesit.second.ruleType==RULETYPES::TURN_OFF_RECURRING) {
+            gWebAPIThingStateChangesQueue.push_back( ThingStateChange(rulesit.second.dbThingPK, 0) );
+          } else {
+            gWebAPIThingStateChangesQueue.push_back( ThingStateChange(rulesit.second.dbThingPK, 1) );
+          }
+          gAsyncLoop.triggerWebApiLoop();
         }
         rulesit.second.lastModified=currenttime;
         rulesit.second.lastRuntime=currenttime;
@@ -1285,120 +1498,6 @@ static void process_rules() {
     }
   }
 }
-
-/*
- * Remove rules that have been scheduled to be deleted
- */
-static void remove_scheduled_to_delete_rules() {
-  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
-
-  //NOTE: We need to use a list to remove the rules as otherwise the main for loop may get confused if we remove items from underneath it
-  auto rulesitbegin=grules.begin();
-  auto rulesitend=grules.end();
-  std::list< std::map<int32_t, Rule>::iterator > rules_to_remove;
-  for (auto &it=rulesitbegin; it!=rulesitend; it++) {
-    if (it->second.needToRemove) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Removing rule: %s\n", __PRETTY_FUNCTION__, it->second.ruleName.c_str());
-      rules_to_remove.push_back(it);
-    }
-  }
-  for (auto const &it : rules_to_remove) {
-    grules.erase(it);
-  }
-}
-
-class asyncloop {
-private:
-  boost::mutex mtx_;
-  boost::asio::io_service io_service;
-  boost::asio::system_timer mainTimer;
-  boost::asio::system_timer webapiTimer;
-  asioclient client;
-
-public:
-  asyncloop()
-    : mainTimer(io_service), webapiTimer(io_service), client(io_service) {
-    }
-
-  void start() {
-    webapi_timer_loop();
-    main_timer_loop();
-    try {
-      io_service.run();
-      io_service.reset();
-    } catch (std::exception& e) {
-      debuglibifaceptr->debuglib_printf(1, "%s: Error while running service: %s\n", __PRETTY_FUNCTION__, e.what());
-    }
-  }
-
-  void stop() {
-    boost::lock_guard<boost::mutex> guard(mtx_);
-    client.stop();
-    mainTimer.expires_from_now(boost::chrono::seconds(0));
-    webapiTimer.expires_from_now(boost::chrono::seconds(0));
-  }
-private:
-  void main_timer_loop() {
-    mainTimer.expires_from_now(boost::chrono::seconds(1)); //Process rules every second
-    mainTimer.async_wait(boost::bind(&asyncloop::main_timer_handler, this, boost::asio::placeholders::error));
-
-    process_rules();
-    remove_scheduled_to_delete_rules();
-  }
-
-  void webapi_timer_loop() {
-    boost::lock_guard<boost::mutex> guard(mtx_);
-    std::string webapihostname="", webapiport="80", webapiurl="", webapihttpuser="", webapihttppass="", webapiuser="", webapipass="";
-    bool result, missingval=false;
-    std::string hubpkstr;
-
-    result=configlibifaceptr->getnamevalue_cpp("general", "hubpk", hubpkstr);
-    if (!result) {
-      missingval=true;
-    }
-    ghubpk=std::atol(hubpkstr.c_str());
-
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hostname", webapihostname);
-    if (!result) {
-      missingval=true;
-    }
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "port", webapiport);
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hubrulesurl", webapiurl);
-    if (!result) {
-      missingval=true;
-    }
-    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httpusername", webapihttpuser);
-    configlibifaceptr->getnamevalue_cpp("webapiconfig", "httppassword", webapihttppass);
-    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apiusername", webapiuser);
-    configlibifaceptr->getnamevalue_cpp("webapiconfig", "apipassword", webapipass);
-    if (!missingval) {
-      webapiTimer.expires_from_now(boost::chrono::seconds(WEBAPI_ACCESS_INTERVAL)); //Restart every WEBAPI_ACCESS_INTERVAL seconds
-      webapiTimer.async_wait(boost::bind(&asyncloop::webapi_timer_handler, this, boost::asio::placeholders::error));
-
-      debuglibifaceptr->debuglib_printf(1, "%s: Starting client connection\n", __PRETTY_FUNCTION__);
-      client.start(webapihostname, webapiport, webapiurl, webapiuser, webapipass, webapihttpuser, webapihttppass);
-    } else {
-      webapiTimer.expires_from_now(boost::chrono::seconds(1)); //Restart every second when config isn't ready
-      webapiTimer.async_wait(boost::bind(&asyncloop::webapi_timer_handler, this, boost::asio::placeholders::error));
-
-      debuglibifaceptr->debuglib_printf(1, "%s: Configuration not yet ready\n", __PRETTY_FUNCTION__);
-    }
-  }
-
-  //Called every time the main timer triggers
-  void main_timer_handler(const boost::system::error_code& error) {
-    if (!getneedtoquit()) {
-      main_timer_loop();
-    }
-  }
-
-  //Called every time the webapi timer triggers
-  void webapi_timer_handler(const boost::system::error_code& error) {
-    if (!getneedtoquit()) {
-      webapi_timer_loop();
-    }
-  }
-};
 
 /*
   Process a command sent by the user using the cmd network interface
@@ -1496,6 +1595,9 @@ static int processcommand(const char *buffer, int clientsock) {
           case DEVICETYPES::CSRMESH_DEVICE:
             ostream << "CSRMesh Device";
             break;
+          case DEVICETYPES::PHILIPS_HUE_DEVICE:
+            ostream << "Philips Hue Device";
+            break;
           default:
             ostream << "Unknown";
             break;
@@ -1566,8 +1668,6 @@ static int processcommand(const char *buffer, int clientsock) {
   return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
 }
 
-asyncloop gasyncloop;
-
 /*
   Main thread loop that manages operation of rules
   NOTE: Don't need to thread lock since the functions this calls will do the thread locking, we just disable canceling of the thread
@@ -1584,7 +1684,7 @@ static void *mainloop(void *UNUSED(val)) {
       break;
     }
     //Auto restart the loop if it crashes before we are ready to quit
-    gasyncloop.start();
+    gAsyncLoop.start();
 
     //Only sleep for one second as we need to handle timeouts ourselves
     semwaittime.tv_sec+=1;
@@ -1607,7 +1707,7 @@ static void setneedtoquit(bool val) {
   needtoquit.store(val);
 
   //Trigger stop in the main async loop
-  gasyncloop.stop();
+  gAsyncLoop.stop();
 }
 
 static bool getneedtoquit() {
@@ -1705,6 +1805,7 @@ static void shutdown(void) {
   grules.clear();
   gRulesTriggered.clear();
   gRulesNeedNextRuntime.clear();
+  gWebAPIThingStateChangesQueue.clear();
 
   sem_destroy(&gmainthreadsleepsem);
 

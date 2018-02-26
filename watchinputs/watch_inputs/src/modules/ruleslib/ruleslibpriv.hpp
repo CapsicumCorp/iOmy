@@ -32,6 +32,7 @@ namespace ruleslib {
     static const int32_t NO_TYPE=0;
     static const int32_t ZIGBEE_DEVICE=1;
     static const int32_t CSRMESH_DEVICE=2;
+    static const int32_t PHILIPS_HUE_DEVICE=3;
   }
   //These values need to stay in sync with the database rule type values
   namespace RULETYPES {
@@ -45,7 +46,8 @@ namespace ruleslib {
   enum class WEBAPI_REQUEST_MODES {
     GET_ALL_RULES,
     RULE_TRIGGERED,
-    UPDATE_NEXT_RUNTIME
+    UPDATE_NEXT_RUNTIME,
+    SET_THING_STATE,
   };
 } //End of namespace
 
