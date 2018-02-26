@@ -589,7 +589,7 @@ class PHPPhilipsHue {
 										array(
 											"RSType"			=> "3907",
 											"UoM"				=> "1",
-											"Type"				=> "1",
+											"Type"				=> "2",
 											"Name"				=> "Green",
 											"BaseConvert"		=> "1",
 											"SampleRate"		=> "-1",
@@ -599,7 +599,7 @@ class PHPPhilipsHue {
 										array(
 											"RSType"			=> "3908",
 											"UoM"				=> "1",
-											"Type"				=> "1",
+											"Type"				=> "2",
 											"Name"				=> "Blue",
 											"BaseConvert"		=> "1",
 											"SampleRate"		=> "-1",
