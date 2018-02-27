@@ -3311,6 +3311,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "LEFT JOIN `REGION` ON `PREMISEADDRESS`.`PREMISEADDRESS_REGION_FK` = `REGION`.`REGION_PK`  \n";
 			$sSQL .= "LEFT JOIN `TIMEZONE` ON `PREMISEADDRESS`.`PREMISEADDRESS_TIMEZONE_FK` = `TIMEZONE`.`TIMEZONE_PK` \n";
 			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') AND `USERS_STATE` = -1;\n";
+			break;
 			
 		/*============================================================
 		  == #6.03# - WATCHINPUTSCOMM                               ==
