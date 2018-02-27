@@ -94,7 +94,9 @@ static pthread_mutex_t mainlibmutex;
 static pthread_mutex_t mainlibmutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
+#ifndef __ANDROID__
 static sem_t *thislib_parentsleepsem; //Used for caller if this library sleeping
+#endif
 static sem_t mainlib_mainthreadsleepsem; //Used for main thread sleeping
 
 static int modulesinited=0;
@@ -959,7 +961,9 @@ void mainlib_setneedtoquit(int val) {
 	PTHREAD_LOCK(&mainlibmutex);
 	needtoquit=val;
   sem_post(&mainlib_mainthreadsleepsem);
-  sem_post(&thislib_parentsleepsem);
+#ifndef __ANDROID__
+  sem_post(thislib_parentsleepsem);
+#endif
 	PTHREAD_UNLOCK(&mainlibmutex);
 }
 
@@ -1137,7 +1141,9 @@ int mainlib_main(sem_t *parentsleepsem) {
 #endif
 
 	//Store a copy of parent sleep sem
+#ifndef __ANDROID__
 	thislib_parentsleepsem=parentsleepsem;
+#endif
 
   //Store module info for mainlib
   //NOTE: The module name comes from mainlib_moduleinfo_ver_1
