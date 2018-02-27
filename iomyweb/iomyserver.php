@@ -1297,7 +1297,7 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateViewsRestricted6":
-							$aResult = DB_CreateViews( $sPostDatabaseName, array( "WatchInputsHub", "WatchInputsComm", "WatchInputsLink", "WatchInputsThing", "WatchInputsIO" ) );
+							$aResult = DB_CreateViews( $sPostDatabaseName, array( "WatchInputsHub", "WatchInputsPremise", "WatchInputsComm", "WatchInputsLink", "WatchInputsThing", "WatchInputsIO" ) );
 							break;
 							
 						//--------------------//
