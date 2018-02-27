@@ -3293,7 +3293,7 @@ function DB_FetchCreateViewsSQL( $sDBName, $sViewName ) {
 			$sSQL .= "	`PREMISEADDRESS_SUBREGION`, \n";
 			$sSQL .= "	`LANGUAGE_PK`, \n";
 			$sSQL .= "	`LANGUAGE_NAME`, \n";
-			$sSQL .= "	`LANGUAGE_ENCODING` \n";
+			$sSQL .= "	`LANGUAGE_ENCODING`, \n";
 			$sSQL .= "	`REGION_PK`, \n";
 			$sSQL .= "	`REGION_NAME`, \n";
 			$sSQL .= "	`REGION_NAME2`, \n";
