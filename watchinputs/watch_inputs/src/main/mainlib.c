@@ -959,7 +959,7 @@ void mainlib_setneedtoquit(int val) {
 	PTHREAD_LOCK(&mainlibmutex);
 	needtoquit=val;
   sem_post(&mainlib_mainthreadsleepsem);
-  sem_post(thislib_parentsleepsem);
+  sem_post(&thislib_parentsleepsem);
 	PTHREAD_UNLOCK(&mainlibmutex);
 }
 
