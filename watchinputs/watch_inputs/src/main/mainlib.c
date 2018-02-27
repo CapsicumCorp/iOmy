@@ -1067,6 +1067,11 @@ static void *mainlib_signal_processor(void *thread_val) {
 #endif
 				//TODO Implement reload code
 				break;
+      case SIGCHLD:
+#ifdef DEBUG
+        printf("DEBUG: %s: SIGCHLD received, child status has changed\n", __func__);
+#endif
+        break;
 			case SIGINT:
 			case SIGQUIT:
 			case SIGILL:
@@ -1080,7 +1085,6 @@ static void *mainlib_signal_processor(void *thread_val) {
 #ifdef SIGSTKFLT
 			case SIGSTKFLT:
 #endif
-			case SIGCHLD:
 			case SIGCONT:
 			case SIGSTOP:
 			case SIGTSTP:
