@@ -1250,7 +1250,7 @@ $.extend(iomy.devices,{
 
                                     if (this.Retries < this.RetryLimit) {
                                         iomy.apiodata.AjaxRequest(this);
-                                        //return;
+                                        return;
                                     } else {
                                         fnFail("Failed to find all of the data for "+mThing.DisplayName+".");
                                     }

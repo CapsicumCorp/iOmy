@@ -1140,12 +1140,12 @@ $.extend(iomy.functions, {
         //--------------------------------------------------------------------//
         // Check that the UTS has been given.
         //--------------------------------------------------------------------//
-        if (mSettings.UTS === undefined) {
+        if (mSettings === undefined || mSettings === null || mSettings.UTS === undefined) {
             //----------------------------------------------------------------//
             // Report and throw an exception if no UTS is given.
             //----------------------------------------------------------------//
             jQuery.sap.log.error("iomy.functions.getLengthOfTimePassedSince() requires a UTS parameter!");
-            throw "iomy.functions.getLengthOfTimePassedSince() requires a UTS parameter!";
+            throw new MissingArgumentException("iomy.functions.getLengthOfTimePassedSince() requires a UTS parameter!");
             
         } else {
             //----------------------------------------------------------------//
@@ -1439,6 +1439,28 @@ $.extend(iomy.functions, {
         } catch (e) {
             iCount = -1;
             $.sap.log.error("Failed to find the number of rooms in the premise (ID: "+iPremiseId+") ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
+        }
+    },
+    
+    getNumberOfRooms : function () {
+        var iCount = 0;
+        
+        try {
+
+            $.each(iomy.common.RoomsList, function (sI, mPremise) {
+                $.each(mPremise, function (sI, mRoom) {
+                    if (sI !== undefined && sI !== null && mRoom !== undefined && mRoom !== null) {
+                        iCount++;
+                    }
+                });
+            });
+
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of rooms in all premises ("+e.name+"): " + e.message);
             
         } finally {
             return iCount;
@@ -2674,7 +2696,7 @@ $.extend(iomy.functions, {
                 fnFail("Error attempting to run the request to check the database indexing state ("+e.name+"): " + e.message);
             }
 
-        },
+        }
     }
     
 });

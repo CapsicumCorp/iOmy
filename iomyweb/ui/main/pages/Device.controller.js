@@ -49,6 +49,8 @@ sap.ui.controller("pages.Device", {
     aCurrentRoomData:               {},         //-- ARRAY:            Used to store the current room data            --//
     aElementsToDestroy:             [],         //-- ARRAY:            Stores a list of Ids of UI5 Objects to destroy on Page Redraw        --//
     
+    bLoadCompleted:                 false,      //-- BOOLEAN:       Flag to indicate whether the device list has finished loading or not. --//
+    
     
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -72,6 +74,8 @@ sap.ui.controller("pages.Device", {
     RefreshPage : function (mData) {
         var oController = this;            //-- SCOPE: Allows subfunctions to access the current scope --//
         var oView = this.getView();
+        
+        oController.bLoadCompleted = false;
         
         //----------------------------------------------------//
         // Find the premise ID, if specified, and store it.
@@ -182,10 +186,23 @@ sap.ui.controller("pages.Device", {
     },
     
     InitialiseDeviceList : function () {
-        var oController = this;
-        var oView       = this.getView();
+        var oController         = this;
+        var oView               = this.getView();
+        var mRefreshSettings    = {};
         
         try {
+            //----------------------------------------------------------------//
+            // Apply the settings for refreshing the core variables.
+            //----------------------------------------------------------------//
+            mRefreshSettings = {
+                onSuccess : function () {
+                    if (oController.bLoadCompleted !== true) {
+                        oController.BuildDeviceListUI();
+                        oController.RefreshAjaxDataForUI();
+                    }
+                }
+            };
+            
             oView.byId("DeviceList").destroyItems();
             oView.byId("DeviceList").addItem(
                 new sap.m.ObjectListItem (oView.createId("loading"), {        
@@ -195,12 +212,7 @@ sap.ui.controller("pages.Device", {
                 })
             );
 
-            iomy.common.RefreshCoreVariables({
-                onSuccess : function () {
-                    oController.BuildDeviceListUI();
-                    oController.RefreshAjaxDataForUI();
-                }
-            });
+            iomy.common.RefreshCoreVariables(mRefreshSettings);
         } catch (e) {
             $.sap.log.error("Failed to launch the device list loading ("+e.name+"): " + e.message);
         }
@@ -414,7 +426,7 @@ sap.ui.controller("pages.Device", {
 
                                         //----------------------------------------------------------//
                                         // If were looking to edit a device, open the form,
-                                        // otherwise, open the stream popup
+                                        // otherwise, open the stream popup.
                                         //----------------------------------------------------------//
                                         if (oController.bEditing) {
                                             iomy.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
@@ -635,6 +647,10 @@ sap.ui.controller("pages.Device", {
                     })
                 );
             }
+            
+            // Flag that the loading has completed
+            oController.bLoadCompleted = true;
+            
         } catch (e) {
             $.sap.log.error("Failed to draw the entry to add a device ("+e.name+"): " + e.message);
         }
@@ -985,6 +1001,9 @@ sap.ui.controller("pages.Device", {
                             aTask = oController.aAjaxTasks.Low.pop();
                             oController.RunAjaxTask(aTask);
     
+//                        } else {
+//                            // Flag that the loading has completed
+//                            oController.bLoadCompleted = true;
                         }
                     }
                 }

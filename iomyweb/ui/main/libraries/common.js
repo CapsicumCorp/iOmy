@@ -717,6 +717,7 @@ $.extend(iomy.common,{
                                                                             } else {
                                                                                 //-- Replace the Current Config with the next --//
                                                                                 iomy.common.aCoreVariablesResConfig = iomy.common.aCoreVariablesResNextConfig;
+                                                                                iomy.common.aCoreVariablesResNextConfig = [];
                                                                                 
                                                                                 //-- Start the next refresh Core Variables --//
                                                                                 iomy.common.bCoreRefreshInProgress = false;
@@ -2567,7 +2568,7 @@ $.extend(iomy.common,{
                 for (var i = 0; i < data.length; i++) {
                     me.LinkTypeList["_"+data[i].LINKTYPE_PK] = {
                         "LinkTypeId" : data[i].LINKTYPE_PK,
-                        "LinkTypeName" : data[i].LINKTYPE_NAME,
+                        "LinkTypeName" : data[i].LINKTYPE_NAME
                     };
                 }
                 
@@ -3011,12 +3012,13 @@ $.extend(iomy.common,{
                 
             //-- Room List (for editing) --//
             } else if (sPageName === "pRoomList" && aPageData.bEditing === true) {
-                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms() ||
+                if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms() &&
                     !iomy.functions.permissions.isCurrentUserAbleToEditRooms())
                 {
-                    aErrorMessages.push(sNoRightToEditRoom);
+                    if (iomy.functions.getNumberOfRooms() > 1) {
+                        aErrorMessages.push(sNoRightToEditRoom);
+                    }
                 }
-                
             }
             
             if (aErrorMessages.length > 0) {
@@ -3052,7 +3054,9 @@ $.extend(iomy.common,{
                             oController.IndicateWhetherInEditModeOrNot();
                             oController.RefreshModel();
                         } else {
-                            oController.RefreshPage({});
+                            if (oApp.getCurrentPage().getId() === "pDevice") {
+                                oController.RefreshPage({});
+                            }
                         }
 
                     } else if (sPageName === "pRoomList") {
