@@ -60,10 +60,13 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <signal.h>
 #include <pthread.h>
 #include <time.h>
+#include <unistd.h>
 #include <semaphore.h>
 #include <endian.h>
 #include <arpa/inet.h>
@@ -86,6 +89,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/archive/iterators/binary_from_base64.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #ifdef __ANDROID__
@@ -122,50 +126,41 @@ static const int WEBAPI_ACCESS_INTERVAL=5; //Number of seconds between web api a
 using boost::asio::ip::tcp;
 
 class CameraStream {
-private:
-  boost::recursive_mutex mtx_;
+public:
   int32_t streamId=0; //A unique id to identify this stream
-  bool runningProcess=false; //A process is currently running to capture this stream
-  pid_t pid=0; //Pid of the camera capture process for this stream
+  pid_t pid=0; //Pid of the camera capture process for this stream; 0=Don't need to wait for child process
+  int exitStatus=0; //See waitpid man page for macros that can be used with this
   std::string cmd; //Command of the camera capture process
   std::vector<std::string> args; //Arguments of the camera capture process
 public:
-  CameraStream(int32_t streamId);
+  CameraStream();
   CameraStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
   ~CameraStream();
-  void setCommand(std::string cmd);
-  void setCommand(std::string cmd, std::vector<std::string> args);
-  int32_t getStreamId();
-  std::string getCommand();
-  std::vector<std::string> getArgs();
-  int startCapture(); //Start a camera capturing process
-  int waitCapture(int timeOut); //Wait for a csmera capturing process to finish
-  int stopCapture(); //Stop a camera capturing process immediately
-  bool isCapturing(); //Check if a stream is currently capturing
 };
 
 class Camera {
-private:
-  boost::recursive_mutex mtx_;
-  int32_t camid=0; //Database ID of the Camera
-  std::map<int32_t, CameraStream *> cameraStreams;
 public:
+  int32_t camid=0; //Database ID of the Camera
+  std::map<int32_t, CameraStream> cameraStreams;
+public:
+  Camera();
   Camera(int32_t camid);
   ~Camera();
 
-  int waitAllCapture(int timeOut); //Wait for all camera capturing processes to finish
+  int32_t getCamId();
+
+  int waitAllCapture(int timeOutSeconds); //Wait for all camera capturing processes to finish
   int stopAllCapture(); //Stop all camera capturing processes immediately
 
-  int addStream(int32_t streamId);
   int addStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
   std::vector<int32_t> getStreamIds();
-  int setStreamCommand(int32_t streamId, std::string cmd);
   int setStreamCommand(int32_t streamId, std::string cmd, std::vector<std::string> args);
   std::string getStreamCommand(int32_t streamId);
   std::vector<std::string> getStreamArgs(int32_t streamId);
+  int getStreamExitStatus(int32_t streamId);
   int startStreamCapture(int32_t streamId); //Start a camera capturing process
-  int waitStreamCapture(int32_t streamId, int timeOut); //Wait for a csmera capturing process to finish
-  int stopStreamCapture(int32_t streamId); //Stop a camera capturing process immediately
+  int waitStreamCapture(int32_t streamId, int timeOutSeconds); //Wait for a csmera capturing process to finish
+  int stopStreamCapture(int32_t streamId, bool force); //Stop a camera capturing process immediately
   bool isStreamCapturing(int32_t streamId); //Check if a stream is currently capturing
 };
 
@@ -338,15 +333,12 @@ static void setneedmoreinfo(bool needmoreinfo) {
 //Class/Struct functions
 //----------------------
 
-CameraStream::CameraStream(int32_t streamId) {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
-
-  this->streamId=streamId;
-  this->cmd="";
-  this->args.clear();
+CameraStream::CameraStream() {
+  //Do nothing
 }
+
 CameraStream::CameraStream(int32_t streamId, std::string cmd, std::vector<std::string> args) {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   this->streamId=streamId;
   this->cmd=cmd;
@@ -357,96 +349,41 @@ CameraStream::~CameraStream() {
   //Do nothing
 }
 
-void CameraStream::setCommand(std::string cmd) {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
-
-  this->cmd=cmd;
-}
-
-void CameraStream::setCommand(std::string cmd, std::vector<std::string> args) {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
-
-  this->cmd=cmd;
-  this->args=args;
-}
-
-int32_t CameraStream::getStreamId() {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
-
-  return this->streamId;
-}
-
-std::string CameraStream::getCommand() {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
-
-  return this->cmd;
-}
-
-std::vector<std::string> CameraStream::getArgs() {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
-
-  return this->args;
-}
-
-int CameraStream::startCapture() {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
-
-  //TODO: Check if everything has been set correctly
-  //TODO: Start camera capture thread
-  return 0;
-}
-
-//Wait for a csmera capturing process to finish
-int CameraStream::waitCapture(int timeOut) {
-  pid_t pid;
-  {
-    boost::lock_guard<boost::recursive_mutex> guard(mtx_);
-
-    pid=this->pid;
-  }
-  //TODO: Wait for process but only until timeOut expires
-  return 0;
-}
-
-//Stop a camera capturing process immediately
-int CameraStream::stopCapture() {
-  //TODO: Kill a process
-
-  return 0;
-}
-
-//Check if a stream is currently capturing
-bool CameraStream::isCapturing() {
-  //TODO: Implement checking if the capture process is currently running
-  return true;
+Camera::Camera() {
+  //Do nothing
 }
 
 Camera::Camera(int32_t camid) {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   this->camid=camid;
 }
 
 Camera::~Camera() {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
-  for (auto &cameraStreamIt : this->cameraStreams) {
-    delete cameraStreamIt.second;
-  }
+  stopAllCapture();
+
   cameraStreams.clear();
+}
+
+int32_t Camera::getCamId() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  return this->camid;
 }
 
 //Wait for all camera capturing processes to finish
 //Returns 0 for success, 1 if timeOut exceeded for at least one process, or negative value for other error
-int Camera::waitAllCapture(int timeOut) {
+int Camera::waitAllCapture(int timeOutSeconds) {
   bool timeOutExceeded=false;
   bool error=false;
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   for (auto &cameraStreamIt : this->cameraStreams) {
     int result;
 
-    result=cameraStreamIt.second->waitCapture(timeOut);
+    result=waitStreamCapture(cameraStreamIt.first, timeOutSeconds);
     if (result==1) {
       timeOutExceeded=true;
     }
@@ -466,50 +403,431 @@ int Camera::waitAllCapture(int timeOut) {
 //Returns 0 for success or negative value on error
 int Camera::stopAllCapture() {
   bool error=false;
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   for (auto &cameraStreamIt : this->cameraStreams) {
     int result;
 
-    result=cameraStreamIt.second->stopCapture();
-    if (result<0) {
-      error=true;
+    //First attempt to terminate the process
+    if (isStreamCapturing(cameraStreamIt.first)) {
+      result=stopStreamCapture(cameraStreamIt.first, false);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Terminate result: %d\n", __PRETTY_FUNCTION__, result);
+      if (result!=0) {
+        error=true;
+      }
     }
   }
-  if (error) {
-    return -1;
+  if (!error) {
+    return 0;
   }
-  return 0;
+  //Sleep for .1 seconds before checking if terminate worked
+  usleep(100000);
+
+  //Force kill if any processes are still running
+  for (auto &cameraStreamIt : this->cameraStreams) {
+    if (isStreamCapturing(cameraStreamIt.first)) {
+      int result;
+
+      result=stopStreamCapture(cameraStreamIt.first, true);
+      if (isStreamCapturing(cameraStreamIt.first)) {
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Failed to terminate capture process for Camera: %d, Camera Stream: %d\n", __PRETTY_FUNCTION__, this->camid, cameraStreamIt.first);
+      }
+    }
+  }
 }
 
-//Added a new camera stream with no command or arguments yet
-//Returns 0 on success or negative value on error
-int Camera::addStream(int32_t streamId) {
-  boost::lock_guard<boost::recursive_mutex> guard(mtx_);
+int Camera::addStream(int32_t streamId, std::string cmd="", std::vector<std::string> args={}) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
   try {
-    if (cameraStreams.at(streamId)->getStreamId()==streamId) {
+    if (cameraStreams.at(streamId).streamId==streamId) {
       //Camera Stream already added
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Camera: %d, Camera Stream: %d already added\n", __PRETTY_FUNCTION__, this->camid, streamId);
       return -1;
     }
   } catch (std::out_of_range& e) {
-    cameraStreams[streamId]=new CameraStream(streamId);
+    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Adding Camera: %d, Camera Stream: %d\n", __PRETTY_FUNCTION__, this->camid, streamId);
+    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command=\"%s\"\n", __PRETTY_FUNCTION__, cmd.c_str());
+    if (!args.empty()) {
+      for (auto argIt : args) {
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command argument=\"%s\"\n", __PRETTY_FUNCTION__, argIt.c_str());
+      }
+    } else {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   No command arguments\n", __PRETTY_FUNCTION__);
+    }
+    cameraStreams[streamId]=CameraStream(streamId, cmd, args);
   }
   return 0;
 }
 
-/*int addStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
-std::vector<int32_t> getStreamIds();
-int setStreamCommand(int32_t streamId, std::string cmd);
-int setStreamCommand(int32_t streamId, std::string cmd, std::vector<std::string> args);
-std::string getStreamCommand(int32_t streamId);
-std::vector<std::string> getStreamArgs(int32_t streamId);
-int startStreamCapture(int32_t streamId); //Start a camera capturing process
-int waitStreamCapture(int32_t streamId, int timeOut); //Wait for a csmera capturing process to finish
-int stopStreamCapture(int32_t streamId); //Stop a camera capturing process immediately
-bool isStreamCapturing(int32_t streamId); //Check if a stream is currently capturing*/
+std::vector<int32_t> Camera::getStreamIds() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
+  std::vector<int32_t> streamIds;
+  for (auto cameraStreamIt : cameraStreams) {
+    streamIds.push_back(cameraStreamIt.first);
+  }
+  return streamIds;
+}
+
+int Camera::setStreamCommand(int32_t streamId, std::string cmd, std::vector<std::string> args={}) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    cameraStreams.at(streamId).cmd=cmd;
+    cameraStreams.at(streamId).args=args;
+    return 0;
+  } catch (std::out_of_range& e) {
+    //Camera Stream doesn't exist
+    return -1;
+  }
+  return -2;
+}
+
+std::string Camera::getStreamCommand(int32_t streamId) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    return cameraStreams.at(streamId).cmd;
+  } catch (std::out_of_range& e) {
+    //Camera Stream doesn't exist
+    return "";
+  }
+}
+
+std::vector<std::string> Camera::getStreamArgs(int32_t streamId) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    return cameraStreams.at(streamId).args;
+  } catch (std::out_of_range& e) {
+    //Camera Stream doesn't exist
+    return {};
+  }
+}
+
+int Camera::getStreamExitStatus(int32_t streamId) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    return cameraStreams.at(streamId).exitStatus;
+  } catch (std::out_of_range& e) {
+    //Camera Stream doesn't exist
+    return 0;
+  }
+}
+
+//Start a camera capturing process
+int Camera::startStreamCapture(int32_t streamId) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    if (cameraStreams.at(streamId).cmd=="") {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: No command has been specified for Camera: %d, Stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
+      return -1;
+    }
+    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Start camera capture: for Camera: %d, stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
+    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command=\"%s\"\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).cmd.c_str());
+    if (!cameraStreams.at(streamId).args.empty()) {
+      for (auto argIt : cameraStreams.at(streamId).args) {
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command argument=\"%s\"\n", __PRETTY_FUNCTION__, argIt.c_str());
+      }
+    } else {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   No command arguments\n", __PRETTY_FUNCTION__);
+    }
+
+    //TODO: Check if everything has been set correctly
+    //TODO: Start camera capture thread
+
+    //Prepare pointers for exec
+    //NOTE: We make a copy of the argument strings and then get c pointers to those string copies
+    //  So the references to the strings will stay in tact by the time exec is called
+    //We auto add the first argument as the name of the command minus the path
+    std::vector<std::string> cargs;
+    std::vector<char *> cargptrs;
+
+    boost::filesystem::path splitcmd(cameraStreams.at(streamId).cmd);
+    try {
+      cargs.push_back(splitcmd.filename().string());
+      if (cameraStreams.at(streamId).args.size()>0) {
+        for (auto argIt : cameraStreams.at(streamId).args) {
+          cargs.push_back(argIt);
+        }
+      }
+      for (size_t i=0; i<cargs.size(); i++) {
+        cargptrs.push_back(const_cast<char *>( cargs[i].c_str() ));
+      }
+      //execv needs the last argument to be NULL
+      cargptrs.push_back(nullptr);
+
+      for (auto argptrIt : cargptrs) {
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: argIt=%s\n", __PRETTY_FUNCTION__, argptrIt);
+      }
+    } catch (std::bad_alloc& e) {
+      //Failed to allocate
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to allocate ram for child processes arguments for Camera: %d, Stream: %d: %s\n", __PRETTY_FUNCTION__, camid, streamId, e.what());
+    } catch (std::logic_error& e) {
+      //Failed to allocate
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to allocate ram for child processes arguments for Camera: %d, Stream: %d: %s\n", __PRETTY_FUNCTION__, camid, streamId, e.what());
+    }
+    //Spawn a new process to run the command
+    pid_t pid=fork();
+    int lerrno=errno;
+    if (pid==-1) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to spawn child process to run command for Camera: %d, Stream: %d, errno=%d\n", __PRETTY_FUNCTION__, camid, streamId, lerrno);
+      return -2;
+    }
+    if (pid==0) {
+      //This is the child
+
+      //disable blocking of signals for the child process
+      sigset_t set;
+      sigfillset(&set);
+      sigprocmask(SIG_UNBLOCK, &set, NULL);
+
+      execvp(cameraStreams.at(streamId).cmd.c_str(), static_cast<char *const *>(cargptrs.data()));
+      exit(1);
+    } else {
+      //Store the value of the child pid
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Camera: %d, Stream: %d now has running child: %ld\n", __PRETTY_FUNCTION__, camid, streamId, pid);
+      cameraStreams.at(streamId).pid=pid;
+    }
+    return 0;
+
+  } catch (std::out_of_range& e) {
+    return -1;
+  }
+  return -2;
+}
+
+//Wait for a csmera capturing process to finish
+//If timeOutSeconds is 0 then don't wait if the process is currently running
+//Returns 1 if timeout expired, 0 if process has finished, or negative value on error
+int Camera::waitStreamCapture(int32_t streamId, int timeOutSeconds) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    if (cameraStreams.at(streamId).pid==0) {
+      return 0;
+    }
+    //TODO: Wait for process but only until timeOut expires
+    bool isRunning=true;
+    int exitStatus=0;
+    int timeOut=0;
+    do {
+      //NOTE: Call waitpid at least once even if timeOutSeconds=0
+      pid_t result=waitpid(cameraStreams.at(streamId).pid, &exitStatus, WNOHANG);
+      if (result!=0) {
+        //-1=Error, but most of those mean the pid is no longer valid for us
+        //Positive value means the process has exited
+        isRunning=false;
+        break;
+      }
+      if (getneedtoquit()) {
+        timeOut=timeOutSeconds;
+        break;
+      }
+      if (timeOutSeconds==0) {
+        break;
+      }
+      //Sleep for 1 second
+      sleep(1);
+      ++timeOut;
+    } while (timeOut<timeOutSeconds);
+    if (!isRunning) {
+      cameraStreams.at(streamId).pid=0;
+      cameraStreams.at(streamId).exitStatus=exitStatus;
+      return 0;
+    }
+    else if (timeOut>=timeOutSeconds) {
+      return 1;
+    }
+  } catch (std::out_of_range& e) {
+    return -1;
+  }
+  return -2;
+}
+
+//Stop a camera capturing process immediately
+//Returns 0 if process has finished, or negative value on error
+int Camera::stopStreamCapture(int32_t streamId, bool force=false) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    if (!isStreamCapturing(streamId)) {
+      return 0;
+    }
+    if (!force) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Terminating process: %ld\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).pid);
+      int result=kill(cameraStreams.at(streamId).pid, SIGTERM);
+      if (result==0) {
+        return 0;
+      } else {
+        return -1;
+      }
+    } else {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Killing process: %ld\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).pid);
+      int result=kill(cameraStreams.at(streamId).pid, SIGKILL);
+      if (result!=0) {
+        return 0;
+      } else {
+        return -1;
+      }
+    }
+  } catch (std::out_of_range& e) {
+    return -2;
+  }
+  return -3;
+}
+
+//Check if a stream is currently capturing
+bool Camera::isStreamCapturing(int32_t streamId) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+  try {
+    if (cameraStreams.at(streamId).pid) {
+      int result=waitStreamCapture(streamId, 0);
+      if (result==1) {
+        return true;
+      }
+    }
+  } catch (std::out_of_range& e) {
+  }
+  return false;
+}
 
 //----------------------
+
+static int cmd_add_camera_test(const char *buffer, int clientsock) {
+  std::string bufferstring;
+  std::vector<std::string> buffertokens;
+
+  //Convert the string to tokens using C++ Boost algorithms for easier access
+  bufferstring=buffer;
+  boost::algorithm::trim(bufferstring);
+  boost::algorithm::split(buffertokens, bufferstring, boost::algorithm::is_any_of(" "), boost::algorithm::token_compress_on);
+
+  if (buffertokens.size()<2) {
+    //Camera ID not specified
+    cmdserverlibifaceptr->netputs("MISSING PARAMETERS\n", clientsock, NULL);
+    return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+  }
+  std::ostringstream ostream;
+
+  int32_t camid;
+  std::istringstream ( buffertokens[1] ) >> camid;
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+    try {
+      if (gcameras.at(camid).camid==camid) {
+        ostream << "Camera object with id: " << camid << " already exists" << std::endl;
+      }
+    } catch (std::out_of_range& e) {
+      gcameras[camid]=Camera(camid);
+      ostream << "Added camera object with id: " << camid << std::endl;
+    }
+  }
+  cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+
+  return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+}
+
+static int cmd_add_camera_stream_test(const char *buffer, int clientsock) {
+  std::string bufferstring;
+  std::vector<std::string> buffertokens;
+
+  //Convert the string to tokens using C++ Boost algorithms for easier access
+  bufferstring=buffer;
+  boost::algorithm::trim(bufferstring);
+  boost::algorithm::split(buffertokens, bufferstring, boost::algorithm::is_any_of(" "), boost::algorithm::token_compress_on);
+
+  if (buffertokens.size()<3) {
+    //Camera ID and Camera Stream not specified
+    cmdserverlibifaceptr->netputs("MISSING PARAMETERS\n", clientsock, NULL);
+    return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+  }
+  std::ostringstream ostream;
+
+  int32_t camid, streamId;
+  std::string cmd;
+  bool haveCmd=false, haveArgs=false;
+  std::istringstream ( buffertokens[1] ) >> camid;
+  std::istringstream ( buffertokens[2] ) >> streamId;
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+    try {
+      if (gcameras.at(camid).camid==camid) {
+        //Do nothing
+      }
+    } catch (std::out_of_range& e) {
+      ostream << "Camera object: " << camid << " not found" << std::endl;
+      cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+
+      return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+    }
+    try {
+      if (gcameras.at(camid).cameraStreams.at(streamId).streamId==streamId) {
+        ostream << "Camera stream with id: " << streamId << " for camera object: " << camid << " already exists" << std::endl;
+      }
+    } catch (std::out_of_range& e) {
+      if (buffertokens.size()>3) {
+        cmd=buffertokens[3];
+        haveCmd=true;
+      }
+      if (buffertokens.size()>4) {
+        //Use the remaining buffer tokens as arguments
+        buffertokens.erase(buffertokens.begin(), buffertokens.begin()+4);
+        haveArgs=true;
+      }
+      if (haveArgs) {
+        gcameras[camid].addStream(streamId, cmd, buffertokens);
+        ostream << "Added camera stream with id: " << streamId << " to camera object: " << camid << std::endl;
+        ostream << "  Command: " << cmd << std::endl;
+        for (auto &argIt : buffertokens) {
+          ostream << "  Arg: " << argIt << std::endl;
+        }
+      } else if (haveCmd) {
+        gcameras[camid].addStream(streamId, cmd);
+        ostream << "Added camera stream with id: " << streamId << " to camera object: " << camid << std::endl;
+        ostream << "  Command: " << cmd << std::endl;
+      } else {
+        gcameras[camid].addStream(streamId);
+        ostream << "Added camera stream with id: " << streamId << " to camera object: " << camid << std::endl;
+      }
+    }
+  }
+  cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+
+  return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+}
+
+static int cmd_get_camera_info(const char *buffer, int clientsock) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  if (gcameras.size()==0) {
+    cmdserverlibifaceptr->netputs("NO CAMERAS", clientsock, NULL);
+  }
+  for (auto &cameraIt : gcameras) {
+    std::ostringstream ostream;
+
+    ostream << "Camera ID: " << cameraIt.first << std::endl;
+    for (auto &streamIt : cameraIt.second.cameraStreams) {
+      ostream << "  Camera Stream ID: " << streamIt.first << std::endl;
+      ostream << "    Command: " << streamIt.second.cmd << std::endl;
+      ostream << "    Number of Arguments: " << streamIt.second.args.size() << std::endl;
+      for (auto &argIt : streamIt.second.args) {
+        ostream << "      Arg: " << argIt << std::endl;
+      }
+      if (cameraIt.second.isStreamCapturing(streamIt.first)) {
+        ostream << "    isStreamCapturing: 1" << std::endl;
+      } else {
+        ostream << "    isStreamCapturing: 0" << std::endl;
+      }
+      ostream << "    Pid: " << streamIt.second.pid << std::endl;
+      ostream << "    Exit Code: " << streamIt.second.exitStatus << std::endl;
+    }
+    cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+  }
+  return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+}
 
 //Returns an encoded string from a unencoded string
 //Based on http://stackoverflow.com/questions/10521581/base64-encode-using-boost-throw-exception/10973348#10973348
@@ -1025,6 +1343,7 @@ private:
   boost::asio::system_timer mainTimer;
   boost::asio::system_timer webapiTimer;
   asioclient client;
+  int cnt=0;
 
 public:
   asyncloop()
@@ -1043,7 +1362,6 @@ public:
   }
 
   void stop() {
-    debuglibifaceptr->debuglib_printf(1, "%s: Got here 1\n", __PRETTY_FUNCTION__);
     boost::lock_guard<boost::mutex> guard(mtx_);
     client.stop();
     mainTimer.expires_from_now(boost::chrono::seconds(0));
@@ -1053,6 +1371,32 @@ private:
   void main_timer_loop() {
     mainTimer.expires_from_now(boost::chrono::seconds(1)); //Run main loop every second
     mainTimer.async_wait(boost::bind(&asyncloop::main_timer_handler, this, boost::asio::placeholders::error));
+
+    //DEBUG Code
+    /*{
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+      if (gcameras.size()<4) {
+        for (auto i=0; i<4; i++) {
+          gcameras[i]=Camera(i);
+          gcameras[i].addStream(0);
+        }
+        std::vector<std::string> args;
+        //args.push_back("/dev/zero");
+        gcameras[0].setStreamCommand(0, "cat", args);
+        gcameras[0].startStreamCapture(0);
+      }
+    }
+    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: CamId=%d\n", __PRETTY_FUNCTION__, gcameras[3].getCamId());
+    if (gcameras[0].isStreamCapturing(0)) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Stream is capturing\n", __PRETTY_FUNCTION__);
+    } else {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Stream is not capturing, exitStatus=%d\n", __PRETTY_FUNCTION__, gcameras[0].getStreamExitStatus(0));
+    }
+    ++cnt;
+    if (cnt==10) {
+      gcameras[0].stopAllCapture();
+    }*/
   }
 
   void webapi_timer_loop() {
@@ -1189,6 +1533,11 @@ static int start(void) {
       result=-1;
     }
   }
+  if (cmdserverlibifaceptr) {
+    cmdserverlibifaceptr->register_cmd_longdesc("cameralib_add_camera_test", "cameralib_add_camera_test <cameraid>", "Test command for adding a camera", "Test command for adding a camera object with a unique id", cmd_add_camera_test);
+    cmdserverlibifaceptr->register_cmd_longdesc("cameralib_add_camera_stream_test", "cameralib_add_camera_stream_test <cameraid> <streamid> [cmd] [args]", "Test command for adding a camera stream", "Test command for adding a camera stream to a camera object with a unique id", cmd_add_camera_stream_test);
+    cmdserverlibifaceptr->register_cmd_longdesc("cameralib_get_camera_info", "cameralib_get_camera_info", "Command to get info about the camera library objects and running streams", "Command to get info about the camera library objects and running streams", cmd_get_camera_info);
+  }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 
   return result;
@@ -1257,6 +1606,8 @@ static void shutdown(void) {
 
   //Free allocated memory
   ghubpk=0;
+
+  gcameras.clear();
 
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 }

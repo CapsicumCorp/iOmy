@@ -54,6 +54,7 @@ BOOST_REQUIRE([1.56])
 BOOST_THREAD([mt])
 BOOST_ASIO([mt])
 BOOST_CHRONO([mt])
+BOOST_FILESYSTEM([mt])
 BOOST_STATICASSERT()
 
 # These are needed for base64 encode and decode
@@ -65,6 +66,8 @@ BOOST_FIND_HEADER([boost/archive/iterators/remove_whitespace.hpp])
 
 BOOST_FIND_HEADER([boost/property_tree/ptree.hpp])
 BOOST_FIND_HEADER([boost/property_tree/json_parser.hpp])
+
+BOOST_FIND_HEADER([boost/filesystem/path.hpp])
 
 # optional libraries
 

@@ -3,7 +3,7 @@ apply plugin: 'com.android.model.native'
 final local_APP_ABIS=APP_ABIS
 
 //NOTE: Only list boost libraries that this library uses here
-final local_BOOST_SHARED_LIBS=["boost_system", "boost_thread", "boost_chrono"]
+final local_BOOST_SHARED_LIBS=["boost_system", "boost_thread", "boost_chrono", "boost_filesystem"]
 
 model {
     android {
