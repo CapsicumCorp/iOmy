@@ -186,6 +186,17 @@ public class InstallWizard {
         int asciiNumber                 = -1;
         String errorMessage             = "";
 
+        //----------------------------------------------------------------------------------------//
+        // Check that no funny character like newlines made their way into the input.
+        //----------------------------------------------------------------------------------------//
+        for (int i = 0; i < passwordLength; i++) {
+            asciiNumber = password.charAt(i);
+
+            if (asciiNumber >= 0 && asciiNumber < 32) {
+                invalidChars++;
+            }
+        }
+
         //----------------------------------//
         // How long is the password?
         //----------------------------------//
@@ -208,7 +219,6 @@ public class InstallWizard {
         // Go through every single character, analyse each one to see if it's a letter, number, or symbol.
         //------------------------------------------------------------------------------------------------//
         for (int i = 0; i < passwordLength; i++) {
-//            Log.d("Character", password.charAt(i) + ", ASCII: "+(int) password.charAt(i));
             if (continueCheck == true) {
                 break;
             }
@@ -230,13 +240,6 @@ public class InstallWizard {
             // No! It must be some sort of symbol!
             } else {
                 symbols++;
-
-                // Check that it's not one of those characters like newlines, or tabs.
-//                asciiNumber = password.charAt(i);
-//
-//                if (asciiNumber >= 0 && asciiNumber < 32) {
-//                    invalidChars++;
-//                }
             }
         }
 
@@ -284,7 +287,8 @@ public class InstallWizard {
             errorMessage += "  * Have at least one upper-case letter\n";
             errorMessage += "  * Have at least one lower-case letter\n";
             errorMessage += "  * Have at least one number\n";
-            errorMessage += "  * Have a symbol (!, @, %, etc).";
+            errorMessage += "  * Have a symbol (!, @, %, etc).\n";
+            errorMessage += "  * Contain no invalid characters (newlines, etc).";
 
             this.validationErrorMessages.add(errorMessage);
         }
