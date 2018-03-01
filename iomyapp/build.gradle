@@ -40,7 +40,7 @@ project.ext.APP_ABIS = ["armeabi","armeabi-v7a","x86","mips"]
 //project.ext.APP_ABIS = ["armeabi","armeabi-v7a","arm64-v8a","x86","x86_64","mips"]
 
 //List all the boost libraries that are being used by all libraries
-project.ext.BOOST_SHARED_LIBS = ["boost_system", "boost_thread", "boost_chrono"]
+project.ext.BOOST_SHARED_LIBS = ["boost_system", "boost_thread", "boost_chrono", "boost_filesystem"]
 
 // Enable Debug
 project.ext.ENABLE_DEBUG=1
