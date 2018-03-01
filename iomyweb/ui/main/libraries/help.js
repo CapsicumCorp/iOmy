@@ -79,7 +79,9 @@ $.extend(iomy.help,{
         
         "pGraphPie" : "This page allows you to view your devices data in a pie graph",
         
-        "pRoomForm" : "This page allows you to change information for a room",
+        "pAddRoomForm" : "This page allows you to create a new room",
+        
+        "pEditRoomForm" : "This page allows you to change information for a room",
         
         "pRulesForm" : "This page allows you to add or edit rules for your selected device",
         

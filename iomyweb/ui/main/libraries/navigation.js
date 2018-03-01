@@ -82,16 +82,7 @@ $.extend( iomy.navigation, {
                         text: "Add Room",
                         type: sap.m.ButtonType.Transparent,
                         press : function () {
-//                            if (oApp.getCurrentPage().getId() === "pRoomForm") {
-//                                var oController = oApp.getCurrentPage().getController();
-//                                
-//                                oController.bEditing    = false;
-//                                oController.mPageData   = {};
-//                                
-//                                oController.loadRoomForm();
-//                            }
-                            
-                            iomy.common.NavigationChangePage( "pRoomForm" ,  {"bEditing": false} , false);
+                            iomy.common.NavigationChangePage( "pAddRoomForm" ,  {"bEditing": false} , false);
                         }
                     }),
                     new sap.m.Button ({
@@ -226,7 +217,7 @@ $.extend( iomy.navigation, {
                                 if (typeof iomy.help.PageInformation[oView.getId()] !== "undefined") {
                                     iomy.common.showInformation( iomy.help.PageInformation[oView.getId()], "Help" );   
                                 } else {
-                                     $.sap.log.error(" Help: no help message exists for this page");
+                                    $.sap.log.error(" Help: no help message exists for this page");
                                 }
                             } catch(e2) {
                                 $.sap.log.error(" Help: Critical Error, occured when looking up page help"+e2.message);

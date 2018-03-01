@@ -228,12 +228,20 @@ var aPages = [
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.graphs.PieGraph\" Page!\n"
 	},
+    //-- Room Form --//
 	{
-		"Id":			"pRoomForm",
+		"Id":			"pAddRoomForm",
 		"Location":		"pages.room.RoomForm",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.room.RoomForm\" Page!\n"
 	},
+	{
+		"Id":			"pEditRoomForm",
+		"Location":		"pages.room.RoomForm",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.room.RoomForm\" Page!\n"
+	},
+    
 	{
 		"Id":			"pRulesForm",
 		"Location":		"pages.rules.RulesForm",

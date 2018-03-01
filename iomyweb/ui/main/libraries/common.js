@@ -2944,13 +2944,13 @@ $.extend(iomy.common,{
         //------------------------------------------------------------------------//
         try {
             //-- Add/Edit Room --//
-            if (sPageName === "pRoomForm" && aPageData.bEditing === true) {
+            if (sPageName === "pEditRoomForm" && aPageData.bEditing === true) {
                 //-- Check that this particular room can be edited. --//
                 if (!iomy.functions.permissions.isCurrentUserAbleToEditRoom(aPageData.RoomId)) {
                     aErrorMessages.push(sNoRightToEditGivenRoom);
                 }
                 
-            } else if (sPageName === "pRoomForm" && aPageData.bEditing !== true) {
+            } else if (sPageName === "pAddRoomForm" && aPageData.bEditing !== true) {
                 
                 //-- Check that you are able to manage rooms at all. --//
                 if (!iomy.functions.permissions.isCurrentUserAbleToManageRooms())
@@ -3070,11 +3070,11 @@ $.extend(iomy.common,{
                             oController.RefreshModel();
                         }
                         
-                    } else if (sPageName === "pRoomForm") {
-                        oController.bEditing    = false;
-                        oController.mPageData   = {};
-
-                        oController.loadRoomForm();
+//                    } else if (sPageName === "pRoomForm") {
+//                        oController.bEditing    = false;
+//                        oController.mPageData   = {};
+//
+//                        oController.loadRoomForm();
                         
                     } else if (sPageName === "pDeviceForm") {
                         oController.bEditExisting   = false;

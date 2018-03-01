@@ -237,7 +237,7 @@ sap.ui.controller("pages.Room", {
                                         // The user can edit any room except the Unassigned "room".
                                         
                                         mPageDataTemp.bEditing = true;
-                                        iomy.common.NavigationChangePage( "pRoomForm" , mPageDataTemp , false);
+                                        iomy.common.NavigationChangePage( "pEditRoomForm" , mPageDataTemp , false);
                                         
                                     } else if (!oController.bEditing) {
                                         // Otherwise, the user won't be looking to edit, so allow the user access to Unassigned.
@@ -269,7 +269,7 @@ sap.ui.controller("pages.Room", {
                             })
                         ],
                         press : function () {
-                            iomy.common.NavigationChangePage( "pRoomForm" , {} , false);
+                            iomy.common.NavigationChangePage( "pAddRoomForm" , {} , false);
                         }
                     })
                 );
