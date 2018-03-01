@@ -284,5 +284,6 @@ public class Application extends android.app.Application {
         System.loadLibrary("boost_system");
         System.loadLibrary("boost_chrono");
         System.loadLibrary("boost_thread");
+        System.loadLibrary("boost_filesystem");
     }
 }
