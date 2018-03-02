@@ -4106,6 +4106,8 @@ function AddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fSam
 
 
 
+
+
 //========================================================================================================================//
 //== #12.0# - IO Data Functions                                                                                         ==//
 //========================================================================================================================//
@@ -4317,6 +4319,41 @@ function GetIOSpecialTotaledEnumValue( $iIODataType, $iIOId, $iStartStamp, $iEnd
 	if( $bError===false) {
 		return $aResult;
 	} else {
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
+function WatchInputsGetMostRecentOnvifStreamProfile( $iThingId ) {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: This function is used to fetch all the IOs that are attached to a certain Thing.  --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbWatchInputsGetMostRecentOnvifStreamProfile( $iThingId );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		return array( "Error"=>true, "ErrMesg"=>"Failed to find the Onvif Stream Profile! \nThere are no rows in the database for that Thing's Onvif Stream Profile.\n");
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Error Occurred --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }

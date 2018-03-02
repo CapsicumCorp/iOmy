@@ -9151,6 +9151,120 @@ function dbInsertNewIODataValue( $sTableName, $iIOId, $iUTS, $Value, $sBindType,
 	}
 }
 
+
+function dbWatchInputsGetMostRecentOnvifStreamProfile( $iThingId ) {
+	//--------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+	
+	
+	//--------------------------------------------------------------------//
+	//-- 2.0 - PREPARE                                                  --//
+	//--------------------------------------------------------------------//
+	
+	if( $bError===false ) {
+		try {
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`DATASHORTSTRING_PK`, \n";
+			$sSQL .= "	`DATASHORTSTRING_DATE`, \n";
+			$sSQL .= "	`DATASHORTSTRING_DATE` AS \"UTS\", \n";
+			$sSQL .= "	`DATASHORTSTRING_VALUE`, \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`USERS_PK` \n";
+			$sSQL .= "FROM `".$sSchema."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PERMHUB` ON `USERS_PK`=`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`HUB` ON `HUB_PK`=`PERMHUB_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`DATASHORTSTRING` ON `IO_PK`=`DATASHORTSTRING_IO_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `THING_PK` = :ThingId \n";
+			$sSQL .= "AND `DATATYPE_PK` = 6 \n";
+			$sSQL .= "AND `IO_RSTYPES_FK` = 3970 \n";
+			$sSQL .= "ORDER BY `DATASHORTSTRING_DATE` DESC \n";
+			$sSQL .= "LIMIT 1; \n";
+			
+			//-- Input binding --//
+			$aInputVals = array(
+				array( "Name"=>"ThingId",           "type"=>"BINT",     "value"=>$iThingId )
+			);
+			
+			
+			//-- Output Binding --//
+			$aOutputCols = array(
+				array( "Name"=>"DataId",            "type"=>"BINT"  ),
+				array( "Name"=>"Timestamp",         "type"=>"TSC"   ),
+				array( "Name"=>"UnixTS",            "type"=>"BINT"  ),
+				array( "Name"=>"DataValue",         "type"=>"STR"   ),
+				
+				array( "Name"=>"IOId",              "type"=>"BINT"  ),
+				array( "Name"=>"ThingId",           "type"=>"BINT"  ),
+			);
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------------------------------//
+	//-- 5.0 - Execute the SQL                                          --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+		} catch( Exception $e5 ) {
+			$bError   = true;
+			$sErrMesg = $e5->getMessage();
+		}
+	}
+	
+	//--------------------------------------------------------------------//
+	//-- 6.0 - Check the Results                                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+		} catch( Exception $e6 ) {
+			$bError   = true;
+			$sErrMesg = $e6->getMessage();
+		}
+	}
+	//--------------------------------------------------------------------//
+	//-- 9.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"WatchInputsOnvifStreamProfile: ".$sErrMesg );
+	}
+	
+}
+
+
+
 //========================================================================================================================//
 //== #13.0# - Graph Functions                                                                                           ==//
 //========================================================================================================================//

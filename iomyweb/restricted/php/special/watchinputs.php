@@ -130,7 +130,7 @@ if($bError===false) {
 			$sPostMode!=="AddThing"           && $sPostMode!=="AddIO"              &&
 			$sPostMode!=="ListAllActiveRules" && $sPostMode!=="UpdateRuleNextTS"   &&
 			$sPostMode!=="RuleJustTriggered"  && $sPostMode!=="RuleTriggeredAt"    &&
-			$sPostMode!=="SetThingState"      
+			$sPostMode!=="SetThingState"      && $sPostMode!=="GetStreamURL"       
 			
 		) {
 			$bError = true;
@@ -246,8 +246,9 @@ if($bError===false) {
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		if( 
-			$sPostMode==="UpdateRuleNextTS" || $sPostMode==="RuleJustTriggered"  || 
-			$sPostMode==="RuleTriggeredAt"  || $sPostMode==="SetThingState"
+			$sPostMode==="UpdateRuleNextTS"   || $sPostMode==="RuleJustTriggered"    || 
+			$sPostMode==="RuleTriggeredAt"    || $sPostMode==="SetThingState"        || 
+			$sPostMode==="GetStreamURL"
 		) {
 			try {
 				//-- Retrieve the "RuleId" --//
@@ -434,7 +435,7 @@ if($bError===false) {
 								$sErrMesg .= "Can't access the database! \n";
 								$sErrMesg .= "Possibly invalid Username and/or Password combination.\n";
 							}
-					
+							
 						} else {
 							//-- LOGIN ATTEMPT HAD AN ERROR --//
 							$bError    = true;
@@ -657,6 +658,104 @@ if( $bError===false ) {
 					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 					$sErrMesg .= "Problem when calculating the next timestamp to run the rule at.\n";
 					$sErrMesg .= $aNextUnixTS['ErrMesg'];
+				}
+			}
+		}
+		
+		//------------------------------------------------------------//
+		//-- 4.5 - Lookup the Thing Information                     --//
+		//------------------------------------------------------------//
+		if( $bError===false ) {
+			if( $sPostMode==="GetStreamURL" ) {
+				try {
+					$iOnvifThingTypeId = LookupFunctionConstant("OnvifThingTypeId");
+					
+					//----------------------------------------------------------------------------//
+					//-- 4.5.1 - Lookup Thing Information                                       --//
+					//----------------------------------------------------------------------------//
+					$aTempFunctionResult1 = WatchInputsGetThingInfo( $iPostId );
+					
+					if( $aTempFunctionResult1['Error']===false ) {
+						
+						$iThingTypeId       = $aTempFunctionResult1['Data']['ThingTypeId'];
+						$iPostLinkId        = $aTempFunctionResult1['Data']['LinkId'];
+						
+						if( $iThingTypeId!==$iOnvifThingTypeId ) {
+							//-- The ThingId that the user passed is not a Onvif Stream --//
+							$bError     = true;
+							$iErrCode   = 7201;
+							$sErrMesg  .= "Error Code:'7201' \n";
+							$sErrMesg  .= "The specified Thing is not a Onvif Stream!\n";
+							$sErrMesg  .= "Please use the ThingId of a valid Onvif Stream.\n";
+						}
+						
+					}
+					
+					//----------------------------------------------------------------------------//
+					//-- 4.5.2 - Fetch the Info about the Link                                  --//
+					//----------------------------------------------------------------------------//
+					if( $bError===false ) {
+						$aTempFunctionResult2 = WatchInputsGetLinkInfo( $iPostLinkId );
+						
+						//-- Extract the desired variables out of the results --//
+						if( $aTempFunctionResult2['Error']===false ) {
+							//-- Extract the Desired Variables --//
+							
+							//-- Extract the required variables from the function results --//
+							$sPostNetworkAddress    = $aTempFunctionResult2['Data']['LinkConnAddress'];
+							$iPostNetworkPort       = $aTempFunctionResult2['Data']['LinkConnPort'];
+							$sPostUsername          = $aTempFunctionResult2['Data']['LinkConnUsername'];
+							$sPostPassword          = $aTempFunctionResult2['Data']['LinkConnPassword'];
+							
+							//-- Flag that this request needs to use the "PhilipsHue" PHP Object to update the device --//
+							$bUsePHPObject = true;
+							
+							//-- Lookup the Comm Info --//
+							$aCommInfo = WatchInputsGetCommInfo( $aTempFunctionResult2['Data']['LinkCommId'] );
+							
+							if( $aCommInfo['Error']===false ) {
+								//-- Extract the Hub's Comm Type --//
+								$iLinkCommType          = $aCommInfo['Data']['CommTypeId'];
+								
+							} else {
+								$bError = true;
+								$iErrCode  = 7203;
+								$sErrMesg .= "Error Code:'7203' \n";
+								$sErrMesg .= "Problem when fetching the Link Comm Info\n";
+								$sErrMesg .= $aCommInfo['ErrMesg'];
+							}
+							
+						} else {
+							$bError = true;
+							$iErrCode  = 7202;
+							$sErrMesg .= "Error Code:'7202' \n";
+							$sErrMesg .= "Problem when fetching the Link info\n";
+							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
+						}
+					}
+					
+					//--------------------------------------------------------------------//
+					//-- 4.5.3 - Check if a PHPOnvif class can be created for that IP   --//
+					//--------------------------------------------------------------------//
+					if( $bError===false ) {
+						require_once SITE_BASE.'/restricted/libraries/onvif/main.php';
+						
+						$oPHPOnvifClient = new PHPOnvif( $sPostNetworkAddress, $iPostNetworkPort, $sPostUsername, $sPostPassword );
+						
+						if( $oPHPOnvifClient->bInitialised===false ) {
+							$bError = true;
+							$iErrCode  = 7210;
+							$sErrMesg .= "Error Code:'7210'\n";
+							$sErrMesg .= "Couldn't initialise Onvif Class!\n";
+							$sErrMesg .= json_encode( $oPHPOnvifClient->aErrorMessges );
+						}
+					}
+				} catch( exception $e7200 ) {
+					$bError = true;
+					$iErrCode  = 7200;
+					$sErrMesg .= "Error Code:'7200' \n";
+					$sErrMesg .= "Critical Error Occurred!\n";
+					$sErrMesg .= "Problem occurred when preparing for the main function.\n";
 				}
 			}
 		}
@@ -1210,7 +1309,6 @@ if($bError===false) {
 									$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 									$sErrMesg .= "Device is unknown! \n";
 									$sErrMesg .= "That particular Philips Hue device may have been disconnected or invalid credentials used!\n";
-									
 								}
 								
 								//--------------------------------------------------------//
@@ -1264,10 +1362,7 @@ if($bError===false) {
 							$sErrMesg .= $aResult["ErrMesg"];
 						}
 					}
-					
 				} //-- ENDIF No errors have occurred --//
-				
-				
 			} catch( Exception $e6400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
@@ -1275,7 +1370,67 @@ if($bError===false) {
 				$sErrMesg .= "Error Code:'6400' \n";
 				$sErrMesg .= $e6400->getMessage();
 			}
+		
+		
+		//================================================================//
+		//== 5.7 - MODE: Get Stream URL                                 ==//
+		//================================================================//
+		} else if( $sPostMode==="GetStreamURL" ) {
+			try {
+				//----------------------------------------------------//
+				//-- IF ONVIF Server                                --//
+				//----------------------------------------------------//
+				if( $iThingTypeId===$iOnvifThingTypeId ) {
+					
+					$aResult = WatchInputsGetMostRecentOnvifStreamProfile( $iPostId );
+					
+					if( $aResult["Error"]===false ) {
+						//----------------//
+						//-- RTSP       --//
+						//----------------//
+						$aProfile = array (
+							"ProfileToken" => $aResult["Data"]["DataValue"]
+						);
+						
+						$aStreamUriRTSP = $oPHPOnvifClient->GetAndExtractStreamURI( $aProfile, 'RTSP', false );
+						
+						if( $aStreamUriRTSP['Error']===false ) {
+							if( isset( $aStreamUriRTSP['Uri'] ) ) {
+								$aResult = array(
+									"Error"  => false,
+									"Data"   => array( 
+										$aStreamUriRTSP['Uri'] 
+									)
+								);
+								
+								//var_dump( $aStreamUriRTSP['Uri'] );
+								//echo "\n\n";
+							}
+						} else {
+							$bError    = true;
+							$iErrCode  = 7402;
+							$sErrMesg .= "Error Code:'7402' \n";
+						}
+						
+						
+					} else {
+						//-- ERROR:  --//
+						$bError    = true;
+						$iErrCode  = 7401;
+						$sErrMesg .= "Error Code:'7401' \n";
+						$sErrMesg .= $aResult['ErrMesg']." \n";
+					}
+					
+					
+				}
 				
+			} catch( Exception $e7400 ) {
+				//-- Display an Error Message --//
+				$bError    = true;
+				$iErrCode  = 7400;
+				$sErrMesg .= "Error Code:'7400' \n";
+				$sErrMesg .= $e7400->getMessage();
+			}
 		//================================================================//
 		//== 5.? - ERROR: UNSUPPORTED MODE                              ==//
 		//================================================================//
