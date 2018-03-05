@@ -27,8 +27,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/commonlib/commonlib.h"
 
 namespace cameralib {
+  //A list of different camera stream modes
+  enum class CAMERA_STREAM_MODE {
+    GENERIC_COMMAND, //Uses generic cmd and args for running any command
+    FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND //Use ffmpeg with a fixed set of commands and stores to a fixed path
+  };
   //A list of webapi request modes
   enum class WEBAPI_REQUEST_MODES {
+    GET_STREAM_URL
   };
 } //End of namespace
 

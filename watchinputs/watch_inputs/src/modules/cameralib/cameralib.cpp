@@ -128,16 +128,20 @@ using boost::asio::ip::tcp;
 class CameraStream {
 public:
   int32_t streamId=0; //A unique id to identify this stream
+  enum CAMERA_STREAM_MODE streamMode=CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND;
   pid_t pid=0; //Pid of the camera capture process for this stream; 0=Don't need to wait for child process
   int exitStatus=0; //See waitpid man page for macros that can be used with this
-  std::string cmd; //Command of the camera capture process
-  std::vector<std::string> args; //Arguments of the camera capture process
+  std::string cmd=""; //Command of the camera capture process
+  std::vector<std::string> args={}; //Arguments of the camera capture process
+  std::string streamURL="";
+  bool needStreamURL=true;
   bool hasRun=false; //True=This process has run at least once
   bool restartOnExit=false; //True=Auto restart the stream when it exits
   bool deleteOnExit=false; //True=Auto delete the stream object when it exits
 public:
   CameraStream();
   CameraStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
+  CameraStream(int32_t streamId, enum CAMERA_STREAM_MODE, std::string cmd, std::vector<std::string> args);
   ~CameraStream();
 };
 
@@ -158,9 +162,12 @@ public:
   int addStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
   int removeStream(int32_t streamId);
   std::vector<int32_t> getStreamIds();
+  int setStreamMode(int32_t streamId, enum CAMERA_STREAM_MODE);
   int setStreamCommand(int32_t streamId, std::string cmd, std::vector<std::string> args);
   std::string getStreamCommand(int32_t streamId);
   std::vector<std::string> getStreamArgs(int32_t streamId);
+  void setNeedStreamURL(int32_t streamId, bool needStreamURL);
+  bool getNeedStreamURL(int32_t streamId);
   void setStreamRestartOnExit(int32_t streamId, bool restartOnExit);
   void setStreamDeleteOnExit(int32_t streamId, bool deleteOnExit);
   int getStreamExitStatus(int32_t streamId);
@@ -170,10 +177,17 @@ public:
   bool isStreamCapturing(int32_t streamId); //Check if a stream is currently capturing
 };
 
+class WebAPIStreamURL {
+  int64_t thinkPK;
+  std::string streamURL;
+};
+
 static boost::recursive_mutex thislibmutex;
 
 //camid, Camera class
 static std::map<int32_t, Camera> gcameras;
+
+static std::list<WebAPIStreamURL> gWebAPIStreamURLQueue;
 
 static int ginuse=0; //Only shutdown when inuse = 0
 static int gshuttingdown=0;
@@ -351,6 +365,15 @@ CameraStream::CameraStream(int32_t streamId, std::string cmd, std::vector<std::s
   this->args=args;
 }
 
+CameraStream::CameraStream(int32_t streamId, enum CAMERA_STREAM_MODE streamMode, std::string cmd, std::vector<std::string> args) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  this->streamId=streamId;
+  this->streamMode=streamMode;
+  this->cmd=cmd;
+  this->args=args;
+}
+
 CameraStream::~CameraStream() {
   //Do nothing
 }
@@ -440,6 +463,7 @@ int Camera::stopAllCapture() {
       }
     }
   }
+  return 0;
 }
 
 int Camera::addStream(int32_t streamId, std::string cmd="", std::vector<std::string> args={}) {
@@ -523,6 +547,27 @@ std::vector<std::string> Camera::getStreamArgs(int32_t streamId) {
     //Camera Stream doesn't exist
     return {};
   }
+}
+
+void Camera::setNeedStreamURL(int32_t streamId, bool needStreamURL) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    cameraStreams.at(streamId).needStreamURL=needStreamURL;
+  } catch (std::out_of_range& e) {
+    //Camera Stream doesn't exist
+  }
+}
+
+bool Camera::getNeedStreamURL(int32_t streamId) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    return cameraStreams.at(streamId).needStreamURL;
+  } catch (std::out_of_range& e) {
+    //Camera Stream doesn't exist
+  }
+  return false;
 }
 
 void Camera::setStreamRestartOnExit(int32_t streamId, bool restartOnExit) {
@@ -1174,6 +1219,36 @@ static int cmd_get_camera_info(const char *buffer, int clientsock) {
   return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
 }
 
+//Process a stream URL that was received from the Web API
+void processReceivedStreamURL(int32_t thingId, const boost::property_tree::ptree& pt) {
+  std::string url;
+  try {
+    //Iterate over data
+    for (auto const &data : pt.get_child("Data")) {
+      url=data.second.get_value<std::string>();
+    }
+  } catch (boost::property_tree::ptree_bad_path& e) {
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to parse Json result for received stream URL: %s\n", __PRETTY_FUNCTION__, e.what());
+    return;
+  }
+  debuglibifaceptr->debuglib_printf(1, "%s: Received Stream URL: %s for Camera ID: %d\n", __PRETTY_FUNCTION__, url.c_str(), thingId);
+  {
+    //Use stream 0 for now
+    boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+    try {
+      if (!gcameras.at(thingId).cameraStreams.at(0).needStreamURL) {
+        //The url isn't needed at the moment so ignore
+        return;
+      }
+    } catch (std::out_of_range& e) {
+      //Stream 0 for the camera Id doesn't exist
+      debuglibifaceptr->debuglib_printf(1, "%s: Stream 0 for Camera ID: %d not found\n", __PRETTY_FUNCTION__, url.c_str(), thingId);
+      return;
+    }
+  }
+}
+
 //Returns an encoded string from a unencoded string
 //Based on http://stackoverflow.com/questions/10521581/base64-encode-using-boost-throw-exception/10973348#10973348
 //The line break inserting at character 76 has been removed
@@ -1241,7 +1316,7 @@ private:
 public:
   httpclient() {
     addHeader("Accept", "*/*");
-    addHeader("User-Agent", "HTTP-Client 1.0");
+    addHeader("User-Agent", "HTTP-Client 1.1");
     addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
   }
 
@@ -1295,7 +1370,7 @@ public:
       body << url_encode(formfieldit.first) << '=' << url_encode(formfieldit.second);
       firstfield=false;
     }
-    stream << "POST " << httppath << " HTTP/1.0\r\n";
+    stream << "POST " << httppath << " HTTP/1.1\r\n";
     if (haveHttpAuth) {
       std::ostringstream authstring;
       authstring << httpusername << ':' << httppassword;
@@ -1333,9 +1408,12 @@ private:
   long httpbodylen;
   WEBAPI_REQUEST_MODES requestmode;
 
+  std::map<int32_t, Camera>::iterator camerasIt;
+
   //See http://stackoverflow.com/questions/21120361/boostasioasync-write-and-buffers-over-65536-bytes
   //These variables need to stay allocated while the asio request is active so can't be local to a single function
   httpclient hc;
+  boost::asio::streambuf getStreamURLRequest_;
 
 public:
   asioclient(boost::asio::io_service& io_service)
@@ -1361,22 +1439,25 @@ public:
     this->httpusername=httpusername;
     this->httppassword=httppassword;
 
-    //NOTE: We set the Mode and Data later on when submitting the request
-    hc.setPath(httppath);
-    if (httpusername != "") {
-      //Send the http password straight away to reduce the number of packets
-      hc.addHttpAuth(httpusername, httppassword);
-    }
-    hc.addHeader("Host", httpserver);
-    hc.addFormField("Version", "0.4.11");
-    if (apiusername != "") {
-      std::ostringstream tmpstr;
-      tmpstr << "[\"" << apiusername << "\",\"" << apipassword << "\"]";
-      hc.addFormField("Access", tmpstr.str());
-    }
     struct timespec curtime;
     clock_gettime(CLOCK_REALTIME, &curtime);
-
+    bool skipGetStreamURL=false;
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      if (gcameras.size()==0) {
+        skipGetStreamURL=true;
+      }
+    }
+    if (getneedtoquit() || (skipGetStreamURL)) {
+      //No need to connect if nothing to process
+      stop();
+      return;
+    }
+    //Loop through the queues processing each one at a time
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      camerasIt=gcameras.begin();
+    }
     // Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
     tcp::resolver::query query(httpserver, this->webapiport);
@@ -1452,11 +1533,77 @@ private:
     }
     if (!err)
     {
-      //TODO: Call processing function here
+      // The connection was successful
+      // Prepare new HTTP request headers
+      setupHTTPHeaders();
     }
     else
     {
       debuglibifaceptr->debuglib_printf(1, "%s: Error: %s\n", __PRETTY_FUNCTION__, err.message().c_str());
+      stop();
+    }
+  }
+
+  void setupHTTPHeaders(void) {
+    //Check if need to quit
+    bool skipGetStreamURL=false;
+    {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      if (gcameras.size()==0 || camerasIt==gcameras.end()) {
+        skipGetStreamURL=true;
+      }
+    }
+    if (getneedtoquit() || (skipGetStreamURL)) {
+      //A full pass has been completed with all the queues
+      stop();
+      return;
+    }
+    //NOTE: We set the Mode and Data later on when submitting the request
+    hc=httpclient();
+    hc.setPath(httppath);
+    if (httpusername != "") {
+      //Send the http password straight away to reduce the number of packets
+      hc.addHttpAuth(httpusername, httppassword);
+    }
+    hc.addHeader("Host", httpserver);
+    hc.addFormField("Version", "0.4.11");
+    if (apiusername != "") {
+      std::ostringstream tmpstr;
+      tmpstr << "[\"" << apiusername << "\",\"" << apipassword << "\"]";
+      hc.addFormField("Access", tmpstr.str());
+    }
+    // Get Stream URL
+    getStreamURL();
+  }
+
+  void getStreamURL(void) {
+    //Get a stream URL for a camera
+    reset_http_body();
+
+    if (!getneedtoquit()) {
+      int32_t thingId;
+      bool needStreamURL;
+      {
+        boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+        needStreamURL=camerasIt->second.getNeedStreamURL(0);
+        thingId=camerasIt->first;
+      }
+      if (!needStreamURL) {
+        //Treat this as a successful send as we don't need the stream url
+        successful_send();
+        return;
+      }
+      hc.addFormField("Mode", "GetStreamURL");
+      hc.addFormField("Id", thingId);
+      std::ostream request_stream(&getStreamURLRequest_);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Requesting url for camera: %d: %s\n", __func__, thingId, hc.toString().c_str());
+      request_stream << hc.toString();
+
+      requestmode=WEBAPI_REQUEST_MODES::GET_STREAM_URL;
+      boost::asio::async_write(socket_, getStreamURLRequest_,
+          boost::bind(&asioclient::handle_write_request, this,
+            boost::asio::placeholders::error));
+    } else {
       stop();
     }
   }
@@ -1603,6 +1750,15 @@ private:
           errcode=-1;
         }
       }
+      if (requestmode==WEBAPI_REQUEST_MODES::GET_STREAM_URL && errcode==0) {
+        //Process the stream url that was received
+        int32_t thingId;
+        {
+          boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+          thingId=camerasIt->first;
+        }
+        processReceivedStreamURL(thingId, pt);
+      }
     } catch (boost::property_tree::ptree_error &e) {
       debuglibifaceptr->debuglib_printf(1, "%s: Webapi server returned an unknown result\n", __PRETTY_FUNCTION__);
       return -1;
@@ -1641,16 +1797,26 @@ private:
 
   //Do processing after the request has been sent and then send the next request
   void successful_send() {
-    if (stopped_) {
-      //Send next request
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Sending next request\n", __PRETTY_FUNCTION__);
-      start(httpserver, webapiport, httppath, apiusername, apipassword, httpusername, httppassword);
+    if (requestmode==WEBAPI_REQUEST_MODES::GET_STREAM_URL) {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+      //Step to next camera entry
+      //Processing was handled by process_response
+      ++camerasIt;
+
+      setupHTTPHeaders();
     }
   }
 
   void failed_send() {
-    //Stop processing and sleep until the next scheduled webapi call
-    stop();
+    if (requestmode==WEBAPI_REQUEST_MODES::GET_STREAM_URL) {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+      //Step to next camera entry since process_response failed
+      ++camerasIt;
+
+      setupHTTPHeaders();
+    }
   }
 
   void check_deadline() {
@@ -1694,7 +1860,7 @@ public:
     }
 
   void start() {
-    //webapi_timer_loop();
+    webapi_timer_loop();
     main_timer_loop();
     try {
       io_service.run();
