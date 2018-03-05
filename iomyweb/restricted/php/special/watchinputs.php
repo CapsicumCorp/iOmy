@@ -689,6 +689,13 @@ if( $bError===false ) {
 							$sErrMesg  .= "Please use the ThingId of a valid Onvif Stream.\n";
 						}
 						
+					} else {
+						//-- The ThingId that the user passed is not a Onvif Stream --//
+						$bError     = true;
+						$iErrCode   = 7204;
+						$sErrMesg  .= "Error Code:'7204' \n";
+						$sErrMesg  .= "Failed to find the ThingId of the desired device!\n";
+						$sErrMesg  .= "Please use the valid ThingId in the HTTP POST \"Id\" parameter of a Thing that this user has access to.\n";
 					}
 					
 					//----------------------------------------------------------------------------//
@@ -719,16 +726,16 @@ if( $bError===false ) {
 								
 							} else {
 								$bError = true;
-								$iErrCode  = 7203;
-								$sErrMesg .= "Error Code:'7203' \n";
+								$iErrCode  = 7206;
+								$sErrMesg .= "Error Code:'7206' \n";
 								$sErrMesg .= "Problem when fetching the Link Comm Info\n";
 								$sErrMesg .= $aCommInfo['ErrMesg'];
 							}
 							
 						} else {
 							$bError = true;
-							$iErrCode  = 7202;
-							$sErrMesg .= "Error Code:'7202' \n";
+							$iErrCode  = 7205;
+							$sErrMesg .= "Error Code:'7205' \n";
 							$sErrMesg .= "Problem when fetching the Link info\n";
 							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
 						}
