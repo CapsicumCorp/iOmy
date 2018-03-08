@@ -21,6 +21,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+//NOTE: Parts of GENERIC_COMMAND might not be working properly at the moment as
+//  the main focus was initially on FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND
+
 //NOTE: POSIX_C_SOURCE is needed for the following
 //  CLOCK_REALTIME
 //  sem_timedwait
@@ -89,6 +92,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/archive/iterators/binary_from_base64.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -138,6 +142,7 @@ public:
   bool hasRun=false; //True=This process has run at least once
   bool restartOnExit=false; //True=Auto restart the stream when it exits
   bool deleteOnExit=false; //True=Auto delete the stream object when it exits
+  bool needToRemove=false;
 public:
   CameraStream();
   CameraStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
@@ -149,6 +154,7 @@ class Camera {
 public:
   int32_t camid=0; //Database ID of the Camera
   std::map<int32_t, CameraStream> cameraStreams;
+  bool needToRemove=false;
 public:
   Camera();
   Camera(int32_t camid);
@@ -186,6 +192,7 @@ static boost::recursive_mutex thislibmutex;
 
 //camid, Camera class
 static std::map<int32_t, Camera> gcameras;
+static int camerasInUse=0; //Mainly used so long running iterators don't get invalidated when a camera is removed
 
 static std::list<WebAPIStreamURL> gWebAPIStreamURLQueue;
 
@@ -348,6 +355,27 @@ static void setneedmoreinfo(bool needmoreinfo) {
   _setneedmoreinfo(needmoreinfo);
 }
 
+static void markCamerasInUse() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  ++camerasInUse;
+}
+
+static void markCamerasNotInUse() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  if (camerasInUse==0) {
+    debuglibifaceptr->debuglib_printf(1, "%s: BUG: Tried to mark cameras not in use when it is already 0\n", __PRETTY_FUNCTION__);
+    return;
+  }
+  --camerasInUse;
+}
+
+static bool getCamerasInUse() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  return (camerasInUse > 0) ? true : false;
+}
 
 //----------------------
 //Class/Struct functions
@@ -502,13 +530,16 @@ std::vector<int32_t> Camera::getStreamIds() {
 int Camera::removeStream(int32_t streamId) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
   try {
-    if (cameraStreams.at(streamId).streamId==streamId) {
-      this->stopStreamCapture(streamId, true);
-      this->cameraStreams.erase(streamId);
+    this->cameraStreams.at(streamId).needToRemove=true;
+    this->stopStreamCapture(streamId, true);
+    if (!getCamerasInUse()) {
+        this->cameraStreams.erase(streamId);
+    } else {
+      return ERRORS::CAMERA_STREAM_SCHEDULED_FOR_REMOVAL;
     }
   } catch (std::out_of_range& e) {
     debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Camera Stream: %d for Camera: %d not found\n", __PRETTY_FUNCTION__, streamId, this->camid);
-    return -1;
+    return ERRORS::STREAM_NOT_FOUND;
   }
   return 0;
 }
@@ -607,20 +638,74 @@ int Camera::startStreamCapture(int32_t streamId) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   try {
-    if (cameraStreams.at(streamId).cmd=="") {
-      debuglibifaceptr->debuglib_printf(1, "%s: Error: No command has been specified for Camera: %d, Stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
-      return -1;
-    }
-    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Start camera capture: for Camera: %d, stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
-    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command=\"%s\"\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).cmd.c_str());
-    if (!cameraStreams.at(streamId).args.empty()) {
-      for (auto argIt : cameraStreams.at(streamId).args) {
-        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command argument=\"%s\"\n", __PRETTY_FUNCTION__, argIt.c_str());
+    if (cameraStreams.at(streamId).streamMode==CAMERA_STREAM_MODE::GENERIC_COMMAND) {
+      if (cameraStreams.at(streamId).cmd=="") {
+        debuglibifaceptr->debuglib_printf(1, "%s: Error: No command has been specified for Camera: %d, Stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
+        return -1;
       }
-    } else {
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   No command arguments\n", __PRETTY_FUNCTION__);
-    }
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Start camera capture: for Camera: %d, stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command=\"%s\"\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).cmd.c_str());
+      if (!cameraStreams.at(streamId).args.empty()) {
+        for (auto argIt : cameraStreams.at(streamId).args) {
+          debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command argument=\"%s\"\n", __PRETTY_FUNCTION__, argIt.c_str());
+        }
+      } else {
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   No command arguments\n", __PRETTY_FUNCTION__);
+      }
+    } else if (cameraStreams.at(streamId).streamMode==CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND) {
+      if (cameraStreams.at(streamId).needStreamURL) {
+        //We don't have a stream URL yet
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: No stream url yet for camera capture: for Camera: %d, stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
+        return -1;
+      }
+      std::string ffmpegpath="ffmpeg", streampath="";
+      bool haveffmpegpath, havestreampath;
 
+      if (!configlibifaceptr->isloaded()) {
+        //Wait until the configuration is loaded before starting capture
+        return -1;
+      }
+      haveffmpegpath=configlibifaceptr->getnamevalue_cpp("cameraconfig", "ffmpegpath", ffmpegpath);
+      havestreampath=configlibifaceptr->getnamevalue_cpp("cameraconfig", "streampath", streampath);
+
+      //Prepare ffmpeg arguments with the stream url
+      //TODO: Check if ini file has a path for ffmpeg first
+      //TODO: Get streams storage folder from ini file
+      //TODO: Add code for Android as it will need a library path override in the environment
+      if (haveffmpegpath) {
+        cameraStreams.at(streamId).cmd=ffmpegpath;
+      } else {
+        cameraStreams.at(streamId).cmd="ffmpeg";
+      }
+      cameraStreams.at(streamId).args={"-v", "info", "-i", cameraStreams.at(streamId).streamURL,
+        "-c:v", "copy", "-c:a", "copy", "-bufsize", "1835k", "-pix_fmt", "yuv420p", "-flags", "-global_header",
+        "-hls_time", "10", "-hls_list_size", "6", "-hls_wrap", "10", "-start_number", "1"};
+
+      std::string storagepath;
+      if (havestreampath) {
+        storagepath=streampath;
+        storagepath+="/";
+      } else {
+        //Use current directory
+        storagepath="";
+      }
+      std::ostringstream camidtostr;
+      camidtostr << this->camid;
+      storagepath+=camidtostr.str();
+
+      //Check if directory exists
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Creating directory: %s for Camera: %d, Stream: %d\n", __PRETTY_FUNCTION__, storagepath.c_str(), camid, streamId);
+      boost::filesystem::path booststoragepath=storagepath;
+      if (!boost::filesystem::exists(booststoragepath)) {
+        bool result=boost::filesystem::create_directories(booststoragepath);
+        if (!result) {
+          debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to create directory: %s for Camera: %d, Stream: %d\n", __PRETTY_FUNCTION__, storagepath.c_str(), camid, streamId);
+          return -1;
+        }
+      }
+      storagepath+="/stream.m3u8";
+      cameraStreams.at(streamId).args.push_back(storagepath);
+    }
     //Prepare pointers for exec
     //NOTE: We make a copy of the argument strings and then get c pointers to those string copies
     //  So the references to the strings will stay in tact by the time exec is called
@@ -691,6 +776,10 @@ int Camera::startStreamCapture(int32_t streamId) {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Camera: %d, Stream: %d now has running child: %ld\n", __PRETTY_FUNCTION__, camid, streamId, pid);
       cameraStreams.at(streamId).pid=pid;
       cameraStreams.at(streamId).hasRun=true;
+      if (cameraStreams.at(streamId).streamMode==CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND) {
+        //Set to get an updated streamURL on the next run
+        cameraStreams.at(streamId).needStreamURL=true;
+      }
     }
     return 0;
 
@@ -796,6 +885,70 @@ bool Camera::isStreamCapturing(int32_t streamId) {
 
 //----------------------
 
+static int removeCamera(int32_t camid) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    if (gcameras.at(camid).cameraStreams.size()>0) {
+      return ERRORS::CAMERA_HAS_STREAM;
+    }
+    gcameras.at(camid).needToRemove=true;
+    if (!getCamerasInUse()) {
+      gcameras.erase(camid);
+    } else {
+      return ERRORS::CAMERA_SCHEDULED_FOR_REMOVAL;
+    }
+  } catch (std::out_of_range& e) {
+    return ERRORS::CAMERA_NOT_FOUND;
+  }
+  return 0;
+}
+
+static void removeCamerasScheduledForRemoval() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  if (getCamerasInUse()) {
+    //Cameras are currently in use so we can't remove any of them
+    debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Cameras are currently in use\n", __PRETTY_FUNCTION__);
+    return;
+  }
+  //Loop through all the cameras and camera streams and remove any that are scheduled for removal
+  std::map<int32_t, Camera>::iterator cameraIt;
+  for (cameraIt=gcameras.begin(); cameraIt!=gcameras.end(); ++cameraIt) {
+    std::map<int32_t, CameraStream>::iterator cameraStreamIt;
+    for (cameraStreamIt=cameraIt->second.cameraStreams.begin(); cameraStreamIt!=cameraIt->second.cameraStreams.end(); ++cameraStreamIt) {
+      if (cameraStreamIt->second.needToRemove) {
+        std::map<int32_t, CameraStream>::iterator prevCameraStreamIt=cameraStreamIt;
+
+        ++cameraStreamIt;
+
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Removing Camera Stream: %d for Camera: %d\n", __PRETTY_FUNCTION__, prevCameraStreamIt->first, cameraIt->first);
+
+        cameraIt->second.removeStream(prevCameraStreamIt->first);
+
+        if (cameraStreamIt==cameraIt->second.cameraStreams.end()) {
+          break;
+        }
+        continue;
+      }
+    }
+    if (cameraIt->second.needToRemove) {
+      std::map<int32_t, Camera>::iterator prevCameraIt=cameraIt;
+
+      ++cameraIt;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Removing Camera: %d\n", __PRETTY_FUNCTION__, prevCameraIt->first);
+
+      gcameras.erase(prevCameraIt);
+
+      if (cameraIt==gcameras.end()) {
+        break;
+      }
+      continue;
+    }
+  }
+}
+
 static int cmd_test_add_camera(const char *buffer, int clientsock) {
   std::string bufferstring;
   std::vector<std::string> buffertokens;
@@ -850,19 +1003,19 @@ static int cmd_test_remove_camera(const char *buffer, int clientsock) {
   std::istringstream ( buffertokens[1] ) >> camid;
   {
     boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
-    try {
-      if (gcameras.at(camid).cameraStreams.size()>0) {
-        ostream << "Camera object with id: " << camid << " cannot be removed as it has streams" << std::endl;
-        cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
-
-        return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
-      }
-      gcameras.erase(camid);
+    int result=removeCamera(camid);
+    if (result==0) {
       ostream << "Camera object with id: " << camid << " has been removed" << std::endl;
-    } catch (std::out_of_range& e) {
-      gcameras[camid]=Camera(camid);
+    } else if (result==ERRORS::CAMERA_HAS_STREAM) {
+      ostream << "Camera object with id: " << camid << " cannot be removed as it has streams" << std::endl;
+    } else if (result==ERRORS::CAMERA_NOT_FOUND) {
       ostream << "Camera object: " << camid << " not found" << std::endl;
+    } else if (result==ERRORS::CAMERA_SCHEDULED_FOR_REMOVAL) {
+      ostream << "Camera object with id: " << camid << " has been scheduled for removal" << std::endl;
     }
+    cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+
+    return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
   }
   cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
 
@@ -960,12 +1113,16 @@ static int cmd_test_remove_camera_stream(const char *buffer, int clientsock) {
   {
     boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
     try {
-      if (gcameras.at(camid).cameraStreams.at(streamId).streamId==streamId) {
-        gcameras.at(camid).removeStream(streamId);
+      int result=gcameras.at(camid).removeStream(streamId);
+      if (result==0) {
         ostream << "Camera stream with id: " << streamId << " for camera object: " << camid << " removed" << std::endl;
+      } else if (result==ERRORS::STREAM_NOT_FOUND) {
+        ostream << "Camera stream: " << streamId << " for camera object: " << camid << " not found" << std::endl;
+      } else if (result==ERRORS::CAMERA_STREAM_SCHEDULED_FOR_REMOVAL) {
+        ostream << "Camera stream with id: " << streamId << " for camera object: " << camid << " scheduled for removal" << std::endl;
       }
     } catch (std::out_of_range& e) {
-      ostream << "Camera stream: " << streamId << " for camera object: " << camid << " not found" << std::endl;
+      ostream << "Camera object: " << camid << " not found" << std::endl;
     }
   }
   cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
@@ -1246,6 +1403,8 @@ void processReceivedStreamURL(int32_t thingId, const boost::property_tree::ptree
       debuglibifaceptr->debuglib_printf(1, "%s: Stream 0 for Camera ID: %d not found\n", __PRETTY_FUNCTION__, url.c_str(), thingId);
       return;
     }
+    gcameras.at(thingId).cameraStreams.at(0).streamURL=url;
+    gcameras.at(thingId).cameraStreams.at(0).needStreamURL=false;
   }
 }
 
@@ -1439,6 +1598,10 @@ public:
     this->httpusername=httpusername;
     this->httppassword=httppassword;
 
+    //Since this class runs asynchronously and uses an iterator to the cameras, the remove camera operation may be
+    //  triggered while this class is running, so we need to mark the cameras in use while running
+    markCamerasInUse();
+
     struct timespec curtime;
     clock_gettime(CLOCK_REALTIME, &curtime);
     bool skipGetStreamURL=false;
@@ -1491,6 +1654,8 @@ public:
     socket_.close(ignored_ec);
     deadline_.cancel();
     response_.consume(response_.size());
+
+    markCamerasNotInUse();
   }
 private:
   void handle_resolve(const boost::system::error_code& err, tcp::resolver::iterator endpoint_iterator) {
@@ -1582,10 +1747,17 @@ private:
 
     if (!getneedtoquit()) {
       int32_t thingId;
-      bool needStreamURL;
+      bool needStreamURL=false;
       {
         boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
-        needStreamURL=camerasIt->second.getNeedStreamURL(0);
+        try {
+          if (!camerasIt->second.isStreamCapturing(0) && !camerasIt->second.needToRemove && !camerasIt->second.cameraStreams.at(0).needToRemove) {
+            //Only get the stream url if not capturing and not scheduled for removal
+            needStreamURL=camerasIt->second.getNeedStreamURL(0);
+          }
+        } catch (std::out_of_range& e) {
+          //Stream 0 doesn't exist
+        }
         thingId=camerasIt->first;
       }
       if (!needStreamURL) {
@@ -1886,9 +2058,16 @@ private:
     //Loop through all the camera streams and to see if they need any actions applied
     for (auto &cameraIt : gcameras) {
       std::map<int32_t, CameraStream>::iterator cameraStreamIt;
+      if (cameraIt.second.needToRemove) {
+        continue;
+      }
       for (cameraStreamIt=cameraIt.second.cameraStreams.begin(); cameraStreamIt!=cameraIt.second.cameraStreams.end(); ++cameraStreamIt) {
+        if (cameraStreamIt->second.needToRemove) {
+          continue;
+        }
         if (!cameraIt.second.isStreamCapturing(cameraStreamIt->first)) {
-          if (cameraStreamIt->second.restartOnExit) {
+          if (cameraStreamIt->second.restartOnExit || cameraStreamIt->second.streamMode==CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND) {
+            //If in continuous stream mode, always restart the stream automatically
             cameraIt.second.startStreamCapture(cameraStreamIt->first);
           }
           else if (cameraStreamIt->second.deleteOnExit && cameraStreamIt->second.hasRun) {
@@ -1909,30 +2088,23 @@ private:
         }
       }
     }
+    removeCamerasScheduledForRemoval();
   }
 
   void webapi_timer_loop() {
     std::string webapihostname="", webapiport="80", webapiurl="", webapihttpuser="", webapihttppass="", webapiuser="", webapipass="";
-    bool result, missingval=false;
+    bool missingval=false;
     std::string hubpkstr;
 
     boost::lock_guard<boost::mutex> guard(mtx_);
 
-    result=configlibifaceptr->getnamevalue_cpp("general", "hubpk", hubpkstr);
-    if (!result) {
-      missingval=true;
-    }
+    missingval|=!(configlibifaceptr->getnamevalue_cpp("general", "hubpk", hubpkstr));
     ghubpk=std::atol(hubpkstr.c_str());
 
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hostname", webapihostname);
-    if (!result) {
-      missingval=true;
-    }
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "port", webapiport);
-    result=configlibifaceptr->getnamevalue_cpp("webapiconfig", "hubcameraurl", webapiurl);
-    if (!result) {
-      missingval=true;
-    }
+    missingval|=!(configlibifaceptr->getnamevalue_cpp("webapiconfig", "hostname", webapihostname));
+    configlibifaceptr->getnamevalue_cpp("webapiconfig", "port", webapiport);
+    missingval|=!(configlibifaceptr->getnamevalue_cpp("webapiconfig", "hubcameraurl", webapiurl));
+
     configlibifaceptr->getnamevalue_cpp("webapiconfig", "httpusername", webapihttpuser);
     configlibifaceptr->getnamevalue_cpp("webapiconfig", "httppassword", webapihttppass);
     configlibifaceptr->getnamevalue_cpp("webapiconfig", "apiusername", webapiuser);
@@ -2127,6 +2299,7 @@ static void shutdown(void) {
   ghubpk=0;
 
   gcameras.clear();
+  camerasInUse=0;
 
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 }

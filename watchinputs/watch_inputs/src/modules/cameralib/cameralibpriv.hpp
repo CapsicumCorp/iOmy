@@ -27,6 +27,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "modules/commonlib/commonlib.h"
 
 namespace cameralib {
+  namespace ERRORS {
+    static const int CAMERA_NOT_FOUND=-1;
+    static const int STREAM_NOT_FOUND=-2;
+    static const int CAMERA_HAS_STREAM=-3;
+    static const int CAMERA_SCHEDULED_FOR_REMOVAL=-4; //During remove attempt camera objects were in use, so the camera has been scheduled for removal as soon as possible
+    static const int CAMERA_STREAM_SCHEDULED_FOR_REMOVAL=-5; //During remove attempt camera objects were in use, so the camera stream has been scheduled for removal as soon as possible
+  }
+
   //A list of different camera stream modes
   enum class CAMERA_STREAM_MODE {
     GENERIC_COMMAND, //Uses generic cmd and args for running any command
