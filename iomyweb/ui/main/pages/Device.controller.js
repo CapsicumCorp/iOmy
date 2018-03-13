@@ -212,9 +212,121 @@ sap.ui.controller("pages.Device", {
                 })
             );
 
-            iomy.common.RefreshCoreVariables(mRefreshSettings);
+            oController.RefreshDeviceVariables(mRefreshSettings);
         } catch (e) {
             $.sap.log.error("Failed to launch the device list loading ("+e.name+"): " + e.message);
+        }
+    },
+    
+    RefreshDeviceVariables : function (aConfig) {
+        var oController = this;
+        
+        try {
+            //------------------------------------------------------------------//
+            //-- IF The Core variables aren't already in currently refreshing --//
+            //------------------------------------------------------------------//
+            if( iomy.common.bCoreRefreshInProgress===false ) {
+
+                //-- Flag that the CoreVariables are refreshing --//
+                iomy.common.bCoreRefreshInProgress = true;
+
+                //-- Remove the Restart flag --//
+                iomy.common.bCoreVariablesRestart = false;
+
+                //----------------------------------------//
+                //-- PART 1: REFRESH LINK LIST          --//
+                //----------------------------------------//
+                iomy.common.RetrieveLinkList({
+                    onSuccess: $.proxy( function() {
+
+                        //----------------------------------------//
+                        //-- PART 2: REFRESH THING LIST         --//
+                        //----------------------------------------//
+                        iomy.common.RefreshThingList({
+                            onSuccess: $.proxy( function() {
+
+                                //-------------------------------------------------------//
+                                //-- Flag that the Core Variables have been configured --//
+                                //-------------------------------------------------------//
+                                iomy.common.CoreVariablesInitialised = true;
+
+
+                                //-------------------------------------------------------//
+                                //-- Perform the onSuccess event                       --//
+                                //-------------------------------------------------------//
+                                try {
+                                    //-- Update when the last core variables occurred --//
+                                    var oTemp = new Date();
+                                    iomy.common.iCoreVariablesLastRefresh = oTemp.getTime();
+
+                                    //------------------------------------------------------------//
+                                    //-- Trigger the normal "onSuccess" event                   --//
+                                    //------------------------------------------------------------//
+                                    if( aConfig.onSuccess ) {
+                                        try {
+                                            aConfig.onSuccess();
+                                        } catch( e00a ) {
+                                            jQuery.sap.log.error("Critical Error: Problem when triggering the onSuccess event for the RefreshCoreVariables function.\n"+e00a.message);
+                                        }
+                                    }
+
+                                    //------------------------------------------------------------//
+                                    //-- Run all the on Success events in the current config    --//
+                                    //------------------------------------------------------------//
+                                    if( iomy.common.aCoreVariablesResConfig.length >= 1 ) {
+                                        $.each( iomy.common.aCoreVariablesResConfig, function ( iIndex, aTempConfig ) {
+                                            //-- Trigger any onSuccess events --//
+                                            if( aTempConfig.onSuccess ) {
+                                                try {
+                                                    aTempConfig.onSuccess();
+                                                } catch( e00b ) {
+                                                    jQuery.sap.log.error("Critical Error: Problem when triggering the one of multiple onSuccess events for the RefreshCoreVariables function.\n"+e00b.message);
+                                                }
+                                            }
+                                        });
+
+                                        //-- Reset the array so this can't be accidentally triggered --//
+                                        iomy.common.aCoreVariablesResConfig = [];
+                                    }
+
+                                    //------------------------------------------------------------//
+                                    //-- If the Core Variables needs to restart on completion   --// 
+                                    if( iomy.common.bCoreVariablesRestart===false ) {
+                                        //-- Turn off the "RefreshInProgress" state as the refresh has finished --//
+                                        iomy.common.bCoreRefreshInProgress = false;
+
+                                    } else {
+                                        //-- Replace the Current Config with the next --//
+                                        iomy.common.aCoreVariablesResConfig = iomy.common.aCoreVariablesResNextConfig;
+                                        iomy.common.aCoreVariablesResNextConfig = [];
+
+                                        //-- Start the next refresh Core Variables --//
+                                        iomy.common.bCoreRefreshInProgress = false;
+                                        iomy.common.RefreshCoreVariables({});
+                                    }
+
+                                } catch( e00 ) {
+                                    jQuery.sap.log.error("Critical Error: Problem when doing the final processing in the RefreshCoreVariables function.\n"+e00.message);
+                                }
+
+                            }, oController),
+                            onFail: $.proxy( function() {
+                                iomy.common.bCoreRefreshInProgress = false;
+                                jQuery.sap.log.error("Error: Failed to update the ThingList for the RefreshCoreVariables function.");
+
+                            }, oController)
+                        }); //-- END PART 2 ( THING LIST ) --//
+
+                    }, oController),
+                    onFail: $.proxy(function() {
+                        iomy.common.bCoreRefreshInProgress = false;
+                        jQuery.sap.log.error("Error: Failed to update the LinkList for the RefreshCoreVariables function.");
+
+                    }, oController)
+                }); //-- END PART 1 ( LINK LIST ) --//
+            }
+        } catch (e) {
+            $.sap.log.error("Error attempting to reload the device variables ("+e.name+"): " + e.message);
         }
     },
     
