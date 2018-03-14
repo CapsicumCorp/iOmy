@@ -24,6 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //Use Boost Chrono instead of C++11 chrono
 #define BOOST_ASIO_DISABLE_STD_CHRONO
 
+#include <stdio.h>
 #include <cctype>
 #include <cstring>
 #include <iomanip>
