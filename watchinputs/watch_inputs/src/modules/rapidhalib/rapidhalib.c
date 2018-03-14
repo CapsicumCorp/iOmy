@@ -3342,7 +3342,7 @@ STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *r
   //Open the firmware file for reading
   rapidhalib_lockrapidha();
   if (rapidhadevice->firmware_file) {
-    rapidhadevice->firmwarefile_fd=open(rapidhadevice->firmware_file, O_RDONLY);
+    rapidhadevice->firmwarefile_fd=open(rapidhadevice->firmware_file, O_RDONLY|O_CLOEXEC);
   } else {
     rapidhadevice->firmwarefile_fd=-1;
   }

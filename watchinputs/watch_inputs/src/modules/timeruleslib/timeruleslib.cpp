@@ -48,6 +48,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <pthread.h>
 #include <time.h>
 #include <semaphore.h>
+#include <fcntl.h>
 #include <list>
 #include <map>
 #include <string>
@@ -413,7 +414,14 @@ int timeruleslib_readrulesfile(void) {
     return 0;
   }
   rulesloadpending=0;
-  file=fopen(rulesfilename.c_str(), "rb");
+  int rulesfilefd=open(rulesfilename.c_str(), O_RDONLY|O_CLOEXEC, 0);
+  if (rulesfilefd==-1) {
+    rulesloadpending=1;
+    timeruleslib_unlock();
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, rulesfilename.c_str());
+    return -1;
+  }
+  file=fdopen(rulesfilefd, "rb");
   if (file == NULL) {
     rulesloadpending=1;
     timeruleslib_unlock();

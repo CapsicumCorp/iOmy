@@ -912,7 +912,7 @@ static int nativeserialib_adddevice(char *filename) {
 #endif
     return -1;
   }
-  fd=open(filename, O_RDWR | O_NOCTTY | O_EXCL | O_NONBLOCK);
+  fd=open(filename, O_RDWR | O_NOCTTY | O_EXCL | O_NONBLOCK | O_CLOEXEC);
   lerrno=errno;
   if (fd==-1) {
     int return_result=-2;
@@ -1129,7 +1129,7 @@ static void nativeseriallib_findserialdevices(void) {
     }
     //Check for a lock file in the standard location
     sprintf(tmpstr, "/var/lock/LCK..%s", direntdata->d_name);
-    fd=open(tmpstr, O_RDONLY);
+    fd=open(tmpstr, O_RDONLY|O_CLOEXEC);
     if (fd!=-1) {
       //This serial port is locked by another program
       //Close the lock file
@@ -1199,7 +1199,7 @@ static void *nativeseriallib_mainloop(void *val) {
   result=1;
   nativeseriallib_serdevdirfd=-1;
 #ifdef F_NOTIFY
-  nativeseriallib_serdevdirfd=open("/dev", O_RDONLY);
+  nativeseriallib_serdevdirfd=open("/dev", O_RDONLY|O_CLOEXEC);
   if (nativeseriallib_serdevdirfd!=-1) {
     result=0;
   }

@@ -24,6 +24,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //TODO: Convert the socket to a struct so can store getc buffers and other info, then return pointer to the struct similar to FILE *
 //TODO: abortearly function should be part of a struct for the socket since the module that opens the socket will also close it on abort
 
+//Needed for accept4
+#define _GNU_SOURCE
+
 #include <poll.h>
 #include <stdio.h>
 #include <string.h>
@@ -448,7 +451,7 @@ static int serverlib_waitForConnection_with_quitpipe(int sock, int (* const getA
       break;
     }
     addrlen = sizeof(struct sockaddr_in);
-    sock=accept(sock, (struct sockaddr*)&remote_addr, &addrlen);
+    sock=accept4(sock, (struct sockaddr*)&remote_addr, &addrlen, SOCK_CLOEXEC);
     lerrno=errno;
     if (sock<0) {
       result=-1;

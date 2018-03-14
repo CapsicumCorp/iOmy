@@ -42,6 +42,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <fcntl.h>
 #include <list>
 #include <map>
 #include <string>
@@ -557,7 +558,14 @@ int configlib_readcfgfile(void) {
     return -1;
   }
   configloadpending=0;
-  file=fopen(cfgfilename.c_str(), "rb");
+  int cfgfilefd=open(cfgfilename.c_str(), O_RDONLY|O_CLOEXEC, 0);
+  if (cfgfilefd==-1) {
+    configloadpending=1;
+    configlib_unlockconfig();
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, cfgfilename.c_str());
+    return -1;
+  }
+  file=fdopen(cfgfilefd, "rb");
   if (file == NULL) {
     configloadpending=1;
     configlib_unlockconfig();

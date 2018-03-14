@@ -7528,7 +7528,14 @@ static void initZigbeeDefs(void) {
 		zigbeelib_unlockzigbee();
 		return;
 	}
-  file=fopen(zigbeedefsfilename.c_str(), "rb");
+  int defsfilefd=open(zigbeedefsfilename.c_str(), O_RDONLY|O_CLOEXEC, 0);
+  if (defsfilefd==-1) {
+    zigbeelib_unlockzigbee();
+    debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, zigbeedefsfilename.c_str());
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
+    return;
+  }
+  file=fdopen(defsfilefd, "rb");
   if (file==NULL) {
 		zigbeelib_unlockzigbee();
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, zigbeedefsfilename.c_str());
@@ -7816,8 +7823,7 @@ static void initZigbeeDefs(void) {
 			}
     }
   }
-  fclose(file);
-
+  fclose(file); //This also closes the descriptor
   if (fileminver!=1) {
 		zigbeelib_unlockzigbee();
     debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
