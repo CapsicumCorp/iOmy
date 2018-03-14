@@ -148,6 +148,7 @@ public:
   CameraStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
   CameraStream(int32_t streamId, enum CAMERA_STREAM_MODE, std::string cmd, std::vector<std::string> args);
   ~CameraStream();
+  boost::property_tree::ptree toProperty(); //Return the object as a Boost Property object
 };
 
 class Camera {
@@ -181,6 +182,7 @@ public:
   int waitStreamCapture(int32_t streamId, int timeOutSeconds); //Wait for a csmera capturing process to finish
   int stopStreamCapture(int32_t streamId, bool force); //Stop a camera capturing process immediately
   bool isStreamCapturing(int32_t streamId); //Check if a stream is currently capturing
+  boost::property_tree::ptree toProperty(); //Return the object as a Boost Property object
 };
 
 class WebAPIStreamURL {
@@ -377,6 +379,16 @@ static bool getCamerasInUse() {
   return (camerasInUse > 0) ? true : false;
 }
 
+static std::string streamModeToString(enum CAMERA_STREAM_MODE streamMode) {
+  switch (streamMode) {
+    case CAMERA_STREAM_MODE::GENERIC_COMMAND:
+      return "GENERIC_COMMAND";
+    case CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND:
+      return "FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND";
+  }
+  return "";
+}
+
 //----------------------
 //Class/Struct functions
 //----------------------
@@ -422,6 +434,35 @@ Camera::~Camera() {
   stopAllCapture();
 
   cameraStreams.clear();
+}
+
+//Return the object as a Boost Property object
+boost::property_tree::ptree CameraStream::toProperty() {
+  boost::property_tree::ptree ptree;
+
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  ptree.put("CameraStreamID", this->streamId);
+  ptree.put("StreamMode", streamModeToString(this->streamMode));
+  ptree.put("Pid", this->pid);
+  ptree.put("ExitCode", this->exitStatus);
+  ptree.put("StreamURL", this->streamURL);
+  ptree.put("hasRun", this->hasRun);
+  ptree.put("restartOnExit", this->restartOnExit);
+  ptree.put("deleteOnExit", this->deleteOnExit);
+  ptree.put("needToRemove", this->needToRemove);
+  ptree.put("Command", this->cmd);
+  ptree.put("CommandArgumentsCount", this->args.size());
+  boost::property_tree::ptree argsPt;
+  for (auto &arg : this->args) {
+    boost::property_tree::ptree argPt;
+
+    argPt.put("", arg);
+    argsPt.push_back(std::make_pair("", argPt));
+  }
+  ptree.put_child("CommandArguments", argsPt);
+
+  return ptree;
 }
 
 int32_t Camera::getCamId() {
@@ -883,7 +924,39 @@ bool Camera::isStreamCapturing(int32_t streamId) {
   return false;
 }
 
+//Return the Camera object as a Boost Property object
+boost::property_tree::ptree Camera::toProperty() {
+  boost::property_tree::ptree ptree;
+
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  ptree.put("CameraID", this->camid);
+  ptree.put("needToRemove", this->needToRemove);
+  ptree.put("CameraStreamCount", cameraStreams.size());
+  boost::property_tree::ptree cameraStreamsPt;
+  for (auto &cameraStream : cameraStreams) {
+    cameraStreamsPt.push_back(std::make_pair("", cameraStream.second.toProperty()));
+  }
+  ptree.put_child("CameraStreams", cameraStreamsPt);
+
+  return ptree;
+}
+
 //----------------------
+
+//Return the camera objects as a Boost Property object
+boost::property_tree::ptree CamerasToProperty() {
+  boost::property_tree::ptree ptree, cameraspt;
+
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+  ptree.put("CameraCount", gcameras.size());
+  for (auto &camera : gcameras) {
+    cameraspt.push_back(std::make_pair("", camera.second.toProperty()));
+  }
+  ptree.put_child("Cameras", cameraspt);
+
+  return ptree;
+}
 
 static int removeCamera(int32_t camid) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
@@ -1373,6 +1446,18 @@ static int cmd_get_camera_info(const char *buffer, int clientsock) {
     }
     cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
   }
+  return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+}
+
+static int cmd_get_camera_info_json(const char *buffer, int clientsock) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  boost::property_tree::ptree ptree=CamerasToProperty();
+  std::ostringstream ostream;
+  write_json(ostream, ptree);
+
+  cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+
   return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
 }
 
@@ -2228,6 +2313,7 @@ static int start(void) {
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_test_start_stream", "cameralib_test_start_stream <cameraid> <streamid>", "Test command to start a stream", "Test command to start a stream", cmd_test_start_stream);
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_test_stop_stream", "cameralib_test_stop_stream <cameraid> <streamid>", "Test command to force stop a stream", "Test command to force stop a stream", cmd_test_stop_stream);
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_get_camera_info", "cameralib_get_camera_info", "Command to get info about the camera library objects and running streams", "Command to get info about the camera library objects and running streams", cmd_get_camera_info);
+    cmdserverlibifaceptr->register_cmd_longdesc("cameralib_get_camera_info_json", "cameralib_get_camera_info_json", "Command to get info about the camera library objects and running streams with JSON output", "Command to get info about the camera library objects and running streams with JSON output", cmd_get_camera_info_json);
   }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 
