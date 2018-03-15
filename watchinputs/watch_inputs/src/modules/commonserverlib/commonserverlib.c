@@ -37,6 +37,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <arpa/inet.h>
 #include <errno.h>
 #ifdef __ANDROID__
+#include <fcntl.h> //For O_CLOEXEC on Android < 21
 #include <jni.h>
 #include <android/log.h>
 #endif
@@ -296,7 +297,17 @@ static int serverlib_setupTCPListenSocket(in_addr_t hostip, uint16_t port, int (
   struct sockaddr_in my_addr;
 
   curretry=0;
-  while( (sock = socket(AF_INET, SOCK_STREAM, 6)) < 0) {
+#ifdef __ANDROID__
+#if __ANDROID_API__ < 21
+  //SOCK_CLOEXEC wasn't defined until Android 21 but Android 21 just redefines it to O_CLOEXEC
+  //  so that should be okay to use here
+  while( (sock = socket(AF_INET, SOCK_STREAM|O_CLOEXEC, 6)) < 0) {
+#else
+  while( (sock = socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC, 6)) < 0) {
+#endif
+#else
+  while( (sock = socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC, 6)) < 0) {
+#endif
     //Failed to create a socket so wait 1 second then try again up to 60 seconds
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to create socket for hostip: %d.%d.%d.%d, port: %d, errno=%d\n",
       __func__,
@@ -451,7 +462,17 @@ static int serverlib_waitForConnection_with_quitpipe(int sock, int (* const getA
       break;
     }
     addrlen = sizeof(struct sockaddr_in);
-    sock=accept4(sock, (struct sockaddr*)&remote_addr, &addrlen, SOCK_CLOEXEC);
+#ifdef __ANDROID__
+#if __ANDROID_API__ < 21
+      //Android workaround for accept4 not available in Android < 21
+      #warning "accept4 and SOCK_CLOEXEC aren't available in Android API < 21"
+      sock=accept(sock, (struct sockaddr*)&remote_addr, &addrlen);
+#else
+      sock=accept4(sock, (struct sockaddr*)&remote_addr, &addrlen, SOCK_CLOEXEC);
+#endif
+#else
+      sock=accept4(sock, (struct sockaddr*)&remote_addr, &addrlen, SOCK_CLOEXEC);
+#endif
     lerrno=errno;
     if (sock<0) {
       result=-1;
