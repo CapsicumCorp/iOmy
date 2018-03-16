@@ -2841,7 +2841,7 @@ $.extend(iomy.common,{
      * This stores the page ID that is used to define the default page, or the
      * home or start page.
      */
-    sNavigationDefaultPage: "pBlock", 
+    sNavigationDefaultPage: "pHome", 
     
     //----------------------------------------------------------------------------------------//
     //-- This function is used to change pages on the website and track what pages have        --//

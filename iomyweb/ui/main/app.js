@@ -107,10 +107,10 @@ var aPages = [
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.Device\" Page!\n"
 	},
 	{
-		"Id":			"pBlock",
-		"Location":		"pages.Block",
+		"Id":			"pHome",
+		"Location":		"pages.Home",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.Block\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Home\" Page!\n"
 	},
 	{
 		"Id":			"pUserSettings",
@@ -265,6 +265,12 @@ var aPages = [
 		"Location":		"pages.Development.DBIndex",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.DBIndex\" Page!\n"
+	},
+	{
+		"Id":			"pAdvanced",
+		"Location":		"pages.Development.Advanced",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.Advanced\" Page!\n"
 	}
 
 ];

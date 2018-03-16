@@ -1447,7 +1447,7 @@ $.extend(iomy.functions, {
     
     getNumberOfRooms : function () {
         var iCount = 0;
-        
+     
         try {
 
             $.each(iomy.common.RoomsList, function (sI, mPremise) {
@@ -1466,6 +1466,82 @@ $.extend(iomy.functions, {
             return iCount;
         }
     },
+    
+    getNumberOfPremises : function () {
+        var iCount = 0;
+     
+        try {
+            $.each(iomy.common.PremiseList, function (sI, mPremise) {
+               if (sI !== undefined && sI !== null && mPremise !== undefined && mPremise !== null) {
+                    iCount++;
+                }
+            });
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of rooms in all premises ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
+        }
+    },
+    
+    getNumberOfAssignedRooms : function () {
+        var iCount = 0;
+     
+        try {
+            $.each(iomy.common.RoomsList, function (sI, mRoom) {
+                if (sI !== undefined && sI !== null && mRoom !== undefined && mRoom !== null) {
+                    
+                    if(mRoom[sI].RoomName !== "Unassigned") {
+                       iCount++;  
+                    } 
+                }
+            });
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of rooms in all premises ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
+        }
+    },
+    
+    getNumberOfThings : function () {
+        var iCount = 0;
+     
+        try {
+            $.each(iomy.common.ThingList, function (sI, mThing) {
+                if (sI !== undefined && sI !== null && mThing !== undefined && mThing !== null) {
+                    iCount++;  
+                }
+            });
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of rooms in all premises ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
+        }
+    },
+    
+    getNumberOfUsers : function () {
+        var iCount = 0;
+     
+        try {
+            $.each(iomy.common.UserList, function (sI, mUser) {
+                if (sI !== undefined && sI !== null && mUser !== undefined && mUser !== null) {
+                    iCount++;  
+                }
+            });
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of rooms in all premises ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
+        }
+    },
+    
     
     getRoom : function (iRoomId, iPremiseId) {
         var mIDInfo     = iomy.validation.isRoomIDValid(iRoomId);

@@ -22,7 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.controller("pages.Block", {
+sap.ui.controller("pages.Home", {
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.

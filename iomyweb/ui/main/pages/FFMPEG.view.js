@@ -88,7 +88,7 @@ sap.ui.jsview("pages.FFMPEG", {
 												new sap.m.Button ({
 													height: "50px",
 													width: "50px",
-													text: "<"
+													text: "<"	
 												}),
 												new sap.m.Button ({
 													height: "50px",

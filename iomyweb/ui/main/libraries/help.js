@@ -39,7 +39,7 @@ $.extend(iomy.help,{
     PageInformation : {
         "pLogin": "Before you can use the app, you need to enter your username and password to view and manage your devices.\n\nIn the demo version of iOmy. The username is 'demo' and the password is 'demo'.",
             
-        "pBlock": "This is the home page.",
+        "pHome": "This is the home page.",
         
         "pPremise": "You should be able to see a list of rooms in a premise with the number of devices to the left of each one. If there are no rooms, you can press the button to add one.\n\nThe 'Unassigned' area will only appear if there are any devices that have not yet been assigned to a room.",
         

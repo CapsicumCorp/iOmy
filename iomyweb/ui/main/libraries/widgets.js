@@ -171,7 +171,7 @@ $.extend( iomy.widgets, {
 			icon: "sap-icon://home",
 			text: "Home",
 			select : function () {
-				iomy.common.NavigationChangePage( "pBlock" , {} , true);
+				iomy.common.NavigationChangePage( "pHome" , {} , true);
 			}
 		});
 		
@@ -250,7 +250,7 @@ $.extend( iomy.widgets, {
 			icon: "sap-icon://settings",
 			text: "Advanced",
 			select : function () {
-				iomy.common.NavigationChangePage( "pTelnet" , {} , true);
+				iomy.common.NavigationChangePage( "pAdvanced" , {} , true);
 			}
 		});
 
@@ -258,7 +258,7 @@ $.extend( iomy.widgets, {
 			icon: "",
 			text: "Powered by Capsicum",
 			select : function () {
-				iomy.common.NavigationChangePage( "pServerInfo" , {} , true);
+				//iomy.common.NavigationChangePage( "pServerInfo" , {} , true);
 			}
 		});
 		
@@ -270,7 +270,7 @@ $.extend( iomy.widgets, {
 			expanded : true,
 			item : new sap.tnt.NavigationList ({
 				items : [
-					oNavHome, oNavDevices, oNavPremise, oNavRoom, oNavRules, oNavUsers, oNavAdvanced
+					oNavHome, oNavDevices, oNavRoom, oNavPremise, oNavRules, oNavUsers, oNavAdvanced
 				]
 			}),
 			fixedItem : new sap.tnt.NavigationList ({
