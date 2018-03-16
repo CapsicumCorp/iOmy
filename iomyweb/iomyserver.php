@@ -1160,7 +1160,7 @@ if($bError===false) {
 							break;
 							
 						case "02_CreateTables6":
-							$aResult = DB_CreateTables( $sPostDatabaseName, array( "Datatype", "RSCat", "RSType", "UoM", "Rule1" ) );
+							$aResult = DB_CreateTables( $sPostDatabaseName, array( "Datatype", "RSCat", "RSType", "UoM", "Rule1", "WiCameraLib" ) );
 							break;
 							
 						//--------------------//

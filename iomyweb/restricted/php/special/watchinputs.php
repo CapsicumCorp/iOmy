@@ -126,11 +126,12 @@ if($bError===false) {
 		
 		//-- Display an error if the mode is unsupported --//
 		if( 
-			$sPostMode!=="AddComm"            && $sPostMode!=="AddLink"            &&
-			$sPostMode!=="AddThing"           && $sPostMode!=="AddIO"              &&
-			$sPostMode!=="ListAllActiveRules" && $sPostMode!=="UpdateRuleNextTS"   &&
-			$sPostMode!=="RuleJustTriggered"  && $sPostMode!=="RuleTriggeredAt"    &&
-			$sPostMode!=="SetThingState"      && $sPostMode!=="GetStreamURL"       
+			$sPostMode!=="AddComm"               && $sPostMode!=="AddLink"               &&
+			$sPostMode!=="AddThing"              && $sPostMode!=="AddIO"                 &&
+			$sPostMode!=="ListAllActiveRules"    && $sPostMode!=="UpdateRuleNextTS"      &&
+			$sPostMode!=="RuleJustTriggered"     && $sPostMode!=="RuleTriggeredAt"       &&
+			$sPostMode!=="SetThingState"         && $sPostMode!=="GetStreamURL"          &&
+			$sPostMode!=="LookupCamStreams"      && $sPostMode!=="UpdateCamStreamCount"  
 			
 		) {
 			$bError = true;
@@ -215,9 +216,10 @@ if($bError===false) {
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		if(
-			$sPostMode==="AddComm"            || $sPostMode==="AddLink"            || 
-			$sPostMode==="AddThing"           || $sPostMode==="AddIO"              || 
-			$sPostMode==="RuleTriggeredAt"    || $sPostMode==="SetThingState"      
+			$sPostMode==="AddComm"               || $sPostMode==="AddLink"               || 
+			$sPostMode==="AddThing"              || $sPostMode==="AddIO"                 || 
+			$sPostMode==="RuleTriggeredAt"       || $sPostMode==="SetThingState"         ||
+			$sPostMode==="UpdateCamStreamCount" 
 		) {
 			try {
 				//-- Retrieve the "Data" --//
@@ -246,9 +248,9 @@ if($bError===false) {
 	//----------------------------------------------------//
 	if( $bError===false ) {
 		if( 
-			$sPostMode==="UpdateRuleNextTS"   || $sPostMode==="RuleJustTriggered"    || 
-			$sPostMode==="RuleTriggeredAt"    || $sPostMode==="SetThingState"        || 
-			$sPostMode==="GetStreamURL"
+			$sPostMode==="UpdateRuleNextTS"      || $sPostMode==="RuleJustTriggered"     || 
+			$sPostMode==="RuleTriggeredAt"       || $sPostMode==="SetThingState"         || 
+			$sPostMode==="GetStreamURL"          || $sPostMode==="UpdateCamStreamCount" 
 		) {
 			try {
 				//-- Retrieve the "RuleId" --//
@@ -477,9 +479,10 @@ if($bError===false) {
 		//================================================================//
 		if( $bError===false ) {
 			if(
-				$sPostMode==="AddComm"            || $sPostMode==="AddLink"            || 
-				$sPostMode==="AddThing"           || $sPostMode==="AddIO"              || 
-				$sPostMode==="RuleTriggeredAt"    || $sPostMode==="SetThingState"      
+				$sPostMode==="AddComm"               || $sPostMode==="AddLink"               || 
+				$sPostMode==="AddThing"              || $sPostMode==="AddIO"                 || 
+				$sPostMode==="RuleTriggeredAt"       || $sPostMode==="SetThingState"         || 
+				$sPostMode==="UpdateCamStreamCount" 
 			) {
 				try {
 					//------------------------------------------------//
@@ -525,7 +528,7 @@ if( $bError===false ) {
 		if( $bError===false ) {
 			
 			//----------------------------------------------------//
-			//-- 4.1.6 - Extract Parameter                      --//
+			//-- 4.1.1 - Extract 'TriggeredUnixTS'              --//
 			//----------------------------------------------------//
 			if( $bError===false ) {
 				if( $sPostMode==="RuleTriggeredAt" ) {
@@ -555,6 +558,54 @@ if( $bError===false ) {
 						$iErrCode  = 211;
 						$sErrMesg .= "Error Code:'0211' \n";
 						$sErrMesg .= "Error: Problem extracting the 'TriggeredUnixTS' value in the 'Data' JSON parameter!\n";
+					}
+				}
+			}
+			
+			//----------------------------------------------------//
+			//-- 4.1.2 - Extract 'Count'                        --//
+			//----------------------------------------------------//
+			if( $bError===false ) {
+				if( $sPostMode==="UpdateCamStreamCount" ) {
+					try {
+						//-- IF Exists --//
+						if( isset( $aPostData['Count'] ) ) {
+							//-- IF Numeric --//
+							if( is_numeric( $aPostData['Count'] ) ) {
+								$iPostCount = intval( $aPostData['Count'] );
+								
+								//-- IF the number is positive --//
+								if( !($iPostCount >= 1) ) {
+									//------------------------------------//
+									//-- ERROR: Invalid Timestamp       --//
+									$bError    = true;
+									$iErrCode  = 214;
+									$sErrMesg .= "Error Code:'0214' \n";
+									$sErrMesg .= "Error: The 'Count' value in the 'Data' JSON parameter is not supported!\n";
+									$sErrMesg .= "The value is not greater than or equal to one.";
+								}
+							} else {
+								//------------------------------------//
+								//-- ERROR: Non-Numeric             --//
+								$bError    = true;
+								$iErrCode  = 214;
+								$sErrMesg .= "Error Code:'0213' \n";
+								$sErrMesg .= "Error: The 'Count' value in the 'Data' JSON parameter is not supported!\n";
+								$sErrMesg .= "Please use a numeric value.\n";
+							}
+						} else {
+							//------------------------------------//
+							//-- ERROR: Missing Parameter       --//
+							$bError    = true;
+							$iErrCode  = 213;
+							$sErrMesg .= "Error Code:'0213' \n";
+							$sErrMesg .= "Error: The 'Count' value in the 'Data' JSON parameter is not supported!\n";
+						}
+					} catch( Exception $e0211 ) {
+						$bError = true;
+						$iErrCode  = 213;
+						$sErrMesg .= "Error Code:'0211' \n";
+						$sErrMesg .= "Error: Problem extracting the 'Count' value in the 'Data' JSON parameter!\n";
 					}
 				}
 			}
@@ -604,7 +655,7 @@ if( $bError===false ) {
 				$sPostMode==="RuleTriggeredAt"  
 			) {
 				//------------------------------------------------//
-				//-- 4.2.1 - Lookup Hub Data for Rule           --//
+				//-- 4.3.1 - Lookup Hub Data for Rule           --//
 				//------------------------------------------------//
 				if( $bError===false ) {
 					$aHubTemp  = WatchInputsHubRetrieveInfoAndPermission( $iPostHubId );
@@ -619,7 +670,7 @@ if( $bError===false ) {
 				}
 				
 				//------------------------------------------------//
-				//-- 4.2.2 - Lookup PremiseAddress              --//
+				//-- 4.3.2 - Lookup PremiseAddress              --//
 				//------------------------------------------------//
 				if( $bError===false ) {
 					$aPremiseAddressTemp = WatchInputsGetPremise( $aHubTemp['Data']['PremiseId'] );
@@ -751,7 +802,7 @@ if( $bError===false ) {
 						
 						if( $oPHPOnvifClient->bInitialised===false ) {
 							$bError = true;
-							$iErrCode  = 7210;
+							$iErrCode  = 7210; 
 							$sErrMesg .= "Error Code:'7210'\n";
 							$sErrMesg .= "Couldn't initialise Onvif Class!\n";
 							$sErrMesg .= json_encode( $oPHPOnvifClient->aErrorMessges );
@@ -1380,57 +1431,128 @@ if($bError===false) {
 		
 		
 		//================================================================//
-		//== 5.7 - MODE: Get Stream URL                                 ==//
+		//== 5.7 - MODE: FFMPEG Stream                                  ==//
 		//================================================================//
-		} else if( $sPostMode==="GetStreamURL" ) {
+		} else if( $sPostMode==="GetStreamURL" || $sPostMode==="LookupCamStreams" || $sPostMode==="UpdateCamStreamCount" ) {
 			try {
-				//----------------------------------------------------//
-				//-- IF ONVIF Server                                --//
-				//----------------------------------------------------//
-				if( $iThingTypeId===$iOnvifThingTypeId ) {
-					
-					$aResult = WatchInputsGetMostRecentOnvifStreamProfile( $iPostId );
-					
-					if( $aResult["Error"]===false ) {
-						//----------------//
-						//-- RTSP       --//
-						//----------------//
-						$aProfile = array (
-							"ProfileToken" => $aResult["Data"]["DataValue"]
-						);
-						
-						$aStreamUriRTSP = $oPHPOnvifClient->GetAndExtractStreamURI( $aProfile, 'RTSP', false );
-						
-						if( $aStreamUriRTSP['Error']===false ) {
-							if( isset( $aStreamUriRTSP['Uri'] ) ) {
-								$aResult = array(
-									"Error"  => false,
-									"Data"   => array( 
-										$aStreamUriRTSP['Uri'] 
-									)
+				//----------------------------------------------------------------//
+				//-- 5.7.A - MODE GetStreamURL                                  --//
+				//----------------------------------------------------------------//
+				if( $sPostMode==="GetStreamURL" ) {
+					try {
+						//----------------------------------------------------//
+						//-- IF ONVIF Server                                --//
+						//----------------------------------------------------//
+						if( $iThingTypeId===$iOnvifThingTypeId ) {
+							
+							$aResult = WatchInputsGetMostRecentOnvifStreamProfile( $iPostId );
+							
+							if( $aResult["Error"]===false ) {
+								//----------------//
+								//-- RTSP       --//
+								//----------------//
+								$aProfile = array (
+									"ProfileToken" => $aResult["Data"]["DataValue"]
 								);
 								
-								//var_dump( $aStreamUriRTSP['Uri'] );
-								//echo "\n\n";
+								$aStreamUriRTSP = $oPHPOnvifClient->GetAndExtractStreamURI( $aProfile, 'RTSP', false );
+								
+								if( $aStreamUriRTSP['Error']===false ) {
+									if( isset( $aStreamUriRTSP['Uri'] ) ) {
+										$aResult = array(
+											"Error"  => false,
+											"Data"   => array(
+												$aStreamUriRTSP['Uri'] 
+											)
+										);
+										
+										//var_dump( $aStreamUriRTSP['Uri'] );
+										//echo "\n\n";
+									}
+								} else {
+									$bError    = true;
+									$iErrCode  = 7403;
+									$sErrMesg .= "Error Code:'7403' \n";
+									$sErrMesg .= "Problem extracting the Stream from the Onvif request!\n";
+									$sErrMesg .= $aStreamUriRTSP["ErrMesg"];
+								}
+							} else {
+								//-- ERROR:  --//
+								$bError    = true;
+								$iErrCode  = 7402;
+								$sErrMesg .= "Error Code:'7402' \n";
+								$sErrMesg .= "Error loooking up the !\n";
+								$sErrMesg .= $aResult['ErrMesg']." \n";
 							}
-						} else {
-							$bError    = true;
-							$iErrCode  = 7402;
-							$sErrMesg .= "Error Code:'7402' \n";
 						}
-						
-						
-					} else {
-						//-- ERROR:  --//
+					} catch( Exception $e7401 ) {
+						//-- Display an Error Message --//
 						$bError    = true;
 						$iErrCode  = 7401;
 						$sErrMesg .= "Error Code:'7401' \n";
-						$sErrMesg .= $aResult['ErrMesg']." \n";
+						$sErrMesg .= $e7401->getMessage();
 					}
 					
-					
+				//----------------------------------------------------------------//
+				//-- 5.7.B - LookupCamStreams                                   --//
+				//----------------------------------------------------------------//
+				} else if( $sPostMode==="LookupCamStreams" ) {
+					try {
+						$aResult = WatchInputsGetManagedCameraStreams();
+						
+						if( $aResult['Error']===true ) {
+							$bError    = true;
+							$iErrCode  = 7431;
+							$sErrMesg .= "Error Code:'7431' \n";
+							$sErrMesg .= $aResult['ErrMesg']." \n";
+						}
+						
+					} catch( Exception $e7430 ) {
+						//-- Display an Error Message --//
+						$bError    = true;
+						$iErrCode  = 7430;
+						$sErrMesg .= "Error Code:'7430' \n";
+						$sErrMesg .= $e7430->getMessage();
+					}
+				//----------------------------------------------------------------//
+				//-- 5.7.C - UpdateStreamCount                                  --//
+				//----------------------------------------------------------------//
+				} else {
+					try {
+						//------------------------------------------------------//
+						//-- STEP 1: Lookup the ThingId to check if it exists --//
+						//------------------------------------------------------//
+						$aStreamInfo = WatchInputsGetManagedCameraStreamFromThingId( $iPostId );
+						
+						if( $aStreamInfo['Error']===true ) {
+							$bError    = true;
+							$iErrCode  = 7462;
+							$sErrMesg .= "Error Code:'7462' \n";
+							$sErrMesg .= $aStreamInfo['ErrMesg']." \n";
+						}
+						
+						//------------------------------------------------------//
+						//-- STEP 2: Update the RunCount                      --//
+						//------------------------------------------------------//
+						if( $bError===false ) {
+							$aResult = WatchInputsUpdateManagedStreamRunCount( $iPostId, $iPostCount );
+							
+							if( $aResult['Error']===true ) {
+								$bError    = true;
+								$iErrCode  = 7461;
+								$sErrMesg .= "Error Code:'7461' \n";
+								$sErrMesg .= $aResult['ErrMesg']." \n";
+							}
+						}
+						
+					} catch( Exception $e7460 ) {
+						//-- Display an Error Message --//
+						$bError    = true;
+						$iErrCode  = 7460;
+						$sErrMesg .= "Error Code:'7460' \n";
+						$sErrMesg .= $e7460->getMessage();
+					}
 				}
-				
 			} catch( Exception $e7400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
@@ -1438,6 +1560,7 @@ if($bError===false) {
 				$sErrMesg .= "Error Code:'7400' \n";
 				$sErrMesg .= $e7400->getMessage();
 			}
+			
 		//================================================================//
 		//== 5.? - ERROR: UNSUPPORTED MODE                              ==//
 		//================================================================//

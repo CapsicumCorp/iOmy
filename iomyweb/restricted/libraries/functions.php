@@ -4412,9 +4412,127 @@ function GetGraphLineIO( $sIOId, $iIODataType, $sPostStartUTS, $sPostEndUTS ) {
 
 
 
+//========================================================================================================================//
+//== #18.0# - ??? Functions                                                                                             ==//
+//========================================================================================================================//
+function WatchInputsGetManagedCameraStreams() {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: Looks up all the Cameras that are managed by WatchInputs for FFMPEG Stream        --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbWatchInputsGetManagedCameraStreams();
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		if( $aResult['ErrMesg']==="WatchInputsManagedCameraStreams: No Rows Found! Code:0" ) {
+			$aResult = array(
+				"Error" => false,
+				"Data"  => array()
+			);
+			
+		} else {
+			$sErrMesg  = "Error: Problem getting the list of all the managed streams!\n";
+			$sErrMesg .= $aResult['ErrMesg'];
+			
+			return array(
+				"Error"   => true,
+				"ErrCode" => 2,
+				"ErrMesg" => $sErrMesg
+			);
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
 
+function WatchInputsGetManagedCameraStreamFromThingId( $iThingId ) {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: Looks up all the Cameras that are managed by WatchInputs for FFMPEG Stream        --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbWatchInputsGetManagedCameraStreamFromThingId( $iThingId );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		return array( "Error"=>true, "ErrMesg"=>"Failed to lookup that WatchInputs managed stream. There might not be a stream with that ThingId!\n");
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
+
+function WatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount ) {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: Looks up all the Cameras that are managed by WatchInputs for FFMPEG Stream        --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		return array( "Error"=>true, "ErrMesg"=>"Failed to update the run count on managed stream!\n");
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return $aResult;
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
 
 
 //========================================================================================================================//
