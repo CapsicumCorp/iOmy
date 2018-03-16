@@ -24,6 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define COMMONLIB_H
 
 #include <stdint.h>
+#include <sys/socket.h>
 
 #pragma pack(push)
 #pragma pack(1) //Pack the structures to 1 byte boundary as pointers to the structure variables will be passed around between multiple libraries
@@ -45,9 +46,29 @@ typedef struct {
   void (*commonlib_bigendian64bittobuf)(unsigned char *buf, uint64_t val);
 } commonlib_ifaceptrs_ver_1_t;
 
+typedef struct {
+  uint16_t (*commonlib_buftolittleendian16bit)(unsigned char *buf);
+  uint32_t (*commonlib_buftolittleendian32bit)(unsigned char *buf);
+  uint64_t (*commonlib_buftolittleendian64bit)(unsigned char *buf);
+  uint16_t (*commonlib_buftobigendian16bit)(unsigned char *buf);
+  uint32_t (*commonlib_buftobigendian32bit)(unsigned char *buf);
+  uint64_t (*commonlib_buftobigendian64bit)(unsigned char *buf);
+  void (*commonlib_littleendian16bittobuf)(unsigned char *buf, uint16_t val);
+  void (*commonlib_littleendian32bittobuf)(unsigned char *buf, uint32_t val);
+  void (*commonlib_littleendian64bittobuf)(unsigned char *buf, uint64_t val);
+  void (*commonlib_bigendian16bittobuf)(unsigned char *buf, uint16_t val);
+  void (*commonlib_bigendian32bittobuf)(unsigned char *buf, uint32_t val);
+  void (*commonlib_bigendian64bittobuf)(unsigned char *buf, uint64_t val);
+  int (*open_with_cloexec)(const char *pathname, int flags);
+  int (*open_with_create_and_cloexec)(const char *pathname, int flags, mode_t mode);
+  int (*socket_with_cloexec)(int domain, int type, int protocol);
+  int (*accept_with_cloexec)(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+} commonlib_ifaceptrs_ver_2_t;
+
 #pragma pack(pop)
 
 #define COMMONLIBINTERFACE_VER_1 1 //A version number for the commonlib interface version
+#define COMMONLIBINTERFACE_VER_2 1 //A version number for the commonlib interface version
 
 typedef struct _value_string value_string;
 typedef union multitypeval multitypeval_t;
