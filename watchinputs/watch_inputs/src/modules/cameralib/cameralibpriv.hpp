@@ -35,10 +35,24 @@ namespace cameralib {
     static const int CAMERA_STREAM_SCHEDULED_FOR_REMOVAL=-5; //During remove attempt camera objects were in use, so the camera stream has been scheduled for removal as soon as possible
   }
 
+  //A list of different reasons a process can exit
+  enum class CAMERA_PROCESS_EXIT_REASON {
+    NEVER_STARTED, //The process has never been started
+    NORMAL_EXIT,
+    TERMINATED_BY_SIGNAL,
+    CRASHED,
+    FAILED_FORK, //Watch inputs failed to fork a new process
+    FAILED_EXEC, //Exec within the fork failed, error code will be an errno value returned by exec
+    NO_COMMAND_SET, //The cmd field hasn't been set
+    FAILED_PIPE, //Failed to create a pipe to communicate with forked process
+    FAILED_TO_CREATE_STREAM_DIRECTORY, //Failed to create a directory for the stream
+    STREAM_NOT_FOUND
+  };
+
   //A list of different camera stream modes
   enum class CAMERA_STREAM_MODE {
     GENERIC_COMMAND, //Uses generic cmd and args for running any command
-    FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND //Use ffmpeg with a fixed set of commands and stores to a fixed path
+    FFMPEG_STREAM_TO_STORAGE_COMMAND //Use ffmpeg with a fixed set of commands and stores to a fixed path
   };
   //A list of webapi request modes
   enum class WEBAPI_REQUEST_MODES {

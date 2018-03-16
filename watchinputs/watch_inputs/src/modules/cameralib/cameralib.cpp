@@ -22,7 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 //NOTE: Parts of GENERIC_COMMAND might not be working properly at the moment as
-//  the main focus was initially on FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND
+//  the main focus was initially on FFMPEG_STREAM_TO_STORAGE_COMMAND
 
 //NOTE: POSIX_C_SOURCE is needed for the following
 //  CLOCK_REALTIME
@@ -132,23 +132,29 @@ using boost::asio::ip::tcp;
 class CameraStream {
 public:
   int32_t streamId=0; //A unique id to identify this stream
-  enum CAMERA_STREAM_MODE streamMode=CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND;
+  enum CAMERA_STREAM_MODE streamMode=CAMERA_STREAM_MODE::FFMPEG_STREAM_TO_STORAGE_COMMAND;
   pid_t pid=0; //Pid of the camera capture process for this stream; 0=Don't need to wait for child process
+  enum CAMERA_PROCESS_EXIT_REASON exitReason=CAMERA_PROCESS_EXIT_REASON::NEVER_STARTED;
   int exitStatus=0; //See waitpid man page for macros that can be used with this
   std::string cmd=""; //Command of the camera capture process
   std::vector<std::string> args={}; //Arguments of the camera capture process
   std::string streamURL="";
   bool needStreamURL=true;
   bool hasRun=false; //True=This process has run at least once
-  bool restartOnExit=false; //True=Auto restart the stream when it exits
+  bool restartOnExit=true; //True=Auto restart the stream when it exits
   bool deleteOnExit=false; //True=Auto delete the stream object when it exits
   bool needToRemove=false;
+  bool enabled=true; //True=Capturing is enabled, False=Capturing is disabled
+  int64_t cntSuccessfulStarts=0;
+  int64_t cntUnsuccessfulStarts=0;
 public:
   CameraStream();
   CameraStream(int32_t streamId, std::string cmd, std::vector<std::string> args);
   CameraStream(int32_t streamId, enum CAMERA_STREAM_MODE, std::string cmd, std::vector<std::string> args);
   ~CameraStream();
   boost::property_tree::ptree toProperty(); //Return the object as a Boost Property object
+  void incSuccessfulStartsCnt();
+  void incUnsuccessfulStartsCnt();
 };
 
 class Camera {
@@ -177,10 +183,11 @@ public:
   bool getNeedStreamURL(int32_t streamId);
   void setStreamRestartOnExit(int32_t streamId, bool restartOnExit);
   void setStreamDeleteOnExit(int32_t streamId, bool deleteOnExit);
+  void setStreamEnabled(int32_t streamId, bool enabled);
   int getStreamExitStatus(int32_t streamId);
   int startStreamCapture(int32_t streamId); //Start a camera capturing process
   int waitStreamCapture(int32_t streamId, int timeOutSeconds); //Wait for a csmera capturing process to finish
-  int stopStreamCapture(int32_t streamId, bool force); //Stop a camera capturing process immediately
+  int stopStreamCapture(int32_t streamId, bool force=false, bool wait=false); //Stop a camera capturing process immediately
   bool isStreamCapturing(int32_t streamId); //Check if a stream is currently capturing
   boost::property_tree::ptree toProperty(); //Return the object as a Boost Property object
 };
@@ -200,6 +207,8 @@ static std::list<WebAPIStreamURL> gWebAPIStreamURLQueue;
 
 static int ginuse=0; //Only shutdown when inuse = 0
 static int gshuttingdown=0;
+
+static bool gAllStop=false; //If True, all camera streams should be stopped for this running instance of watch_inputs
 
 static char gneedtoquit=0; //Set to 1 when this library should exit
 
@@ -383,10 +392,36 @@ static std::string streamModeToString(enum CAMERA_STREAM_MODE streamMode) {
   switch (streamMode) {
     case CAMERA_STREAM_MODE::GENERIC_COMMAND:
       return "GENERIC_COMMAND";
-    case CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND:
-      return "FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND";
+    case CAMERA_STREAM_MODE::FFMPEG_STREAM_TO_STORAGE_COMMAND:
+      return "FFMPEG_STREAM_TO_STORAGE_COMMAND";
   }
-  return "";
+  return "Unknown";
+}
+
+static std::string exitReasonToString(enum CAMERA_PROCESS_EXIT_REASON exitReason) {
+  switch (exitReason) {
+    case CAMERA_PROCESS_EXIT_REASON::NEVER_STARTED:
+      return "NEVER_STARTED";
+    case CAMERA_PROCESS_EXIT_REASON::NORMAL_EXIT:
+      return "NORMAL_EXIT";
+    case CAMERA_PROCESS_EXIT_REASON::TERMINATED_BY_SIGNAL:
+      return "TERMINATED_BY_SIGNAL";
+    case CAMERA_PROCESS_EXIT_REASON::CRASHED:
+      return "CRASHED";
+    case CAMERA_PROCESS_EXIT_REASON::FAILED_TO_CREATE_STREAM_DIRECTORY:
+      return "FAILED_TO_CREATE_STREAM_DIRECTORY";
+    case CAMERA_PROCESS_EXIT_REASON::FAILED_FORK:
+      return "FAILED_FORK";
+    case CAMERA_PROCESS_EXIT_REASON::FAILED_EXEC:
+      return "FAILED_EXEC";
+    case CAMERA_PROCESS_EXIT_REASON::NO_COMMAND_SET:
+      return "NO_COMMAND_SET";
+    case CAMERA_PROCESS_EXIT_REASON::FAILED_PIPE:
+      return "FAILED_PIPE";
+    case CAMERA_PROCESS_EXIT_REASON::STREAM_NOT_FOUND:
+      return "STREAM_NOT_FOUND";
+  }
+  return "Unknown";
 }
 
 //----------------------
@@ -445,12 +480,16 @@ boost::property_tree::ptree CameraStream::toProperty() {
   ptree.put("CameraStreamID", this->streamId);
   ptree.put("StreamMode", streamModeToString(this->streamMode));
   ptree.put("Pid", this->pid);
+  ptree.put("exitReason", exitReasonToString(this->exitReason));
   ptree.put("ExitCode", this->exitStatus);
   ptree.put("StreamURL", this->streamURL);
   ptree.put("hasRun", this->hasRun);
   ptree.put("restartOnExit", this->restartOnExit);
   ptree.put("deleteOnExit", this->deleteOnExit);
   ptree.put("needToRemove", this->needToRemove);
+  ptree.put("enabled", this->enabled);
+  ptree.put("cntSuccessfulStarts", this->cntSuccessfulStarts);
+  ptree.put("cntUnsuccessfulStarts", this->cntUnsuccessfulStarts);
   ptree.put("Command", this->cmd);
   ptree.put("CommandArgumentsCount", this->args.size());
   boost::property_tree::ptree argsPt;
@@ -463,6 +502,18 @@ boost::property_tree::ptree CameraStream::toProperty() {
   ptree.put_child("CommandArguments", argsPt);
 
   return ptree;
+}
+
+void CameraStream::incSuccessfulStartsCnt() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  ++this->cntSuccessfulStarts;
+}
+
+void CameraStream::incUnsuccessfulStartsCnt() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  ++this->cntUnsuccessfulStarts;
 }
 
 int32_t Camera::getCamId() {
@@ -572,7 +623,7 @@ int Camera::removeStream(int32_t streamId) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
   try {
     this->cameraStreams.at(streamId).needToRemove=true;
-    this->stopStreamCapture(streamId, true);
+    this->stopStreamCapture(streamId, true, true);
     if (!getCamerasInUse()) {
         this->cameraStreams.erase(streamId);
     } else {
@@ -662,6 +713,16 @@ void Camera::setStreamDeleteOnExit(int32_t streamId, bool deleteOnExit) {
   }
 }
 
+void Camera::setStreamEnabled(int32_t streamId, bool enabled) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    cameraStreams.at(streamId).enabled=enabled;
+  } catch (std::out_of_range& e) {
+    //Camera Stream doesn't exist
+  }
+}
+
 int Camera::getStreamExitStatus(int32_t streamId) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
@@ -676,26 +737,32 @@ int Camera::getStreamExitStatus(int32_t streamId) {
 //Start a camera capturing process
 //Returns 0 for success or negative value on error
 int Camera::startStreamCapture(int32_t streamId) {
-  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   try {
-    if (cameraStreams.at(streamId).streamMode==CAMERA_STREAM_MODE::GENERIC_COMMAND) {
-      if (cameraStreams.at(streamId).cmd=="") {
+    boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+    CameraStream &cameraStream=cameraStreams.at(streamId);
+    if (cameraStream.streamMode==CAMERA_STREAM_MODE::GENERIC_COMMAND) {
+      if (cameraStream.cmd=="") {
         debuglibifaceptr->debuglib_printf(1, "%s: Error: No command has been specified for Camera: %d, Stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
+        cameraStream.incUnsuccessfulStartsCnt();
+        cameraStream.exitReason=CAMERA_PROCESS_EXIT_REASON::NO_COMMAND_SET;
+        cameraStream.exitStatus=0;
         return -1;
       }
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Start camera capture: for Camera: %d, stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command=\"%s\"\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).cmd.c_str());
-      if (!cameraStreams.at(streamId).args.empty()) {
-        for (auto argIt : cameraStreams.at(streamId).args) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command=\"%s\"\n", __PRETTY_FUNCTION__, cameraStream.cmd.c_str());
+      if (!cameraStream.args.empty()) {
+        for (auto argIt : cameraStream.args) {
           debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   command argument=\"%s\"\n", __PRETTY_FUNCTION__, argIt.c_str());
         }
       } else {
         debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG:   No command arguments\n", __PRETTY_FUNCTION__);
       }
-    } else if (cameraStreams.at(streamId).streamMode==CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND) {
-      if (cameraStreams.at(streamId).needStreamURL) {
+    } else if (cameraStream.streamMode==CAMERA_STREAM_MODE::FFMPEG_STREAM_TO_STORAGE_COMMAND) {
+      if (cameraStream.needStreamURL) {
         //We don't have a stream URL yet
+        //Don't treat it as a normal failure as this comes from the webapi
         debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: No stream url yet for camera capture: for Camera: %d, stream: %d\n", __PRETTY_FUNCTION__, camid, streamId);
         return -1;
       }
@@ -714,11 +781,11 @@ int Camera::startStreamCapture(int32_t streamId) {
       //TODO: Get streams storage folder from ini file
       //TODO: Add code for Android as it will need a library path override in the environment
       if (haveffmpegpath) {
-        cameraStreams.at(streamId).cmd=ffmpegpath;
+        cameraStream.cmd=ffmpegpath;
       } else {
-        cameraStreams.at(streamId).cmd="ffmpeg";
+        cameraStream.cmd="ffmpeg";
       }
-      cameraStreams.at(streamId).args={"-v", "info", "-i", cameraStreams.at(streamId).streamURL,
+      cameraStream.args={"-v", "info", "-i", cameraStream.streamURL,
         "-c:v", "copy", "-c:a", "copy", "-bufsize", "1835k", "-pix_fmt", "yuv420p", "-flags", "-global_header",
         "-hls_time", "10", "-hls_list_size", "6", "-hls_wrap", "10", "-start_number", "1"};
 
@@ -741,24 +808,28 @@ int Camera::startStreamCapture(int32_t streamId) {
         bool result=boost::filesystem::create_directories(booststoragepath);
         if (!result) {
           debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to create directory: %s for Camera: %d, Stream: %d\n", __PRETTY_FUNCTION__, storagepath.c_str(), camid, streamId);
+          cameraStream.incUnsuccessfulStartsCnt();
+          cameraStream.exitReason=CAMERA_PROCESS_EXIT_REASON::FAILED_TO_CREATE_STREAM_DIRECTORY;
+          cameraStream.exitStatus=0;
           return -1;
         }
       }
       storagepath+="/stream.m3u8";
-      cameraStreams.at(streamId).args.push_back(storagepath);
+      cameraStream.args.push_back(storagepath);
     }
     //Prepare pointers for exec
     //NOTE: We make a copy of the argument strings and then get c pointers to those string copies
     //  So the references to the strings will stay in tact by the time exec is called
     //We auto add the first argument as the name of the command minus the path
+    std::string cmd=cameraStream.cmd;
     std::vector<std::string> cargs;
     std::vector<char *> cargptrs;
 
-    boost::filesystem::path splitcmd(cameraStreams.at(streamId).cmd);
+    boost::filesystem::path splitcmd(cameraStream.cmd);
     try {
       cargs.push_back(splitcmd.filename().string());
-      if (cameraStreams.at(streamId).args.size()>0) {
-        for (auto argIt : cameraStreams.at(streamId).args) {
+      if (cameraStream.args.size()>0) {
+        for (auto argIt : cameraStream.args) {
           cargs.push_back(argIt);
         }
       }
@@ -778,11 +849,25 @@ int Camera::startStreamCapture(int32_t streamId) {
       //Failed to allocate
       debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to allocate ram for child processes arguments for Camera: %d, Stream: %d: %s\n", __PRETTY_FUNCTION__, camid, streamId, e.what());
     }
+    //Create a pipe so can determine if exec succeeds
+    //https://stackoverflow.com/questions/13710003/execvp-fork-how-to-catch-unsuccessful-executions
+    //https://stackoverflow.com/a/13710144
+    int pipefd[2];
+    if (pipe(pipefd) == -1) {
+      debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to create pipe for communication with forked process\n", __PRETTY_FUNCTION__);
+      cameraStream.exitReason=CAMERA_PROCESS_EXIT_REASON::FAILED_PIPE;
+      cameraStream.exitStatus=0;
+      cameraStream.incUnsuccessfulStartsCnt();
+      return -1;
+    }
     //Spawn a new process to run the command
     pid_t pid=fork();
     int lerrno=errno;
     if (pid==-1) {
       debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to spawn child process to run command for Camera: %d, Stream: %d, errno=%d\n", __PRETTY_FUNCTION__, camid, streamId, lerrno);
+      cameraStream.exitReason=CAMERA_PROCESS_EXIT_REASON::FAILED_FORK;
+      cameraStream.exitStatus=0;
+      cameraStream.incUnsuccessfulStartsCnt();
       return -2;
     }
     if (pid==0) {
@@ -804,22 +889,72 @@ int Camera::startStreamCapture(int32_t streamId) {
       dup2(devNullStdOut, STDOUT_FILENO);
       dup2(devNullStdErr, STDERR_FILENO);
 
-      execvp(cameraStreams.at(streamId).cmd.c_str(), static_cast<char *const *>(cargptrs.data()));
+      //Close the reading end of the pipe
+      close(pipefd[0]);
+
+      //Set close on exec flag for the writing end of the pipe
+      fcntl(pipefd[1], F_SETFD, FD_CLOEXEC);
+
+      execvp(cmd.c_str(), static_cast<char *const *>(cargptrs.data()));
+
+      int execerrno=errno;
 
       //If we get here then the program failed to run so cleanup and shutdown the child
       close(devNullStdIn);
       close(devNullStdOut);
       close(devNullStdErr);
 
-      exit(1);
+      //Write an error code to the pipe
+      char buf[2];
+
+      buf[0]=1; //Special Error Type within child
+      buf[1]=execerrno;
+
+      write(pipefd[1], buf, 2);
+
+      //Close the writing end of the pipe
+      close(pipefd[1]);
+
+      exit(0);
     } else {
-      //Store the value of the child pid
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Camera: %d, Stream: %d now has running child: %ld\n", __PRETTY_FUNCTION__, camid, streamId, pid);
-      cameraStreams.at(streamId).pid=pid;
-      cameraStreams.at(streamId).hasRun=true;
-      if (cameraStreams.at(streamId).streamMode==CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND) {
+      //This is the parent
+
+      //Store the value of the child pid so we can wait for it
+      cameraStream.pid=pid;
+
+      if (cameraStream.streamMode==CAMERA_STREAM_MODE::FFMPEG_STREAM_TO_STORAGE_COMMAND) {
         //Set to get an updated streamURL on the next run
-        cameraStreams.at(streamId).needStreamURL=true;
+        cameraStream.needStreamURL=true;
+      }
+      //Close the writing end of the pipe
+      close(pipefd[1]);
+
+      //Check for error code from the pipe
+      char buf[2];
+
+      ssize_t pipereadcnt=read(pipefd[0], buf, 2);
+      if (pipereadcnt<1) {
+        //Successful run
+
+        //Close the reading end of the pipe
+        close(pipefd[0]);
+
+        cameraStream.incSuccessfulStartsCnt();
+
+        debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Camera: %d, Stream: %d now has running child: %ld\n", __PRETTY_FUNCTION__, camid, streamId, pid);
+      } else {
+        //A failure occurred within the child
+
+        //Force kill the child process as it can get stuck with cloned versions of the parent's descriptors if exec failed
+        stopStreamCapture(streamId, true, true);
+        if (buf[0]==1) {
+          //Exec failed so set the exit status to errno result of exec
+          cameraStream.exitReason=CAMERA_PROCESS_EXIT_REASON::FAILED_EXEC;
+          cameraStream.exitStatus=buf[1];
+          cameraStream.incUnsuccessfulStartsCnt();
+          debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Exec failed with exit status: %d\n", __PRETTY_FUNCTION__, (int) buf[1]);
+        }
+        return -1;
       }
     }
     return 0;
@@ -843,11 +978,15 @@ int Camera::waitStreamCapture(int32_t streamId, int timeOutSeconds) {
     bool isRunning=true;
     int exitStatus=0;
     int timeOut=0;
-    do {
+    while (timeOut<=timeOutSeconds) {
       //NOTE: Call waitpid at least once even if timeOutSeconds=0
       pid_t result=waitpid(cameraStreams.at(streamId).pid, &exitStatus, WNOHANG);
-      if (result!=0) {
-        //-1=Error, but most of those mean the pid is no longer valid for us
+      if (result==-1) {
+        //Error occurred so just return finished without setting exit status
+        cameraStreams.at(streamId).pid=0;
+        return 0;
+      }
+      if (result>0) {
         //Positive value means the process has exited
         isRunning=false;
         break;
@@ -862,10 +1001,32 @@ int Camera::waitStreamCapture(int32_t streamId, int timeOutSeconds) {
       //Sleep for 1 second
       sleep(1);
       ++timeOut;
-    } while (timeOut<timeOutSeconds);
+    }
     if (!isRunning) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Setting exit status of pid: %d to %d\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).pid, exitStatus);
       cameraStreams.at(streamId).pid=0;
-      cameraStreams.at(streamId).exitStatus=exitStatus;
+      cameraStreams.at(streamId).hasRun=true;
+      if (WIFEXITED(exitStatus)) {
+        cameraStreams.at(streamId).exitReason=CAMERA_PROCESS_EXIT_REASON::NORMAL_EXIT;
+        cameraStreams.at(streamId).exitStatus=WEXITSTATUS(exitStatus);
+      } else if (WIFSIGNALED(exitStatus)) {
+#ifdef WCOREDUMP
+        //NOTE: WCOREDUMP isn't defined on all systems
+        if (WCOREDUMP(exitStatus)) {
+          cameraStreams.at(streamId).exitReason=CAMERA_PROCESS_EXIT_REASON::CRASHED;
+          cameraStreams.at(streamId).exitStatus=WTERMSIG(exitStatus); //The  number  of  the  signal that caused the child process to terminate
+        } else {
+#endif
+        cameraStreams.at(streamId).exitReason=CAMERA_PROCESS_EXIT_REASON::TERMINATED_BY_SIGNAL;
+        cameraStreams.at(streamId).exitStatus=WTERMSIG(exitStatus); //The  number  of  the  signal that caused the child process to terminate
+#ifdef WCOREDUMP
+        }
+#endif
+      } else {
+        //Just assume a normal exit by default
+        cameraStreams.at(streamId).exitReason=CAMERA_PROCESS_EXIT_REASON::NORMAL_EXIT;
+        cameraStreams.at(streamId).exitStatus=exitStatus;
+      }
       return 0;
     }
     else if (timeOut>=timeOutSeconds) {
@@ -879,7 +1040,8 @@ int Camera::waitStreamCapture(int32_t streamId, int timeOutSeconds) {
 
 //Stop a camera capturing process immediately
 //Returns 0 if process has finished, or negative value on error
-int Camera::stopStreamCapture(int32_t streamId, bool force=false) {
+//wait=true; Wait a few seconds for the process to exit before returning
+int Camera::stopStreamCapture(int32_t streamId, bool force, bool wait) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   try {
@@ -890,6 +1052,10 @@ int Camera::stopStreamCapture(int32_t streamId, bool force=false) {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Terminating process: %ld\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).pid);
       int result=kill(cameraStreams.at(streamId).pid, SIGTERM);
       if (result==0) {
+        if (wait) {
+          //Call waitPid to get the exit status and finish the cleaning up child process
+          waitStreamCapture(streamId, 2);
+        }
         return 0;
       } else {
         return -1;
@@ -897,7 +1063,11 @@ int Camera::stopStreamCapture(int32_t streamId, bool force=false) {
     } else {
       debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Killing process: %ld\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).pid);
       int result=kill(cameraStreams.at(streamId).pid, SIGKILL);
-      if (result!=0) {
+      if (result==0) {
+        if (wait) {
+          //Call waitPid to get the exit status and finish the cleaning up child process
+          waitStreamCapture(streamId, 2);
+        }
         return 0;
       } else {
         return -1;
@@ -949,6 +1119,7 @@ boost::property_tree::ptree CamerasToProperty() {
   boost::property_tree::ptree ptree, cameraspt;
 
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+  ptree.put("AllStop", gAllStop);
   ptree.put("CameraCount", gcameras.size());
   for (auto &camera : gcameras) {
     cameraspt.push_back(std::make_pair("", camera.second.toProperty()));
@@ -1290,6 +1461,20 @@ static int cmd_test_set_camera_stream_property(const char *buffer, int clientsoc
       } else if (buffertokens[4]=="false") {
         gcameras[camid].setStreamDeleteOnExit(streamId, false);
         ostream << "deleteOnExit set to false for camera stream with id: " << streamId << " for camera object: " << camid << std::endl;
+      } else {
+        ostream << "Invalid parameter: " << buffertokens[4] << std::endl;
+      }
+    } else if (property=="enabled") {
+      if (buffertokens.size()<4) {
+        cmdserverlibifaceptr->netputs("MISSING PARAMETERS\n", clientsock, NULL);
+        return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+      }
+      if (buffertokens[4]=="true") {
+        gcameras[camid].setStreamEnabled(streamId, true);
+        ostream << "enabled set to true for camera stream with id: " << streamId << " for camera object: " << camid << std::endl;
+      } else if (buffertokens[4]=="false") {
+        gcameras[camid].setStreamEnabled(streamId, false);
+        ostream << "enabled set to false for camera stream with id: " << streamId << " for camera object: " << camid << std::endl;
       } else {
         ostream << "Invalid parameter: " << buffertokens[4] << std::endl;
       }
@@ -2151,7 +2336,7 @@ private:
           continue;
         }
         if (!cameraIt.second.isStreamCapturing(cameraStreamIt->first)) {
-          if (cameraStreamIt->second.restartOnExit || cameraStreamIt->second.streamMode==CAMERA_STREAM_MODE::FFMPEG_CONTINUOUS_STREAM_STORAGE_COMMAND) {
+          if (cameraStreamIt->second.restartOnExit && cameraStreamIt->second.enabled) {
             //If in continuous stream mode, always restart the stream automatically
             cameraIt.second.startStreamCapture(cameraStreamIt->first);
           }
