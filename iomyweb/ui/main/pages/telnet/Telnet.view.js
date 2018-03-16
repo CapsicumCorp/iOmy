@@ -53,9 +53,11 @@ sap.ui.jsview("pages.telnet.Telnet", {
 		}).addStyleClass("width100Percent TelnetOutput");
 		
 		oView.wInputTelnetCommand = new sap.m.Input ({
-			layoutData : new sap.m.FlexItemData({
-				growFactor : 1
+			layoutData : new sap.m.OverflowToolbarLayoutData({
+				priority : sap.m.OverflowToolbarPriority.NeverOverflow
 			}),
+			width: "240px",
+			placeholder: "Enter Command",
 			submit : function () {
 				if (this.getValue().length > 0) {
 					oController.ExecuteCommand(this.getValue());
@@ -65,6 +67,9 @@ sap.ui.jsview("pages.telnet.Telnet", {
 		}).addStyleClass("");
 		
 		oView.wBtnExecuteCommand = new sap.m.Button({
+			layoutData : new sap.m.OverflowToolbarLayoutData({
+				priority : sap.m.OverflowToolbarPriority.NeverOverflow
+			}),
 			text: "Run",
 			press : function () {
 				if (oView.wInputTelnetCommand.getValue().length > 0) {
@@ -94,145 +99,69 @@ sap.ui.jsview("pages.telnet.Telnet", {
 								oView.wTextAreaOutput
 							]
 						}),				
-						new sap.m.VBox ({
-							items: [
-								new sap.m.Label ({
-									text : "Enter command:"
+						new sap.m.OverflowToolbar ({
+							content: [
+								oView.wInputTelnetCommand,
+								oView.wBtnExecuteCommand,
+								oView.wToggleShowDebug,
+								oView.wBtnCheckLink,
+								oView.wBtnListDevices,
+								new sap.m.Button({
+									type:"Default",
+									text: "Show Debug",
+									press : function () {
+										oController.ExecuteCommand("debug output show");
+									}
 								}),
-								new sap.m.HBox({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									items : [
-										oView.wInputTelnetCommand,
-										oView.wBtnExecuteCommand
-									]
-								}).addStyleClass(""),
-								new sap.m.HBox({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									items : [
-										oView.wToggleShowDebug,
-										oView.wBtnCheckLink,
-										oView.wBtnListDevices
-									]
-								}).addStyleClass("TextCenter"),
-                                
-                                //-- Row 1 --//
-                                new sap.m.HBox({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									items : [
-                                        //-- Debug Output --//
-										new sap.m.Button({
-                                            layoutData : new sap.m.FlexItemData({
-                                                growFactor : 1
-                                            }),
-                                            type:"Default",
-                                            text: "Show Debug",
-
-                                            press : function () {
-                                                oController.ExecuteCommand("debug output show");
-                                            }
-                                        }),
-                                        
-                                        //-- Version Info --//
-										new sap.m.Button({
-                                            layoutData : new sap.m.FlexItemData({
-                                                growFactor : 1
-                                            }),
-                                            type:"Default",
-                                            text: "Show Version",
-
-                                            press : function () {
-                                                oController.ExecuteCommand("versioninfo");
-                                            }
-                                        }),
-                                        
-                                        //-- Modules Info --//
-										new sap.m.Button({
-                                            layoutData : new sap.m.FlexItemData({
-                                                growFactor : 1
-                                            }),
-                                            type:"Default",
-                                            text: "Show Modules",
-
-                                            press : function () {
-                                                oController.ExecuteCommand("modulesinfo");
-                                            }
-                                        })
-									]
-								}).addStyleClass("TextCenter"),
-                                
-                                //-- Row 2 --//
-                                new sap.m.HBox({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									items : [
-                                        //-- Get RapidHA Information --//
-										new sap.m.Button({
-                                            layoutData : new sap.m.FlexItemData({
-                                                growFactor : 1
-                                            }),
-                                            type:"Default",
-                                            text: "Get RapidHA Info",
-
-                                            press : function () {
-                                                oController.ExecuteCommand("get_rapidha_info");
-                                            }
-                                        }),
-                                        
-                                        //-- Get Zigbee Information --//
-										new sap.m.Button({
-                                            layoutData : new sap.m.FlexItemData({
-                                                growFactor : 1
-                                            }),
-                                            type:"Default",
-                                            text: "Get Zigbee Info",
-
-                                            press : function () {
-                                                oController.ExecuteCommand("get_zigbee_info");
-                                            }
-                                        })
-									]
-								}).addStyleClass("TextCenter"),
-                                
-                                //-- Row 3 --//
-                                new sap.m.HBox({
-									layoutData : new sap.m.FlexItemData({
-										growFactor : 1
-									}),
-									items : [
-                                        //-- Get RapidHA Information --//
-										new sap.m.Button({
-                                            layoutData : new sap.m.FlexItemData({
-                                                growFactor : 1
-                                            }),
-                                            type:"Default",
-                                            text: "Form Network",
-
-                                            press : function () {
-                                                oController.ExecuteCommand("rapidha_form_network");
-                                            }
-                                        }),
-                                        
-                                        //-- Get Zigbee Information --//
-										new sap.m.Button({
-                                            layoutData : new sap.m.FlexItemData({
-                                                growFactor : 1
-                                            }),
-                                            type:"Default",
-                                            text: "Form Network (Netvox)",
-
-                                            press : function () {
-                                                oController.ExecuteCommand("rapidha_form_network_netvoxchan");
-                                            }
-                                        })
-									]
-								}).addStyleClass("TextCenter")
+								//-- Version Info --//
+								new sap.m.Button({
+									type:"Default",
+									text: "Show Version",
+									press : function () {
+										oController.ExecuteCommand("versioninfo");
+									}
+								}),
+								//-- Modules Info --//
+								new sap.m.Button({
+									type:"Default",
+									text: "Show Modules",
+									press : function () {
+										oController.ExecuteCommand("modulesinfo");
+									}
+								}),
+								//-- Get RapidHA Information --//
+								new sap.m.Button({
+									type:"Default",
+									text: "Get RapidHA Info",
+									press : function () {
+										oController.ExecuteCommand("get_rapidha_info");
+									}
+								}),
+								
+								//-- Get Zigbee Information --//
+								new sap.m.Button({
+									type:"Default",
+									text: "Get Zigbee Info",
+									press : function () {
+										oController.ExecuteCommand("get_zigbee_info");
+									}
+								}),
+								//-- Get RapidHA Information --//
+								new sap.m.Button({
+									type:"Default",
+									text: "Form Network",
+									press : function () {
+										oController.ExecuteCommand("rapidha_form_network");
+									}
+								}),
+								//-- Get Zigbee Information --//
+								new sap.m.Button({
+									type:"Default",
+									text: "Form Network (Netvox)",
+									press : function () {
+										oController.ExecuteCommand("rapidha_form_network_netvoxchan");
+									}
+								})
 							]
 						})					
 					]
