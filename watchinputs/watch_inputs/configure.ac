@@ -69,7 +69,8 @@ BOOST_FIND_HEADER([boost/property_tree/json_parser.hpp])
 
 BOOST_FIND_HEADER([boost/filesystem/path.hpp])
 
-# optional libraries
+# optional libraries and functions
+AC_CHECK_FUNCS([accept4], [], [])
 
 # Plugin options
 AC_ARG_ENABLE([mysql-plugin], AS_HELP_STRING([--disable-mysql-plugin], [Build without MySQL plugin]), [], [enable_mysql_plugin=yes])

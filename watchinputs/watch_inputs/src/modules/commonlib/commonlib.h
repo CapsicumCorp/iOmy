@@ -68,7 +68,7 @@ typedef struct {
 #pragma pack(pop)
 
 #define COMMONLIBINTERFACE_VER_1 1 //A version number for the commonlib interface version
-#define COMMONLIBINTERFACE_VER_2 1 //A version number for the commonlib interface version
+#define COMMONLIBINTERFACE_VER_2 2 //A version number for the commonlib interface version
 
 typedef struct _value_string value_string;
 typedef union multitypeval multitypeval_t;

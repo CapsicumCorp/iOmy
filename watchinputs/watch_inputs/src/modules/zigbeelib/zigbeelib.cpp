@@ -74,6 +74,7 @@ NOTE: RapidHA seems to have a total in transit buffer limit of 5 packets which i
 #include <jni.h>
 #endif
 #include "moduleinterface.h"
+#include "main/mainlib.h"
 #include "modules/commonlib/commonlib.h"
 #include "zigbeelib.h"
 #include "zigbeelibpriv.h"
@@ -591,6 +592,8 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_ZigbeeLib_jnige
 #define WEBAPICLIENTLIB_DEPIDX 4
 #define CONFIGLIB_DEPIDX 5
 #define LOCKLIB_DEPIDX 6
+#define COMMONLIB_DEPIDX 7
+#define MAINLIB_DEPIDX 8
 
 static zigbeelib_ifaceptrs_ver_1_t zigbeelib_ifaceptrs_ver_1={
   zigbeelib_process_zdo_send_status,
@@ -707,6 +710,16 @@ static moduledep_ver_1_t zigbeelib_deps[]={
     nullptr,
     LOCKLIBINTERFACE_VER_1,
     1
+  },
+  {
+    "commonlib",
+    nullptr,
+    COMMONLIBINTERFACE_VER_2
+  },
+  {
+    "mainlib",
+    nullptr,
+    MAINLIBINTERFACE_VER_2
   },
   {
     nullptr, nullptr, 0, 0
@@ -7497,6 +7510,8 @@ struct dbtypes {
 static void initZigbeeDefs(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) zigbeelib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   auto configlibifaceptr=(configlib_ifaceptrs_ver_1_cpp_t *) zigbeelib_deps[CONFIGLIB_DEPIDX].ifaceptr;
+  auto commonlibifaceptr=(commonlib_ifaceptrs_ver_2_t *) zigbeelib_deps[COMMONLIB_DEPIDX].ifaceptr;
+  auto mainlibifaceptr=(mainlib_ifaceptrs_ver_2_t *) zigbeelib_deps[MAINLIB_DEPIDX].ifaceptr;
   size_t tmplen;
   char linebuf[LINEBUF_SIZE];
   FILE *file=NULL;
@@ -7528,8 +7543,10 @@ static void initZigbeeDefs(void) {
 		zigbeelib_unlockzigbee();
 		return;
 	}
-  int defsfilefd=open(zigbeedefsfilename.c_str(), O_RDONLY|O_CLOEXEC, 0);
-  if (defsfilefd==-1) {
+  mainlibifaceptr->newdescriptorlock();
+  int defsfilefd=commonlibifaceptr->open_with_cloexec(zigbeedefsfilename.c_str(), O_RDONLY);
+  mainlibifaceptr->newdescriptorunlock();
+  if (defsfilefd<0) {
     zigbeelib_unlockzigbee();
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, zigbeedefsfilename.c_str());
     debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);

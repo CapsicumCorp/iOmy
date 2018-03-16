@@ -24,9 +24,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //TODO: Convert the socket to a struct so can store getc buffers and other info, then return pointer to the struct similar to FILE *
 //TODO: abortearly function should be part of a struct for the socket since the module that opens the socket will also close it on abort
 
-//Needed for accept4
-#define _GNU_SOURCE
-
 #include <poll.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,8 +39,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <android/log.h>
 #endif
 #include "moduleinterface.h"
+#include "main/mainlib.h"
 #include "commonserverlib.h"
 #include "modules/debuglib/debuglib.h"
+#include "modules/commonlib/commonlib.h"
 
 #define MAX_PENDING 10
 
@@ -61,6 +60,8 @@ static int serverlib_waitForConnection(int sock, int (* const getAbortEarlyfuncp
 
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
+#define COMMONLIB_DEPIDX 1
+#define MAINLIB_DEPIDX 2
 
 static commonserverlib_ifaceptrs_ver_1_t commonserverlib_ifaceptrs_ver_1={
   serverlib_netgetc,
@@ -90,6 +91,18 @@ static moduledep_ver_1_t commonserverlib_deps[]={
     "debuglib",
     NULL,
     DEBUGLIBINTERFACE_VER_1,
+    1
+  },
+  {
+    "commonlib",
+    NULL,
+    COMMONLIBINTERFACE_VER_2,
+    1
+  },
+  {
+    "mainlib",
+    NULL,
+    MAINLIBINTERFACE_VER_2,
     1
   },
   {
@@ -284,6 +297,17 @@ static void serverlib_closeSocket(int *socket) {
   }
 }
 
+static int serverlib_socket_with_locking(int domain, int type, int protocol) {
+  commonlib_ifaceptrs_ver_2_t const * const commonlibifaceptr=commonserverlib_deps[COMMONLIB_DEPIDX].ifaceptr;
+  mainlib_ifaceptrs_ver_2_t const * const mainlibifaceptr=commonserverlib_deps[MAINLIB_DEPIDX].ifaceptr;
+
+  mainlibifaceptr->newdescriptorlock();
+  int sock=commonlibifaceptr->socket_with_cloexec(domain, type, protocol);
+  mainlibifaceptr->newdescriptorunlock();
+
+  return sock;
+}
+
 /*
   Setup a socket to a tcp connection listener
   Arguments: hostip: The IP address to listen to or INADDR_ANY to listen on all IP addresses
@@ -297,17 +321,7 @@ static int serverlib_setupTCPListenSocket(in_addr_t hostip, uint16_t port, int (
   struct sockaddr_in my_addr;
 
   curretry=0;
-#ifdef __ANDROID__
-#if __ANDROID_API__ < 21
-  //SOCK_CLOEXEC wasn't defined until Android 21 but Android 21 just redefines it to O_CLOEXEC
-  //  so that should be okay to use here
-  while( (sock = socket(AF_INET, SOCK_STREAM|O_CLOEXEC, 6)) < 0) {
-#else
-  while( (sock = socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC, 6)) < 0) {
-#endif
-#else
-  while( (sock = socket(AF_INET, SOCK_STREAM|SOCK_CLOEXEC, 6)) < 0) {
-#endif
+  while( (sock = serverlib_socket_with_locking(AF_INET, SOCK_STREAM, 6)) < 0) {
     //Failed to create a socket so wait 1 second then try again up to 60 seconds
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to create socket for hostip: %d.%d.%d.%d, port: %d, errno=%d\n",
       __func__,
@@ -403,6 +417,8 @@ static int serverlib_setupTCPListenSocket(in_addr_t hostip, uint16_t port, int (
   Returns the socket number of the new connection or negative value on error
 */
 static int serverlib_waitForConnection_with_quitpipe(int sock, int (* const getAbortEarlyfuncptr)(void), int quitpipefd) {
+  commonlib_ifaceptrs_ver_2_t const * const commonlibifaceptr=commonserverlib_deps[COMMONLIB_DEPIDX].ifaceptr;
+  mainlib_ifaceptrs_ver_2_t const * const mainlibifaceptr=commonserverlib_deps[MAINLIB_DEPIDX].ifaceptr;
   int result=-1, lerrno;
   struct pollfd fds[2];
   nfds_t nfds;
@@ -462,18 +478,10 @@ static int serverlib_waitForConnection_with_quitpipe(int sock, int (* const getA
       break;
     }
     addrlen = sizeof(struct sockaddr_in);
-#ifdef __ANDROID__
-#if __ANDROID_API__ < 21
-      //Android workaround for accept4 not available in Android < 21
-      #warning "accept4 and SOCK_CLOEXEC aren't available in Android API < 21"
-      sock=accept(sock, (struct sockaddr*)&remote_addr, &addrlen);
-#else
-      sock=accept4(sock, (struct sockaddr*)&remote_addr, &addrlen, SOCK_CLOEXEC);
-#endif
-#else
-      sock=accept4(sock, (struct sockaddr*)&remote_addr, &addrlen, SOCK_CLOEXEC);
-#endif
+    mainlibifaceptr->newdescriptorlock();
+    sock=commonlibifaceptr->accept_with_cloexec(sock, (struct sockaddr*)&remote_addr, &addrlen);
     lerrno=errno;
+    mainlibifaceptr->newdescriptorunlock();
     if (sock<0) {
       result=-1;
       break;

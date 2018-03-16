@@ -102,6 +102,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include "moduleinterface.h"
 #include "cameralibpriv.hpp"
+#include "main/mainlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/dblib/dblib.h"
@@ -224,6 +225,7 @@ static const cmdserverlib_ifaceptrs_ver_2_t *cmdserverlibifaceptr;
 static const dblib_ifaceptrs_ver_1_t *dblibifaceptr;
 static const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr;
 static const configlib_ifaceptrs_ver_2_cpp_t *configlibifaceptr;
+static const mainlib_ifaceptrs_ver_2_t *mainlibifaceptr;
 
 //Static Function Declarations
 
@@ -267,6 +269,12 @@ static moduledep_ver_1_t gdeps[]={
     "configlib",
     nullptr,
     CONFIGLIBINTERFACECPP_VER_2,
+    1
+  },
+  {
+    "mainlib",
+    nullptr,
+    MAINLIBINTERFACE_VER_2,
     1
   },
   {
@@ -861,9 +869,13 @@ int Camera::startStreamCapture(int32_t streamId) {
       return -1;
     }
     //Spawn a new process to run the command
+    //First wait for new descriptor lock
+    mainlibifaceptr->newdescriptorlock();
     pid_t pid=fork();
     int lerrno=errno;
     if (pid==-1) {
+      mainlibifaceptr->newdescriptorunlock();
+
       debuglibifaceptr->debuglib_printf(1, "%s: Error: Failed to spawn child process to run command for Camera: %d, Stream: %d, errno=%d\n", __PRETTY_FUNCTION__, camid, streamId, lerrno);
       cameraStream.exitReason=CAMERA_PROCESS_EXIT_REASON::FAILED_FORK;
       cameraStream.exitStatus=0;
@@ -872,6 +884,10 @@ int Camera::startStreamCapture(int32_t streamId) {
     }
     if (pid==0) {
       //This is the child
+
+      //We don't unlock descriptor lock as some systems may corrupt pthread structures
+      //This should only be a problem though if exec fails
+      //http://www.linuxprogrammingblog.com/threads-and-fork-think-twice-before-using-them
 
       //disable blocking of signals for the child process
       sigset_t set;
@@ -915,9 +931,15 @@ int Camera::startStreamCapture(int32_t streamId) {
       //Close the writing end of the pipe
       close(pipefd[1]);
 
-      exit(0);
+      //Since exec failed there may still be locks in place left by other threads which are no longer running
+      //We should just force kill as exit might not work
+      pid_t pid=getpid();
+      kill(pid, SIGKILL);
     } else {
       //This is the parent
+
+      //Unlock new descriptor lock
+      mainlibifaceptr->newdescriptorunlock();
 
       //Store the value of the child pid so we can wait for it
       cameraStream.pid=pid;
@@ -2528,6 +2550,7 @@ static int init(void) {
   dblibifaceptr=reinterpret_cast<const dblib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("dblib", DBLIBINTERFACE_VER_1));;
   debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   configlibifaceptr=reinterpret_cast<const configlib_ifaceptrs_ver_2_cpp_t *>(getmoduledepifaceptr("configlib", CONFIGLIBINTERFACECPP_VER_2));
+  mainlibifaceptr=reinterpret_cast<const mainlib_ifaceptrs_ver_2_t *>(getmoduledepifaceptr("mainlib", MAINLIBINTERFACE_VER_2));
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
 

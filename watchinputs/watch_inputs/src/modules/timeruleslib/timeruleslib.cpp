@@ -58,6 +58,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include "moduleinterface.h"
 #include "timeruleslib.hpp"
+#include "main/mainlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/dblib/dblib.h"
 #include "modules/commonlib/commonlib.h"
@@ -213,6 +214,8 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_TimeRulesLib_jn
 #define DEBUGLIB_DEPIDX 0
 #define DBLIB_DEPIDX 1
 #define CMDSERVERLIB_DEPIDX 2
+#define COMMONLIB_DEPIDX 3
+#define MAINLIB_DEPIDX 4
 
 static timeruleslib_ifaceptrs_ver_1_t timeruleslib_ifaceptrs_ver_1={
   timeruleslib_setrulesfilename,
@@ -257,6 +260,18 @@ moduledep_ver_1_t timeruleslib_deps[]={
     "cmdserverlib",
     nullptr,
     CMDSERVERLIBINTERFACE_VER_1,
+    0
+  },
+  {
+    "commonlib",
+    nullptr,
+    COMMONLIBINTERFACE_VER_2,
+    0
+  },
+  {
+    "mainlib",
+    nullptr,
+    MAINLIBINTERFACE_VER_2,
     0
   },
   {
@@ -389,6 +404,8 @@ void timeruleslib_unlock() {
 */
 int timeruleslib_readrulesfile(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) timeruleslib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  commonlib_ifaceptrs_ver_2_t *commonlibifaceptr=(commonlib_ifaceptrs_ver_2_t *) timeruleslib_deps[COMMONLIB_DEPIDX].ifaceptr;
+  mainlib_ifaceptrs_ver_2_t *mainlibifaceptr=(mainlib_ifaceptrs_ver_2_t *) timeruleslib_deps[MAINLIB_DEPIDX].ifaceptr;
   FILE *file;
   char *linebuf;
   int abort=0;
@@ -414,8 +431,10 @@ int timeruleslib_readrulesfile(void) {
     return 0;
   }
   rulesloadpending=0;
-  int rulesfilefd=open(rulesfilename.c_str(), O_RDONLY|O_CLOEXEC, 0);
-  if (rulesfilefd==-1) {
+  mainlibifaceptr->newdescriptorlock();
+  int rulesfilefd=commonlibifaceptr->open_with_cloexec(rulesfilename.c_str(), O_RDONLY);
+  mainlibifaceptr->newdescriptorunlock();
+  if (rulesfilefd<0) {
     rulesloadpending=1;
     timeruleslib_unlock();
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, rulesfilename.c_str());

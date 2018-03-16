@@ -52,6 +52,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include "moduleinterface.h"
 #include "configlib.hpp"
+#include "main/mainlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/commonlib/commonlib.h"
 
@@ -190,6 +191,8 @@ JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_ConfigLib_jnige
 
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
+#define COMMONLIB_DEPIDX 1
+#define MAINLIB_DEPIDX 2
 
 static configlib_ifaceptrs_ver_1_t configlib_ifaceptrs_ver_1={
   configlib_register_readcfgfile_post_listener,
@@ -258,6 +261,18 @@ moduledep_ver_1_t configlib_deps[]={
     "debuglib",
 		nullptr,
     DEBUGLIBINTERFACE_VER_1,
+    1
+  },
+  {
+    "commonlib",
+    nullptr,
+    COMMONLIBINTERFACE_VER_2,
+    1
+  },
+  {
+    "mainlib",
+    nullptr,
+    MAINLIBINTERFACE_VER_2,
     1
   },
   {
@@ -540,6 +555,8 @@ int configlib_setcfgfilename(const char *cfgfile) {
 */
 int configlib_readcfgfile(void) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) configlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  commonlib_ifaceptrs_ver_2_t *commonlibifaceptr=(commonlib_ifaceptrs_ver_2_t *) configlib_deps[COMMONLIB_DEPIDX].ifaceptr;
+  mainlib_ifaceptrs_ver_2_t *mainlibifaceptr=(mainlib_ifaceptrs_ver_2_t *) configlib_deps[MAINLIB_DEPIDX].ifaceptr;
   FILE *file;
   char *linebuf;
   int abort=0;
@@ -558,8 +575,10 @@ int configlib_readcfgfile(void) {
     return -1;
   }
   configloadpending=0;
-  int cfgfilefd=open(cfgfilename.c_str(), O_RDONLY|O_CLOEXEC, 0);
-  if (cfgfilefd==-1) {
+  mainlibifaceptr->newdescriptorlock();
+  int cfgfilefd=commonlibifaceptr->open_with_cloexec(cfgfilename.c_str(), O_RDONLY);
+  mainlibifaceptr->newdescriptorunlock();
+  if (cfgfilefd<0) {
     configloadpending=1;
     configlib_unlockconfig();
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, cfgfilename.c_str());

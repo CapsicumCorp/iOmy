@@ -90,8 +90,10 @@ static pthread_t gmainthread=0;
 static pthread_mutexattr_t errorcheckmutexattr;
 
 static pthread_mutex_t mainlibmutex;
+static pthread_mutex_t mainlibnewdescriptormutex;
 #else
 static pthread_mutex_t mainlibmutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t mainlibnewdescriptormutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 #ifndef __ANDROID__
@@ -120,6 +122,14 @@ void mainlib_setneedtoquit(int val);
 int mainlib_getneedtoquit();
 static void *mainlib_MainThreadLoop(void *thread_val);
 
+//Lock the thread before creating a new descriptor (with open for example)
+//Useful when O_CLOEXEC or SOCK_CLOEXEC aren't available so CLOEXEC needs to be applied using multiple system calls
+//Also should be used just before calling fork so CLOEXEC race condition doesn't occur
+int mainlib_newdescriptorlock();
+
+//Unlock the thread after finished creating the new descriptor
+int mainlib_newdescriptorunlock();
+
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
 #define CMDSERVERLIB_DEPIDX 1
@@ -129,13 +139,27 @@ static void *mainlib_MainThreadLoop(void *thread_val);
 static const mainlib_ifaceptrs_ver_1_t mainlib_ifaceptrs_ver_1={
   mainlib_loadsymbol,
   mainlib_loadmodulesymbol,
-  mainlib_loadcustommodulesymbol
+  mainlib_loadcustommodulesymbol,
+  mainlib_getneedtoquit
+};
+
+static const mainlib_ifaceptrs_ver_2_t mainlib_ifaceptrs_ver_2={
+  mainlib_loadsymbol,
+  mainlib_loadmodulesymbol,
+  mainlib_loadcustommodulesymbol,
+  mainlib_getneedtoquit,
+  mainlib_newdescriptorlock,
+  mainlib_newdescriptorunlock
 };
 
 static const moduleiface_ver_1_t mainlib_ifaces[]={
   {
     &mainlib_ifaceptrs_ver_1,
     MAINLIBINTERFACE_VER_1
+  },
+  {
+    &mainlib_ifaceptrs_ver_2,
+    MAINLIBINTERFACE_VER_2
   },
   {
     NULL, 0
@@ -218,6 +242,7 @@ __android_log_print(ANDROID_LOG_INFO, APPNAME, "DEBUG: Entering %s", __func__);
   pthread_mutexattr_settype(&errorcheckmutexattr, PTHREAD_MUTEX_ERRORCHECK);
 
   pthread_mutex_init(&mainlibmutex, &errorcheckmutexattr);
+  pthread_mutex_init(&mainlibnewdescriptormutex, &errorcheckmutexattr);
 #endif
 
 	mainlib_inited=1;
@@ -291,6 +316,7 @@ void mainlib_shutdown() {
 #ifdef DEBUG
   //Destroy main mutexes
   pthread_mutex_destroy(&mainlibmutex);
+  pthread_mutex_destroy(&mainlibnewdescriptormutex);
 
   pthread_mutexattr_destroy(&errorcheckmutexattr);
 #endif
@@ -975,6 +1001,18 @@ int mainlib_getneedtoquit() {
 	PTHREAD_UNLOCK(&mainlibmutex);
 
 	return val;
+}
+
+//Lock the thread before creating a new descriptor (with open for example)
+//Useful when O_CLOEXEC or SOCK_CLOEXEC aren't available so CLOEXEC needs to be applied using multiple system calls
+//Also should be used just before calling fork so CLOEXEC race condition doesn't occur
+int mainlib_newdescriptorlock() {
+  return PTHREAD_LOCK(&mainlibnewdescriptormutex);
+}
+
+//Unlock the thread after finished creating the new descriptor
+int mainlib_newdescriptorunlock() {
+  return PTHREAD_UNLOCK(&mainlibnewdescriptormutex);
 }
 
 #ifndef __ANDROID__

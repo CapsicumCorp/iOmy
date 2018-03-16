@@ -21,6 +21,13 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+//Needed for accept4
+#define _GNU_SOURCE
+
+#ifndef __ANDROID__
+#include <config.h>
+#endif
+
 #include <unistd.h>
 #include <pthread.h>
 #include <ctype.h>
@@ -35,6 +42,21 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef FD_CLOEXEC
 #error "commonlib.c needs FD_CLOEXEC to be defined"
+#endif
+
+#ifdef __ANDROID__
+//Only Android > 21 has accept4
+#if __ANDROID_API__ >= 21
+#ifndef HAVE_ACCEPT4
+#define HAVE_ACCEPT4
+#endif
+#endif
+#if __ANDROID_API__ < 21
+//Make sure HAVE_ACCEPT4 isn't defined on Android < 21
+#ifdef HAVE_ACCEPT4
+#undef HAVE_ACCEPT4
+#endif
+#endif
 #endif
 
 //On Android SOCK_CLOEXEC wasn't defined until Android 21
@@ -374,7 +396,7 @@ int commonlib_socket_with_cloexec(int domain, int type, int protocol) {
   }
   return sock;
 #else
-  sock=socket(domain, type, protocol);
+  sock=socket(domain, type|SOCK_CLOEXEC, protocol);
   if (sock==-1) {
     return -1;
   }
@@ -425,7 +447,11 @@ int commonlib_accept_with_cloexec(int sockfd, struct sockaddr *addr, socklen_t *
   }
   return sock;
 #else
+#ifdef HAVE_ACCEPT4
+  sock=accept4(sockfd, addr, addrlen, SOCK_CLOEXEC);
+#else
   sock=accept(sockfd, addr, addrlen);
+#endif
   if (sock==-1) {
     return -1;
   }

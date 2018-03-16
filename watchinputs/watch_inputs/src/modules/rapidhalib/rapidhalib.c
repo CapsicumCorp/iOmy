@@ -72,6 +72,7 @@ NOTE: We have seen the following RapidHA firmware versions:
 #endif
 #include "moduleinterface.h"
 #include "rapidhalib.h"
+#include "main/mainlib.h"
 #include "modules/cmdserverlib/cmdserverlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/serialportlib/serialportlib.h"
@@ -326,6 +327,16 @@ STATIC moduledep_ver_1_t rapidhalib_deps[]={
   {
     .modulename="zigbeelib",
     .ifacever=ZIGBEELIBINTERFACE_VER_1,
+    .required=1
+  },
+  {
+    .modulename="commonlib",
+    .ifacever=COMMONLIBINTERFACE_VER_2,
+    .required=1
+  },
+  {
+    .modulename="mainlib",
+    .ifacever=MAINLIBINTERFACE_VER_2,
     .required=1
   },
   {
@@ -3311,6 +3322,8 @@ STATIC void rapidhalib_doreinit(rapidhadevice_t *rapidhadevice, long *rapidhaloc
 STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *rapidhalocked, long *zigbeelocked) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=rapidhalib_getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1);
   zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=rapidhalib_getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1);
+  commonlib_ifaceptrs_ver_2_t *commonlibifaceptr=rapidhalib_getmoduledepifaceptr("commonlib", COMMONLIBINTERFACE_VER_2);
+  mainlib_ifaceptrs_ver_2_t *mainlibifaceptr=rapidhalib_getmoduledepifaceptr("mainlib", MAINLIBINTERFACE_VER_2);
   int zigbeelibindex;
   uint64_t addr;
   int result;
@@ -3342,11 +3355,13 @@ STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *r
   //Open the firmware file for reading
   rapidhalib_lockrapidha();
   if (rapidhadevice->firmware_file) {
-    rapidhadevice->firmwarefile_fd=open(rapidhadevice->firmware_file, O_RDONLY|O_CLOEXEC);
+    mainlibifaceptr->newdescriptorlock();
+    rapidhadevice->firmwarefile_fd=commonlibifaceptr->open_with_cloexec(rapidhadevice->firmware_file, O_RDONLY);
+    mainlibifaceptr->newdescriptorunlock();
   } else {
     rapidhadevice->firmwarefile_fd=-1;
   }
-  if (rapidhadevice->firmwarefile_fd==-1) {
+  if (rapidhadevice->firmwarefile_fd<0) {
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s for reading\n", __func__, rapidhadevice->firmware_file);
     rapidhalib_unlockrapidha();
     goto firmwareupgrade_cleanup;

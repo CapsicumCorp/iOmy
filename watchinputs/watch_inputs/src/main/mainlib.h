@@ -38,6 +38,21 @@ typedef struct {
   int (*mainlib_getneedtoquit)(void);
 } mainlib_ifaceptrs_ver_1_t;
 
+typedef struct {
+  void *(*mainlib_loadsymbol)(const char *modulename, const char *symbolname);
+  int (*mainlib_loadmodulesymbol)(void **symptr, const char *modulename, const char *symbolname);
+  int (*mainlib_loadcustommodulesymbol)(void **symptr, const char *modulename, const char *symbolname);
+  int (*mainlib_getneedtoquit)(void);
+
+  //Lock the thread before creating a new descriptor (with open for example)
+  //Useful when O_CLOEXEC or SOCK_CLOEXEC aren't available so CLOEXEC needs to be applied using multiple system calls
+  //Also should be used just before calling fork so CLOEXEC race condition doesn't occur
+  int (*newdescriptorlock)();
+
+  //Unlock the thread after finished creating the new descriptor
+  int (*newdescriptorunlock)();
+} mainlib_ifaceptrs_ver_2_t;
+
 #pragma pack(pop)
 
 //Needed by watch_inputs.c
@@ -46,5 +61,6 @@ int mainlib_main(sem_t *sleepsem);
 void mainlib_cleanup();
 
 #define MAINLIBINTERFACE_VER_1 1 //A version number for the mainlib interface version
+#define MAINLIBINTERFACE_VER_2 2 //A version number for the mainlib interface version
 
 #endif

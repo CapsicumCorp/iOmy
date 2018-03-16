@@ -63,6 +63,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include "moduleinterface.h"
 #include "nativeseriallib.h"
+#include "main/mainlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/commonlib/commonlib.h"
 #include "modules/serialportlib/serialportlib.h"
@@ -191,6 +192,8 @@ void nativeseriallib_shutdown(void);
 //Module Interface Definitions
 #define DEBUGLIB_DEPIDX 0
 #define SERIALPORTLIB_DEPIDX 1
+#define COMMONLIB_DEPIDX 2
+#define MAINLIB_DEPIDX 3
 
 static nativeseriallib_ifaceptrs_ver_1_t nativeseriallib_ifaceptrs_ver_1={
   .nativeseriallib_init=nativeseriallib_init,
@@ -216,6 +219,16 @@ static moduledep_ver_1_t nativeseriallib_deps[]={
   {
     .modulename="serialportlib",
     .ifacever=SERIALPORTLIBINTERFACE_VER_1,
+    .required=1
+  },
+  {
+    .modulename="commonlib",
+    .ifacever=COMMONLIBINTERFACE_VER_2,
+    .required=1
+  },
+  {
+    .modulename="mainlib",
+    .ifacever=MAINLIBINTERFACE_VER_2,
     .required=1
   },
   {
@@ -895,6 +908,8 @@ static int serialib_isdeviceadded(char *filename) {
 static int nativeserialib_adddevice(char *filename) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
   serialportlib_ifaceptrs_ver_1_t *serialportlibifaceptr=nativeseriallib_deps[SERIALPORTLIB_DEPIDX].ifaceptr;
+  commonlib_ifaceptrs_ver_2_t *commonlibifaceptr=nativeseriallib_deps[COMMONLIB_DEPIDX].ifaceptr;
+  mainlib_ifaceptrs_ver_2_t *mainlibifaceptr=nativeseriallib_deps[MAINLIB_DEPIDX].ifaceptr;
   int i, fd, result, lerrno;
   struct termios oldserporttio;
 #ifdef HAVE_LINUX_SERIAL_H
@@ -912,9 +927,11 @@ static int nativeserialib_adddevice(char *filename) {
 #endif
     return -1;
   }
-  fd=open(filename, O_RDWR | O_NOCTTY | O_EXCL | O_NONBLOCK | O_CLOEXEC);
+  mainlibifaceptr->newdescriptorlock();
+  fd=commonlibifaceptr->open_with_cloexec(filename, O_RDWR | O_NOCTTY | O_EXCL | O_NONBLOCK);
   lerrno=errno;
-  if (fd==-1) {
+  mainlibifaceptr->newdescriptorunlock();
+  if (fd<0) {
     int return_result=-2;
 
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Can't open device: %s, errno=%d\n", __func__, filename, lerrno);
@@ -1106,6 +1123,8 @@ static void nativeseriallib_findserialdevices(void) {
 #ifdef NATIVESERIALLIB_MOREDEBUG
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
 #endif
+  commonlib_ifaceptrs_ver_2_t *commonlibifaceptr=nativeseriallib_deps[COMMONLIB_DEPIDX].ifaceptr;
+  mainlib_ifaceptrs_ver_2_t *mainlibifaceptr=nativeseriallib_deps[MAINLIB_DEPIDX].ifaceptr;
   int fd;
   DIR *devdir;
   struct dirent *direntdata=NULL;
@@ -1129,8 +1148,10 @@ static void nativeseriallib_findserialdevices(void) {
     }
     //Check for a lock file in the standard location
     sprintf(tmpstr, "/var/lock/LCK..%s", direntdata->d_name);
-    fd=open(tmpstr, O_RDONLY|O_CLOEXEC);
-    if (fd!=-1) {
+    mainlibifaceptr->newdescriptorlock();
+    fd=commonlibifaceptr->open_with_cloexec(tmpstr, O_RDONLY);
+    mainlibifaceptr->newdescriptorunlock();
+    if (fd>=0) {
       //This serial port is locked by another program
       //Close the lock file
       close(fd);
@@ -1188,6 +1209,8 @@ void nativeseriallib_mainloopcleanup(void) {
 */
 static void *nativeseriallib_mainloop(void *val) {
   debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=nativeseriallib_deps[DEBUGLIB_DEPIDX].ifaceptr;
+  commonlib_ifaceptrs_ver_2_t *commonlibifaceptr=nativeseriallib_deps[COMMONLIB_DEPIDX].ifaceptr;
+  mainlib_ifaceptrs_ver_2_t *mainlibifaceptr=nativeseriallib_deps[MAINLIB_DEPIDX].ifaceptr;
   int result;
   int cannotify=0; //1=dnotify is available on this system
   struct sigaction dnotifysigact;
@@ -1199,8 +1222,10 @@ static void *nativeseriallib_mainloop(void *val) {
   result=1;
   nativeseriallib_serdevdirfd=-1;
 #ifdef F_NOTIFY
-  nativeseriallib_serdevdirfd=open("/dev", O_RDONLY|O_CLOEXEC);
-  if (nativeseriallib_serdevdirfd!=-1) {
+  mainlibifaceptr->newdescriptorlock();
+  nativeseriallib_serdevdirfd=commonlibifaceptr->open_with_cloexec("/dev", O_RDONLY);
+  mainlibifaceptr->newdescriptorunlock();
+  if (nativeseriallib_serdevdirfd>=0) {
     result=0;
   }
   if (result==0) {
