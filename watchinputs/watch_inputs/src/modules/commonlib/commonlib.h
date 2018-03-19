@@ -277,4 +277,28 @@ union multitypeval {
   #define MOREDEBUG_ADDDEBUGLIBIFACEPTR() { }
 #endif
 
+#ifdef __ANDROID__
+
+//From https://github.com/googlesamples/android-ndk/blob/master/hello-jni/app/src/main/cpp/hello-jni.c
+
+#if defined(__arm__)
+  #if defined(__ARM_ARCH_7A__)
+    #define ABI "armeabi-v7a"
+  #else
+   #define ABI "armeabi"
+  #endif
+#elif defined(__i386__)
+#define ABI "x86"
+#elif defined(__x86_64__)
+#define ABI "x86_64"
+#elif defined(__mips64)  /* mips64el-* toolchain defines __mips__ too */
+#define ABI "mips64"
+#elif defined(__mips__)
+#define ABI "mips"
+#elif defined(__aarch64__)
+#define ABI "arm64-v8a"
+#else
+#define ABI "unknown"
+#endif
+
 #endif
