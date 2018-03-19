@@ -1658,6 +1658,37 @@ static int cmd_test_stop_stream(const char *buffer, int clientsock) {
   return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
 }
 
+static int cmd_all_stop(const char *buffer, int clientsock) {
+  std::string bufferstring;
+  std::vector<std::string> buffertokens;
+
+  //Convert the string to tokens using C++ Boost algorithms for easier access
+  bufferstring=buffer;
+  boost::algorithm::trim(bufferstring);
+  boost::algorithm::split(buffertokens, bufferstring, boost::algorithm::is_any_of(" "), boost::algorithm::token_compress_on);
+
+  std::ostringstream ostream;
+  std::string property;
+  if (buffertokens.size()>1) {
+    std::istringstream ( buffertokens[1] ) >> property;
+  } else {
+    property="true";
+  }
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+    if (property=="true") {
+      gAllStop=true;
+      ostream << "All camera capturing will be stopped" << std::endl;
+    } else if (property=="false") {
+      gAllStop=false;
+      ostream << "Camera capturing will be restarted" << std::endl;
+    }
+  }
+  cmdserverlibifaceptr->netputs(ostream.str().c_str(), clientsock, NULL);
+
+  return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+}
+
 static int cmd_get_camera_info(const char *buffer, int clientsock) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
@@ -2393,6 +2424,9 @@ private:
           continue;
         }
         if (!cameraIt.second.isStreamCapturing(cameraStreamIt->first)) {
+          if (gAllStop) {
+            continue;
+          }
           if (cameraStreamIt->second.restartOnExit && cameraStreamIt->second.enabled) {
             //If in continuous stream mode, always restart the stream automatically
             cameraIt.second.startStreamCapture(cameraStreamIt->first);
@@ -2411,6 +2445,12 @@ private:
             if (cameraStreamIt==cameraIt.second.cameraStreams.end()) {
               break;
             }
+          }
+        } else {
+          if (gAllStop) {
+            //Force stop stream capture
+            debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Stopping camera stream: %d for camera object: %d as allStop is true\n", __func__, cameraStreamIt->first, cameraIt.first);
+            cameraIt.second.stopStreamCapture(cameraIt.first, true, true);
           }
         }
       }
@@ -2554,6 +2594,7 @@ static int start(void) {
 
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_test_start_stream", "cameralib_test_start_stream <cameraid> <streamid>", "Test command to start a stream", "Test command to start a stream", cmd_test_start_stream);
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_test_stop_stream", "cameralib_test_stop_stream <cameraid> <streamid>", "Test command to force stop a stream", "Test command to force stop a stream", cmd_test_stop_stream);
+    cmdserverlibifaceptr->register_cmd_longdesc("cameralib_all_stop", "cameralib_all_stop [true (default)|false]", "Command to stop all streams until watch inputs is restarted", "Command to stop all streams until watch inputs is restarted", cmd_all_stop);
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_get_camera_info", "cameralib_get_camera_info", "Command to get info about the camera library objects and running streams", "Command to get info about the camera library objects and running streams", cmd_get_camera_info);
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_get_camera_info_json", "cameralib_get_camera_info_json", "Command to get info about the camera library objects and running streams with JSON output", "Command to get info about the camera library objects and running streams with JSON output", cmd_get_camera_info_json);
   }
