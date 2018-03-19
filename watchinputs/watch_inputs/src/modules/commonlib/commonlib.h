@@ -301,4 +301,6 @@ union multitypeval {
 #define ABI "unknown"
 #endif
 
+#endif //End of #ifdef __ANDROID__
+
 #endif
