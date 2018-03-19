@@ -9568,7 +9568,10 @@ function dbWatchInputsGetManagedCameraStreams() {
 			$sSQL .= "SELECT \n";
 			$sSQL .= "	`WICAMERALIB_PK`, \n";
 			$sSQL .= "	`WICAMERALIB_THING_FK`, \n";
+			$sSQL .= "	`WICAMERALIB_NAME`, \n";
+			$sSQL .= "	`WICAMERALIB_ENABLED`, \n";
 			$sSQL .= "	`WICAMERALIB_RUNCOUNT`, \n";
+			$sSQL .= "	`WICAMERALIB_FAILCOUNT`, \n";
 			$sSQL .= "	`WICAMERALIB_LASTUPDATE`, \n";
 			$sSQL .= "	`WICAMERALIB_LASTUPDATE` AS `UTS` \n";
 			$sSQL .= "FROM `".$sSchema."`.`WICAMERALIB` \n";
@@ -9584,7 +9587,10 @@ function dbWatchInputsGetManagedCameraStreams() {
 			$aOutputCols = array(
 				array( "Name"=>"CameraLibId",           "type"=>"INT"   ),
 				array( "Name"=>"ThingId",               "type"=>"INT"   ),
+				array( "Name"=>"Name",                  "type"=>"STR"   ),
+				array( "Name"=>"Enabled",               "type"=>"INT"   ),
 				array( "Name"=>"RunCount",              "type"=>"INT"   ),
+				array( "Name"=>"FailCount",             "type"=>"INT"   ),
 				array( "Name"=>"LastUpdate",            "type"=>"TSC"   ),
 				array( "Name"=>"LastUpdateUTS",         "type"=>"INT"   )
 			);
@@ -9658,7 +9664,10 @@ function dbWatchInputsGetManagedCameraStreamFromThingId( $iThingId ) {
 			$sSQL .= "SELECT \n";
 			$sSQL .= "	`WICAMERALIB_PK`, \n";
 			$sSQL .= "	`WICAMERALIB_THING_FK`, \n";
+			$sSQL .= "	`WICAMERALIB_NAME`, \n";
+			$sSQL .= "	`WICAMERALIB_ENABLED`, \n";
 			$sSQL .= "	`WICAMERALIB_RUNCOUNT`, \n";
+			$sSQL .= "	`WICAMERALIB_FAILCOUNT`, \n";
 			$sSQL .= "	`WICAMERALIB_LASTUPDATE`, \n";
 			$sSQL .= "	`WICAMERALIB_LASTUPDATE` AS `UTS` \n";
 			$sSQL .= "FROM `".$sSchema."`.`WICAMERALIB` \n";
@@ -9678,7 +9687,10 @@ function dbWatchInputsGetManagedCameraStreamFromThingId( $iThingId ) {
 			$aOutputCols = array(
 				array( "Name"=>"CameraLibId",           "type"=>"INT"   ),
 				array( "Name"=>"ThingId",               "type"=>"INT"   ),
+				array( "Name"=>"Name",                  "type"=>"STR"   ),
+				array( "Name"=>"Enabled",               "type"=>"INT"   ),
 				array( "Name"=>"RunCount",              "type"=>"INT"   ),
+				array( "Name"=>"FailCount",             "type"=>"INT"   ),
 				array( "Name"=>"LastUpdate",            "type"=>"TSC"   ),
 				array( "Name"=>"LastUpdateUTS",         "type"=>"INT"   )
 			);
@@ -9721,7 +9733,7 @@ function dbWatchInputsGetManagedCameraStreamFromThingId( $iThingId ) {
 }
 
 
-function dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount ) {
+function dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount, $iFailCount ) {
 	//--------------------------------------------//
 	//-- 1.0 - Declare Variables                --//
 	//--------------------------------------------//
@@ -9747,7 +9759,8 @@ function dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount ) {
 			
 			$sSQL .= "UPDATE `".$sSchema."`.`WICAMERALIB` ";
 			$sSQL .= "SET ";
-			$sSQL .= "    `WICAMERALIB_RUNCOUNT` = :RunCount, ";
+			$sSQL .= "    `WICAMERALIB_RUNCOUNT`   = :RunCount, ";
+			$sSQL .= "    `WICAMERALIB_FAILCOUNT`  = :FailCount, ";
 			$sSQL .= "    `WICAMERALIB_LASTUPDATE` = :LastUpdate ";
 			$sSQL .= "WHERE `WICAMERALIB_THING_FK` = :ThingId; ";
 			
@@ -9756,6 +9769,7 @@ function dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount ) {
 			//----------------------------------------------------//
 			$aInputVals = array(
 				array( "Name"=>"RunCount",          "type"=>"INT",      "value"=>$iRunCount      ),
+				array( "Name"=>"FailCount",         "type"=>"INT",      "value"=>$iFailCount     ),
 				array( "Name"=>"LastUpdate",        "type"=>"INT",      "value"=>$iNewUTS        ),
 				array( "Name"=>"ThingId",           "type"=>"BINT",     "value"=>$iThingId       )
 			);

@@ -219,7 +219,7 @@ if($bError===false) {
 			$sPostMode==="AddComm"               || $sPostMode==="AddLink"               || 
 			$sPostMode==="AddThing"              || $sPostMode==="AddIO"                 || 
 			$sPostMode==="RuleTriggeredAt"       || $sPostMode==="SetThingState"         ||
-			$sPostMode==="UpdateCamStreamCount" 
+			$sPostMode==="UpdateCamStreamCount"  
 		) {
 			try {
 				//-- Retrieve the "Data" --//
@@ -486,7 +486,7 @@ if($bError===false) {
 			) {
 				try {
 					//------------------------------------------------//
-					//-- "ACCESS" JSON PARSING                      --//
+					//-- "Data" JSON PARSING                        --//
 					//------------------------------------------------//
 					$aPostData = json_decode( $sPostData, true );
 					
@@ -563,25 +563,25 @@ if( $bError===false ) {
 			}
 			
 			//----------------------------------------------------//
-			//-- 4.1.2 - Extract 'Count'                        --//
+			//-- 4.1.2 - Extract 'RunCount'                     --//
 			//----------------------------------------------------//
 			if( $bError===false ) {
 				if( $sPostMode==="UpdateCamStreamCount" ) {
 					try {
 						//-- IF Exists --//
-						if( isset( $aPostData['Count'] ) ) {
+						if( isset( $aPostData['RunCount'] ) ) {
 							//-- IF Numeric --//
-							if( is_numeric( $aPostData['Count'] ) ) {
-								$iPostCount = intval( $aPostData['Count'] );
+							if( is_numeric( $aPostData['RunCount'] ) ) {
+								$iPostRunCount = intval( $aPostData['RunCount'] );
 								
 								//-- IF the number is positive --//
-								if( !($iPostCount >= 1) ) {
+								if( !($iPostRunCount >= 1) ) {
 									//------------------------------------//
-									//-- ERROR: Invalid Timestamp       --//
+									//-- ERROR: Invalid RunCount        --//
 									$bError    = true;
 									$iErrCode  = 214;
 									$sErrMesg .= "Error Code:'0214' \n";
-									$sErrMesg .= "Error: The 'Count' value in the 'Data' JSON parameter is not supported!\n";
+									$sErrMesg .= "Error: The 'RunCount' value in the 'Data' JSON parameter is not supported!\n";
 									$sErrMesg .= "The value is not greater than or equal to one.";
 								}
 							} else {
@@ -590,7 +590,7 @@ if( $bError===false ) {
 								$bError    = true;
 								$iErrCode  = 214;
 								$sErrMesg .= "Error Code:'0213' \n";
-								$sErrMesg .= "Error: The 'Count' value in the 'Data' JSON parameter is not supported!\n";
+								$sErrMesg .= "Error: The 'RunCount' value in the 'Data' JSON parameter is not supported!\n";
 								$sErrMesg .= "Please use a numeric value.\n";
 							}
 						} else {
@@ -599,13 +599,61 @@ if( $bError===false ) {
 							$bError    = true;
 							$iErrCode  = 213;
 							$sErrMesg .= "Error Code:'0213' \n";
-							$sErrMesg .= "Error: The 'Count' value in the 'Data' JSON parameter is not supported!\n";
+							$sErrMesg .= "Error: The 'RunCount' value in the 'Data' JSON parameter is not supported!\n";
 						}
-					} catch( Exception $e0211 ) {
+					} catch( Exception $e0213 ) {
 						$bError = true;
 						$iErrCode  = 213;
-						$sErrMesg .= "Error Code:'0211' \n";
-						$sErrMesg .= "Error: Problem extracting the 'Count' value in the 'Data' JSON parameter!\n";
+						$sErrMesg .= "Error Code:'0213' \n";
+						$sErrMesg .= "Error: Problem extracting the 'RunCount' value in the 'Data' JSON parameter!\n";
+					}
+				}
+			}
+			
+			//----------------------------------------------------//
+			//-- 4.1.3 - Extract 'FailCount'                    --//
+			//----------------------------------------------------//
+			if( $bError===false ) {
+				if( $sPostMode==="UpdateCamStreamCount" ) {
+					try {
+						//-- IF Exists --//
+						if( isset( $aPostData['FailCount'] ) ) {
+							//-- IF Numeric --//
+							if( is_numeric( $aPostData['FailCount'] ) ) {
+								$iPostFailCount = intval( $aPostData['FailCount'] );
+								
+								//-- IF the number is positive --//
+								if( !($iPostFailCount >= 1) ) {
+									//------------------------------------//
+									//-- ERROR: Invalid Timestamp       --//
+									$bError    = true;
+									$iErrCode  = 216;
+									$sErrMesg .= "Error Code:'0216' \n";
+									$sErrMesg .= "Error: The 'FailCount' value in the 'Data' JSON parameter is not supported!\n";
+									$sErrMesg .= "The value is not greater than or equal to one.";
+								}
+							} else {
+								//------------------------------------//
+								//-- ERROR: Non-Numeric             --//
+								$bError    = true;
+								$iErrCode  = 216;
+								$sErrMesg .= "Error Code:'0216' \n";
+								$sErrMesg .= "Error: The 'FailCount' value in the 'Data' JSON parameter is not supported!\n";
+								$sErrMesg .= "Please use a numeric value.\n";
+							}
+						} else {
+							//------------------------------------//
+							//-- ERROR: Missing Parameter       --//
+							$bError    = true;
+							$iErrCode  = 215;
+							$sErrMesg .= "Error Code:'0215' \n";
+							$sErrMesg .= "Error: The 'FailCount' value in the 'Data' JSON parameter is not supported!\n";
+						}
+					} catch( Exception $e0215 ) {
+						$bError = true;
+						$iErrCode  = 215;
+						$sErrMesg .= "Error Code:'0215' \n";
+						$sErrMesg .= "Error: Problem extracting the 'FailCount' value in the 'Data' JSON parameter!\n";
 					}
 				}
 			}
@@ -1535,7 +1583,7 @@ if($bError===false) {
 						//-- STEP 2: Update the RunCount                      --//
 						//------------------------------------------------------//
 						if( $bError===false ) {
-							$aResult = WatchInputsUpdateManagedStreamRunCount( $iPostId, $iPostCount );
+							$aResult = WatchInputsUpdateManagedStreamRunCount( $iPostId, $iPostRunCount, $iPostFailCount );
 							
 							if( $aResult['Error']===true ) {
 								$bError    = true;

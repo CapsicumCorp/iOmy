@@ -4500,7 +4500,7 @@ function WatchInputsGetManagedCameraStreamFromThingId( $iThingId ) {
 }
 
 
-function WatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount ) {
+function WatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount, $iFailCount ) {
 	//----------------------------------------------------------------------------------------------------//
 	//-- Description: Looks up all the Cameras that are managed by WatchInputs for FFMPEG Stream        --//
 	//----------------------------------------------------------------------------------------------------//
@@ -4515,7 +4515,7 @@ function WatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount ) {
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
-	$aResult = dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount );
+	$aResult = dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount, $iFailCount );
 	
 	if( $aResult["Error"]===true ) {
 		//-- Display an Error --//
