@@ -485,6 +485,7 @@ public class InstallWizard {
             PrintWriter watchInputsTempFile = new PrintWriter(Application.getInstance().getInternalStorageFolderName() +"/WatchInputs.cfg.tmp");
             watchInputsTempFile.println("# ioMy Watch Inputs Config");
             watchInputsTempFile.println("[general]");
+            watchInputsTempFile.println("apppath=" + Application.getInstance().getInternalStorageFolderName());
             watchInputsTempFile.println("hubpk=" + hubID);
             watchInputsTempFile.println("hubname=" + hubName);
             watchInputsTempFile.println("[dbconfig]");
@@ -498,8 +499,15 @@ public class InstallWizard {
             watchInputsTempFile.println("port=8080");
             watchInputsTempFile.println("url=/restricted/php/special/watchinputs.php");
             watchInputsTempFile.println("hubrulesurl=/restricted/php/special/watchinputs.php");
+            watchInputsTempFile.println("hubcameraurl=/restricted/php/special/watchinputs.php");
             watchInputsTempFile.println("apiusername=" + watchInputsUsername);
             watchInputsTempFile.println("apipassword=" + watchInputsPassword);
+            watchInputsTempFile.println("[cameraconfig]");
+
+            //Watch Inputs will use apppath and abi to build a full path for ffmpeg and streampath
+            watchInputsTempFile.println("ffmpegpath=ffmpeg");
+            watchInputsTempFile.println("streampath=htdocs/streams");
+
             watchInputsTempFile.println("[zigbeeconfig]");
             watchInputsTempFile.println("zigbeedefsfilename=" + Application.getInstance().getInternalStorageFolderName() + "/zigbeedefs.ini");
             watchInputsTempFile.close();

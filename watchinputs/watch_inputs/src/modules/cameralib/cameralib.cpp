@@ -781,6 +781,16 @@ int Camera::startStreamCapture(int32_t streamId) {
         //Wait until the configuration is loaded before starting capture
         return -1;
       }
+#ifdef __ANDROID__
+      bool missingval=false;
+      std::string apppathstr;
+      missingval|=!(configlibifaceptr->getnamevalue_cpp("general", "apppath", apppathstr));
+      if (missingval) {
+        //We don't have the Android app path or abi yet
+        //Don't treat it as a normal failure as this comes from the config library
+        return -1;
+      }
+#endif
       haveffmpegpath=configlibifaceptr->getnamevalue_cpp("cameraconfig", "ffmpegpath", ffmpegpath);
       havestreampath=configlibifaceptr->getnamevalue_cpp("cameraconfig", "streampath", streampath);
 
@@ -789,7 +799,15 @@ int Camera::startStreamCapture(int32_t streamId) {
       //TODO: Get streams storage folder from ini file
       //TODO: Add code for Android as it will need a library path override in the environment
       if (haveffmpegpath) {
+#ifndef __ANDROID__
         cameraStream.cmd=ffmpegpath;
+#else
+        //On Android, build the ffmpeg path using apppath and abi as additional components to the full path
+        std::ostringstream buildffmpegpath;
+
+        buildffmpegpath << apppathstr << "/components/bin/" << ABI << "/pie/" << ffmpegpath;
+        cameraStream.cmd=buildffmpegpath.str();
+#endif
       } else {
         cameraStream.cmd="ffmpeg";
       }
@@ -799,8 +817,16 @@ int Camera::startStreamCapture(int32_t streamId) {
 
       std::string storagepath;
       if (havestreampath) {
+#ifndef __ANDROID__
         storagepath=streampath;
         storagepath+="/";
+#else
+        //On Android, build the stream path using apppath as additional component to the full path
+        std::ostringstream buildstreampath;
+
+        buildstreampath << apppathstr << "/" << streampath << "/";
+        storagepath=buildstreampath.str();
+#endif
       } else {
         //Use current directory
         storagepath="";
@@ -824,6 +850,15 @@ int Camera::startStreamCapture(int32_t streamId) {
       }
       storagepath+="/stream.m3u8";
       cameraStream.args.push_back(storagepath);
+
+#ifdef __ANDROID__
+      //On Android, we need to set the library path for ffmpeg so build the path using apppath and abi as additional component to the full path
+      std::ostringstream buildlibrarypath;
+
+      buildlibrarypath << apppathstr << "/components/lib/" << ABI;
+      std::string librarypath=buildlibrarypath.str();
+      setenv("LD_LIBRARY_PATH", librarypath.c_str(), 1);
+#endif
     }
     //Prepare pointers for exec
     //NOTE: We make a copy of the argument strings and then get c pointers to those string copies
