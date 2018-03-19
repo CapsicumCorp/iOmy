@@ -1447,7 +1447,7 @@ $.extend(iomy.functions, {
     
     getNumberOfRooms : function () {
         var iCount = 0;
-     
+
         try {
 
             $.each(iomy.common.RoomsList, function (sI, mPremise) {
@@ -1489,13 +1489,14 @@ $.extend(iomy.functions, {
         var iCount = 0;
      
         try {
-            $.each(iomy.common.RoomsList, function (sI, mRoom) {
-                if (sI !== undefined && sI !== null && mRoom !== undefined && mRoom !== null) {
-                    
-                    if(mRoom[sI].RoomName !== "Unassigned") {
-                       iCount++;  
-                    } 
-                }
+            $.each(iomy.common.RoomsList, function (sI, mPremise) {
+                $.each(mPremise, function (sI, mRoom) {
+                    if (sI !== undefined && sI !== null && mRoom !== undefined && mRoom !== null) {
+                        if(mRoom.RoomName !== "Unassigned") {
+                            iCount++;  
+                        } 
+                    }
+                });
             });
         } catch (e) {
             iCount = -1;
