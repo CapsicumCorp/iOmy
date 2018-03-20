@@ -154,6 +154,8 @@ public:
   CameraStream(int32_t streamId, enum CAMERA_STREAM_MODE, std::string cmd, std::vector<std::string> args);
   ~CameraStream();
   boost::property_tree::ptree toProperty(); //Return the object as a Boost Property object
+  int waitStreamCapture(int timeOutSeconds); //Wait for the csmera capturing process to finish
+  bool isStreamCapturing(); //Check if the stream is currently capturing
   void incSuccessfulStartsCnt();
   void incUnsuccessfulStartsCnt();
 };
@@ -187,7 +189,7 @@ public:
   void setStreamEnabled(int32_t streamId, bool enabled);
   int getStreamExitStatus(int32_t streamId);
   int startStreamCapture(int32_t streamId); //Start a camera capturing process
-  int waitStreamCapture(int32_t streamId, int timeOutSeconds); //Wait for a csmera capturing process to finish
+  int waitStreamCapture(int32_t streamId, int timeOutSeconds); //Wait for a camera capturing process to finish
   int stopStreamCapture(int32_t streamId, bool force=false, bool wait=false); //Stop a camera capturing process immediately
   bool isStreamCapturing(int32_t streamId); //Check if a stream is currently capturing
   boost::property_tree::ptree toProperty(); //Return the object as a Boost Property object
@@ -495,6 +497,7 @@ boost::property_tree::ptree CameraStream::toProperty() {
   ptree.put("restartOnExit", this->restartOnExit);
   ptree.put("deleteOnExit", this->deleteOnExit);
   ptree.put("needToRemove", this->needToRemove);
+  ptree.put("isStreamCapturing", isStreamCapturing());
   ptree.put("enabled", this->enabled);
   ptree.put("cntSuccessfulStarts", this->cntSuccessfulStarts);
   ptree.put("cntUnsuccessfulStarts", this->cntUnsuccessfulStarts);
@@ -510,6 +513,94 @@ boost::property_tree::ptree CameraStream::toProperty() {
   ptree.put_child("CommandArguments", argsPt);
 
   return ptree;
+}
+
+//Wait for camera capturing process to finish
+//If timeOutSeconds is 0 then don't wait if the process is currently running
+//Returns 1 if timeout expired, 0 if process has finished, or negative value on error
+int CameraStream::waitStreamCapture(int timeOutSeconds) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  try {
+    if (this->pid==0) {
+      return 0;
+    }
+    bool isRunning=true;
+    int exitStatus=0;
+    int timeOut=0;
+    while (timeOut<=timeOutSeconds) {
+      //NOTE: Call waitpid at least once even if timeOutSeconds=0
+      pid_t result=waitpid(this->pid, &exitStatus, WNOHANG);
+      if (result==-1) {
+        //Error occurred so just return finished without setting exit status
+        this->pid=0;
+        return 0;
+      }
+      if (result>0) {
+        //Positive value means the process has exited
+        isRunning=false;
+        break;
+      }
+      if (getneedtoquit()) {
+        timeOut=timeOutSeconds;
+        break;
+      }
+      if (timeOutSeconds==0) {
+        break;
+      }
+      //Sleep for 1 second
+      sleep(1);
+      ++timeOut;
+    }
+    if (!isRunning) {
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Setting exit status of pid: %d to %d\n", __PRETTY_FUNCTION__, this->pid, exitStatus);
+      this->pid=0;
+      this->hasRun=true;
+      if (WIFEXITED(exitStatus)) {
+        this->exitReason=CAMERA_PROCESS_EXIT_REASON::NORMAL_EXIT;
+        this->exitStatus=WEXITSTATUS(exitStatus);
+      } else if (WIFSIGNALED(exitStatus)) {
+#ifdef WCOREDUMP
+        //NOTE: WCOREDUMP isn't defined on all systems
+        if (WCOREDUMP(exitStatus)) {
+          this->exitReason=CAMERA_PROCESS_EXIT_REASON::CRASHED;
+          this->exitStatus=WTERMSIG(exitStatus); //The  number  of  the  signal that caused the child process to terminate
+        } else {
+#endif
+          this->exitReason=CAMERA_PROCESS_EXIT_REASON::TERMINATED_BY_SIGNAL;
+          this->exitStatus=WTERMSIG(exitStatus); //The  number  of  the  signal that caused the child process to terminate
+#ifdef WCOREDUMP
+        }
+#endif
+      } else {
+        //Just assume a normal exit by default
+        this->exitReason=CAMERA_PROCESS_EXIT_REASON::NORMAL_EXIT;
+        this->exitStatus=exitStatus;
+      }
+      return 0;
+    }
+    else if (timeOut>=timeOutSeconds) {
+      return 1;
+    }
+  } catch (std::out_of_range& e) {
+    return -1;
+  }
+  return -2;
+}
+
+//Check if the stream is currently capturing
+bool CameraStream::isStreamCapturing() {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+  try {
+    if (this->pid) {
+      int result=waitStreamCapture(0);
+      if (result==1) {
+        return true;
+      }
+    }
+  } catch (std::out_of_range& e) {
+  }
+  return false;
 }
 
 void CameraStream::incSuccessfulStartsCnt() {
@@ -1022,77 +1113,17 @@ int Camera::startStreamCapture(int32_t streamId) {
   return -2;
 }
 
-//Wait for a csmera capturing process to finish
+//Wait for a camera capturing process to finish
 //If timeOutSeconds is 0 then don't wait if the process is currently running
 //Returns 1 if timeout expired, 0 if process has finished, or negative value on error
 int Camera::waitStreamCapture(int32_t streamId, int timeOutSeconds) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   try {
-    if (cameraStreams.at(streamId).pid==0) {
-      return 0;
-    }
-    bool isRunning=true;
-    int exitStatus=0;
-    int timeOut=0;
-    while (timeOut<=timeOutSeconds) {
-      //NOTE: Call waitpid at least once even if timeOutSeconds=0
-      pid_t result=waitpid(cameraStreams.at(streamId).pid, &exitStatus, WNOHANG);
-      if (result==-1) {
-        //Error occurred so just return finished without setting exit status
-        cameraStreams.at(streamId).pid=0;
-        return 0;
-      }
-      if (result>0) {
-        //Positive value means the process has exited
-        isRunning=false;
-        break;
-      }
-      if (getneedtoquit()) {
-        timeOut=timeOutSeconds;
-        break;
-      }
-      if (timeOutSeconds==0) {
-        break;
-      }
-      //Sleep for 1 second
-      sleep(1);
-      ++timeOut;
-    }
-    if (!isRunning) {
-      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Setting exit status of pid: %d to %d\n", __PRETTY_FUNCTION__, cameraStreams.at(streamId).pid, exitStatus);
-      cameraStreams.at(streamId).pid=0;
-      cameraStreams.at(streamId).hasRun=true;
-      if (WIFEXITED(exitStatus)) {
-        cameraStreams.at(streamId).exitReason=CAMERA_PROCESS_EXIT_REASON::NORMAL_EXIT;
-        cameraStreams.at(streamId).exitStatus=WEXITSTATUS(exitStatus);
-      } else if (WIFSIGNALED(exitStatus)) {
-#ifdef WCOREDUMP
-        //NOTE: WCOREDUMP isn't defined on all systems
-        if (WCOREDUMP(exitStatus)) {
-          cameraStreams.at(streamId).exitReason=CAMERA_PROCESS_EXIT_REASON::CRASHED;
-          cameraStreams.at(streamId).exitStatus=WTERMSIG(exitStatus); //The  number  of  the  signal that caused the child process to terminate
-        } else {
-#endif
-        cameraStreams.at(streamId).exitReason=CAMERA_PROCESS_EXIT_REASON::TERMINATED_BY_SIGNAL;
-        cameraStreams.at(streamId).exitStatus=WTERMSIG(exitStatus); //The  number  of  the  signal that caused the child process to terminate
-#ifdef WCOREDUMP
-        }
-#endif
-      } else {
-        //Just assume a normal exit by default
-        cameraStreams.at(streamId).exitReason=CAMERA_PROCESS_EXIT_REASON::NORMAL_EXIT;
-        cameraStreams.at(streamId).exitStatus=exitStatus;
-      }
-      return 0;
-    }
-    else if (timeOut>=timeOutSeconds) {
-      return 1;
-    }
+    return cameraStreams.at(streamId).waitStreamCapture(timeOutSeconds);
   } catch (std::out_of_range& e) {
-    return -1;
   }
-  return -2;
+  return -1;
 }
 
 //Stop a camera capturing process immediately
@@ -1140,12 +1171,7 @@ int Camera::stopStreamCapture(int32_t streamId, bool force, bool wait) {
 bool Camera::isStreamCapturing(int32_t streamId) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
   try {
-    if (cameraStreams.at(streamId).pid) {
-      int result=waitStreamCapture(streamId, 0);
-      if (result==1) {
-        return true;
-      }
-    }
+    return cameraStreams.at(streamId).isStreamCapturing();
   } catch (std::out_of_range& e) {
   }
   return false;
