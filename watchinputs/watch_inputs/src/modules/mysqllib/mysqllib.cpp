@@ -351,6 +351,10 @@ int mysqllib_init(void) {
   init_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "init", "()I");
   env->CallStaticIntMethod(mysqllib_mysql_class, init_methodid);
   JNIDetachThread(wasdetached);
+#else
+  if (mysql_library_init(0, NULL, NULL)) {
+    return -2;
+  }
 #endif
 #ifdef DEBUG
   //Enable error checking on mutexes if debugging is enabled
@@ -396,6 +400,8 @@ void mysqllib_shutdown(void) {
   shutdown_methodid=env->GetStaticMethodID(mysqllib_mysql_class, "shutdown", "()V");
   env->CallStaticVoidMethod(mysqllib_mysql_class, shutdown_methodid);
   JNIDetachThread(wasdetached);
+#else
+  mysql_library_end();
 #endif
 
 #ifdef DEBUG
