@@ -84,6 +84,8 @@ $.extend(iomy.devices,{
         } catch (e) {
             iStatus = 0;
             
+            $.sap.log.error("Failed to retrieve the device on/off state ("+e.name+"): " + e.message);
+            
         } finally {
             return iStatus;
         }
