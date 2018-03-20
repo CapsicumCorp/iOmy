@@ -2450,7 +2450,10 @@ private:
           if (gAllStop) {
             //Force stop stream capture
             debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG Stopping camera stream: %d for camera object: %d as allStop is true\n", __func__, cameraStreamIt->first, cameraIt.first);
-            cameraIt.second.stopStreamCapture(cameraIt.first, true, true);
+            int result=cameraIt.second.stopStreamCapture(cameraStreamIt->first, true, true);
+            if (result!=0) {
+              debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG stopStreamCapture returned error: %d\n", __func__, result);
+            }
           }
         }
       }
