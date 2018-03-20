@@ -618,15 +618,33 @@ int mysqllib_unloaddatabase(void) {
 */
 int mysqllib_is_initialised() {
   int result;
+  bool unloaddb=false;
 
+  PTHREAD_LOCK(&thislibmutex_singleaccess_mutex);
   PTHREAD_LOCK(&thislibmutex);
   if (!dbloaded) {
     result=0;
   } else {
     result=1;
+#ifndef __ANDROID__
+    const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(mysqllib_deps[DEBUGLIB_DEPIDX].ifaceptr);
+    int mysql_result;
+    mysql_result=mysql_ping(conn);
+    if (mysql_result!=0) {
+      //The connection is down so unload the database connection so the parent library can reconnect
+      debuglibifaceptr->debuglib_printf(1, "%s: Database connection has disconnected, unloading database connection so can reconnect\n", __func__);
+      unloaddb=true;
+      result=0;
+    }
+#endif
   }
   PTHREAD_UNLOCK(&thislibmutex);
+  PTHREAD_UNLOCK(&thislibmutex_singleaccess_mutex);
 
+  //Unload the database outside of the lock as it isn't recursive yet
+  if (unloaddb) {
+    mysqllib_unloaddatabase();
+  }
   return result;
 }
 
