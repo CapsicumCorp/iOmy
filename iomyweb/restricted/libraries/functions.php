@@ -3971,13 +3971,13 @@ function getIODebuggingInfo( $sIOId, $sDataType) {
 		$sErrMesg .= "Internal API Error! \n";
 		$sErrMesg .= "Non numeric DataTypeId has been passed \n";
 	}
-
+	
 	
 	//-- Convert datatype to string --//
 	$aConvertedDataType = ConvertDataTypeToName( $iDataType );
 	//sConvertedDataType = aConvertedDataType.Value
-
-
+	
+	
 	//-----------------------------------------------------------//
 	//-- 3.0 - Run the query                                   --//
 	//-----------------------------------------------------------//
@@ -3992,13 +3992,13 @@ function getIODebuggingInfo( $sIOId, $sDataType) {
 			$sErrMesg .= $e7->getMessage();
 		}
 	}
-
+	
 	//-----------------------------------------------------------//
 	//-- 4.0 - Check for Errors                                --//
 	//-----------------------------------------------------------//
 	if( $bError===false ) {
 		try {
-			if( $aResult["Error"]===true ) { 
+			if( $aResult["Error"]===true ) {
 				
 				if( $aResult["ErrMesg"]==="Error Occurred! Debug: No Rows Found! Code:1" ) {
 					$aResult = array( "UnixTS"=>"No Results Found!" );
@@ -4465,6 +4465,40 @@ function WatchInputsGetManagedCameraStreams() {
 }
 
 
+function WatchInputsGetManagedCameraStreamFromStreamId( $iThingId ) {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: Looks up all the Cameras that are managed by WatchInputs for FFMPEG Stream        --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbWatchInputsGetManagedCameraStreamFromStreamId( $iThingId );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		return array( "Error"=>true, "ErrMesg"=>"Failed to lookup that WatchInputs managed stream. There might not be a stream with that ThingId!\n");
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
 function WatchInputsGetManagedCameraStreamFromThingId( $iThingId ) {
 	//----------------------------------------------------------------------------------------------------//
 	//-- Description: Looks up all the Cameras that are managed by WatchInputs for FFMPEG Stream        --//
@@ -4516,6 +4550,75 @@ function WatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount, $iFailCo
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
 	$aResult = dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount, $iFailCount );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		return array( "Error"=>true, "ErrMesg"=>"Failed to update the run count on managed stream!\n");
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return $aResult;
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+function WatchInputsManagedStreamAdd( $iThingId, $sName, $iEnabled ) {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: Add a stream to the WatchInputs cameralib managed streams table                   --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbWatchInputsManagedStreamAdd( $iThingId, $sName, $iEnabled );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		return array( "Error"=>true, "ErrMesg"=>"Failed to update the run count on managed stream!\n");
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return $aResult;
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+function WatchInputsManagedStreamEdit( $iStreamId, $sName, $iEnabled ) {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: Add a stream to the WatchInputs cameralib managed streams table                   --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$aResult = dbWatchInputsManagedStreamEdit( $iStreamId, $sName, $iEnabled );
 	
 	if( $aResult["Error"]===true ) {
 		//-- Display an Error --//
@@ -4664,7 +4767,6 @@ function APICore_UserData( $oDBConnection ) {
 //========================================================================================================================//
 //== #20.0# - Server Modification Functions                                                                             ==//
 //========================================================================================================================//
-
 function SpecialLookupTableIndicies( $sTableName ) {
 	//------------------------------------------------------------//
 	//-- 1.0 - Initialise                                       --//
@@ -4735,8 +4837,6 @@ function CreateIndexOnTable( $oDBConn, $sTableName, $sNewIndexName, $sTableColum
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
-
-
 
 function DeleteIndexOnTable( $oDBConn, $sTableName, $sIndexName ) {
 	//------------------------------------------------------------//

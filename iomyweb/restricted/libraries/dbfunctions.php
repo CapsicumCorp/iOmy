@@ -9632,6 +9632,107 @@ function dbWatchInputsGetManagedCameraStreams() {
 }
 
 
+function dbWatchInputsGetManagedCameraStreamFromStreamId( $iStreamId ) {
+	//----------------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                                --//
+	//----------------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+
+	$sSchema            = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
+	$aOutputCols        = array();      //-- ARRAY:     Used to hold an array of values to do the formatting of the SQL Output data --//
+	
+	if( $bError===false ) {
+		try {
+			//----------------------------------------------------------------------------//
+			//-- SETUP VARIABLES                                                        --//
+			//----------------------------------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			
+			//------------------------------------//
+			//-- SQL                            --//
+			//------------------------------------//
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`WICAMERALIB_PK`, \n";
+			$sSQL .= "	`WICAMERALIB_THING_FK`, \n";
+			$sSQL .= "	`WICAMERALIB_NAME`, \n";
+			$sSQL .= "	`WICAMERALIB_ENABLED`, \n";
+			$sSQL .= "	`WICAMERALIB_RUNCOUNT`, \n";
+			$sSQL .= "	`WICAMERALIB_FAILCOUNT`, \n";
+			$sSQL .= "	`WICAMERALIB_LASTUPDATE`, \n";
+			$sSQL .= "	`WICAMERALIB_LASTUPDATE` AS `UTS` \n";
+			$sSQL .= "FROM `".$sSchema."`.`WICAMERALIB` \n";
+			$sSQL .= "WHERE `WICAMERALIB_PK` = :StreamId \n";
+			$sSQL .= "LIMIT 1 \n";
+			
+			//------------------------------------//
+			//-- Input Binding                  --//
+			//------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"StreamId",              "type"=>"INT",     "value"=>$iStreamId      ),
+			);
+			
+			//------------------------------------//
+			//-- Output Binding                 --//
+			//------------------------------------//
+			$aOutputCols = array(
+				array( "Name"=>"CameraLibId",           "type"=>"INT"   ),
+				array( "Name"=>"ThingId",               "type"=>"INT"   ),
+				array( "Name"=>"Name",                  "type"=>"STR"   ),
+				array( "Name"=>"Enabled",               "type"=>"INT"   ),
+				array( "Name"=>"RunCount",              "type"=>"INT"   ),
+				array( "Name"=>"FailCount",             "type"=>"INT"   ),
+				array( "Name"=>"LastUpdate",            "type"=>"TSC"   ),
+				array( "Name"=>"LastUpdateUTS",         "type"=>"INT"   )
+			);
+			
+			//------------------------------------//
+			//-- Execute the SQL Query          --//
+			//------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	//----------------------------------------------------------------------------//
+	//-- 4.0 - Error Check                                                      --//
+	//----------------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message                                  --//
+	//----------------------------------------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"WatchInputsCameraLibFromStreamId: ".$sErrMesg );
+	}
+}
+
+
 function dbWatchInputsGetManagedCameraStreamFromThingId( $iThingId ) {
 	//----------------------------------------------------------------------------//
 	//-- 1.0 - Declare Variables                                                --//
@@ -9728,7 +9829,7 @@ function dbWatchInputsGetManagedCameraStreamFromThingId( $iThingId ) {
 	if( $bError===false ) {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
-		return array( "Error"=>true, "ErrMesg"=>"WatchInputsManagedCameraStream: ".$sErrMesg );
+		return array( "Error"=>true, "ErrMesg"=>"WatchInputsCameraLibFromThingId: ".$sErrMesg );
 	}
 }
 
@@ -9800,12 +9901,179 @@ function dbWatchInputsUpdateManagedStreamRunCount( $iThingId, $iRunCount, $iFail
 		return $aResult;
 		
 	} else {
-		return array( 
+		return array(
 			"Error"   => true, 
-			"ErrMesg" => "UpdateRuleStatus: ".$sErrMesg 
+			"ErrMesg" => "UpdateWatchInputsCameraLibCount: ".$sErrMesg 
 		);
 	}
 }
+
+
+function dbWatchInputsManagedStreamAdd( $iThingId, $sName, $iEnabled ) {
+	//----------------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                                --//
+	//----------------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Normal Variables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+
+	$sSchema            = "";           //-- STRING:    Used to hold the extracted string that contains the SQL View name  --//
+	$aInputVals         = array();      //-- ARRAY:     Used to hold an array of values to do the SQL Input Binding --//
+	$iUTS               = time();
+	
+	
+	
+	if( $bError===false ) {
+		try {
+			//----------------------------------------------------------------------------//
+			//-- SETUP VARIABLES                                                        --//
+			//----------------------------------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			//------------------------------------//
+			//-- SQL                            --//
+			//------------------------------------//
+			$sSQL .= "INSERT INTO `".$sSchema."`.`WICAMERALIB` ( ";
+			$sSQL .= "    `WICAMERALIB_THING_FK`,           `WICAMERALIB_NAME`, ";
+			$sSQL .= "    `WICAMERALIB_ENABLED`,            `WICAMERALIB_RUNCOUNT`, ";
+			$sSQL .= "    `WICAMERALIB_FAILCOUNT`,          `WICAMERALIB_LASTUPDATE` ";
+			$sSQL .= ") VALUES ( ";
+			$sSQL .= "    :ThingId,         :Name, ";
+			$sSQL .= "    :Enabled,         0, ";
+			$sSQL .= "    0,                :UTS ";
+			$sSQL .= ") ";
+			
+			//------------------------------------//
+			//-- Input Binding                  --//
+			//------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"ThingId",           "type"=>"INT",          "value"=>$iThingId                ),
+				array( "Name"=>"Name",              "type"=>"STR",          "value"=>$sName                   ),
+				array( "Name"=>"Enabled",           "type"=>"INT",          "value"=>$iEnabled                ),
+				array( "Name"=>"UTS",               "type"=>"INT",          "value"=>$iUTS                    )
+			);
+			
+			//------------------------------------//
+			//-- Execute the SQL Query          --//
+			//------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindNonCommittedInsertQuery( $sSQL, $aInputVals );
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	
+	//----------------------------------------------------------------------------//
+	//-- 4.0 - Error Check                                                      --//
+	//----------------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true ) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Write error message for when Database Library returns an unexpected result --//
+		}
+	}
+	
+	//----------------------------------------------------------------------------//
+	//-- 5.0 - Return Results or Error Message                                  --//
+	//----------------------------------------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Result"=>"Success" );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"WatchInputsCameraLibStreamAdd: ".$sErrMesg );
+	}
+}
+
+
+
+function dbWatchInputsManagedStreamEdit( $iStreamId, $sName, $iEnabled ) {
+	//--------------------------------------------//
+	//-- 1.0 - Declare Variables                --//
+	//--------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$sSQL               = "";       //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;    //-- BOOL:      --//
+	$sErrMesg           = "";       //-- STRING:    --//
+	$iNewUTS            = time();
+	
+	//----------------------------------------------------------------//
+	//-- 4.0 - SQL Query                                            --//
+	//----------------------------------------------------------------//
+	if( $bError===false) {
+		try {
+			//----------------------------------------------------//
+			//-- 4.1 - Setup SQL Query String                   --//
+			//----------------------------------------------------//
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "UPDATE `".$sSchema."`.`WICAMERALIB` ";
+			$sSQL .= "SET ";
+			$sSQL .= "    `WICAMERALIB_NAME`       = :Name, ";
+			$sSQL .= "    `WICAMERALIB_ENABLED`    = :Enabled, ";
+			$sSQL .= "    `WICAMERALIB_LASTUPDATE` = :LastUpdate ";
+			$sSQL .= "WHERE `WICAMERALIB_PK`       = :StreamId; ";
+			
+			//----------------------------------------------------//
+			//-- 4.2 - Setup SQL Input                          --//
+			//----------------------------------------------------//
+			$aInputVals = array(
+				array( "Name"=>"Name",              "type"=>"INT",      "value"=>$sName          ),
+				array( "Name"=>"Enabled",           "type"=>"INT",      "value"=>$iEnabled       ),
+				array( "Name"=>"LastUpdate",        "type"=>"INT",      "value"=>$iNewUTS        ),
+				array( "Name"=>"StreamId",          "type"=>"BINT",     "value"=>$iStreamId      )
+			);
+			
+			//----------------------------------------------//
+			//-- 4.4 - Run the SQL Query                  --//
+			//----------------------------------------------//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->InputBindUpdateQuery( $sSQL, $aInputVals );
+			
+			
+			//----------------------------------------------//
+			//-- 4.5 - Validate Results                   --//
+			//----------------------------------------------//
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 9.0 - Return Results or Error Message  --//
+	//--------------------------------------------//
+	if($bError===false) {
+		return $aResult;
+		
+	} else {
+		return array(
+			"Error"   => true, 
+			"ErrMesg" => "WatchInputsCameraLibStreamEdit: ".$sErrMesg 
+		);
+	}
+}
+
+
 
 //========================================================================================================================//
 //== #19.0# - Server Version Functions                                                                                  ==//
