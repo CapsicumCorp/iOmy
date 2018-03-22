@@ -127,6 +127,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 namespace cameralib {
 
 static const int WEBAPI_ACCESS_INTERVAL=60; //Number of seconds between web api accesses
+static const int WEBAPI_CAMERA_STREAMS_LOOKUP_INTERVAL=60; //Number of seconds between web api camera stream lookups
 
 using boost::asio::ip::tcp;
 
@@ -214,6 +215,8 @@ static pthread_t gmainthread=0;
 static bool gneedmoreinfo=false; //Set to false when a device needs more info to indicate that we shouldn't sleep for very long
 
 std::int64_t ghubpk;
+
+static time_t lastCameraStreamsRefreshTime=0;
 
 //global iface pointers set once for improved performance compared to for every function that uses it,
 //  as the pointer value shouldn't change apart from during init/shutdown stage
@@ -2184,8 +2187,18 @@ private:
 
     //Find out what the next request mode should be
     if (requestmode==WEBAPI_REQUEST_MODES::NO_REQUEST) {
+      struct timespec curtime;
+      clock_gettime(CLOCK_REALTIME, &curtime);
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      if (WEBAPI_CAMERA_STREAMS_LOOKUP_INTERVAL+lastCameraStreamsRefreshTime>curtime.tv_sec) {
+        //Skip looking up camera streams
+        requestmode=WEBAPI_REQUEST_MODES::LOOKUP_CAMERA_STREAMS;
+      }
+    }
+    if (requestmode==WEBAPI_REQUEST_MODES::NO_REQUEST) {
       nextRequestMode=WEBAPI_REQUEST_MODES::LOOKUP_CAMERA_STREAMS;
-    } else if (requestmode==WEBAPI_REQUEST_MODES::LOOKUP_CAMERA_STREAMS) {
+    }
+    if (requestmode==WEBAPI_REQUEST_MODES::LOOKUP_CAMERA_STREAMS) {
       boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
       if (gcameras.size()==0) {
         nextRequestMode=WEBAPI_REQUEST_MODES::NO_REQUEST;
@@ -2557,6 +2570,13 @@ private:
   //Do processing after the request has been sent and then send the next request
   void successful_send() {
     if (requestmode==WEBAPI_REQUEST_MODES::LOOKUP_CAMERA_STREAMS) {
+      {
+        struct timespec curtime;
+        clock_gettime(CLOCK_REALTIME, &curtime);
+        boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+        lastCameraStreamsRefreshTime=curtime.tv_sec;
+      }
       //Process more requests
       setupHTTPHeaders();
     } else if (requestmode==WEBAPI_REQUEST_MODES::GET_STREAM_URL) {
@@ -2786,6 +2806,9 @@ static asyncloop gasyncloop;
 
 static int cmd_refresh_webapi(const char *buffer, int clientsock) {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  //Force a refresh of everything
+  lastCameraStreamsRefreshTime=0;
 
   gasyncloop.triggerWebApiLoop();
 
