@@ -1347,6 +1347,7 @@ $.extend(iomy.functions, {
             //--------------------------------------------------------------------//
             $.each(aDeviceTypeList, function (sI, mDeviceType) {
                 // TODO: Place all of these options in alphabetical order.
+                // TODO: Create a function to check whether the link type is supported by the new device interface.
                 if (mDeviceType.LinkTypeId === iomy.devices.zigbeesmartplug.LinkTypeId ||
                     mDeviceType.LinkTypeId === iomy.devices.onvif.LinkTypeId ||
                     mDeviceType.LinkTypeId === iomy.devices.philipshue.LinkTypeId ||
@@ -1422,6 +1423,7 @@ $.extend(iomy.functions, {
         }
     },
     
+    // TODO: Consolidate these two functions into one with an optional premise ID argument.
     getNumberOfRoomsInPremise : function (iPremiseId) {
         var iCount = 0;
         
@@ -1467,12 +1469,13 @@ $.extend(iomy.functions, {
         }
     },
     
+    // TODO: Consolidate these getNumberOf functions to be one function.
     getNumberOfPremises : function () {
         var iCount = 0;
      
         try {
             $.each(iomy.common.PremiseList, function (sI, mPremise) {
-               if (sI !== undefined && sI !== null && mPremise !== undefined && mPremise !== null) {
+                if (sI !== undefined && sI !== null && mPremise !== undefined && mPremise !== null) {
                     iCount++;
                 }
             });
@@ -1791,6 +1794,7 @@ $.extend(iomy.functions, {
             if (iLevel === undefined || iLevel === null) {
                 throw new MissingArgumentException("Permission level must be given.");
                 
+            // TODO: Shorten this to only change the appropriate flag according to the level.
             } else if (iLevel === 2 ) {
                 //-- Read Access--//
                 iRoomRead = 1;

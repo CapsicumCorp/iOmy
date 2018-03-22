@@ -24,7 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 $.sap.require("sap.ui.table.Table");
 sap.ui.controller("pages.Development.ManagedStreams", {
 	
-	
+	aStreams : [],
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -49,7 +49,7 @@ sap.ui.controller("pages.Development.ManagedStreams", {
 				//oController.RefreshModel( oController, {} );
 				
 				//-- Check the parameters --//
-				oController.RefreshModel(oController, {} );
+				oController.LoadStreams();
 				//-- Defines the Device Type --//
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
 			}
@@ -57,6 +57,61 @@ sap.ui.controller("pages.Development.ManagedStreams", {
 		});
 		
 	},
+    
+    LoadStreams : function () {
+        var oController = this;
+        
+        //--------------------------------------------------------------------//
+        // Attempt to look up the streams.
+        //--------------------------------------------------------------------//
+        try {
+            iomy.apiphp.AjaxRequest({
+                url     : iomy.apiphp.APILocation("managedstreams"),
+                data    : {
+                    "Mode" : "LookupStreams"
+                },
+                
+                onSuccess : function (sType, mData) {
+                    try {
+                        //--------------------------------------------------------------------//
+                        // Go through the list of streams.
+                        //--------------------------------------------------------------------//
+                        for (var i = 0; i < mData.Data.length; i++) {
+                            var mStream = mData.Data[i];
+                            var sStateText = "Disabled";
+
+                            if (mStream.Enabled === 1) {
+                                sStateText = "Enabled";
+                            }
+
+                            oController.aStreams.push({
+                                "DeviceName": mStream.Name,
+                                "Descript"  : "Onvif IP Camera",
+                                "Fail"      : mStream.FailCount,
+                                "Success"   : mStream.RunCount,
+                                "State"     : sStateText
+                            });
+                        }
+
+                        oController.RefreshModel(oController, {} );
+                        
+                    } catch (e) {
+                        $.sap.log.error("Error occurred in the success callback ("+e.name+"): " + e.message);
+                    }
+                },
+                
+                onFail : function (response) {
+                    $.sap.log.error("Error occurred while looking up streams: " + response.responseText);
+                    
+                    iomy.common.showError(response.responseText, "Error");
+                }
+            });
+            
+        } catch (e) {
+            $.sap.log.error("Error occurred attempting to run the stream list request ("+e.name+"): " + e.message);
+        }
+    },
+    
 	RefreshModel: function( oController, oConfig ) {
 		//------------------------------------------------//
 		//-- Declare Variables                          --//
@@ -68,7 +123,7 @@ sap.ui.controller("pages.Development.ManagedStreams", {
 		//------------------------------------------------//
 		oView.setModel( 
 			new sap.ui.model.json.JSONModel({
-				"mCameraList":   [
+				"CameraList":   [
 					{
 						"DeviceName": "Front Door Camera",
 						"Descript": "Onvif IP Camera",
@@ -101,6 +156,6 @@ sap.ui.controller("pages.Development.ManagedStreams", {
 			oConfig.onSuccess();
 		}
 		
-	},
+	}
 
 });

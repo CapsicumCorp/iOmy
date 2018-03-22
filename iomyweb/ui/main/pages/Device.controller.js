@@ -208,7 +208,7 @@ sap.ui.controller("pages.Device", {
                 new sap.m.ObjectListItem (oView.createId("loading"), {        
                     title: "Loading Devices...",
                     type: "Active",
-                    attributes : [],
+                    attributes : []
                 })
             );
 

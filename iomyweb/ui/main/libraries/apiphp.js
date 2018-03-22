@@ -153,6 +153,10 @@ $.extend(iomy.apiphp,{
             case "serveradmin":
 				sReturn = sUrlRestricted+'/php/api_serveradmin.php';
 				break;
+                
+            case "managedstreams":
+                sReturn = sUrlRestricted+'/php/api_managedstreams.php';
+                break;
 		}
 		
 		//--------------------------------------------------------//

@@ -23,6 +23,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.Development.AddStream", {
+    bEditing : false,
+    iStreamId : null,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -42,5 +44,139 @@ sap.ui.controller("pages.Development.AddStream", {
 			}
 			
 		});	
-	}
+	},
+    
+    ToggleControls : function (bEnabled) {
+        var oController = this;
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
+        var sControl    = "/enabledControls/";
+        
+        oModel.setProperty(sControl + "Fields",         bEnabled);
+        oModel.setProperty(sControl + "SubmitButton",   bEnabled);
+        oModel.setProperty(sControl + "CancelButton",   bEnabled);
+    },
+    
+    RefreshModel: function( oController, oConfig ) {
+		//------------------------------------------------//
+		//-- Declare Variables                          --//
+		//------------------------------------------------//
+		var oView           = oController.getView();
+        var oModel          = null;
+        var oModelData      = {};
+		
+		//------------------------------------------------//
+		//-- Build and Bind Model to the View           --//
+		//------------------------------------------------//
+        oModelData = {
+            "fields" : {
+                "CameraType" : "1",
+                "SelectedCamera" : null,
+                "Description" : "",
+                "Enabled" : false
+            },
+            "options" : {
+                "OnvifCameras" : [],
+                "CameraTypes" : [
+                    {
+                        "Id" : "1",
+                        "Name" : "Onvif Camera"
+                    }
+                ]
+            },
+            "enabledControls" : {
+                "Fields" : true,
+                "SubmitButton" : true,
+                "CancelButton" : true
+            }
+        };
+        
+		oModel = new sap.ui.model.json.JSONModel(oModelData);
+        oModel.setSizeLimit(420);
+        oView.setModel( oModel );
+		
+		//------------------------------------------------//
+		//-- Trigger the onSuccess Event                --//
+		//------------------------------------------------//
+		if( oConfig.onSuccess ) {
+			oConfig.onSuccess();
+		}
+		
+	},
+    
+    submitStreamInformation : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oFormData   = oView.getModel().getProperty("/fields/");
+        
+        var aErrorMessages  = [];
+        
+        var iCameraType = oFormData.CameraType;
+        var iCamId      = oFormData.SelectedCamera;
+        var sName       = oFormData.Description;
+        var vEnabled    = oFormData.Enabled;
+        var sDataString = "";
+        var sMode       = "";
+        
+        oController.ToggleControls(false);
+        
+        if (sName === "") {
+            aErrorMessages.push("Stream name must be given.");
+        }
+        
+        if (aErrorMessages.length > 0) {
+            iomy.common.showError(aErrorMessages.join("\n"), "Error");
+            return;
+        }
+        
+        if (vEnabled) {
+            vEnabled = 1;
+        } else {
+            vEnabled = 0;
+        }
+        
+        if (oController.iStreamId !== null) {
+            sMode = "EditStream";
+            sDataString = JSON.stringify({
+                "Name" : sName,
+                "Enabled" : vEnabled,
+                "StreamId" : oController.iStreamId
+            });
+            
+        } else {
+            sMode = "AddStream";
+            sDataString = JSON.stringify({
+                "Name" : sName,
+                "Enabled" : vEnabled,
+                "ThingId" : iCamId
+            });
+        }
+        
+        try {
+            iomy.apiphp.AjaxRequest({
+                url     : iomy.apiphp.APILocation("managedstream"),
+                data    : {
+                    "Mode" : sMode,
+                    "Id" : iCameraType,
+                    "Data" : sDataString
+                },
+                
+                onSuccess : function () {
+                    oController.ToggleControls(true);
+                },
+                
+                onFail : function () {
+                    iomy.common.showError(aErrorMessages.join("\n"), "Error",
+                        function () {
+                            oController.ToggleControls(true);
+                        }
+                    );
+                }
+            });
+            
+        } catch (e) {
+            $.sap.log.error("Error attempting to run the managed stream API ("+e.name+"): "+ e.message);
+            oController.ToggleControls(true);
+        }
+    }
 });

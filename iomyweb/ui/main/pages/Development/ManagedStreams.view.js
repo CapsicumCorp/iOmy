@@ -85,7 +85,7 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
 				new sap.ui.table.Table ({
-					rows: "{/mCameraList}",
+					rows: "{/CameraList}",
 					extension : [
 						new sap.m.Toolbar ({
 							selectionMode:"MultiToggle",

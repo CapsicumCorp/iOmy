@@ -44,6 +44,16 @@ sap.ui.jsview("pages.Development.AddStream", {
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var oView = this;
+        
+        var oCameraTypeTemplate = new sap.ui.core.Item({
+            key:  "{Id}",
+            text: "{Name}"
+        });
+        
+        var oOnvifCameraTemplate = new sap.ui.core.Item({
+            key:  "{Id}",
+            text: "{Name}"
+        });
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
 			title: "Stream Form",
@@ -93,13 +103,11 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Camera Type",
 															fields: [
 																new sap.m.Select ({
-																	selectedKey: "1",
-																	items: [
-																		new sap.ui.core.Item({
-																			key:  "1",
-																			text: "Onvif Camera"
-																		})
-																	]
+																	selectedKey: "{/fields/CameraType}",
+																	items: {
+																		path : "{/options/CameraTypes}",
+                                                                        template : oCameraTypeTemplate
+																	}
 																})
 															]
 														}),
@@ -107,21 +115,11 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Select Camera",
 															fields: [
 																new sap.m.Select ({
-																	selectedKey: "1",
-																	items: [
-																		new sap.ui.core.Item({
-																			key:  "1",
-																			text: "Name"
-																		}),
-																		new sap.ui.core.Item({
-																			key:  "2",
-																			text: "Name"
-																		}),
-																		new sap.ui.core.Item({
-																			key:  "3",
-																			text: "Name"
-																		}),
-																	]
+																	selectedKey: "{/fields/SelectedCamera}",
+																	items: {
+                                                                        path : "{/options/OnvifCameras}",
+                                                                        template : oOnvifCameraTemplate
+                                                                    }
 																})
 															]
 														}),
@@ -129,14 +127,16 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Stream Description",
 															fields: [
 																new sap.m.Input ({
-																	value:""
+																	value:"{/fields/Description}"
 																})
 															]
 														}),
 														new sap.ui.layout.form.FormElement({
 															label : "Enable Stream",
 															fields: [
-																new sap.m.CheckBox ({})
+																new sap.m.CheckBox ({
+                                                                    checked : "{/fields/Enabled}"
+                                                                })
 															]
 														}),
 														new sap.ui.layout.form.FormElement({
@@ -166,7 +166,7 @@ sap.ui.jsview("pages.Development.AddStream", {
 									
 								})
 							]
-						}),
+						})
 					]
 					
 				}).addStyleClass("")
