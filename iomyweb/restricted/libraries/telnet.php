@@ -97,8 +97,6 @@ class PHPTelnet {
 			$this->aErrorMessges[] = "Critical error in fsock!\n".$e0001->getMessage();
 			
 		}
-		
-		
 	}
 	
 	
@@ -173,7 +171,9 @@ class PHPTelnet {
 	}
 	
 	
-	
+	//========================================================================================================================//
+	//== #4.0# - INPUT FUNCTIONS                                                                                            ==//
+	//========================================================================================================================//
 	public function WriteArray($aInputArray) {
 		//------------------------------------//
 		//-- 1 - Initialise                 --//
@@ -213,140 +213,246 @@ class PHPTelnet {
 		return false;
 	}
 	
+	//========================================================================================================================//
+	//== #5.0# - OUTPUT FUNCTIONS                                                                                           ==//
+	//========================================================================================================================//
 	
-	public function FetchRows( $iColumnMax=null, $iMaxRows=25, $bHideComments=false ) {
-		//--------------------------------------------//
-		//-- 1 - Initialise                         --//
-		//--------------------------------------------//
+	
+	//====================================================================//
+	//== #5.1# -    ==//
+	//====================================================================//
+	public function FetchRows( $sFetchType="normal", $iMaxCol=null, $iMaxRows=25, $bHideComments=false ) {
+		//--------------------------------------------------------//
+		//-- 1.0 - Declare Variables                            --//
+		//--------------------------------------------------------//
+		$bError             = false;        //-- BOOLEAN:  --//
+		$sErrMesg           = "";           //-- STRING:   --//
 		$j                  = 0;            //-- INTEGER:  Used to store how many invalid rows have been found --//
 		$aResult            = array();      //-- ARRAY:    --//
 		
 		
-		//--------------------------------------------//
-		//-- 3 - Fetch the Output                   --//
-		//--------------------------------------------//
-		if( $iColumnMax!==null ) {
-			//-- Check to see if iMax rows is greater than 0 --//
-			if( $iMaxRows>=1 ) {
-				//--------------------------------------------//
-				//-- 3.A - Limited Mode                     --//
-				//--------------------------------------------//
-				
-				//-- While not "End of File" or has not exceeded the max empty rows --//
-				while( !feof( $this->oSocket ) && $j<=$iMaxRows ) {
-					
-					//-- Fetch the output --//
-					$sOutput = fgets( $this->oSocket, $iColumnMax )."\n";
-					
-					//-- If output isn't false --//
-					if( $sOutput!==false ) {
-						//--------------------------------------------//
-						//-- IF the TelnetType is WatchInputs       --//
-						//--------------------------------------------//
-						if( $this->sTelnetType==="WatchInputs") {
-							//--------------------------------------------//
-							//-- STEP 1 - Trim Whitespace               --//
-							$sTrimedOutput   = trim( $sOutput );
-							
-							//--------------------------------------------//
-							//-- STEP 2 - Filter unwanted characters    --//
-							$sFilteredOutput = filter_var( $sTrimedOutput, FILTER_UNSAFE_RAW, array( 'flags' => FILTER_FLAG_STRIP_LOW|FILTER_FLAG_STRIP_HIGH ) );
-							
-							//--------------------------------------------//
-							//-- STEP 3 - Remove GreaterThan symbols    --//
-							if( $sFilteredOutput==="> logout" ) {
-								$sFilteredOutput = "";
-								
-								//-- Add to the debugging log --//
-								$this->AddToDebuggingLog( 
-									array(
-										"Type"   => "Debug",
-										"Mesg"   => "Hide the logout message!"
-									)
-								);
-								
-							} else if( substr($sFilteredOutput, 0, 2)==='> ' ) {
-								//-- Add to the Result --//
-								$sFilteredOutput = substr( $sFilteredOutput, 2 );
-								
-							}
-							
-							//--------------------------------------------//
-							//-- STEP 4 - Return the Results            --//
-							if( !empty($sFilteredOutput) ) {
-								
-								if( $bHideComments===false ) {
-									//-- Add to the Result --//
-									$aResult[] = $sFilteredOutput;
-									
-									//-- Add to the debugging log --//
-									$this->AddToDebuggingLog( 
-										array(
-											"Type"   => "Output",
-											"Value"  => $sFilteredOutput
-										)
-									);
-									
-								} else {
-									//-- IF the first character isn't the character used for comments --//
-									if( substr($sFilteredOutput, 0, 1)!=='#' ) {
-										//-- Add to the Result --//
-										$aResult[] = $sFilteredOutput;
-										
-										//-- Add to the debugging log --//
-										$this->AddToDebuggingLog( 
-										array(
-												"Type"   => "Output",
-												"Value"  => $sFilteredOutput
-											)
-										);
-										
-									} //-- ELSE the Output is a comment so do nothing --//
-								}
-							} else {
-								//-- Increment the count of invalid rows --//
-								$j++;
-							}
-							
-						//--------------------------------------------//
-						//-- ELSE Unsupported Type                  --//
-						//--------------------------------------------//
-						} else {
-							//-- TODO: Add other types --//
-							$this->AddToDebuggingLog( 
-								array(
-									"Type"   => "Error",
-									"Value"  => "Unsupported Telnet Type."
-								)
-							);
-						}
-					} else {
-						//-- Value is false indicating that it couldn't retrieve the value --//
-						$j++;
-					}
-				}	//-- ENDWHILE Loop --//
-				
-				
-				//--------------------------------------------//
-				//-- Return the Results                     --//
-				//--------------------------------------------//
-				return $aResult;
-			} else {
-				$this->AddToDebuggingLog( 
+		//--------------------------------------------------------//
+		//-- 3.0 - Check the Values                             --//
+		//--------------------------------------------------------//
+		try {
+			//--------------------------------------------//
+			//-- 3.1 - Check Max Column Count           --//
+			//--------------------------------------------//
+			if( $iMaxCol===null || $iMaxCol<30 ) {
+				$this->AddToDebuggingLog(
 					array(
 						"Type"   => "Error",
-						"Value"  => "Unsupported MaxRows parameter."
+						"Value"  => "Unsupported 'MaxCol' parameter. "
 					)
 				);
 				return false;
 			}
+			
+			//--------------------------------------------//
+			//-- 3.2 - Check Max Rows Count             --//
+			//--------------------------------------------//
+			if( $iMaxRows===null || $iMaxRows>30 ) {
+				$this->AddToDebuggingLog(
+					array(
+						"Type"   => "Error",
+						"Value"  => "Unsupported 'MaxRows' parameter. "
+					)
+				);
+				return false;
+			}
+		} catch( Exception $e30 ) {
+			$bError   = true;
+			$sErrMesg = "Critical Error: Performing !";
 		}
 		
-		//--------------------------------------------//
-		//-- Return the failure response            --//
-		//--------------------------------------------//
-		return false;
+		//--------------------------------------------------------//
+		//-- 5.0 - Fetch the Output                             --//
+		//--------------------------------------------------------//
+		if( $bError===false ) {
+			try {
+				switch( $this->sTelnetType ) {
+					case "WatchInputs":
+						$aResult = $this->GetRowsWatchInputs( $sFetchType, $iMaxCol, $iMaxRows, $bHideComments );
+						break;
+						
+					default:
+						$bError   = true;
+						$sErrMesg = "Unsupported Telnet Type!";
+						break;
+				}
+			} catch( Exception $e50 ) {
+				$bError   = true;
+				$sErrMesg = "Critical Error: When fetching rows from the Telnet Interface!";
+			}
+		}
+		
+		//--------------------------------------------------------//
+		//-- 9.0 - Return the failure response                  --//
+		//--------------------------------------------------------//
+		if( $bError===false ){ 
+			return $aResult;
+			
+		} else {
+			$this->AddToDebuggingLog(
+				array(
+					"Type"   => "Error",
+					"Value"  => $sErrMesg
+				)
+			);
+			
+			return false;
+		}
 	}
+	
+	
+	//====================================================================//
+	//== #5.2# - WatchInputs Variant                                    ==//
+	//====================================================================//
+	private function GetRowsWatchInputs( $sFetchType, $iMaxCol, $iMaxRows, $bHideComments ) {
+		//--------------------------------------------------------------------//
+		//-- 1.0 - Declare Variables                                        --//
+		//--------------------------------------------------------------------//
+		$bError             = false;        //-- BOOLEAN:  --//
+		$sErrMesg           = "";           //-- STRING:   --//
+		$sOutput            = "";           //--  --//
+		$aResult            = array();      //--  --//
+		$j                  = 0;            //--  --//
+		$sTemp1             = "";           //-- STRING:   Used to hold a tempory string for the output formatting --//
+		
+		$bFinished          = false;        //-- BOOLEAN:   --//
+		
+		//--------------------------------------------------------------------//
+		//-- 2.0 - Prepare                                                  --//
+		//--------------------------------------------------------------------//
+		$sFetchType = strtolower( $sFetchType );
+		
+		//--------------------------------------------------------------------//
+		//-- 5.0 - Fetch Data                                               --//
+		//--------------------------------------------------------------------//
+		while( !feof( $this->oSocket ) && $j<=$iMaxRows && $bFinished===false ) {
+			
+			//-- Fetch the output --//
+			$sOutput = fgets( $this->oSocket, $iMaxCol )."\n";
+			
+			
+			//-- If output isn't false --//
+			if( $sOutput!==false ) {
+				//--------------------------------------------//
+				//-- STEP 1 - Trim Whitespace               --//
+				//--------------------------------------------//
+				$sTrimedOutput   = trim( $sOutput );
+				
+				//--------------------------------------------//
+				//-- STEP 2 - Filter unwanted characters    --//
+				//--------------------------------------------//
+				$sFilteredOutput = filter_var( $sTrimedOutput, FILTER_UNSAFE_RAW, array( 'flags' => FILTER_FLAG_STRIP_LOW|FILTER_FLAG_STRIP_HIGH ) );
+				
+				//--------------------------------------------//
+				//-- STEP 3 - Remove GreaterThan symbols    --//
+				//--------------------------------------------//
+				if( $sFilteredOutput==="> logout" ) {
+					$sFilteredOutput = "";
+					
+					//-- Add to the debugging log --//
+					$this->AddToDebuggingLog(
+						array(
+							"Type"   => "Debug",
+							"Mesg"   => "Hide the logout message!"
+						)
+					);
+					
+				} else if( substr($sFilteredOutput, 0, 2)==='> ' ) {
+					$bFinished = true;
+					
+					//-- Add to the Result --//
+					$sFilteredOutput = substr( $sFilteredOutput, 2 );
+					
+				} else if( $sFilteredOutput==='>' ) {
+					$bFinished = true;
+					$sFilteredOutput = "";
+				}
+				
+				//--------------------------------------------//
+				//-- STEP 4 - Return the Results            --//
+				//--------------------------------------------//
+				if( !empty($sFilteredOutput) ) {
+					//------------------------------------------------------------//
+					//-- IF Comment and filter out is enabled                   --//
+					//------------------------------------------------------------//
+					if( $bHideComments===true && substr($sFilteredOutput, 0, 1)==='#' ) {
+						//-- Add to the debugging log --//
+						$this->AddToDebuggingLog(
+							array(
+								"Type"   => "Debug",
+								"Value"  => "Removed comment from output"
+							)
+						);
+					//------------------------------------------------------------//
+					//-- ELSE Format the output                                 --//
+					//------------------------------------------------------------//
+					} else {
+						//-- Add to the debugging log --//
+						$this->AddToDebuggingLog(
+							array(
+								"Type"   => "Output",
+								"Value"  => $sFilteredOutput
+							)
+						);
+						
+						//--------------------------------------------//
+						//-- Format the Output in the desired way   --//
+						switch( $sFetchType ) {
+							case "json":
+								$sTemp1 .= $sFilteredOutput;
+								break;
+								
+							default:
+								//-- Add to Iterative Array --//
+								$aResult[] = $sFilteredOutput;
+						}
+					}
+				} else {
+					//-- Increment the count of invalid rows --//
+					$j++;
+				}
+			}	//-- ENDIF OUTPUT ISNT FALSE --//
+		}	//-- ENDWHILE --//
+		
+		//--------------------------------------------------------------------//
+		//-- 8.0 - Perform any formatting that needs to be done             --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ){ 
+			switch( $sFetchType ) {
+				case "json":
+					$aResult = json_decode( $sTemp1, true );
+					break;
+					
+				default:
+					
+			}
+		}
+		
+		
+		
+		//--------------------------------------------------------------------//
+		//-- 9.0 - Return the Results                                       --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ){ 
+			return $aResult;
+			
+		} else {
+			$this->AddToDebuggingLog(
+				array(
+					"Type"   => "Error",
+					"Value"  => $sErrMesg
+				)
+			);
+			
+			return false;
+		}
+	}
+	
+	
 }
 
 

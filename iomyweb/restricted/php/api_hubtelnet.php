@@ -45,6 +45,8 @@ $sPostToken                 = "";           //-- STRING:        Used to store th
 $aResult                    = array();      //-- ARRAY:         Used to store the results.			--//
 
 
+$bTelnetDebugging           = false;        //-- BOOLEAN:       "CustomTelnetCommand" Mode Only. Used to output the fractions of a second that it took to fetch the data from telnet --//
+
 
 $aTempFunctionResult1       = array();      //-- ARRAY:         Used to store the functions results before being parsed and converted to the correct format to be extracted or returned.	--//
 $aTempFunctionResult2       = array();      //-- ARRAY:         Used to store the functions results before being parsed and converted to the correct format to be extracted or returned.	--//
@@ -56,18 +58,9 @@ $iPostHubId                 = 0;            //-- INTEGER:       This is used to 
 $iPostCommId                = 0;            //-- INTEGER:       This is used to store which "Zigbee Comm" to connect to --//
 $sNetworkAddress            = "";           //-- STRING:        --//
 $iNetworkPort               = 0;            //-- INTEGER:       --//
-$sUserToken                 = "";           //-- STRING:        --//
-$iHWId                      = 0;            //-- INTEGER:       --//
-$sLightId                   = "";           //-- STRING:        Used to store the --//
 $bUsePHPObject              = false;        //-- BOOLEAN:       --//
 $iUTS                       = 0;            //-- INTEGER:       --//
-$aThingList                 = array();      //-- ARRAY:         Used to hold the list of things.  --//
-$aInsertThing               = array();      //-- ARRAY:         Used to hold the results of the function that inserts a new Light if a new one is detected. --//
-$aThingData                 = array();      //-- ARRAY:         Used to hold the data that gets passed to the function so that it can insert a light if a new one is detected. --//
 $aHubData                   = array();      //-- ARRAY:         --//
-$aNewCommData               = array();      //-- ARRAY:         --//
-$bTransactionStarted        = false;        //-- BOOLEAN:       --//
-$bFound                     = false;        //-- BOOLEAN:       Used to indicate if a match is found or not. --//
 $bCommNetworkStateFound     = false;        //-- BOOLEAN:       Used to indicate if a Network State for a RapidHA modem was found or not. --//
 $bCommNetworkState          = false;        //-- BOOLEAN:       Used to store the current network state that the RapidHa Modem is in. --//
 
@@ -131,7 +124,6 @@ if($bError===false) {
 			$sErrMesg .= "Please use a valid \"Mode\" parameter\n";
 			$sErrMesg .= "eg. \n \"GetRapidHAInfo\", \"TurnOnZigbeeJoinMode\", \"RapidHAFormNetwork\" or \"CustomTelnetCommand\" \n\n";
 		}
-		
 	} catch( Exception $e0102 ) {
 		$bError = true;
 		$iErrCode  = 102;
@@ -310,7 +302,7 @@ if( $bError===false ) {
 						//var_dump( $aHubData['Data'] );
 						
 					} else {
-						$bError = true;
+						$bError    = true;
 						$iErrCode  = 213;
 						$sErrMesg .= "Error Code:'0213' \n";
 						$sErrMesg .= "Problem looking up the Info for the selected Hub.\n";
@@ -359,10 +351,10 @@ if( $bError===false ) {
 				//----------------------------//
 				//-- RapidHA Info           --//
 				//----------------------------//
-				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
 				if( $oTelnet->bInitialised===true ) {
 					$oTelnet->WriteArray( array( "get_rapidha_info\n", "quit\n" ) );
-					$aResult['Data']['RapidHAInfo'] = $oTelnet->FetchRows( 128, 5, true );
+					$aResult['Data']['RapidHAInfo'] = $oTelnet->FetchRows( "normal", 128, 5, true );
 					
 				} else {
 					$bError     = true;
@@ -374,10 +366,10 @@ if( $bError===false ) {
 				//----------------------------//
 				//-- Zigbee Info            --//
 				//----------------------------//
-				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
 				if( $oTelnet->bInitialised===true ) {
 					$oTelnet->WriteArray( array( "get_zigbee_info\n", "quit\n" ) );
-					$aResult['Data']['ZigbeeInfo'] = $oTelnet->FetchRows( 128, 5, true );
+					$aResult['Data']['ZigbeeInfo'] = $oTelnet->FetchRows( "normal", 128, 5, true );
 					
 				} else {
 					$bError     = true;
@@ -418,10 +410,10 @@ if( $bError===false ) {
 						//----------------------------//
 						//-- RapidHA Info           --//
 						//----------------------------//
-						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
 						if( $oTelnet->bInitialised===true ) {
 							$oTelnet->WriteArray( array( "zigbee_enable_tempjoin ".$sCommAddress."\n", "quit\n" ) );
-							$aResult['Data']['JoinMode'] = $oTelnet->FetchRows( 128, 5, true );
+							$aResult['Data']['JoinMode'] = $oTelnet->FetchRows( "normal", 128, 5, true );
 							
 						} else {
 							$bError     = true;
@@ -472,10 +464,10 @@ if( $bError===false ) {
 					//----------------------------//
 					//-- RapidHA Info           --//
 					//----------------------------//
-					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
 					if( $oTelnet->bInitialised===true ) {
 						$oTelnet->WriteArray( array( "get_rapidha_info\n", "quit\n" ) );
-						$aTempFunctionResult1 = $oTelnet->FetchRows( 128, 5, true );
+						$aTempFunctionResult1 = $oTelnet->FetchRows( "normal", 128, 5, true );
 						
 						if( $aTempFunctionResult1===false || count( $aTempFunctionResult1 )<=4 ) {
 							$bError     = true;
@@ -543,10 +535,10 @@ if( $bError===false ) {
 						//----------------------------//
 						//-- Form a Network         --//
 						//----------------------------//
-						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
 						if( $oTelnet->bInitialised===true ) {
 							$oTelnet->WriteArray( array( "rapidha_form_network ".$sCommAddress."\n", "quit\n" ) );
-							$aResult['Data']['FormNetwork'] = $oTelnet->FetchRows( 128, 5, true );
+							$aResult['Data']['FormNetwork'] = $oTelnet->FetchRows( "normal", 128, 5, true );
 							
 						} else {
 							$bError     = true;
@@ -565,6 +557,7 @@ if( $bError===false ) {
 			} catch( Exception $e3400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;
+				$iErrCode   = 3400;
 				$sErrMesg  .= "Error Code:'3400' \n";
 				$sErrMesg  .= "Critical Error in the main section of the \"".$sPostMode."\" Mode!\n";
 				$sErrMesg  .= $e3400->getMessage();
@@ -576,9 +569,9 @@ if( $bError===false ) {
 		} else if( $sPostMode==="CustomTelnetCommand" ) {
 			try {
 				if( $iHubOwnerPerm===1 ) {
-					//----------------------------//
-					//-- Setup the Results      --//
-					//----------------------------//
+					//----------------------------------------------------------------//
+					//-- Setup the Results                                          --//
+					//----------------------------------------------------------------//
 					$aResult = array(
 						"Error" => false,
 						"Data"  => array(
@@ -586,18 +579,59 @@ if( $bError===false ) {
 						)
 					);
 					
-					//----------------------------//
-					//-- Custom Command         --//
-					//----------------------------//
-					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+					//----------------------------------------------------------------//
+					//-- Custom Command                                             --//
+					//----------------------------------------------------------------//
+					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
 					if( $oTelnet->bInitialised===true ) {
+						
 						//----------------------------//
-						//-- Write Test             --//
+						//-- PRE COMMAND            --//
 						//----------------------------//
-						//$oTelnet->WriteArray( array( "versioninfo\n" ) );
-						//$oTelnet->FetchRows( 128, 5, true );
-						$oTelnet->WriteArray( array( $sPostTelnetCommand."\n", "quit\n" ) );
-						$aResult['Data']['Custom'] = $oTelnet->FetchRows( 128, 5, true );
+						if( $bTelnetDebugging===true ) {
+							$iTime1Start = microtime();
+						}
+						
+						$aTempFunctionResult4 = $oTelnet->FetchRows( "normal", 128, 1, true );
+						
+						if( $bTelnetDebugging===true ) {
+							$aResult['Data']['Pre'] = $aTempFunctionResult4;
+							$iTime1End   = microtime();
+							$iTime1Total = floatval( $iTime1End ) - floatval( $iTime1Start );
+							$aResult['Data']['PreTime'] = $iTime1Total;
+						}
+						//----------------------------//
+						//-- MAIN COMMAND           --//
+						//----------------------------//
+						if( $bTelnetDebugging===true ) {
+							$iTime2Start = microtime();
+						}
+						
+						$oTelnet->WriteArray( array( $sPostTelnetCommand."\n" ) );
+						$aResult['Data']['Custom'] = $oTelnet->FetchRows( "normal", 128, 5, true );
+						
+						if( $bTelnetDebugging===true ) {
+							$iTime2End = microtime();
+							$iTime2Total = floatval( $iTime2End ) - floatval( $iTime2Start );
+							$aResult['Data']['MainTime'] = $iTime2Total;
+						}
+						//----------------------------//
+						//-- EXIT COMMAND           --//
+						//----------------------------//
+						if( $bTelnetDebugging===true ) {
+							$iTime3Start = microtime();
+						}
+						
+						$oTelnet->WriteArray( array( "quit\n" ) );
+						$aTempFunctionResult4 = $oTelnet->FetchRows( "normal", 128, 1, true );
+						
+						if( $bTelnetDebugging===true ) {
+							$aResult['Data']['Exit'] = $aTempFunctionResult4;
+							$iTime3End = microtime();
+							$iTime3Total = floatval( $iTime3End ) - floatval( $iTime3Start );
+							$aResult['Data']['EndTime'] = $iTime3Total;
+						}
+						//var_dump( $oTelnet->aDebbugingLogs );
 						
 					} else {
 						$bError     = true;
@@ -616,6 +650,7 @@ if( $bError===false ) {
 			} catch( Exception $e4400 ) {
 				//-- Display an Error Message --//
 				$bError     = true;
+				$iErrCode   = 4400;
 				$sErrMesg  .= "Error Code:'4400' \n";
 				$sErrMesg  .= "Critical Error in the main section of the \"".$sPostMode."\" Mode!\n";
 				$sErrMesg  .= $e4400->getMessage();
