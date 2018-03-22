@@ -232,8 +232,6 @@ static int start(void);
 static void stop(void);
 static int init(void);
 static void shutdown(void);
-static void register_listeners(void);
-static void unregister_listeners(void);
 
 //Module Interface Definitions
 static moduledep_ver_1_t gdeps[]={
@@ -285,8 +283,8 @@ static moduleinfo_ver_1_t gmoduleinfo_ver_1={
   shutdown,
   start,
   stop,
-  register_listeners,
-  unregister_listeners,
+  nullptr,
+  nullptr,
   nullptr,
   (moduledep_ver_1_t (*)[]) &gdeps
 };
@@ -2687,37 +2685,6 @@ private:
   }
 };
 
-/*
-  Process a command sent by the user using the cmd network interface
-  Input: buffer The command buffer containing the command
-         clientsock The network socket for sending output to the cmd network interface
-  Returns: A CMDLISTENER definition depending on the result
-*/
-static int processcommand(const char *buffer, int clientsock) {
-  std::string bufferstring;
-  std::vector<std::string> buffertokens;
-
-  if (!cmdserverlibifaceptr) {
-    return *cmdserverlibifaceptr->CMDLISTENER_NOTHANDLED;
-  }
-  MOREDEBUG_ENTERINGFUNC();
-
-  //Convert the string to tokens using C++ Boost algorithms for easier access
-  bufferstring=buffer;
-  boost::algorithm::trim(bufferstring);
-  boost::algorithm::split(buffertokens, bufferstring, boost::algorithm::is_any_of(" "), boost::algorithm::token_compress_on);
-  if (buffertokens.size()==0) {
-    //No valid tokens found
-    return *cmdserverlibifaceptr->CMDLISTENER_NOTHANDLED;
-  }
-  {
-    return *cmdserverlibifaceptr->CMDLISTENER_NOTHANDLED;
-  }
-  MOREDEBUG_EXITINGFUNC();
-
-  return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
-}
-
 static asyncloop gasyncloop;
 
 static int cmd_refresh_webapi(const char *buffer, int clientsock) {
@@ -2867,30 +2834,6 @@ static void shutdown(void) {
   gcameras.clear();
   camerasInUse=0;
 
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
-}
-
-/*
-  Register all the listeners for this library
-  NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
-*/
-static void register_listeners(void) {
-  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
-  if (cmdserverlibifaceptr) {
-    cmdserverlibifaceptr->register_cmd_listener(processcommand);
-  }
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
-}
-
-/*
-  Unregister all the listeners for this library
-  NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
-*/
-static void unregister_listeners(void) {
-  debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __PRETTY_FUNCTION__);
-  if (cmdserverlibifaceptr) {
-    cmdserverlibifaceptr->unregister_cmd_listener(processcommand);
-  }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 }
 
