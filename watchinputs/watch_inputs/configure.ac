@@ -76,8 +76,9 @@ AC_CHECK_FUNCS([accept4], [], [])
 AC_ARG_ENABLE([mysql-plugin], AS_HELP_STRING([--disable-mysql-plugin], [Build without MySQL plugin]), [], [enable_mysql_plugin=yes])
 AS_IF([test "x$enable_mysql_plugin" != xno], [
   # MySQL client
-  MYSQL_CLIENT([], client)
-  MYSQLPLUGIN=true
+	WITH_MYSQL()
+	MYSQL_USE_CLIENT_API()
+	MYSQL_NEED_VERSION([5.0.0])
 ])
 
 # Checks for required headers
@@ -259,6 +260,9 @@ AC_SUBST([COMMONFLAGS])
 AC_SUBST([COMMONCFLAGS])
 AC_SUBST([COMMONCPPFLAGS])
 AC_SUBST([COMMONCXXFLAGS])
+AS_IF([test "x$enable_mysql_plugin" != xno], [
+	MYSQL_SUBST
+])
 
 dnl AC_CONFIG_FILES([Makefile])
 
