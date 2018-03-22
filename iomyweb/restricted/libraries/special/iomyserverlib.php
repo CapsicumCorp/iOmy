@@ -845,7 +845,6 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= ") ENGINE=InnoDB  DEFAULT CHARSET=".$sDefaultCharset."; \n";
 			$sSQL .= "alter table `".$sDBName."`.`DATASTRING255` comment 'Stores String255 data from the sensors.'; \n";
 
-
 			$sSQL .= "create table `".$sDBName."`.`DATABLOB` \n";
 			$sSQL .= "( \n";
 			$sSQL .= "   DATABLOB_PK          bigint not null auto_increment comment 'Primary Key', \n";
@@ -1057,7 +1056,7 @@ function DB_FetchCreateTableSQL( $sDBName, $sName, $sDefaultCharset="utf8" ) {
 			$sSQL .= "( \n";
 			$sSQL .= "   `WICAMERALIB_PK`         integer not null auto_increment comment 'Primary Key', \n";
 			$sSQL .= "   `WICAMERALIB_THING_FK`   bigint not null comment 'Foreign Key', \n";
-			$sSQL .= "   `WICAMERALIB_NAME`       varchar(64) not null, \n";
+			$sSQL .= "   `WICAMERALIB_NAME`       varchar(255) not null, \n";
 			$sSQL .= "   `WICAMERALIB_ENABLED`    integer not null, \n";
 			$sSQL .= "   `WICAMERALIB_RUNCOUNT`   integer not null comment 'Count of how often the Camera has been run', \n";
 			$sSQL .= "   `WICAMERALIB_FAILCOUNT`  bigint not null comment 'Count of how often the Camera has failed to run', \n";

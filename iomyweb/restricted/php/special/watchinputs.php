@@ -575,14 +575,14 @@ if( $bError===false ) {
 								$iPostRunCount = intval( $aPostData['RunCount'] );
 								
 								//-- IF the number is positive --//
-								if( !($iPostRunCount >= 1) ) {
+								if( !($iPostRunCount >= 0) ) {
 									//------------------------------------//
 									//-- ERROR: Invalid RunCount        --//
 									$bError    = true;
 									$iErrCode  = 214;
 									$sErrMesg .= "Error Code:'0214' \n";
 									$sErrMesg .= "Error: The 'RunCount' value in the 'Data' JSON parameter is not supported!\n";
-									$sErrMesg .= "The value is not greater than or equal to one.";
+									$sErrMesg .= "The value is not greater than or equal to zero.";
 								}
 							} else {
 								//------------------------------------//
@@ -623,14 +623,14 @@ if( $bError===false ) {
 								$iPostFailCount = intval( $aPostData['FailCount'] );
 								
 								//-- IF the number is positive --//
-								if( !($iPostFailCount >= 1) ) {
+								if( !($iPostFailCount >= 0) ) {
 									//------------------------------------//
 									//-- ERROR: Invalid Timestamp       --//
 									$bError    = true;
 									$iErrCode  = 216;
 									$sErrMesg .= "Error Code:'0216' \n";
 									$sErrMesg .= "Error: The 'FailCount' value in the 'Data' JSON parameter is not supported!\n";
-									$sErrMesg .= "The value is not greater than or equal to one.";
+									$sErrMesg .= "The value is not greater than or equal to zero.";
 								}
 							} else {
 								//------------------------------------//
