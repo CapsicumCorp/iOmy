@@ -56,7 +56,10 @@ namespace cameralib {
   };
   //A list of webapi request modes
   enum class WEBAPI_REQUEST_MODES {
-    GET_STREAM_URL
+    NO_REQUEST,
+    LOOKUP_CAMERA_STREAMS,
+    GET_STREAM_URL,
+    UPDATE_CAMERA_STREAM_COUNT
   };
 } //End of namespace
 
