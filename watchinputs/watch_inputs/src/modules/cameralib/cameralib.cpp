@@ -2564,6 +2564,7 @@ public:
   }
   //Trigger a call to the webapi as soon as possible
   void triggerWebApiLoop() {
+    boost::lock_guard<boost::mutex> guard(mtx_);
     webapiTimer.expires_from_now(boost::chrono::milliseconds(1));
   }
 private:
@@ -2719,6 +2720,16 @@ static int processcommand(const char *buffer, int clientsock) {
 
 static asyncloop gasyncloop;
 
+static int cmd_refresh_webapi(const char *buffer, int clientsock) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+  gasyncloop.triggerWebApiLoop();
+
+  cmdserverlibifaceptr->netputs("OKAY\n", clientsock, NULL);
+
+  return *cmdserverlibifaceptr->CMDLISTENER_NOERROR;
+}
+
 /*
   Main thread loop that manages operation of rules
   NOTE: Don't need to thread lock since the functions this calls will do the thread locking, we just disable canceling of the thread
@@ -2778,6 +2789,7 @@ static int start(void) {
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_all_stop", "cameralib_all_stop [true (default)|false]", "Command to stop all streams until watch inputs is restarted", "Command to stop all streams until watch inputs is restarted", cmd_all_stop);
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_get_camera_info", "cameralib_get_camera_info", "Command to get info about the camera library objects and running streams", "Command to get info about the camera library objects and running streams", cmd_get_camera_info);
     cmdserverlibifaceptr->register_cmd_longdesc("cameralib_get_camera_info_json", "cameralib_get_camera_info_json", "Command to get info about the camera library objects and running streams with JSON output", "Command to get info about the camera library objects and running streams with JSON output", cmd_get_camera_info_json);
+    cmdserverlibifaceptr->register_cmd_longdesc("cameralib_refresh_webapi", "cameralib_webapi_refresh", "Command to trigger an immediate refresh from the web api", "Command to trigger an immediate refresh from the web api", cmd_refresh_webapi);
   }
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __PRETTY_FUNCTION__);
 
