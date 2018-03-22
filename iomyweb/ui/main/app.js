@@ -271,6 +271,18 @@ var aPages = [
 		"Location":		"pages.Development.Advanced",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.Advanced\" Page!\n"
+	},
+	{
+		"Id":			"pManagedStreams",
+		"Location":		"pages.Development.ManagedStreams",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.ManagedStreams\" Page!\n"
+	},
+	{
+		"Id":			"pAddStream",
+		"Location":		"pages.Development.AddStream",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.AddStream\" Page!\n"
 	}
 
 ];
