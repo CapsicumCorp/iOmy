@@ -126,7 +126,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace cameralib {
 
-static const int WEBAPI_ACCESS_INTERVAL=5; //Number of seconds between web api accesses
+static const int WEBAPI_ACCESS_INTERVAL=60; //Number of seconds between web api accesses
 
 using boost::asio::ip::tcp;
 
