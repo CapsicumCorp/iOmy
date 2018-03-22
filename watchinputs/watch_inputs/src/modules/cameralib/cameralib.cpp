@@ -620,12 +620,14 @@ void CameraStream::incSuccessfulStartsCnt() {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   ++this->cntSuccessfulStarts;
+  syncCountsWebApi=true;
 }
 
 void CameraStream::incUnsuccessfulStartsCnt() {
   boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
   ++this->cntUnsuccessfulStarts;
+  syncCountsWebApi=true;
 }
 
 int32_t Camera::getCamId() {
@@ -1809,6 +1811,10 @@ static void processReceivedCameraStreams(const boost::property_tree::ptree& pt) 
               if (gcameras[thingId]->cameraStreams[0]->cntSuccessfulStarts!=runCount || gcameras[thingId]->cameraStreams[0]->cntUnsuccessfulStarts!=failCount) {
                 gcameras[thingId]->cameraStreams[0]->syncCountsWebApi=true;
               }
+              if (gcameras[thingId]->cameraStreams[0]->cntSuccessfulStarts==runCount && gcameras[thingId]->cameraStreams[0]->cntUnsuccessfulStarts==failCount) {
+                //New count values don't need to be sent to the webapi
+                gcameras[thingId]->cameraStreams[0]->syncCountsWebApi=false;
+              }
             }
           } catch (std::out_of_range& e) {
             //The camera exists but not stream: 0 so create it
@@ -1918,6 +1924,19 @@ static std::string url_encode(const std::string &value) {
     }
 
     return escaped.str();
+}
+
+std::string cameraStreamRunFailCountsToJson(const CameraStream& cameraStream) {
+  boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+  using boost::property_tree::ptree;
+  ptree countPt;
+
+  countPt.put("RunCount", cameraStream.cntSuccessfulStarts);
+  countPt.put("FailCount", cameraStream.cntUnsuccessfulStarts);
+  std::ostringstream streamstr;
+  write_json(streamstr, countPt);
+
+  return streamstr.str();
 }
 
 //Setup a http request
@@ -2035,6 +2054,7 @@ private:
   httpclient hc;
   boost::asio::streambuf lookupCamStreamsRequest_;
   boost::asio::streambuf getStreamURLRequest_;
+  boost::asio::streambuf updateCamStreamCountRequest_;
 
 public:
   asioclient(boost::asio::io_service& io_service)
@@ -2178,10 +2198,20 @@ private:
       boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
       if (gcameras.size()==0 || camerasIt==gcameras.end()) {
         //Stop getting stream URLs for camera streams that need it
-        nextRequestMode=WEBAPI_REQUEST_MODES::NO_REQUEST;
+        nextRequestMode=WEBAPI_REQUEST_MODES::UPDATE_CAMERA_STREAM_COUNT;
+        camerasIt=gcameras.begin();
       } else {
         //Continue getting stream URLs for camera streams that need it
         nextRequestMode=WEBAPI_REQUEST_MODES::GET_STREAM_URL;
+      }
+    } else if (requestmode==WEBAPI_REQUEST_MODES::UPDATE_CAMERA_STREAM_COUNT) {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+      if (gcameras.size()==0 || camerasIt==gcameras.end()) {
+        //Stop updating stream run and fail counts for camera streams that need it
+        nextRequestMode=WEBAPI_REQUEST_MODES::NO_REQUEST;
+      } else {
+        //Continue updating stream run and fail counts for camera streams that need it
+        nextRequestMode=WEBAPI_REQUEST_MODES::UPDATE_CAMERA_STREAM_COUNT;
       }
     }
     debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Next request=%s\n", __PRETTY_FUNCTION__, webapiRequestModesToString(nextRequestMode).c_str());
@@ -2216,6 +2246,9 @@ private:
         break;
       case WEBAPI_REQUEST_MODES::GET_STREAM_URL:
         getStreamURL();
+        break;
+      case WEBAPI_REQUEST_MODES::UPDATE_CAMERA_STREAM_COUNT:
+        updateCamStreamCount();
         break;
       default:
         //Just quit as the request can't be handled
@@ -2273,6 +2306,46 @@ private:
       request_stream << hc.toString();
 
       boost::asio::async_write(socket_, getStreamURLRequest_,
+          boost::bind(&asioclient::handle_write_request, this,
+            boost::asio::placeholders::error));
+    } else {
+      stop();
+    }
+  }
+
+  //Update the camera stream run and fail counts
+  void updateCamStreamCount() {
+    if (!getneedtoquit()) {
+      bool syncCountsWebApi=false;
+      int32_t thingId;
+      std::string runFailCounts;
+      {
+        boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+        try {
+          if (!camerasIt->second->needToRemove && !camerasIt->second->cameraStreams.at(0)->needToRemove && camerasIt->second->cameraStreams.at(0)->syncCountsWebApi) {
+            //Only sync the counts if not scheduled for removal
+            syncCountsWebApi=true;
+            runFailCounts=cameraStreamRunFailCountsToJson(*(camerasIt->second->cameraStreams[0]));
+            thingId=camerasIt->first;
+          }
+        } catch (std::out_of_range& e) {
+          //Stream 0 or camera doesn't exist
+        }
+      }
+      if (!syncCountsWebApi) {
+        //Treat this as a successful send as we don't need to sync the counts
+        successful_send();
+        return;
+      }
+      reset_http_body();
+      hc.addFormField("Mode", "UpdateCamStreamCount");
+      hc.addFormField("Id", thingId);
+      hc.addFormField("Data", runFailCounts);
+      std::ostream request_stream(&updateCamStreamCountRequest_);
+      debuglibifaceptr->debuglib_printf(1, "%s: SUPER DEBUG: Updating run and fail counts for camera: %d: %s\n", __PRETTY_FUNCTION__, thingId, hc.toString().c_str());
+      request_stream << hc.toString();
+
+      boost::asio::async_write(socket_, updateCamStreamCountRequest_,
           boost::bind(&asioclient::handle_write_request, this,
             boost::asio::placeholders::error));
     } else {
@@ -2426,8 +2499,7 @@ private:
         if (requestmode==WEBAPI_REQUEST_MODES::LOOKUP_CAMERA_STREAMS) {
           //Process the list of camera streams
           processReceivedCameraStreams(pt);
-        }
-        else if (requestmode==WEBAPI_REQUEST_MODES::GET_STREAM_URL) {
+        } else if (requestmode==WEBAPI_REQUEST_MODES::GET_STREAM_URL) {
           //Process the stream url that was received
           int32_t thingId;
           {
@@ -2435,6 +2507,15 @@ private:
             thingId=camerasIt->first;
           }
           processReceivedStreamURL(thingId, pt);
+        } else if (requestmode==WEBAPI_REQUEST_MODES::UPDATE_CAMERA_STREAM_COUNT) {
+          //Set that run, fail counts no longer need to be synced
+          boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+          try {
+            camerasIt->second->cameraStreams.at(0)->syncCountsWebApi=false;
+          } catch (std::out_of_range& e) {
+            //Stream 0 or camera doesn't exist
+            debuglibifaceptr->debuglib_printf(1, "%s: BUG: Stream: 0 of Camera: %d no longer exists after syncing stream counts which should not be possible\n", __PRETTY_FUNCTION__, camerasIt->first);
+          }
         }
       }
     } catch (boost::property_tree::ptree_error &e) {
@@ -2486,6 +2567,14 @@ private:
       ++camerasIt;
 
       setupHTTPHeaders();
+    } else if (requestmode==WEBAPI_REQUEST_MODES::UPDATE_CAMERA_STREAM_COUNT) {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+      //Step to next camera entry
+      //Processing was handled by process_response
+      ++camerasIt;
+
+      setupHTTPHeaders();
     }
   }
 
@@ -2497,6 +2586,14 @@ private:
       boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
 
       //Step to next camera entry since process_response failed
+      ++camerasIt;
+
+      setupHTTPHeaders();
+    } else if (requestmode==WEBAPI_REQUEST_MODES::UPDATE_CAMERA_STREAM_COUNT) {
+      boost::lock_guard<boost::recursive_mutex> guard(thislibmutex);
+
+      //Step to next camera entry
+      //Processing was handled by process_response
       ++camerasIt;
 
       setupHTTPHeaders();
