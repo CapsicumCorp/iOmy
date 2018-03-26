@@ -152,6 +152,31 @@ $.extend(iomy.devices.onvif,{
         });
     },
     
+    loadStream : function (iThingId) {
+        try {
+            iomy.devices.onvif.getStreamURL({
+                ThingId : iThingId,
+
+                onSuccess : function(sUrl) {
+                    iomy.widgets.showOnvifStreamPopup({
+                        thingID         : iThingId,
+                        url             : sUrl
+                    });
+                },
+
+                onFail : function (response) {
+                    iomy.common.showError(response.responseText, "Couldn't load the stream");
+                }
+            });
+
+            //iomy.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Player" } , false);
+
+
+        } catch (ex) {
+            iomy.common.showError(ex.message, "Couldn't load the stream");
+        }
+    },
+    
     /**
      * Retrives a list of profiles within an Onvif server identified by its link
      * ID. A callback function must be used if you wish to retrieve the results.
@@ -373,6 +398,26 @@ $.extend(iomy.devices.onvif,{
         });
         
         oRPopover.openBy(oCallingButton);
+    },
+    
+    getListOfOnvifStreams : function () {
+        var aStreams = [];
+        
+        try {
+            $.each(iomy.common.ThingList, function (sI, mThing) {
+                if (mThing.TypeId == iomy.devices.onvif.ThingTypeId) {
+                    aStreams.push({
+                        ThingId     : mThing.Id,
+                        ThingName   : mThing.DisplayName
+                    });
+                }
+            });
+            
+        } catch (e) {
+            $.sap.log.error("Failed to retrieve a list of Onvif streams ("+e.name+"): " + e.message);
+        }
+        
+        return aStreams;
     },
     
     GetUITaskList : function (mSettings) {

@@ -544,28 +544,7 @@ sap.ui.controller("pages.Device", {
                                             iomy.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
 
                                         } else {
-                                            try {
-                                                iomy.devices.onvif.getStreamURL({
-                                                    ThingId : mDevice.DeviceId,
-
-                                                    onSuccess : function(sUrl) {
-                                                        iomy.widgets.showOnvifStreamPopup({
-                                                            thingID         : mDevice.DeviceId,
-                                                            url             : sUrl
-                                                        });
-                                                    },
-
-                                                    onFail : function (response) {
-                                                        iomy.common.showError(response.responseText, "Couldn't load the stream");
-                                                    }
-                                                });
-
-                                                //iomy.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Player" } , false);
-
-
-                                            } catch (ex) {
-                                                iomy.common.showError(ex.message, "Couldn't load the stream");
-                                            }
+                                            iomy.devices.onvif.loadStream(mDevice.DeviceId);
                                         }
                                     }
                                 })

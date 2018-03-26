@@ -70,6 +70,11 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 			//text: "Edit",
 			type: "Transparent",
 			width: "100%",
+            press : function (oEvent) {
+                iomy.common.NavigationChangePage( "pAddStream" ,  {
+                    StreamId : oEvent.getSource().getBindingContext().getProperty("CameraLibId")
+                } , false);
+            }
 		});
 		
 		var oColView = new sap.m.Button ({
@@ -77,6 +82,10 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 			//text: "View",
 			type: "Transparent",
 			width: "100%",
+            press : function (oEvent) {
+                var iThingId =  oEvent.getSource().getBindingContext().getProperty("ThingId");
+                iomy.devices.onvif.loadStream(iThingId);
+            }
 		});
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
@@ -94,7 +103,13 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 									text: "Add",
 									type: sap.m.ButtonType.Accept,
 									press:   function( oEvent ) {
-										iomy.common.NavigationChangePage( "pAddStream" ,  {} , false);
+                                        var iStreamCount = iomy.devices.onvif.getListOfOnvifStreams().length;
+                                        
+                                        if (iStreamCount > 0) {
+                                            iomy.common.NavigationChangePage("pAddStream",  {} , false);
+                                        } else {
+                                            iomy.common.showInformation("You need to first create an Onvif Stream to manage one.", "No Onvif Streams.");
+                                        }
 									}
 								}),
                                 new sap.m.Button({
@@ -114,9 +129,13 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 								new sap.m.ToolbarSpacer({}),
 								new sap.m.ToolbarSpacer({}),
 								new sap.m.ToolbarSpacer({}),
-                                 new sap.m.Button({
+                                new sap.m.Button({
 									text: "Stop All Streams",
-									type: sap.m.ButtonType.Reject
+									type: sap.m.ButtonType.Reject,
+                                    
+                                    press : function () {
+                                        oController.stopAllStreams();
+                                    }
 								}),
 							]
 						})

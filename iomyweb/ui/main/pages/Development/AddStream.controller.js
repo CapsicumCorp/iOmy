@@ -23,7 +23,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.Development.AddStream", {
-    bEditing : false,
+    bStreamsAvailable : false,
     iStreamId : null,
 	
 /**
@@ -41,20 +41,31 @@ sap.ui.controller("pages.Development.AddStream", {
 			onBeforeShow: function ( oEvent ) {
 				//-- Defines the Device Type --//
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                
+                if (oEvent.data.StreamId !== null && oEvent.data.StreamId !== undefined) {
+                    oController.iStreamId = oEvent.data.StreamId;
+                } else {
+                    oController.iStreamId = null;
+                }
+                
+                oController.RefreshModel(oController, {});
 			}
 			
 		});	
 	},
     
     ToggleControls : function (bEnabled) {
-        var oController = this;
-        var oView       = this.getView();
-        var oModel      = oView.getModel();
-        var sControl    = "/enabledControls/";
-        
-        oModel.setProperty(sControl + "Fields",         bEnabled);
-        oModel.setProperty(sControl + "SubmitButton",   bEnabled);
-        oModel.setProperty(sControl + "CancelButton",   bEnabled);
+        try {
+            var oController = this;
+            var oView       = this.getView();
+            var oModel      = oView.getModel();
+            var sControl    = "/enabledControls/";
+
+            oModel.setProperty(sControl + "MostControls",   bEnabled);
+            oModel.setProperty(sControl + "IfHasStreams",   bEnabled && oController.bStreamsAvailable);
+        } catch (e) {
+            $.sap.log.error("Error enabling or disabling controls ("+e.name+"): " + e.message);
+        }
     },
     
     RefreshModel: function( oController, oConfig ) {
@@ -64,19 +75,39 @@ sap.ui.controller("pages.Development.AddStream", {
 		var oView           = oController.getView();
         var oModel          = null;
         var oModelData      = {};
+        var sTitle          = "";
+        var aStreams        = iomy.devices.onvif.getListOfOnvifStreams();
+        
+        if (oController.iStreamId === null) {
+            sTitle = "Add Managed Camera Stream";
+        } else {
+            sTitle = "Edit Managed Camera Stream";
+        }
+        
+        if (aStreams.length === 0) {
+            oController.bStreamsAvailable = false;
+            
+            aStreams.push({
+                ThingId : 0,
+                ThingName : "No streams available."
+            });
+        } else {
+            oController.bStreamsAvailable = true;
+        }
 		
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
         oModelData = {
+            "title" : sTitle,
             "fields" : {
                 "CameraType" : "1",
-                "SelectedCamera" : null,
-                "Description" : "",
+                "SelectedCamera" : aStreams[0].ThingId,
+                "Name" : "",
                 "Enabled" : false
             },
             "options" : {
-                "OnvifCameras" : [],
+                "OnvifCameras" : aStreams,
                 "CameraTypes" : [
                     {
                         "Id" : "1",
@@ -85,9 +116,8 @@ sap.ui.controller("pages.Development.AddStream", {
                 ]
             },
             "enabledControls" : {
-                "Fields" : true,
-                "SubmitButton" : true,
-                "CancelButton" : true
+                "MostControls" : true,
+                "IfHasStreams" : true && oController.bStreamsAvailable
             }
         };
         
@@ -113,7 +143,7 @@ sap.ui.controller("pages.Development.AddStream", {
         
         var iCameraType = oFormData.CameraType;
         var iCamId      = oFormData.SelectedCamera;
-        var sName       = oFormData.Description;
+        var sName       = oFormData.Name;
         var vEnabled    = oFormData.Enabled;
         var sDataString = "";
         var sMode       = "";
@@ -125,7 +155,11 @@ sap.ui.controller("pages.Development.AddStream", {
         }
         
         if (aErrorMessages.length > 0) {
-            iomy.common.showError(aErrorMessages.join("\n"), "Error");
+            iomy.common.showError(aErrorMessages.join("\n"), "Error",
+                function () {
+                    oController.ToggleControls(true);
+                }
+            );
             return;
         }
         
@@ -154,7 +188,7 @@ sap.ui.controller("pages.Development.AddStream", {
         
         try {
             iomy.apiphp.AjaxRequest({
-                url     : iomy.apiphp.APILocation("managedstream"),
+                url     : iomy.apiphp.APILocation("managedstreams"),
                 data    : {
                     "Mode" : sMode,
                     "Id" : iCameraType,
@@ -162,7 +196,21 @@ sap.ui.controller("pages.Development.AddStream", {
                 },
                 
                 onSuccess : function () {
+                    var sSuccessMessage;
+                    
+                    if (oController.iStreamId !== null) {
+                        sSuccessMessage = sName + " created.";
+                    } else {
+                        sSuccessMessage = sName + " updated.";
+                    }
+                    
                     oController.ToggleControls(true);
+                    
+                    iomy.common.showMessage({
+                        text : sSuccessMessage
+                    });
+                    
+                    iomy.common.NavigationChangePage( "pManagedStreams" ,  {} , false);
                 },
                 
                 onFail : function () {

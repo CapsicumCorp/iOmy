@@ -2813,7 +2813,7 @@ $.extend(iomy.common,{
      * 
      * @returns {Number}    
      */
-    LookupFirstHubToUseWithTelnet : function () {
+    LookupFirstPremiseToUseWithTelnet : function () {
         var iPremiseId = 0;
         
         try {
@@ -2831,6 +2831,34 @@ $.extend(iomy.common,{
             
         } finally {
             return iPremiseId;
+        }
+    },
+    
+    /**
+     * Returns the ID of the first hub found to be able to communicate
+     * using telnet. If 0 is return, either no such hub was found, or an
+     * error occurred, in which case, an error message will appear in the log.
+     * 
+     * @returns {Number}    
+     */
+    LookupFirstHubToUseWithTelnet : function () {
+        var iHubId = 0;
+        
+        try {
+            $.each(iomy.common.HubList, function (sI, mHub) {
+                
+                if (mHub.PermTelnet === 1) {
+                    iHubId = mHub.HubId;
+                    return false;
+                }
+                
+            });
+        } catch (e) {
+            iHubId = 0;
+            $.sap.log.error("Error searching for the first hub for telnet communication ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iHubId;
         }
     },
     
@@ -2994,13 +3022,13 @@ $.extend(iomy.common,{
                 
             //-- Rules List --//
             } else if (sPageName === "pRulesList" || sPageName === "pRulesForm") {
-                if (iomy.common.LookupFirstHubToUseWithTelnet() == 0) {
+                if (iomy.common.LookupFirstPremiseToUseWithTelnet() == 0) {
                     aErrorMessages.push("Only the owner of a premise can manage rules.");
                 }
                 
             //-- Telnet Console --//
             } else if (sPageName === "pTelnet") {
-                if (iomy.common.LookupFirstHubToUseWithTelnet() == 0) {
+                if (iomy.common.LookupFirstPremiseToUseWithTelnet() == 0) {
                     aErrorMessages.push("Only the owner of a premise can use the telnet console.");
                 }
                 

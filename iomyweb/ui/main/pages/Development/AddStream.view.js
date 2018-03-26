@@ -51,8 +51,8 @@ sap.ui.jsview("pages.Development.AddStream", {
         });
         
         var oOnvifCameraTemplate = new sap.ui.core.Item({
-            key:  "{Id}",
-            text: "{Name}"
+            key:  "{ThingId}",
+            text: "{ThingName}"
         });
 		
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
@@ -91,7 +91,7 @@ sap.ui.jsview("pages.Development.AddStream", {
 											toolbar : new sap.m.Toolbar({
 												content : [
 													new sap.m.Title (oView.createId("StreamToolbarTitle"),{
-														text:"Add Managed Camera Stream"
+														text:"{/title}"
 													}),
 												]
 											}).addStyleClass("MarBottom1d0Rem"),
@@ -103,9 +103,10 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Camera Type",
 															fields: [
 																new sap.m.Select ({
+                                                                    enabled : "{/enabledControls/MostControls}",
 																	selectedKey: "{/fields/CameraType}",
 																	items: {
-																		path : "{/options/CameraTypes}",
+																		path : "/options/CameraTypes",
                                                                         template : oCameraTypeTemplate
 																	}
 																})
@@ -115,19 +116,21 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Select Camera",
 															fields: [
 																new sap.m.Select ({
+																	enabled : "{/enabledControls/IfHasStreams}",
 																	selectedKey: "{/fields/SelectedCamera}",
 																	items: {
-                                                                        path : "{/options/OnvifCameras}",
+                                                                        path : "/options/OnvifCameras",
                                                                         template : oOnvifCameraTemplate
                                                                     }
 																})
 															]
 														}),
 														new sap.ui.layout.form.FormElement({
-															label : "Stream Description",
+															label : "Stream Name",
 															fields: [
 																new sap.m.Input ({
-																	value:"{/fields/Description}"
+																	enabled : "{/enabledControls/MostControls}",
+																	value:"{/fields/Name}"
 																})
 															]
 														}),
@@ -135,7 +138,8 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Enable Stream",
 															fields: [
 																new sap.m.CheckBox ({
-                                                                    checked : "{/fields/Enabled}"
+                                                                    enabled : "{/enabledControls/MostControls}",
+																	selected : "{/fields/Enabled}"
                                                                 })
 															]
 														}),
@@ -143,13 +147,15 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label: "",
 															fields: [
 																new sap.m.Button (oView.createId("ButtonSubmit"), {
+																	enabled : "{/enabledControls/IfHasStreams}",
 																	text: "Save",
 																	type: sap.m.ButtonType.Accept,
 																	press:   function( oEvent ) {
-																		iomy.common.NavigationChangePage( "pManagedStreams" ,  {} , false);
+                                                                        oController.submitStreamInformation();
 																	}
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
+																	enabled : "{/enabledControls/MostControls}",
 																	text: "Cancel",
 																	type: sap.m.ButtonType.Reject,
 																	press:   function( oEvent ) {
