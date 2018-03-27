@@ -49,6 +49,7 @@ sap.ui.controller("pages.Development.ManagedStreams", {
 				//oController.RefreshModel( oController, {} );
 				
 				//-- Check the parameters --//
+                oController.aStreams = [];
                 oController.RefreshModel(oController, {});
 				oController.LoadStreams();
 				//-- Defines the Device Type --//
@@ -64,14 +65,14 @@ sap.ui.controller("pages.Development.ManagedStreams", {
             var oController = this;
             var oView       = this.getView();
             var oModel      = oView.getModel();
-            var sControl    = "/enabledControls/";
+            var sControl    = "/controlsEnabled/";
             var iHubId      = iomy.common.LookupFirstHubToUseWithTelnet();
             
             var bManagedStreamsExist    = oController.aStreams.length > 0;
             var bHubHasPermission       = iHubId > 0;
 
-            oModel.setProperty(sControl + "Buttons",    bEnabled);
-            oModel.setProperty(sControl + "StopAllBtn", bEnabled && bHubHasPermission && bManagedStreamsExist);
+            oModel.setProperty(sControl + "Buttons",        bEnabled);
+            oModel.setProperty(sControl + "IfStreamsExist", bEnabled && bHubHasPermission && bManagedStreamsExist);
         } catch (e) {
             $.sap.log.error("Error enabling or disabling controls ("+e.name+"): " + e.message);
         }
@@ -108,20 +109,23 @@ sap.ui.controller("pages.Development.ManagedStreams", {
                         for (var i = 0; i < mData.Data.length; i++) {
                             var mStream = mData.Data[i];
                             var sStateText = "Disabled";
+                            var mTemp      = {};
 
                             if (mStream.Enabled === 1) {
                                 sStateText = "Enabled";
                             }
-
-                            oController.aStreams.push({
+                            
+                            mTemp = {
                                 "ThingId"       : mStream.ThingId,
-                                "CameraLibId"   : mStream.Id,
+                                "StreamId"      : mStream.StreamId,
                                 "DeviceName"    : mStream.Name,
                                 "Descript"      : "Onvif IP Camera",
                                 "Fail"          : mStream.FailCount,
                                 "Success"       : mStream.RunCount,
                                 "State"         : sStateText
-                            });
+                            };
+
+                            oController.aStreams.push(mTemp);
                         }
 
                         oController.ToggleControls(true);
@@ -171,9 +175,9 @@ sap.ui.controller("pages.Development.ManagedStreams", {
 		//------------------------------------------------//
 		oModelData = {
             "CameraList"        : oController.aStreams,
-            "enabledControls"   : {
-                "Buttons"       : true,
-                "StopAllBtn"    : true && bHubHasPermission && bManagedStreamsExist
+            "controlsEnabled"   : {
+                "Buttons"           : true,
+                "IfStreamsExist"    : true && bHubHasPermission && bManagedStreamsExist
             }
         };
         
@@ -194,13 +198,22 @@ sap.ui.controller("pages.Development.ManagedStreams", {
         var oController = this;
         var iHubId      = iomy.common.LookupFirstHubToUseWithTelnet();
         
+        //--------------------------------------------------------------------//
+        // Attempt to run the telnet command.
+        //--------------------------------------------------------------------//
         try {
             oController.ToggleControls(false);
             
+            //----------------------------------------------------------------//
+            // The user needs permission to do this.
+            //----------------------------------------------------------------//
             if (iHubId == 0) {
                 throw new PermissionException("Only the owner of the premise can stop all streams at once.");
             }
             
+            //----------------------------------------------------------------//
+            // Run the telnet command to stop all streams.
+            //----------------------------------------------------------------//
             iomy.telnet.RunCommand({
                 command : "stop_all_streams",
                 hubID : iHubId,
@@ -230,5 +243,161 @@ sap.ui.controller("pages.Development.ManagedStreams", {
             );
         }
     },
+    
+    /**
+     * Generates an array of rules that are selected in the table.
+     * 
+     * @returns array           Rules selected in the table
+     */
+    getSelectedStreams : function () {
+        // TODO: This can be a separate function for retrieving selected data from all tables.
+        var oController         = this;
+        var oView               = oController.getView();
+        var oTable              = oView.byId("streamTable");
+        var aSelectedIndices    = oTable.getSelectedIndices();
+        var aSelectedRows       = [];
+        
+        try {
+            var aSelectedIndices    = oTable.getSelectedIndices();
+            var aCameraList         = oView.getModel().getProperty("/CameraList");
 
+            for (var i = 0; i < aSelectedIndices.length; i++) {
+                aSelectedRows.push(aCameraList[aSelectedIndices[i]]);
+            }
+        } catch (e) {
+            $.sap.log.error("Error compiling a list of selected rows ("+e.name+"): " + e.message);
+        }
+        
+        return aSelectedRows;
+    },
+
+    toggleSelectedStreams : function () {
+        var oController         = this;
+        var oView               = this.getView();
+        var oRequestQueue       = null;
+        var aSelectedStreams    = oController.getSelectedStreams();
+        var iEnabledCount       = 0;
+        var iDisabledCount      = 0;
+        var iFailed             = 0;
+        var aRequests           = [];
+        var oModel              = oView.getModel();
+        
+        try {
+            if (aSelectedStreams.length > 0) {
+                oController.ToggleControls(false);
+
+                //----------------------------------------------------------------//
+                // Create a request for each selected stream.
+                //----------------------------------------------------------------//
+                for (var i = 0; i < aSelectedStreams.length; i++) {
+                    var mStream = aSelectedStreams[i];
+                    var iEnabled;
+
+                    if (mStream.Status === "Disabled") {
+                        //-- We enable it. --//
+                        iEnabled = 1;
+                    } else {
+                        //-- We disable it. --//
+                        iEnabled = 0;
+                    }
+
+                    aRequests.push({
+                        library : "php",
+                        url     : iomy.apiphp.APILocation("managedstreams"),
+                        data    : {
+                            "Mode" : "EditStream",
+                            "Id" : "1",
+                            "Data" : JSON.stringify({
+                                "Name" : mStream.DeviceName,
+                                "Enabled" : iEnabled,
+                                "StreamId" : mStream.StreamId
+                            })
+                        },
+
+                        onSuccess : function () {
+                            if (iEnabled === 1) {
+                                iEnabledCount++;
+
+                            } else {
+                                iDisabledCount++;
+                            }
+                        },
+
+                        onFail : function () {
+                            iFailed++;
+                        }
+                    });
+                }
+
+                //----------------------------------------------------------------//
+                // Create the request queue to run them
+                //----------------------------------------------------------------//
+                oRequestQueue = new AjaxRequestQueue({
+                    requests : aRequests,
+                    concurrentRequests : 2,
+
+                    onSuccess : function () {
+                        try {
+                            var sSuccessMessage = "";
+                            var oTable              = oView.byId("streamTable");
+                            var aSelectedIndices    = oTable.getSelectedIndices();
+
+                            if (iEnabledCount > 0) {
+                                sSuccessMessage += iEnabledCount + " streams enabled.";
+                            }
+
+                            if (iDisabledCount > 0) {
+                                if (sSuccessMessage.length > 0) {
+                                    sSuccessMessage += "\n";
+                                }
+
+                                sSuccessMessage += iDisabledCount + " streams disabled.";
+                            }
+
+                            oController.ToggleControls(true);
+
+                            iomy.common.showMessage({
+                                text : sSuccessMessage
+                            });
+
+                            for (var i = 0; i < aSelectedIndices.length; i++) {
+                                var j       = aSelectedIndices[i];
+                                var sKey    = "/CameraList/"+j+"/State";
+
+                                if (oModel.getProperty(sKey) === "Enabled") {
+                                    oModel.setProperty(sKey, "Disabled");
+                                } else {
+                                    oModel.setProperty(sKey, "Enabled");
+
+                                }
+                            }
+                        } catch (e) {
+                            $.sap.log.error("Failure in the success function of the request queue for changing the status of a stream. ("+e.name+"): " + e.message);
+                        }
+                    },
+
+                    onWarning : function () {
+                        var oQueue = this;
+
+                        iomy.common.showWarning("Some streams could not be enabled or disabled.", "Warning",
+                            function () {
+                                oQueue.onSuccess();
+    //                            oController.ToggleControls(true);
+                            }
+                        );
+                    },
+
+                    onFail : function () {
+                        iomy.common.showError("Failed to enable or disable the selected streams.", "Error",
+                            function () {
+                                oController.ToggleControls(true);
+                            }
+                        );
+                    }
+                });
+            }
+        } catch (e) {
+            $.sap.log.error("Failed to create and run requests to enable or disable selected streams ("+e.name+"): " + e.message);
+        }
+    }
 });

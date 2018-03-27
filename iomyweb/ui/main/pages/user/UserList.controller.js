@@ -193,7 +193,6 @@ sap.ui.controller("pages.user.UserList", {
         var aSelectedRows       = [];
         
         try {
-            var aRows               = oTable.getRows();
             var aSelectedIndices    = oTable.getSelectedIndices();
             var aUserList           = oView.getModel().getProperty("/UserList");
 

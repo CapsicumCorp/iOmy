@@ -24,7 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("pages.Development.AddStream", {
     bStreamsAvailable : false,
-    iStreamId : null,
+    mStream : null,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -42,10 +42,10 @@ sap.ui.controller("pages.Development.AddStream", {
 				//-- Defines the Device Type --//
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
-                if (oEvent.data.StreamId !== null && oEvent.data.StreamId !== undefined) {
-                    oController.iStreamId = oEvent.data.StreamId;
+                if (oEvent.data.Stream !== null && oEvent.data.Stream !== undefined) {
+                    oController.mStream = oEvent.data.Stream;
                 } else {
-                    oController.iStreamId = null;
+                    oController.mStream = null;
                 }
                 
                 oController.RefreshModel(oController, {});
@@ -59,7 +59,7 @@ sap.ui.controller("pages.Development.AddStream", {
             var oController = this;
             var oView       = this.getView();
             var oModel      = oView.getModel();
-            var sControl    = "/enabledControls/";
+            var sControl    = "/controlsEnabled/";
 
             oModel.setProperty(sControl + "MostControls",   bEnabled);
             oModel.setProperty(sControl + "IfHasStreams",   bEnabled && oController.bStreamsAvailable);
@@ -77,8 +77,9 @@ sap.ui.controller("pages.Development.AddStream", {
         var oModelData      = {};
         var sTitle          = "";
         var aStreams        = iomy.devices.onvif.getListOfOnvifStreams();
+        var bEnabled        = true;
         
-        if (oController.iStreamId === null) {
+        if (oController.mStream === null) {
             sTitle = "Add Managed Camera Stream";
         } else {
             sTitle = "Edit Managed Camera Stream";
@@ -100,12 +101,7 @@ sap.ui.controller("pages.Development.AddStream", {
 		//------------------------------------------------//
         oModelData = {
             "title" : sTitle,
-            "fields" : {
-                "CameraType" : "1",
-                "SelectedCamera" : aStreams[0].ThingId,
-                "Name" : "",
-                "Enabled" : false
-            },
+            "fields" : {},
             "options" : {
                 "OnvifCameras" : aStreams,
                 "CameraTypes" : [
@@ -115,11 +111,33 @@ sap.ui.controller("pages.Development.AddStream", {
                     }
                 ]
             },
-            "enabledControls" : {
-                "MostControls" : true,
-                "IfHasStreams" : true && oController.bStreamsAvailable
+            "controlsEnabled" : {
+                "MostControls"  : true,
+                "IfHasStreams"  : true && oController.bStreamsAvailable
             }
         };
+        
+        if (oController.mStream !== null) {
+            if (oController.mStream.State === "Enabled") {
+                bEnabled = true;
+            } else {
+                bEnabled = false;
+            }
+            
+            oModelData.fields = {
+                "CameraType" : "1",
+                "SelectedCamera" : oController.mStream.ThingId,
+                "Name" : oController.mStream.DeviceName,
+                "Enabled" : bEnabled
+            };
+        } else {
+            oModelData.fields = {
+                "CameraType" : "1",
+                "SelectedCamera" : aStreams[0].ThingId,
+                "Name" : "",
+                "Enabled" : bEnabled
+            };
+        }
         
 		oModel = new sap.ui.model.json.JSONModel(oModelData);
         oModel.setSizeLimit(420);
@@ -169,12 +187,12 @@ sap.ui.controller("pages.Development.AddStream", {
             vEnabled = 0;
         }
         
-        if (oController.iStreamId !== null) {
+        if (oController.mStream !== null) {
             sMode = "EditStream";
             sDataString = JSON.stringify({
                 "Name" : sName,
                 "Enabled" : vEnabled,
-                "StreamId" : oController.iStreamId
+                "StreamId" : oController.mStream.StreamId
             });
             
         } else {
@@ -198,7 +216,7 @@ sap.ui.controller("pages.Development.AddStream", {
                 onSuccess : function () {
                     var sSuccessMessage;
                     
-                    if (oController.iStreamId !== null) {
+                    if (oController.mStream === null) {
                         sSuccessMessage = sName + " created.";
                     } else {
                         sSuccessMessage = sName + " updated.";
@@ -213,8 +231,8 @@ sap.ui.controller("pages.Development.AddStream", {
                     iomy.common.NavigationChangePage( "pManagedStreams" ,  {} , false);
                 },
                 
-                onFail : function () {
-                    iomy.common.showError(aErrorMessages.join("\n"), "Error",
+                onFail : function (response) {
+                    iomy.common.showError(response.responseText, "Error",
                         function () {
                             oController.ToggleControls(true);
                         }

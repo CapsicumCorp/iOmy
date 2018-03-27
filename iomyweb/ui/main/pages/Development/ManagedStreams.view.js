@@ -67,23 +67,23 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 		
 		var oColEdit = new sap.m.Button ({
 			icon: "sap-icon://edit",
-			//text: "Edit",
 			type: "Transparent",
 			width: "100%",
             press : function (oEvent) {
+                var mThing = oEvent.getSource().getBindingContext().getProperty(""); // Get the relevant model data.
+                
                 iomy.common.NavigationChangePage( "pAddStream" ,  {
-                    StreamId : oEvent.getSource().getBindingContext().getProperty("CameraLibId")
+                    Stream : mThing
                 } , false);
             }
 		});
 		
 		var oColView = new sap.m.Button ({
 			icon: "sap-icon://show",
-			//text: "View",
 			type: "Transparent",
 			width: "100%",
             press : function (oEvent) {
-                var iThingId =  oEvent.getSource().getBindingContext().getProperty("ThingId");
+                var iThingId = oEvent.getSource().getBindingContext().getProperty("ThingId");
                 iomy.devices.onvif.loadStream(iThingId);
             }
 		});
@@ -93,7 +93,7 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 			header : iomy.widgets.getToolPageHeader(oController),
 			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-				new sap.ui.table.Table ({
+				new sap.ui.table.Table (oView.createId("streamTable"), {
 					rows: "{/CameraList}",
 					extension : [
 						new sap.m.Toolbar ({
@@ -103,7 +103,8 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 									text: "Add",
 									type: sap.m.ButtonType.Accept,
 									press:   function( oEvent ) {
-                                        var iStreamCount = iomy.devices.onvif.getListOfOnvifStreams().length;
+                                        var aStreams        = iomy.devices.onvif.getListOfOnvifStreams();
+                                        var iStreamCount    = aStreams.length;
                                         
                                         if (iStreamCount > 0) {
                                             iomy.common.NavigationChangePage("pAddStream",  {} , false);
@@ -113,8 +114,13 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 									}
 								}),
                                 new sap.m.Button({
+                                    enabled : "{/controlsEnabled/IfStreamsExist}",
 									text: "Toggle",
-									type: sap.m.ButtonType.Default
+									type: sap.m.ButtonType.Default,
+                                    
+                                    press : function () {
+                                        oController.toggleSelectedStreams();
+                                    }
 								}),
                                
 								new sap.m.ToolbarSpacer({}),
@@ -130,6 +136,7 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 								new sap.m.ToolbarSpacer({}),
 								new sap.m.ToolbarSpacer({}),
                                 new sap.m.Button({
+                                    enabled : "{/controlsEnabled/IfStreamsExist}",
 									text: "Stop All Streams",
 									type: sap.m.ButtonType.Reject,
                                     

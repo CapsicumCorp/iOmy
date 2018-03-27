@@ -103,7 +103,7 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Camera Type",
 															fields: [
 																new sap.m.Select ({
-                                                                    enabled : "{/enabledControls/MostControls}",
+                                                                    enabled : "{/controlsEnabled/MostControls}",
 																	selectedKey: "{/fields/CameraType}",
 																	items: {
 																		path : "/options/CameraTypes",
@@ -116,7 +116,7 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Select Camera",
 															fields: [
 																new sap.m.Select ({
-																	enabled : "{/enabledControls/IfHasStreams}",
+																	enabled : "{/controlsEnabled/IfHasStreams}",
 																	selectedKey: "{/fields/SelectedCamera}",
 																	items: {
                                                                         path : "/options/OnvifCameras",
@@ -126,11 +126,11 @@ sap.ui.jsview("pages.Development.AddStream", {
 															]
 														}),
 														new sap.ui.layout.form.FormElement({
-															label : "Stream Name",
+															label : "Stream Name*",
 															fields: [
 																new sap.m.Input ({
-																	enabled : "{/enabledControls/MostControls}",
-																	value:"{/fields/Name}"
+																	enabled : "{/controlsEnabled/MostControls}",
+																	value :"{/fields/Name}"
 																})
 															]
 														}),
@@ -138,7 +138,7 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label : "Enable Stream",
 															fields: [
 																new sap.m.CheckBox ({
-                                                                    enabled : "{/enabledControls/MostControls}",
+                                                                    enabled : "{/controlsEnabled/MostControls}",
 																	selected : "{/fields/Enabled}"
                                                                 })
 															]
@@ -147,7 +147,7 @@ sap.ui.jsview("pages.Development.AddStream", {
 															label: "",
 															fields: [
 																new sap.m.Button (oView.createId("ButtonSubmit"), {
-																	enabled : "{/enabledControls/IfHasStreams}",
+																	enabled : "{/controlsEnabled/IfHasStreams}",
 																	text: "Save",
 																	type: sap.m.ButtonType.Accept,
 																	press:   function( oEvent ) {
@@ -155,7 +155,7 @@ sap.ui.jsview("pages.Development.AddStream", {
 																	}
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
-																	enabled : "{/enabledControls/MostControls}",
+																	enabled : "{/controlsEnabled/MostControls}",
 																	text: "Cancel",
 																	type: sap.m.ButtonType.Reject,
 																	press:   function( oEvent ) {
