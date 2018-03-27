@@ -25,6 +25,7 @@ $.sap.require("sap.ui.table.Table");
 sap.ui.controller("pages.Development.ManagedStreams", {
 	
 	aStreams : [],
+    bLoadingStreams : false,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -224,6 +225,7 @@ sap.ui.controller("pages.Development.ManagedStreams", {
                     });
                     
                     oController.LoadStreams();
+                    oController.ToggleControls(true);
                 },
                 
                 onFail : function (response) {
@@ -293,7 +295,7 @@ sap.ui.controller("pages.Development.ManagedStreams", {
                     var mStream = aSelectedStreams[i];
                     var iEnabled;
 
-                    if (mStream.Status === "Disabled") {
+                    if (mStream.State === "Disabled") {
                         //-- We enable it. --//
                         iEnabled = 1;
                     } else {
@@ -315,7 +317,7 @@ sap.ui.controller("pages.Development.ManagedStreams", {
                         },
 
                         onSuccess : function () {
-                            if (iEnabled === 1) {
+                            if (mStream.State === "Disabled") {
                                 iEnabledCount++;
 
                             } else {
@@ -343,7 +345,15 @@ sap.ui.controller("pages.Development.ManagedStreams", {
                             var aSelectedIndices    = oTable.getSelectedIndices();
 
                             if (iEnabledCount > 0) {
-                                sSuccessMessage += iEnabledCount + " streams enabled.";
+                                sSuccessMessage += iEnabledCount;
+                                
+                                if (iEnabledCount === 1) {
+                                    sSuccessMessage += " stream";
+                                } else {
+                                    sSuccessMessage += " streams";
+                                }
+                                
+                                sSuccessMessage += " enabled";
                             }
 
                             if (iDisabledCount > 0) {
@@ -351,7 +361,15 @@ sap.ui.controller("pages.Development.ManagedStreams", {
                                     sSuccessMessage += "\n";
                                 }
 
-                                sSuccessMessage += iDisabledCount + " streams disabled.";
+                                sSuccessMessage += iDisabledCount;
+                                
+                                if (iDisabledCount === 1) {
+                                    sSuccessMessage += " stream";
+                                } else {
+                                    sSuccessMessage += " streams";
+                                }
+                                
+                                sSuccessMessage += " disabled";
                             }
 
                             oController.ToggleControls(true);
