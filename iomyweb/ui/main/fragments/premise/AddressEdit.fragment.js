@@ -28,7 +28,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 						})
 					]
 				}),new sap.ui.layout.form.FormElement({
-					label : "Street Address",
+					label : iomy.widgets.RequiredLabel("Street Address"),
 					fields: [
 						new sap.m.Input (oView.createId("InputAddressLine1"), {
                             value : "{/Address/AddressLine1}"

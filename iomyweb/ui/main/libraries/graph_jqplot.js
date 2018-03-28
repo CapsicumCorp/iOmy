@@ -60,14 +60,15 @@ $.extend( iomy.graph_jqplot, {
 	//========================================================================//
 	// Time Period Strings
 	//========================================================================//
+    Period6Hour     : "6hour",
 	PeriodDay		: "day",
 	PeriodWeek		: "Week",
 	PeriodFortnight	: "Fortnight",
 	PeriodMonth		: "Month",
 	PeriodQuarter	: "Quarter",
 	PeriodYear		: "year",
-	
-	//========================================================================//
+    
+    //========================================================================//
 	//== LEGEND PRESET                                                      ==//
 	//========================================================================//
 	LegendPreset: function( iLegendPreset ) {
@@ -436,6 +437,9 @@ $.extend( iomy.graph_jqplot, {
 				
 			} else if ( sTimePeriod==="6hour" || sTimePeriod==="day" ) {
 				sAxisX_FormatTickString = "%#I:%M%p";
+                
+            } else if ( sTimePeriod===iomy.graph_jqplot.PeriodWeek) {
+                sAxisX_FormatTickString = "%#d&nbsp;%b";
 				
 			} else if ( sTimePeriod==="year" ) {
 				sAxisX_FormatTickString = "%#d&nbsp;%b&nbsp;%y";

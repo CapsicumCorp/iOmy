@@ -61,7 +61,7 @@ sap.ui.jsfragment("fragments.rules.AddRuleNew", {
 				}),
 				new sap.ui.layout.form.FormElement({
 					//label : "Display Name",
-					label : "Device",
+					label : iomy.widgets.RequiredLabel("Device"),
 					fields: [
                         new sap.m.Select({
                             selectedKey : "1",
@@ -79,7 +79,7 @@ sap.ui.jsfragment("fragments.rules.AddRuleNew", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Time",
+					label : iomy.widgets.RequiredLabel("Time"),
 					fields: [
 						new sap.m.TimePicker ({
 							valueFormat: "hh:mm",

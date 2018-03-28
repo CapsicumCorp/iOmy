@@ -110,7 +110,7 @@ sap.ui.jsview("pages.Development.DBIndex", {
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
-                                                            label : "DB Root User",
+                                                            label : iomy.widgets.RequiredLabel("DB Root User"),
                                                             fields: [ 
                                                                 new sap.m.Input ({
                                                                     enabled : "{/controls/ControlsEnabled}",
@@ -119,7 +119,7 @@ sap.ui.jsview("pages.Development.DBIndex", {
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
-                                                            label : "DB Root Password",
+                                                            label : iomy.widgets.RequiredLabel("DB Root Password"),
                                                             fields: [ 
                                                                 new sap.m.Input ({
                                                                     enabled : "{/controls/ControlsEnabled}",

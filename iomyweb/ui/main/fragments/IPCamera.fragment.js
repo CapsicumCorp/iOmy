@@ -74,7 +74,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Device Name",
+							label : iomy.widgets.RequiredLabel("Device Name"),
 							fields: [ 
 								new sap.m.Input ({
 									placeholder : "Name of the IP Webcam",
@@ -83,7 +83,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Stream Name",
+							label : iomy.widgets.RequiredLabel("Stream Name"),
 							fields: [ 
 								new sap.m.Input ({
 									placeholder : "Name of the Camera Stream",
@@ -107,7 +107,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Network Address",
+							label : iomy.widgets.RequiredLabel("Network Address"),
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "Enter Protocol",
@@ -125,7 +125,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Path",
+							label : iomy.widgets.RequiredLabel("Path"),
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "e.g. video",

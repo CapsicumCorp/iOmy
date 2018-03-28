@@ -14,7 +14,7 @@ sap.ui.jsfragment("fragments.UserPasswordEdit", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Current Password",
+					label : iomy.widgets.RequiredLabel("Current Password"),
 					fields: [
 						new sap.m.Input (oView.createId("InputOldPassword"), {
 							value: "{/Password/OldPassword}",
@@ -23,7 +23,7 @@ sap.ui.jsfragment("fragments.UserPasswordEdit", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "New Password",
+					label : iomy.widgets.RequiredLabel("New Password"),
 					fields: [
 						new sap.m.Input (oView.createId("InputNewPassword"), {
 							value: "{/Password/NewPassword}",
@@ -32,7 +32,7 @@ sap.ui.jsfragment("fragments.UserPasswordEdit", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Confirm Password",
+					label : iomy.widgets.RequiredLabel("Confirm Password"),
 					fields: [
 						new sap.m.Input (oView.createId("InputConfirmPassword"), {
 							value: "{/Password/ConfirmPassword}",

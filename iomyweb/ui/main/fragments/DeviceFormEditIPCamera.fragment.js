@@ -45,7 +45,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 				new sap.ui.layout.form.FormContainer({
 					formElements : [
 						new sap.ui.layout.form.FormElement({
-                            label : "Device Name",
+                            label : iomy.widgets.RequiredLabel("Device Name"),
                             fields: [
                                 new sap.m.Input (oView.createId("DeviceName"), {
 									placeholder : "Display Name",
@@ -84,7 +84,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Network Address",
+							label : iomy.widgets.RequiredLabel("Network Address"),
 							fields: [ 
 								new sap.m.Input(oView.createId("InputIPProtocol"), {
 									placeholder: "Enter Protocol",
@@ -105,7 +105,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Path",
+							label : iomy.widgets.RequiredLabel("Path"),
 							fields: [ 
 								new sap.m.Input(oView.createId("InputPath"), {
 									placeholder: "e.g. video",

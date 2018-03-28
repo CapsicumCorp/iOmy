@@ -251,6 +251,16 @@ sap.ui.controller("pages.premise.PremiseForm", {
         
         oController.TogglePremiseInfoControls(false);
         
+        if (oFormData.Name === "") {
+            iomy.common.showError("Premise must have a name.");
+            return;
+        }
+        
+        if (oFormData.Name.length < 3) {
+            iomy.common.showError("Premise name must be at least 3 characters long.");
+            return;
+        }
+        
         try {
             oController.editPremiseInformation({
                 premiseID       : oController.iPremiseId,

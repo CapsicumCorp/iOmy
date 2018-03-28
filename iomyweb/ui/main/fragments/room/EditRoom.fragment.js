@@ -18,7 +18,7 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Room Name",
+					label : iomy.widgets.RequiredLabel("Room Name"),
 					fields: [ 
 						new sap.m.Input ({
 							value:"{/CurrentRoom/RoomName}"

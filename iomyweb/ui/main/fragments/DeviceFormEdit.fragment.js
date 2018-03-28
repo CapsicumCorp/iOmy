@@ -42,7 +42,7 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
                 new sap.ui.layout.form.FormContainer({
                     formElements : [
                         new sap.ui.layout.form.FormElement({
-                            label : "Device Name",
+                            label : iomy.widgets.RequiredLabel("Device Name"),
                             fields: [
                                 new sap.m.Input (oView.createId("DeviceName"), {
 									placeholder : "Display Name",

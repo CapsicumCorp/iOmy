@@ -690,6 +690,13 @@ $.extend( iomy.widgets, {
         
 		return oForm;
 	},
+    
+    RequiredLabel : function (sText) {
+        return new sap.m.Label({
+            text : sText,
+            required : true
+        });
+    },
 	
 	//-- Scroll Container for the "Mjpeg" image --//
 	MJPEGCont : function (oCurrentController, mSettings) {

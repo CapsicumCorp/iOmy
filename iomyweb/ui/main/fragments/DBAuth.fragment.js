@@ -14,7 +14,7 @@ sap.ui.jsfragment("fragments.DBAuth", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Username",
+					label : iomy.widgets.RequiredLabel("Username"),
 					fields: [
 						new sap.m.Input ({
 							value:"{/NewUser/DBUser}"
@@ -22,7 +22,7 @@ sap.ui.jsfragment("fragments.DBAuth", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Password",
+					label : iomy.widgets.RequiredLabel("Password"),
 					fields: [
 						new sap.m.Input ({
 							value:"{/NewUser/DBPassword}",

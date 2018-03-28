@@ -74,7 +74,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Display Name",
+							label : iomy.widgets.RequiredLabel("Display Name"),
 							fields: [ 
 								new sap.m.Input({
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}"
@@ -82,7 +82,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Key Code",
+							label : iomy.widgets.RequiredLabel("Key Code"),
 							fields: [ 
 								new sap.m.Input ({
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/KeyCode}",
@@ -97,7 +97,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Station Code",
+							label : iomy.widgets.RequiredLabel("Station Code"),
 							fields: [ 
 								new sap.m.Input ({
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StationCode}"

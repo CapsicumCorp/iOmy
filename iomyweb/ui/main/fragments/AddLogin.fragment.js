@@ -14,7 +14,7 @@ sap.ui.jsfragment("fragments.AddLogin", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Username",
+					label : iomy.widgets.RequiredLabel("Username"),
 					fields: [ 
 						new sap.m.Input ({
 							value:"{/NewUser/Username}"
@@ -22,7 +22,7 @@ sap.ui.jsfragment("fragments.AddLogin", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Password",
+					label : iomy.widgets.RequiredLabel("Password"),
 					fields: [
 						new sap.m.Input ({
 							value:"{/NewUser/Password}",
@@ -31,7 +31,7 @@ sap.ui.jsfragment("fragments.AddLogin", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Confirm Password",
+					label : iomy.widgets.RequiredLabel("Confirm Password"),
 					fields: [
 						new sap.m.Input ({
 							value:"{/NewUser/ConfirmPassword}",

@@ -51,7 +51,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Stream Name",
+							label : iomy.widgets.RequiredLabel("Stream Name"),
 							fields: [ 
 								new sap.m.Input(oView.createId("InputStreamName"), {
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/CameraName}"

@@ -14,7 +14,7 @@ sap.ui.jsfragment("fragments.premise.InfoEdit", {
 		oFragContent = new sap.ui.layout.form.FormContainer({
 			formElements : [
 				new sap.ui.layout.form.FormElement({
-					label : "Name",
+					label : iomy.widgets.RequiredLabel("Name"),
 					fields: [
 						new sap.m.Input(oView.createId("InputName"), {
                             value : "{/Information/Name}"

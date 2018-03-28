@@ -74,7 +74,7 @@ sap.ui.jsfragment("fragments.OnvifServer", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Display Name",
+							label : iomy.widgets.RequiredLabel("Display Name"),
 							fields: [ 
 								new sap.m.Input ({
 									placeholder : "Name of the Onvif device",
@@ -83,7 +83,7 @@ sap.ui.jsfragment("fragments.OnvifServer", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Network Address",
+							label : iomy.widgets.RequiredLabel("Network Address"),
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "Enter IP Address",
