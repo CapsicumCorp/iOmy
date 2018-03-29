@@ -1165,7 +1165,6 @@ class VP_RSSUBCAT{
 	public $RSCAT_PK;
 	public $RSCAT_NAME;
 	public $RSSUBCAT_PK;
-	public $RSSUBCAT_RSCAT_FK;
 	public $RSSUBCAT_NAME;
 	public $RSSUBCAT_TYPE;
 }
@@ -2338,7 +2337,6 @@ class CreateMainMetadata
 		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSCAT_PK',                 EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSCAT_NAME',               EdmPrimitiveType::CHARARRAY     );
 		$metadata->addKeyProperty(          $VP_RSSUBCATEntityType,         'RSSUBCAT_PK',              EdmPrimitiveType::INT32         );
-		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSSUBCAT_RSCAT_FK',        EdmPrimitiveType::INT32         );
 		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSSUBCAT_NAME',            EdmPrimitiveType::CHARARRAY     );
 		$metadata->addPrimitiveProperty(    $VP_RSSUBCATEntityType,         'RSSUBCAT_TYPE',            EdmPrimitiveType::INT32         );
 			

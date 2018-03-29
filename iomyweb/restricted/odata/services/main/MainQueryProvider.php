@@ -1731,8 +1731,9 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 		private function _serializeVP_RSSUBCAT($record)
 		{
 			$VP_RSSUBCAT = new VP_RSSUBCAT();
+			$VP_RSSUBCAT->RSCAT_PK              = $record['RSCAT_PK'];
+			$VP_RSSUBCAT->RSCAT_NAME            = $record['RSCAT_NAME'];
 			$VP_RSSUBCAT->RSSUBCAT_PK           = $record['RSSUBCAT_PK'];
-			$VP_RSSUBCAT->RSSUBCAT_RSCAT_FK     = $record['RSSUBCAT_RSCAT_FK'];
 			$VP_RSSUBCAT->RSSUBCAT_NAME         = $record['RSSUBCAT_NAME'];
 			$VP_RSSUBCAT->RSSUBCAT_TYPE         = $record['RSSUBCAT_TYPE'];
 
