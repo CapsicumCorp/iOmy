@@ -79,6 +79,7 @@ AS_IF([test "x$enable_mysql_plugin" != xno], [
 	WITH_MYSQL()
 	MYSQL_USE_CLIENT_API()
 	MYSQL_NEED_VERSION([5.0.0])
+	MYSQLPLUGIN=true
 ])
 
 # Checks for required headers
@@ -260,7 +261,7 @@ AC_SUBST([COMMONFLAGS])
 AC_SUBST([COMMONCFLAGS])
 AC_SUBST([COMMONCPPFLAGS])
 AC_SUBST([COMMONCXXFLAGS])
-AS_IF([test "x$enable_mysql_plugin" != xno], [
+AS_IF([test "x$MYSQLPLUGIN" = xtrue], [
 	MYSQL_SUBST
 ])
 
