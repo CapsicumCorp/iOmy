@@ -256,33 +256,33 @@ var aPages = [
 	},
 	{
 		"Id":			"pServerInfo",
-		"Location":		"pages.Development.ServerInfo",
+		"Location":		"pages.server.ServerInfo",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.ServerInfo\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.server.ServerInfo\" Page!\n"
 	},
 	{
 		"Id":			"pDBIndex",
-		"Location":		"pages.Development.DBIndex",
+		"Location":		"pages.server.DBIndex",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.DBIndex\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.server.DBIndex\" Page!\n"
 	},
 	{
 		"Id":			"pAdvanced",
-		"Location":		"pages.Development.Advanced",
+		"Location":		"pages.Advanced",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.Advanced\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.Advanced\" Page!\n"
 	},
 	{
 		"Id":			"pManagedStreams",
-		"Location":		"pages.Development.ManagedStreams",
+		"Location":		"pages.streams.ManagedStreams",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.ManagedStreams\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.streams.ManagedStreams\" Page!\n"
 	},
 	{
 		"Id":			"pAddStream",
-		"Location":		"pages.Development.AddStream",
+		"Location":		"pages.streams.AddStream",
 		"Type":			"JS",
-		"ErrMesg":		"Critical Error: Couldn't load \"pages.Development.AddStream\" Page!\n"
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.streams.AddStream\" Page!\n"
 	}
 
 ];

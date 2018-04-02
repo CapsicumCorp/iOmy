@@ -22,17 +22,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 $.sap.require("sap.ui.table.Table");
-sap.ui.jsview("pages.Development.ManagedStreams", {
+sap.ui.jsview("pages.streams.ManagedStreams", {
 	
 	/*************************************************************************************************** 
 	** 1.0 - Controller Declaration
 	**************************************************************************************************** 
 	* Specifies the Controller belonging to this View. 
 	* In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
-	* @memberOf pages.staging.UserSettings
+	* @memberOf pages.streams.ManagedStream
 	****************************************************************************************************/ 
 	getControllerName : function() {
-		return "pages.Development.ManagedStreams";
+		return "pages.streams.ManagedStreams";
 	},
 
 	/*************************************************************************************************** 
@@ -40,7 +40,7 @@ sap.ui.jsview("pages.Development.ManagedStreams", {
 	**************************************************************************************************** 
 	* Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
 	* Since the Controller is given to this method, its event handlers can be attached right away. 
-	* @memberOf pages.staging.UserSettings
+	* @memberOf pages.streams.ManagedStream
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var oView = this;
