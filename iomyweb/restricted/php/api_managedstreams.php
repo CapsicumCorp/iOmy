@@ -680,6 +680,15 @@ if( $bError===false ) {
 						$sErrMesg .= "Problem editing WatchInputs cameralib managed stream!\n";
 						$sErrMesg .= $aResult['ErrMesg'];
 					}
+					
+					
+					if( $bError===false ) {
+						$aFunctionTemp3 = WatchInputsGetManagedCameraStreamFromStreamId( $iPostStreamId );
+						
+						if( $aFunctionTemp3['Error']===false ) {
+							$aResult['Data'] = $aFunctionTemp3['Data'];
+						}
+					}
 				}
 				
 			} catch( Exception $e3400 ) {

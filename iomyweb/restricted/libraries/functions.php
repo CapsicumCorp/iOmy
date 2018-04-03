@@ -4465,7 +4465,7 @@ function WatchInputsGetManagedCameraStreams() {
 }
 
 
-function WatchInputsGetManagedCameraStreamFromStreamId( $iThingId ) {
+function WatchInputsGetManagedCameraStreamFromStreamId( $iStreamId ) {
 	//----------------------------------------------------------------------------------------------------//
 	//-- Description: Looks up all the Cameras that are managed by WatchInputs for FFMPEG Stream        --//
 	//----------------------------------------------------------------------------------------------------//
@@ -4480,7 +4480,7 @@ function WatchInputsGetManagedCameraStreamFromStreamId( $iThingId ) {
 	//------------------------------------------------------------//
 	//-- 2.0 - Begin                                            --//
 	//------------------------------------------------------------//
-	$aResult = dbWatchInputsGetManagedCameraStreamFromStreamId( $iThingId );
+	$aResult = dbWatchInputsGetManagedCameraStreamFromStreamId( $iStreamId );
 	
 	if( $aResult["Error"]===true ) {
 		//-- Display an Error --//
