@@ -22,17 +22,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("pages.Development.ServerInfo", {
+sap.ui.jsview("pages.server.ServerInfo", {
     
     /*************************************************************************************************** 
     ** 1.0 - Controller Declaration
     **************************************************************************************************** 
     * Specifies the Controller belonging to this View. 
     * In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
-    * @memberOf pages.UserSettings
+    * @memberOf pages.server.ServerInfo
     ****************************************************************************************************/ 
     getControllerName : function() {
-        return "pages.Development.ServerInfo";
+        return "pages.server.ServerInfo";
     },
 
     /*************************************************************************************************** 
@@ -40,7 +40,7 @@ sap.ui.jsview("pages.Development.ServerInfo", {
     **************************************************************************************************** 
     * Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
     * Since the Controller is given to this method, its event handlers can be attached right away. 
-    * @memberOf pages.UserSettings
+    * @memberOf pages.server.ServerInfo
     ****************************************************************************************************/ 
     createContent : function(oController) {
         var oView = this;

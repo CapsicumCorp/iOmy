@@ -45,10 +45,33 @@ sap.ui.controller("pages.Home", {
 				
 				//-- Defines the Device Type --//
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                oController.RefreshModel();
 			}
 		});
 			
 		
 	},
+    
+    RefreshModel : function () {
+        var oView   = this.getView();
+        var oModel  = null;
+        
+        var iDevices    = iomy.functions.getNumberOfThings();
+        var iRooms      = iomy.functions.getNumberOfAssignedRooms();
+        var iPremises   = iomy.functions.getNumberOfPremises();
+        
+        var oData = {
+            "count" : {
+                devices : iDevices,
+                rooms : iRooms,
+                premises : iPremises
+            }
+        };
+        
+        oModel = new sap.ui.model.json.JSONModel(oData);
+        oModel.setSizeLimit(420);
+        
+        oView.setModel(oModel);
+    }
 	
 });

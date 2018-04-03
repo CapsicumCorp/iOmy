@@ -22,7 +22,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.controller("pages.Development.DBIndex", {
+sap.ui.controller("pages.server.DBIndex", {
     aFormFragments  : {},
     
     bIndexingOn         : false,
@@ -35,7 +35,7 @@ sap.ui.controller("pages.Development.DBIndex", {
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
-* @memberOf pages.template.Template
+* @memberOf pages.server.DBIndex
 */
 
     onInit: function() {
@@ -57,7 +57,8 @@ sap.ui.controller("pages.Development.DBIndex", {
     },
     
     /**
-     * Toggles 
+     * Enables or disables each control on the form. Some controls are toggled
+     * if other conditions are met.
      * 
      * @param {type} bEnabled
      */
@@ -65,17 +66,17 @@ sap.ui.controller("pages.Development.DBIndex", {
         try {
             var oController     = this;
             var oView           = oController.getView();
-            var oData           = JSON.parse(oView.getModel().getJSON());
-            var oModel          = {};
+//            var oData           = JSON.parse(oView.getModel().getJSON());
+            var oModel          = oView.getModel();
             
             oController.bControlsEnabled = bEnabled;
             
-            oData.controls.ControlsEnabled      = oController.bControlsEnabled;
-            oData.controls.CancelEnabled        = oController.bControlsEnabled || oController.bLoading;
-            oData.controls.EditIndexEnabled     = oController.bControlsEnabled && oController.bOptionChanged;
+            oModel.setProperty("/controls/ControlsEnabled",     oController.bControlsEnabled);
+            oModel.setProperty("/controls/CancelEnabled",       oController.bControlsEnabled || oController.bLoading);
+            oModel.setProperty("/controls/EditIndexEnabled",    oController.bControlsEnabled && oController.bOptionChanged);
             
-            oModel = new sap.ui.model.json.JSONModel(oData);
-            oView.setModel(oModel);
+//            oModel = new sap.ui.model.json.JSONModel(oData);
+//            oView.setModel(oModel);
             
         } catch (e) {
             $.sap.log.error("Error toggling controls ("+e.name+"): " + e.message);

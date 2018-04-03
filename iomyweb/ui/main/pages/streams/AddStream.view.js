@@ -22,17 +22,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("pages.Development.AddStream", {
+sap.ui.jsview("pages.streams.AddStream", {
 	
 	/*************************************************************************************************** 
 	** 1.0 - Controller Declaration
 	**************************************************************************************************** 
 	* Specifies the Controller belonging to this View. 
 	* In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
-	* @memberOf pages.UserSettings
+	* @memberOf pages.streams.AddStream
 	****************************************************************************************************/ 
 	getControllerName : function() {
-		return "pages.Development.AddStream";
+		return "pages.streams.AddStream";
 	},
 
 	/*************************************************************************************************** 
@@ -40,7 +40,7 @@ sap.ui.jsview("pages.Development.AddStream", {
 	**************************************************************************************************** 
 	* Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
 	* Since the Controller is given to this method, its event handlers can be attached right away. 
-	* @memberOf pages.UserSettings
+	* @memberOf pages.streams.AddStream
 	****************************************************************************************************/ 
 	createContent : function(oController) {
 		var oView = this;

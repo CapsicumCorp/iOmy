@@ -22,14 +22,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.controller("pages.Development.AddStream", {
+sap.ui.controller("pages.streams.AddStream", {
     bStreamsAvailable : false,
     mStream : null,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
-* @memberOf pages.template.Template
+* @memberOf pages.streams.AddStream
 */
 
 	onInit: function() {

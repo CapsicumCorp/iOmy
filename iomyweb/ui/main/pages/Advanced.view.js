@@ -22,17 +22,17 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-sap.ui.jsview("pages.Development.Advanced", {
+sap.ui.jsview("pages.Advanced", {
     
     /*************************************************************************************************** 
     ** 1.0 - Controller Declaration
     **************************************************************************************************** 
     * Specifies the Controller belonging to this View. 
     * In the case that it is not implemented, or that "null" is returned, this View does not have a Controller.
-    * @memberOf pages.Block
+    * @memberOf pages.Advanced
     ****************************************************************************************************/ 
     getControllerName : function() {
-        return "pages.Development.Advanced";
+        return "pages.Advanced";
     },
 
     /*************************************************************************************************** 
@@ -40,7 +40,7 @@ sap.ui.jsview("pages.Development.Advanced", {
     **************************************************************************************************** 
     * Is initially called once after the Controller has been instantiated. It is the place where the UI is constructed. 
     * Since the Controller is given to this method, its event handlers can be attached right away. 
-    * @memberOf pages.Block
+    * @memberOf pages.Advanced
     ****************************************************************************************************/ 
     createContent : function(oController) {
         var oView = this;
@@ -55,7 +55,7 @@ sap.ui.jsview("pages.Development.Advanced", {
                     height: "100%",
                     vertical : true,
                     content : [
-                       iomy.widgets.DeviceToolbar(oController, "Advanced"),
+                        iomy.widgets.DeviceToolbar(oController, "Advanced"),
                         new sap.m.List (oView.createId("AdvancedList"), {
                             mode: sap.m.ListMode.None,
                             items: [

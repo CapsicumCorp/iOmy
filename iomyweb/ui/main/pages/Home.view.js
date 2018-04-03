@@ -62,7 +62,7 @@ sap.ui.jsview("pages.Home", {
                                 new sap.m.ObjectListItem (oView.createId("entryDevices"), {        
                                     title: "Devices",
                                     type: "Active",
-                                    number: iomy.functions.getNumberOfThings(),
+                                    number: "{/count/devices}",
                                     press : function () {
                                         iomy.common.NavigationChangePage( "pDevice" , {} , false);
                                     }
@@ -71,7 +71,7 @@ sap.ui.jsview("pages.Home", {
                                 new sap.m.ObjectListItem (oView.createId("entryRoom"), {        
                                     title: "Rooms",
                                     type: "Active",
-                                    number: iomy.functions.getNumberOfAssignedRooms(),
+                                    number: "{/count/rooms}",
                                     press : function () {
                                         iomy.common.NavigationChangePage( "pRoomList" , {} , false);
                                     }
@@ -79,7 +79,7 @@ sap.ui.jsview("pages.Home", {
                                 new sap.m.ObjectListItem (oView.createId("entryPremise"), {        
                                     title: "Premises",
                                     type: "Active",
-                                    number: iomy.functions.getNumberOfPremises(),
+                                    number: "{/count/premises}",
                                     press : function () {
                                         iomy.common.NavigationChangePage( "pPremise" , {} , false);
                                     }
