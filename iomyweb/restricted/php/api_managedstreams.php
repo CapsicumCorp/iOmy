@@ -532,34 +532,36 @@ if( $bError===false ) {
 				//--------------------------------------------------------------------//
 				//-- 5.1.2 - Lookup the WatchInputs Values                          --//
 				//--------------------------------------------------------------------//
-				try {
-					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
-					if( $oTelnet->bInitialised===true ) {
-						//----------------------------//
-						//-- PRE COMMAND            --//
-						//----------------------------//
-						$oTelnet->FetchRows( "normal", 128, 1, true );
-						
-						//----------------------------//
-						//-- MAIN COMMAND           --//
-						//----------------------------//
-						$oTelnet->WriteArray( array( "cameralib_get_camera_info_json"."\n" ) );
-						$aFunctionTemp2 = $oTelnet->FetchRows( "json", 128, 5, true );
-						
-						
-						//----------------------------//
-						//-- EXIT COMMAND           --//
-						//----------------------------//
-						$oTelnet->WriteArray( array( "quit\n" ) );
-						$oTelnet->FetchRows( "normal", 128, 1, true );
+				if( $bError===false ) {
+					try {
+						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 1 );
+						if( $oTelnet->bInitialised===true ) {
+							//----------------------------//
+							//-- PRE COMMAND            --//
+							//----------------------------//
+							$oTelnet->FetchRows( "normal", 128, 1, true );
+							
+							//----------------------------//
+							//-- MAIN COMMAND           --//
+							//----------------------------//
+							$oTelnet->WriteArray( array( "cameralib_get_camera_info_json"."\n" ) );
+							$aFunctionTemp2 = $oTelnet->FetchRows( "json", 128, 5, true );
+							
+							//----------------------------//
+							//-- EXIT COMMAND           --//
+							//----------------------------//
+							$oTelnet->WriteArray( array( "quit\n" ) );
+							$oTelnet->FetchRows( "normal", 128, 1, true );
+							
+						} 
+					} catch( Exception $e1410 ) {
+						//-- Display an Error Message --//
+						$bError    = true;
+						$sErrMesg .= "Error Code:'1402' \n";
+						$sErrMesg .= $e1400->getMessage();
 					}
-					
-				} catch( Exception $e1410 ) {
-					//-- Display an Error Message --//
-					$bError    = true;
-					$sErrMesg .= "Error Code:'1400' \n";
-					$sErrMesg .= $e1400->getMessage();
 				}
+				
 				
 				//echo "\n\nDB: \n";
 				//var_dump( $aFunctionTemp1['Data'] );
@@ -574,28 +576,68 @@ if( $bError===false ) {
 				//--------------------------------------------------------------------//
 				//-- 5.1.3 - Create the Results to be returned                      --//
 				//--------------------------------------------------------------------//
-				$aResult = array(
-					"Error" => false,
-					"Data"  => array()
-				);
-				
-				
-				foreach( $aFunctionTemp1['Data'] as $aDBStream ) {
-					foreach( $aFunctionTemp2['Cameras'] as $aTelnetStream ) {
+				if( $bError===false ) {
+					$aResult = array(
+						"Error" => false,
+						"Data"  => array()
+					);
+					
+					foreach( $aFunctionTemp1['Data'] as $aDBStream ) {
+						//--------------------------------------------//
+						//-- Reset Variables to default             --//
+						//--------------------------------------------//
+						$bMatchFound     = false;
 						$iDBThingId      = intval( $aDBStream['ThingId'] );
-						$iTelnetThingId  = intval( $aTelnetStream['CameraID'] );
 						
-						if( $iDBThingId===$iTelnetThingId ) {
-							if( isset( $aTelnetStream['CameraStreams'][0] ) ) {
-								$sExitCode   = $aTelnetStream['CameraStreams'][0]['ExitCode'];
-								$sExitReason = $aTelnetStream['CameraStreams'][0]['exitReason'];
-								$sCapturing  = $aTelnetStream['CameraStreams'][0]['isStreamCapturing'];
-							} else {
-								$sExitCode   = "";
-								$sExitReason = "";
-								$sCapturing  = "";
-							}
-							
+						
+						
+						//--------------------------------------------//
+						//-- IF WatchInputs Telnet Data Found       --//
+						//--------------------------------------------//
+						if( isset( $aFunctionTemp2['Cameras'] ) ) {
+							foreach( $aFunctionTemp2['Cameras'] as $aTelnetStream ) {
+								
+								$iTelnetThingId  = intval( $aTelnetStream['CameraID'] );
+								
+								//--------------------------------------------//
+								//-- IF DBThingId and TelnetThindId Match   --//
+								//--------------------------------------------//
+								if( $iDBThingId===$iTelnetThingId ) {
+									//-- Flag the Match was found --//
+									$bMatchFound = true;
+									
+									if( isset( $aTelnetStream['CameraStreams'][0] ) ) {
+										$sExitCode   = $aTelnetStream['CameraStreams'][0]['ExitCode'];
+										$sExitReason = $aTelnetStream['CameraStreams'][0]['exitReason'];
+										$sCapturing  = $aTelnetStream['CameraStreams'][0]['isStreamCapturing'];
+									} else {
+										$sExitCode   = "";
+										$sExitReason = "";
+										$sCapturing  = "";
+									}
+									
+									$aResult['Data'][] = array(
+										"StreamId"        => $aDBStream['CameraLibId'],
+										"ThingId"         => $iDBThingId,
+										"Name"            => $aDBStream['Name'],
+										"Enabled"         => $aDBStream['Enabled'],
+										"RunCount"        => $aDBStream['RunCount'],
+										"FailCount"       => $aDBStream['FailCount'],
+										"LastUpdate"      => $aDBStream['LastUpdate'],
+										"LastUpdateUTS"   => $aDBStream['LastUpdateUTS'],
+										"ExitCode"        => $sExitCode,
+										"ExitReason"      => $sExitReason,
+										"Capturing"       => $sCapturing,
+										"InWatchInputs"   => true
+									);
+								}
+							}	//-- ENDFOREACH Telnet Stream --//
+						} //-- ENDIF WatchInputs Telnet Data --//
+						
+						//--------------------------------------------//
+						//-- IF No Match Found                      --//
+						//--------------------------------------------//
+						if( $bMatchFound===false ) {
 							$aResult['Data'][] = array(
 								"StreamId"        => $aDBStream['CameraLibId'],
 								"ThingId"         => $iDBThingId,
@@ -605,14 +647,16 @@ if( $bError===false ) {
 								"FailCount"       => $aDBStream['FailCount'],
 								"LastUpdate"      => $aDBStream['LastUpdate'],
 								"LastUpdateUTS"   => $aDBStream['LastUpdateUTS'],
-								"ExitCode"        => $sExitCode,
-								"ExitReason"      => $sExitReason,
-								"Capturing"       => $sCapturing
+								"ExitCode"        => "",
+								"ExitReason"      => "",
+								"Capturing"       => "",
+								"InWatchInputs"   => false
 							);
+							
 						}
-					}	//-- ENDFOREACH Telnet Stream --//
-				}	//-- ENDFOREACH Database Stream --//
-				
+						
+					}	//-- ENDFOREACH Database Stream --//
+				}
 				
 			} catch( Exception $e1400 ) {
 				//-- Display an Error Message --//
