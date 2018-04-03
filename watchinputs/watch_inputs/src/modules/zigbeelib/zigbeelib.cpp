@@ -136,11 +136,21 @@ NOTE: RapidHA seems to have a total in transit buffer limit of 5 packets which i
 //#define ZIGBEELIB_PTHREAD_LOCK(mutex) LOCKLIB_LOCK(mutex, "zigbeelibmutex")
 //#define ZIGBEELIB_PTHREAD_UNLOCK(mutex) LOCKLIB_UNLOCK(mutex, "zigbeelibmutex")
 
+#ifdef DEBUG
+
 #define ZIGBEELIB_PTHREAD_LOCK(mutex, __FILE__, __func__, __LINE__) \
   locklibifaceptr->pthread_mutex_lock(mutex, "zigbeelibmutex", __FILE__, __func__, __LINE__);
-
 #define ZIGBEELIB_PTHREAD_UNLOCK(mutex, __FILE__, __func__, __LINE__) \
   locklibifaceptr->pthread_mutex_unlock(mutex, "zigbeelibmutex", __FILE__, __func__, __LINE__);
+
+#else
+
+#define ZIGBEELIB_PTHREAD_LOCK(mutex) \
+  pthread_mutex_lock(mutex);
+#define ZIGBEELIB_PTHREAD_UNLOCK(mutex) \
+  pthread_mutex_unlock(mutex);
+
+#endif
 
 #ifdef ZIGBEELIB_LOCKDEBUG
 #define LOCKDEBUG_ENTERINGFUNC() { \
