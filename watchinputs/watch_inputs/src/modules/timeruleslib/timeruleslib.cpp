@@ -266,13 +266,13 @@ moduledep_ver_1_t timeruleslib_deps[]={
     "commonlib",
     nullptr,
     COMMONLIBINTERFACE_VER_2,
-    0
+    1
   },
   {
     "mainlib",
     nullptr,
     MAINLIBINTERFACE_VER_2,
-    0
+    1
   },
   {
     nullptr, nullptr, 0, 0

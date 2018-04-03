@@ -724,12 +724,14 @@ static moduledep_ver_1_t zigbeelib_deps[]={
   {
     "commonlib",
     nullptr,
-    COMMONLIBINTERFACE_VER_2
+    COMMONLIBINTERFACE_VER_2,
+    1
   },
   {
     "mainlib",
     nullptr,
-    MAINLIBINTERFACE_VER_2
+    MAINLIBINTERFACE_VER_2,
+    1
   },
   {
     nullptr, nullptr, 0, 0
