@@ -27,7 +27,8 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 					label : iomy.widgets.RequiredLabel("Room Name"),
 					fields: [ 
 						new sap.m.Input ({
-							value:"{/CurrentRoom/RoomName}"
+							value:"{/fields/RoomName}",
+                            enabled: "{/controlsEnabled/WhenReady}"
 						})
 					]
 				}),
@@ -35,7 +36,8 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 					label : "Description",
 					fields: [
 						new sap.m.Input ({
-							value:"{/CurrentRoom/RoomDesc}"
+							value:"{/fields/RoomDesc}",
+                            enabled: "{/controlsEnabled/WhenReady}"
 						})
 					]
 				}),
@@ -43,9 +45,10 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 					label : "Room Type",
 					fields: [
 						new sap.m.Select ({
-							selectedKey: "{/CurrentRoom/RoomTypeId}",
+							selectedKey: "{/fields/RoomTypeId}",
+                            enabled: "{/controlsEnabled/WhenReady}",
 							items: {
-								path: "/RoomTypes",
+								path: "/options/RoomTypes",
 								template: oItemTemplateRoomTypes
 							},
 						})
@@ -55,9 +58,10 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 					label : "Assigned Premise",
 					fields: [
 						new sap.m.Select ({
-							selectedKey: "{/CurrentRoom/PremiseId}",
+							selectedKey: "{/fields/PremiseId}",
+                            enabled: "{/controlsEnabled/WhenReady}",
 							items: {
-								path: "/Premises",
+								path: "/options/Premises",
 								template: oItemTemplatePremises
 							},
 						})
@@ -68,6 +72,7 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 					fields: [
 						new sap.m.Button (oView.createId("ButtonSubmit"), {
 							text: "Save",
+                            enabled: "{/controlsEnabled/WhenReady}",
 							type: sap.m.ButtonType.Accept,
 							press:   function( oEvent ) {
 								oController.InsertRoomInfoValues( oController );
@@ -75,6 +80,7 @@ sap.ui.jsfragment("fragments.room.AddRoom", {
 						}),
 						new sap.m.Button (oView.createId("ButtonCancel"), {
 							text: "Cancel",
+                            enabled: "{/controlsEnabled/WhenReady}",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
 								iomy.common.NavigationChangePage( "pRoomList" ,  {} , false);

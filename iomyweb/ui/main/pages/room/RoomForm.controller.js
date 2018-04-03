@@ -93,33 +93,44 @@ sap.ui.controller("pages.room.RoomForm", {
         iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
     },
     
-    ToggleSubmitCancelButtons : function (bEnabled) {
+    ToggleControls : function (bEnabled) {
         var oView = this.getView();
+        var oModel = oView.getModel();
         
-        oView.byId("ButtonSubmit").setEnabled(bEnabled);
-        oView.byId("ButtonCancel").setEnabled(bEnabled);
-        
-        if (oView.byId("ButtonDelete") !== undefined) {
-            oView.byId("ButtonDelete").setEnabled(bEnabled);
-        }
+        oModel.setProperty("/controlsEnabled/WhenReady", bEnabled);
     },
 	
 	RefreshModel : function( oController, oConfig ) {
 		//------------------------------------------------//
 		//-- Declare Variables                          --//
 		//------------------------------------------------//
-		var oView            = oController.getView();
+		var oView           = oController.getView();
+        var oModel          = null;
+        var sTitle          = "Add Room";
+        var oData           = {};
 		
 		//------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
-		oView.setModel( 
-			new sap.ui.model.json.JSONModel({
-				"Premises":           JSON.parse(JSON.stringify(iomy.common.PremiseList)),
-				"RoomTypes":          JSON.parse(JSON.stringify(iomy.common.RoomTypes)),
-				"CurrentRoom":        JSON.parse(JSON.stringify(oController.mRoomData))
-			})
-		);	
+        if(oController.bEditing === true ) {
+            sTitle = "Edit Room";
+        }
+        
+        oData = {
+            "title": sTitle,
+            "fields":  JSON.parse(JSON.stringify(oController.mRoomData)),
+            "options": {
+                "Premises":     JSON.parse(JSON.stringify(iomy.common.PremiseList)),
+                "RoomTypes":    JSON.parse(JSON.stringify(iomy.common.RoomTypes))
+            },
+            "controlsEnabled" : {
+                "WhenReady" : true
+            }
+        };
+        
+        oModel = new sap.ui.model.json.JSONModel(oData);
+        oModel.setSizeLimit(420);
+		oView.setModel(oModel);	
 		
 		//------------------------------------------------//
 		//-- Trigger the onSuccess Event                --//
@@ -133,12 +144,12 @@ sap.ui.controller("pages.room.RoomForm", {
 		var bError          = false;
         var aErrorMessages  = [];
         
-        oController.ToggleSubmitCancelButtons(false);
+        oController.ToggleControls(false);
 		
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
 		//------------------------------------------------//
-		var oCurrentFormData = oController.getView().getModel().getProperty("/CurrentRoom/");
+		var oCurrentFormData = oController.getView().getModel().getProperty("/fields/");
 		
 		//------------------------------------------------//
 		//-- STEP 2 - Check for Errors                  --//
@@ -181,7 +192,7 @@ sap.ui.controller("pages.room.RoomForm", {
                                                         text : oCurrentFormData.RoomName + " successfully updated."
                                                     });
                                                     
-                                                    oController.ToggleSubmitCancelButtons(true);
+                                                    oController.ToggleControls(true);
                                                     
 													iomy.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
 												}, oController )
@@ -212,14 +223,14 @@ sap.ui.controller("pages.room.RoomForm", {
 						jQuery.sap.log.error(sErrorMessage);
                         
                         iomy.common.showError( sErrorMessage, "Error", function () {
-                            oController.ToggleSubmitCancelButtons(true);
+                            oController.ToggleControls(true);
                         });
                         
 					}
 				});
 			} else {
 				iomy.common.showError(aErrorMessages.join("\n"), "No name", function () {
-                    oController.ToggleSubmitCancelButtons(true);
+                    oController.ToggleControls(true);
                 });
 			}
 		} catch( e1 ) {
@@ -231,11 +242,11 @@ sap.ui.controller("pages.room.RoomForm", {
 		var bError   = false;
         var aErrorMessages = [];
 		
-        oController.ToggleSubmitCancelButtons(false);
+        oController.ToggleControls(false);
 		//------------------------------------------------//
 		//-- STEP 1 - Extract Values from the Model     --//
 		//------------------------------------------------//
-		var oCurrentFormData = oController.getView().getModel().getProperty("/CurrentRoom/");
+		var oCurrentFormData = oController.getView().getModel().getProperty("/fields/");
 		//var oTest = oController.getView().getModel();
 		
 		//------------------------------------------------//
@@ -293,7 +304,7 @@ sap.ui.controller("pages.room.RoomForm", {
                                                                     text : oCurrentFormData.RoomName + " successfully created."
                                                                 });
 
-                                                                oController.ToggleSubmitCancelButtons(true);
+                                                                oController.ToggleControls(true);
                                                                 
 																iomy.common.NavigationChangePage( "pRoomList" , {} , false);
 															}, oController )
@@ -325,13 +336,13 @@ sap.ui.controller("pages.room.RoomForm", {
                         
 						jQuery.sap.log.error(sErrorMessage);
                         iomy.common.showError( sErrorMessage, "Error", function () {
-                            oController.ToggleSubmitCancelButtons(true);
+                            oController.ToggleControls(true);
                         });
 					}
 				});
 			} else {
                 iomy.common.showError(aErrorMessages.join("\n"), "No name", function () {
-                    oController.ToggleSubmitCancelButtons(true);
+                    oController.ToggleControls(true);
                 });
 			}
 		} catch( e1 ) {
@@ -345,7 +356,7 @@ sap.ui.controller("pages.room.RoomForm", {
         var iNumOfDevices   = iomy.functions.getNumberOfDevicesInRoom(oController.mRoomData.RoomId);
         var sDialogTitle;
         
-        oController.ToggleSubmitCancelButtons(false);
+        oController.ToggleControls(false);
 
         try {
             if (iNumOfDevices > 0) {
@@ -362,7 +373,7 @@ sap.ui.controller("pages.room.RoomForm", {
 
                 iomy.common.showError(sErrMessage, "Error",
                     function () {
-                        oController.ToggleSubmitCancelButtons(true);
+                        oController.ToggleControls(true);
                     }
                 );
 
@@ -381,14 +392,14 @@ sap.ui.controller("pages.room.RoomForm", {
                                             text : oController.mRoomData.RoomName + " successfully removed."
                                         });
 
-                                        oController.ToggleSubmitCancelButtons(true);
+                                        oController.ToggleControls(true);
                                         iomy.common.NavigationChangePage( "pRoomList" , {"bEditing" : oController.bEditing} , false);
                                     },
 
                                     onFail : function (sErrorMessage) {
                                         iomy.common.showError(sErrorMessage, "Error",
                                             function () {
-                                                oController.ToggleSubmitCancelButtons(true);
+                                                oController.ToggleControls(true);
                                             }
                                         );
                                     }
@@ -409,21 +420,21 @@ sap.ui.controller("pages.room.RoomForm", {
 
                                 iomy.common.showError(err.message, sDialogTitle,
                                     function () {
-                                        oController.ToggleSubmitCancelButtons(true);
+                                        oController.ToggleControls(true);
                                     }
                                 );
 
                             }
 
                         } else {
-                            oController.ToggleSubmitCancelButtons(true);
+                            oController.ToggleControls(true);
                         }
                     }
                 );
             }
         } catch (e) {
             $.sap.log.error("Error preparing to delete a room ("+e.name+"): " + e.message);
-            oController.ToggleSubmitCancelButtons(true);
+            oController.ToggleControls(true);
         }
     },
 	

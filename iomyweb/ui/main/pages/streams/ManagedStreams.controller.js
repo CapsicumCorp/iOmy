@@ -316,8 +316,8 @@ sap.ui.controller("pages.streams.ManagedStreams", {
                             })
                         },
 
-                        onSuccess : function () {
-                            if (mStream.State === "Disabled") {
+                        onSuccess : function (sType, mData) {
+                            if (mData.Enabled === 1) {
                                 iEnabledCount++;
 
                             } else {

@@ -21,7 +21,8 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 					label : iomy.widgets.RequiredLabel("Room Name"),
 					fields: [ 
 						new sap.m.Input ({
-							value:"{/CurrentRoom/RoomName}"
+                            enabled: "{/fields/WhenReady}",
+							value:"{/fields/RoomName}"
 						})
 					]
 				}),
@@ -29,7 +30,8 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 					label : "Description",
 					fields: [
 						new sap.m.Input ({
-							value:"{/CurrentRoom/RoomDesc}"
+                            enabled: "{/fields/WhenReady}",
+							value:"{/fields/RoomDesc}"
 						})
 					]
 				}),
@@ -37,9 +39,10 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 					label : "Room Type",
 					fields: [
 						new sap.m.Select ({
-							selectedKey: "{/CurrentRoom/RoomTypeId}",
+							selectedKey: "{/fields/RoomTypeId}",
+                            enabled: "{/controlsEnabled/WhenReady}",
 							items: {
-								path: "/RoomTypes",
+								path: "/options/RoomTypes",
 								template: oItemTemplateRoomTypes
 							},
 						})
@@ -49,7 +52,7 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 					label : "Assigned Premise",
 					fields: [
 						new sap.m.Text ({
-							text:"{/CurrentRoom/PremiseName}"
+							text:"{/fields/PremiseName}"
 						})
 					]
 				}),
@@ -58,6 +61,7 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 					fields: [
 						new sap.m.Button (oView.createId("ButtonSubmit"), {
 							text: "Update",
+                            enabled: "{/controlsEnabled/WhenReady}",
 							type: sap.m.ButtonType.Accept,
 							press:   function( oEvent ) {
 								oController.UpdateRoomInfoValues( oController );
@@ -65,6 +69,7 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 						}),
 						new sap.m.Button (oView.createId("ButtonCancel"), {
 							text: "Cancel",
+                            enabled: "{/controlsEnabled/WhenReady}",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
 								iomy.common.NavigationChangePage( "pRoomList" ,  {"bEditing": true} , false);
@@ -72,6 +77,7 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 						}),
 						new sap.m.Button (oView.createId("ButtonDelete"), {
 							text: "Delete",
+                            enabled: "{/controlsEnabled/WhenReady}",
 							type: sap.m.ButtonType.Reject,
 							press:   function( oEvent ) {
 								oController.DeleteRoomInfoValues();
