@@ -93,115 +93,122 @@ sap.ui.jsview("pages.streams.ManagedStreams", {
 			header : iomy.widgets.getToolPageHeader(oController),
 			sideContent : iomy.widgets.getToolPageSideContent(oController),
 			mainContents: [ 
-				new sap.ui.table.Table (oView.createId("streamTable"), {
-					rows: "{/CameraList}",
-					extension : [
-						new sap.m.Toolbar ({
-							selectionMode:"MultiToggle",
-							content : [
-								new sap.m.Button ({
-									text: "Add",
-									type: sap.m.ButtonType.Accept,
-									press:   function( oEvent ) {
-                                        var aStreams        = iomy.devices.onvif.getListOfOnvifStreams();
-                                        var iStreamCount    = aStreams.length;
-                                        
-                                        if (iStreamCount > 0) {
-                                            iomy.common.NavigationChangePage("pAddStream",  {} , false);
-                                        } else {
-                                            iomy.common.showInformation("You need to first create an Onvif Stream to manage one.", "No Onvif Streams.");
-                                        }
-									}
-								}),
-                                new sap.m.Button({
-                                    enabled : "{/controlsEnabled/IfStreamsExist}",
-									text: "Toggle",
-									type: sap.m.ButtonType.Default,
-                                    
-                                    press : function () {
-                                        oController.toggleSelectedStreams();
-                                    }
-								}),
-                               
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.Title ({
-									id: "toolbarTitle" ,
-									text: "Managed Cameras"
-								}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-								new sap.m.ToolbarSpacer({}),
-                                new sap.m.Button({
-                                    enabled : "{/controlsEnabled/IfStreamsExist}",
-									text: "Stop All Streams",
-									type: sap.m.ButtonType.Reject,
-                                    
-                                    press : function () {
-                                        oController.stopAllStreams();
-                                    }
-								}),
-							]
-						})
-					],
-					columns : [
-						new sap.ui.table.Column ({
-                            minWidth: 200,
-                            width: "auto",
-							label : new sap.m.Label({ 
-								text:"Device Name" 
-							}),
-							template : oColDName
-						}),
-						new sap.ui.table.Column ({
-                            minWidth: 200,
-                            width: "auto",
-							label : new sap.m.Label({ 
-								text:"Description" 
-							}),
-							template : oColDesc
-						}),
-						new sap.ui.table.Column ({
-                            minWidth: 200,
-                            width: "auto",
-							label : new sap.m.Label({ 
-								text:"Status" 
-							}),
-							template : oColState
-						}),
-                        new sap.ui.table.Column ({
-                            width: "7rem",
-							label : new sap.m.Label({ 
-								text:"Successful" 
-							}),
-							template : oColSuccess
-						}),
-                        new sap.ui.table.Column ({
-                            width: "7rem",
-							label : new sap.m.Label({ 
-								text:"Failed" 
-							}),
-							template : oColFail
-						}),
-						new sap.ui.table.Column ({
-							width: "4rem",
-							label : new sap.m.Label({ 
-								text:"View" 
-							}),
-							template : oColView
-						}),
-						new sap.ui.table.Column ({
-							width: "4rem",
-							label : new sap.m.Label({ 
-								text:"Edit" 
-							}),
-							template : oColEdit
-						}),
-					],
-				})
+				new sap.m.ScrollContainer ({
+                    width : "100%",
+                    height : "100%",
+                    vertical : true,
+                    content :[
+                        new sap.ui.table.Table (oView.createId("streamTable"), {
+                            rows: "{/CameraList}",
+                            extension : [
+                                new sap.m.Toolbar ({
+                                    selectionMode:"MultiToggle",
+                                    content : [
+                                        new sap.m.Button ({
+                                            text: "Add",
+                                            type: sap.m.ButtonType.Accept,
+                                            press:   function( oEvent ) {
+                                                var aStreams        = iomy.devices.onvif.getListOfOnvifStreams();
+                                                var iStreamCount    = aStreams.length;
+
+                                                if (iStreamCount > 0) {
+                                                    iomy.common.NavigationChangePage("pAddStream",  {} , false);
+                                                } else {
+                                                    iomy.common.showInformation("You need to first create an Onvif Stream to manage one.", "No Onvif Streams.");
+                                                }
+                                            }
+                                        }),
+                                        new sap.m.Button({
+                                            enabled : "{/controlsEnabled/IfStreamsExist}",
+                                            text: "Toggle",
+                                            type: sap.m.ButtonType.Default,
+
+                                            press : function () {
+                                                oController.toggleSelectedStreams();
+                                            }
+                                        }),
+
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.Title ({
+                                            id: "toolbarTitle" ,
+                                            text: "Managed Cameras"
+                                        }),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.ToolbarSpacer({}),
+                                        new sap.m.Button({
+                                            enabled : "{/controlsEnabled/IfStreamsExist}",
+                                            text: "Stop All Streams",
+                                            type: sap.m.ButtonType.Reject,
+
+                                            press : function () {
+                                                oController.stopAllStreams();
+                                            }
+                                        }),
+                                    ]
+                                })
+                            ],
+                            columns : [
+                                new sap.ui.table.Column ({
+                                    minWidth: 200,
+                                    width: "auto",
+                                    label : new sap.m.Label({ 
+                                        text:"Device Name" 
+                                    }),
+                                    template : oColDName
+                                }),
+                                new sap.ui.table.Column ({
+                                    minWidth: 200,
+                                    width: "auto",
+                                    label : new sap.m.Label({ 
+                                        text:"Description" 
+                                    }),
+                                    template : oColDesc
+                                }),
+                                new sap.ui.table.Column ({
+                                    minWidth: 200,
+                                    width: "auto",
+                                    label : new sap.m.Label({ 
+                                        text:"Status" 
+                                    }),
+                                    template : oColState
+                                }),
+                                new sap.ui.table.Column ({
+                                    width: "7rem",
+                                    label : new sap.m.Label({ 
+                                        text:"Successful" 
+                                    }),
+                                    template : oColSuccess
+                                }),
+                                new sap.ui.table.Column ({
+                                    width: "7rem",
+                                    label : new sap.m.Label({ 
+                                        text:"Failed" 
+                                    }),
+                                    template : oColFail
+                                }),
+                                new sap.ui.table.Column ({
+                                    width: "4rem",
+                                    label : new sap.m.Label({ 
+                                        text:"View" 
+                                    }),
+                                    template : oColView
+                                }),
+                                new sap.ui.table.Column ({
+                                    width: "4rem",
+                                    label : new sap.m.Label({ 
+                                        text:"Edit" 
+                                    }),
+                                    template : oColEdit
+                                }),
+                            ],
+                        })
+                    ]
+                })
 			]
 		}).addStyleClass("MainBackground");
 	}
