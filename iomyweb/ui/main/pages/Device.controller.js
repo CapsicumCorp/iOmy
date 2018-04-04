@@ -171,6 +171,7 @@ sap.ui.controller("pages.Device", {
         var oController = this;
         var oView       = this.getView();
         var oJSON       = {};
+        var oModel      = null;
         
         if (oController.bEditing) {
             oJSON.CameraTapInstructions = "Tap to edit details";
@@ -180,9 +181,9 @@ sap.ui.controller("pages.Device", {
             oJSON.MotionSensorInstructions = "Tap to view more information";
         }
         
-        oView.setModel( 
-            new sap.ui.model.json.JSONModel(oJSON)
-        );
+        oModel = new sap.ui.model.json.JSONModel(oJSON);
+        
+        oView.setModel(oModel);
     },
     
     InitialiseDeviceList : function () {
@@ -389,6 +390,7 @@ sap.ui.controller("pages.Device", {
                                             text: "link",
                                             customContent : new sap.m.Link ({
                                                 text: "Toggle State",
+                                                enabled : iomy.functions.permissions.isCurrentUserAbleToEditDevice(mDevice.DeviceId),
                                                 press : function () {
                                                     oController.RunSwitch({
                                                         "thingID" : mDevice.DeviceId,
@@ -434,6 +436,7 @@ sap.ui.controller("pages.Device", {
                                             text: "link",
                                             customContent : new sap.m.Link ({
                                                 text: "Toggle State",
+                                                enabled : iomy.functions.permissions.isCurrentUserAbleToEditDevice(mDevice.DeviceId),
                                                 press : function () {
                                                     oController.RunSwitch({
                                                         "thingID" : mDevice.DeviceId,
@@ -480,6 +483,7 @@ sap.ui.controller("pages.Device", {
                                             text: "link",
                                             customContent : new sap.m.Link ({
                                                 text: "Toggle State",
+                                                enabled : iomy.functions.permissions.isCurrentUserAbleToEditDevice(mDevice.DeviceId),
                                                 press : function () {
                                                     oController.RunSwitch({
                                                         "thingID" : mDevice.DeviceId,
