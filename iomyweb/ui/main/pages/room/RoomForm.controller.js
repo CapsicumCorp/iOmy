@@ -130,7 +130,7 @@ sap.ui.controller("pages.room.RoomForm", {
         
         oModel = new sap.ui.model.json.JSONModel(oData);
         oModel.setSizeLimit(420);
-		oView.setModel(oModel);	
+		oView.setModel(oModel);
 		
 		//------------------------------------------------//
 		//-- Trigger the onSuccess Event                --//

@@ -21,8 +21,8 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 					label : iomy.widgets.RequiredLabel("Room Name"),
 					fields: [ 
 						new sap.m.Input ({
-                            enabled: "{/fields/WhenReady}",
-							value:"{/fields/RoomName}"
+							value:"{/fields/RoomName}",
+                            enabled: "{/controlsEnabled/WhenReady}"
 						})
 					]
 				}),
@@ -30,8 +30,8 @@ sap.ui.jsfragment("fragments.room.EditRoom", {
 					label : "Description",
 					fields: [
 						new sap.m.Input ({
-                            enabled: "{/fields/WhenReady}",
-							value:"{/fields/RoomDesc}"
+							value:"{/fields/RoomDesc}",
+                            enabled: "{/controlsEnabled/WhenReady}"
 						})
 					]
 				}),
