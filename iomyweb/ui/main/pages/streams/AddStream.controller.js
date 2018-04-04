@@ -222,9 +222,6 @@ sap.ui.controller("pages.streams.AddStream", {
                         sSuccessMessage = sName + " updated.";
                     }
                     
-                    //-- Append the message to allow about a minute before it will appear in the list. --//
-                    sSuccessMessage += " Changes should appear in the list in about 60 seconds.";
-                    
                     oController.ToggleControls(true);
                     
                     iomy.common.showMessage({

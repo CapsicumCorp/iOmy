@@ -216,7 +216,7 @@ sap.ui.controller("pages.streams.ManagedStreams", {
             // Run the telnet command to stop all streams.
             //----------------------------------------------------------------//
             iomy.telnet.RunCommand({
-                command : "stop_all_streams",
+                command : "cameralib_all_stop",
                 hubID : iHubId,
                 
                 onSuccess : function () {
@@ -317,7 +317,7 @@ sap.ui.controller("pages.streams.ManagedStreams", {
                         },
 
                         onSuccess : function (sType, mData) {
-                            if (mData.Enabled === 1) {
+                            if (mData.Data.Enabled == 1) {
                                 iEnabledCount++;
 
                             } else {
