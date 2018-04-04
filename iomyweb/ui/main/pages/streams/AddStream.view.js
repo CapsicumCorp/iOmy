@@ -126,7 +126,7 @@ sap.ui.jsview("pages.streams.AddStream", {
 															]
 														}),
 														new sap.ui.layout.form.FormElement({
-															label : "Stream Name*",
+															label : iomy.widgets.RequiredLabel("Stream Name"),
 															fields: [
 																new sap.m.Input ({
 																	enabled : "{/controlsEnabled/MostControls}",

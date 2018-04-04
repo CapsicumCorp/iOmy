@@ -69,6 +69,7 @@ sap.ui.jsview("pages.streams.ManagedStreams", {
 			icon: "sap-icon://edit",
 			type: "Transparent",
 			width: "100%",
+            enabled : "{/controlsEnabled/Always}",
             press : function (oEvent) {
                 var mThing = oEvent.getSource().getBindingContext().getProperty(""); // Get the relevant model data.
                 
@@ -82,6 +83,7 @@ sap.ui.jsview("pages.streams.ManagedStreams", {
 			icon: "sap-icon://show",
 			type: "Transparent",
 			width: "100%",
+            enabled : "{/controlsEnabled/Always}",
             press : function (oEvent) {
                 var iThingId = oEvent.getSource().getBindingContext().getProperty("ThingId");
                 iomy.devices.onvif.loadStream(iThingId);

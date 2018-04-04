@@ -72,7 +72,7 @@ sap.ui.controller("pages.streams.ManagedStreams", {
             var bManagedStreamsExist    = oController.aStreams.length > 0;
             var bHubHasPermission       = iHubId > 0;
 
-            oModel.setProperty(sControl + "Buttons",        bEnabled);
+            oModel.setProperty(sControl + "Always",         bEnabled);
             oModel.setProperty(sControl + "IfStreamsExist", bEnabled && bHubHasPermission && bManagedStreamsExist);
         } catch (e) {
             $.sap.log.error("Error enabling or disabling controls ("+e.name+"): " + e.message);
@@ -177,7 +177,7 @@ sap.ui.controller("pages.streams.ManagedStreams", {
 		oModelData = {
             "CameraList"        : oController.aStreams,
             "controlsEnabled"   : {
-                "Buttons"           : true,
+                "Always"           : true,
                 "IfStreamsExist"    : true && bHubHasPermission && bManagedStreamsExist
             }
         };
