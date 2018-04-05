@@ -69,6 +69,7 @@ sap.ui.controller("pages.streams.ManagedStreams", {
             var sControl    = "/controlsEnabled/";
             var iHubId      = iomy.common.LookupFirstHubToUseWithTelnet();
             
+            //-- Prepare the boolean flags by looking to see if certain conditions are satisfied. --//
             var bManagedStreamsExist    = oController.aStreams.length > 0;
             var bHubHasPermission       = iHubId > 0;
 
@@ -105,7 +106,7 @@ sap.ui.controller("pages.streams.ManagedStreams", {
                         oController.aStreams = [];
                         
                         //--------------------------------------------------------------------//
-                        // Go through the list of streams.
+                        // Process the list of streams to be used for the model.
                         //--------------------------------------------------------------------//
                         for (var i = 0; i < mData.Data.length; i++) {
                             var mStream = mData.Data[i];
@@ -344,6 +345,11 @@ sap.ui.controller("pages.streams.ManagedStreams", {
                             var oTable              = oView.byId("streamTable");
                             var aSelectedIndices    = oTable.getSelectedIndices();
 
+                            //----------------------------------------------------------------//
+                            // Prepare the result message.
+                            //----------------------------------------------------------------//
+                            
+                            //-- Prepare the enabled count. --//
                             if (iEnabledCount > 0) {
                                 sSuccessMessage += iEnabledCount;
                                 
@@ -356,6 +362,7 @@ sap.ui.controller("pages.streams.ManagedStreams", {
                                 sSuccessMessage += " enabled";
                             }
 
+                            //-- Prepare the disabled count. --//
                             if (iDisabledCount > 0) {
                                 if (sSuccessMessage.length > 0) {
                                     sSuccessMessage += "\n";
@@ -374,6 +381,10 @@ sap.ui.controller("pages.streams.ManagedStreams", {
 
                             oController.ToggleControls(true);
 
+                            //----------------------------------------------------------------//
+                            // Show the message in a toast and update the state fields in the
+                            // model.
+                            //----------------------------------------------------------------//
                             iomy.common.showMessage({
                                 text : sSuccessMessage
                             });
@@ -392,6 +403,8 @@ sap.ui.controller("pages.streams.ManagedStreams", {
                         } catch (e) {
                             $.sap.log.error("Failure in the success function of the request queue for changing the status of a stream. ("+e.name+"): " + e.message);
                         }
+                        
+                        this.onFail();
                     },
 
                     onWarning : function () {

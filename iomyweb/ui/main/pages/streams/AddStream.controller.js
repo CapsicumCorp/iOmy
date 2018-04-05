@@ -166,45 +166,51 @@ sap.ui.controller("pages.streams.AddStream", {
         var sDataString = "";
         var sMode       = "";
         
-        oController.ToggleControls(false);
-        
-        if (sName === "") {
-            aErrorMessages.push("Stream name must be given.");
-        }
-        
-        if (aErrorMessages.length > 0) {
-            iomy.common.showError(aErrorMessages.join("\n"), "Error",
-                function () {
-                    oController.ToggleControls(true);
-                }
-            );
-            return;
-        }
-        
-        if (vEnabled) {
-            vEnabled = 1;
-        } else {
-            vEnabled = 0;
-        }
-        
-        if (oController.mStream !== null) {
-            sMode = "EditStream";
-            sDataString = JSON.stringify({
-                "Name" : sName,
-                "Enabled" : vEnabled,
-                "StreamId" : oController.mStream.StreamId
-            });
-            
-        } else {
-            sMode = "AddStream";
-            sDataString = JSON.stringify({
-                "Name" : sName,
-                "Enabled" : vEnabled,
-                "ThingId" : iCamId
-            });
-        }
-        
         try {
+            oController.ToggleControls(false);
+
+            //--------------------------------------------------------------------//
+            // Check that the stream name is given and if it isn't given, display
+            // an error popup, and end the function.
+            //--------------------------------------------------------------------//
+            if (sName === "") {
+                aErrorMessages.push("Stream name must be given.");
+            }
+
+            if (aErrorMessages.length > 0) {
+                iomy.common.showError(aErrorMessages.join("\n"), "Error",
+                    function () {
+                        oController.ToggleControls(true);
+                    }
+                );
+                return;
+            }
+
+            //-- Convert the enabled flag to either 1 or 0. --//
+            if (vEnabled) {
+                vEnabled = 1;
+            } else {
+                vEnabled = 0;
+            }
+
+            //-- Prepare request parameters based on whether we are adding or editing a stream.. --//
+            if (oController.mStream !== null) {
+                sMode = "EditStream";
+                sDataString = JSON.stringify({
+                    "Name" : sName,
+                    "Enabled" : vEnabled,
+                    "StreamId" : oController.mStream.StreamId
+                });
+
+            } else {
+                sMode = "AddStream";
+                sDataString = JSON.stringify({
+                    "Name" : sName,
+                    "Enabled" : vEnabled,
+                    "ThingId" : iCamId
+                });
+            }
+        
             iomy.apiphp.AjaxRequest({
                 url     : iomy.apiphp.APILocation("managedstreams"),
                 data    : {
@@ -214,21 +220,29 @@ sap.ui.controller("pages.streams.AddStream", {
                 },
                 
                 onSuccess : function () {
-                    var sSuccessMessage;
-                    
-                    if (oController.mStream === null) {
-                        sSuccessMessage = sName + " created.";
-                    } else {
-                        sSuccessMessage = sName + " updated.";
+                    try {
+                        var sSuccessMessage;
+
+                        //-- Prepare the result message .--//
+                        if (oController.mStream === null) {
+                            sSuccessMessage = sName + " created.";
+                        } else {
+                            sSuccessMessage = sName + " updated.";
+                        }
+
+                        //-- Switch the controls back on. --//
+                        oController.ToggleControls(true);
+
+                        //-- Show the toast. --//
+                        iomy.common.showMessage({
+                            text : sSuccessMessage
+                        });
+
+                        iomy.common.NavigationChangePage( "pManagedStreams" ,  {} , false);
+                        
+                    } catch (e) {
+                        $.sap.log.error("Error attempting to run the managed stream API ("+e.name+"): "+ e.message);
                     }
-                    
-                    oController.ToggleControls(true);
-                    
-                    iomy.common.showMessage({
-                        text : sSuccessMessage
-                    });
-                    
-                    iomy.common.NavigationChangePage( "pManagedStreams" ,  {} , false);
                 },
                 
                 onFail : function (response) {
