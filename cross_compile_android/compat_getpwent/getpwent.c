@@ -31,7 +31,7 @@ struct passwd *getpwent(void)
 	return current_pw++;
 }
 
-int setpwent(void)
+void setpwent(void)
 {
 	current_pw = NULL;
 }
