@@ -80,7 +80,7 @@ __FBSDID("$FreeBSD$");
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
-#include <glob.h>
+#include "glob.h"
 #include <limits.h>
 #include <pwd.h>
 #include <stdint.h>
@@ -183,7 +183,11 @@ glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *
 	if (flags & GLOB_LIMIT) {
 		limit = pglob->gl_matchc;
 		if (limit == 0)
+#ifdef _KERNEL_ARG_MAX
+			limit = _KERNEL_ARG_MAX;
+#else
 			limit = ARG_MAX;
+#endif
 	} else
 		limit = 0;
 	pglob->gl_flags = flags & ~GLOB_MAGCHAR;
