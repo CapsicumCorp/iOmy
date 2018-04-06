@@ -1,0 +1,25 @@
+diff -Naur busybox-1.28.0/libbb/capability.c busybox-1.28.0-2/libbb/capability.c
+--- busybox-1.28.0/libbb/capability.c	2017-08-22 03:34:57.000000000 +1000
++++ busybox-1.28.0-2/libbb/capability.c	2018-04-04 17:17:12.500952247 +1000
+@@ -16,6 +16,21 @@
+ // This way, libcap needs not be installed in build environment.
+ #include "libbb.h"
+ 
++//Android <= 21 doesn't define these
++#define _LINUX_CAPABILITY_VERSION_1  0x19980330
++#define _LINUX_CAPABILITY_U32S_1     1
++
++#define _LINUX_CAPABILITY_VERSION_2  0x20071026  /* deprecated - use v3 */
++#define _LINUX_CAPABILITY_U32S_2     2
++
++#define _LINUX_CAPABILITY_VERSION_3  0x20080522
++#define _LINUX_CAPABILITY_U32S_3     2
++
++#define CAP_LAST_CAP         CAP_AUDIT_CONTROL
++#define cap_valid(x) ((x) >= 0 && (x) <= CAP_LAST_CAP)
++
++//----------------------------------------------------------------------
++
+ static const char *const capabilities[] = {
+ 	"chown",
+ 	"dac_override",
