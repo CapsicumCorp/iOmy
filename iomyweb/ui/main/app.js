@@ -283,6 +283,18 @@ var aPages = [
 		"Location":		"pages.streams.AddStream",
 		"Type":			"JS",
 		"ErrMesg":		"Critical Error: Couldn't load \"pages.streams.AddStream\" Page!\n"
+	},
+	{
+		"Id":			"pSecurity",
+		"Location":		"pages.security.Security",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.security.Security\" Page!\n"
+	},
+	{
+		"Id":			"pSecurityData",
+		"Location":		"pages.security.SecurityData",
+		"Type":			"JS",
+		"ErrMesg":		"Critical Error: Couldn't load \"pages.security.SecurityData\" Page!\n"
 	}
 
 ];
