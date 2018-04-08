@@ -1,0 +1,14 @@
+diff -Naur busybox-1.28.0/libbb/missing_syscalls.c busybox-1.28.0-2/libbb/missing_syscalls.c
+--- busybox-1.28.0/libbb/missing_syscalls.c	2017-07-07 01:14:57.000000000 +1000
++++ busybox-1.28.0-2/libbb/missing_syscalls.c	2018-04-06 14:02:46.955479369 +1000
+@@ -40,10 +40,4 @@
+ 	return syscall(__NR_pivot_root, new_root, put_old);
+ }
+ 
+-# if __ANDROID_API__ < 21
+-int tcdrain(int fd)
+-{
+-	return ioctl(fd, TCSBRK, 1);
+-}
+-# endif
+ #endif

@@ -1,0 +1,17 @@
+diff -Naur mysql-5.6.39/extra/innochecksum.cc mysql-5.6.39-2/extra/innochecksum.cc
+--- mysql-5.6.39/extra/innochecksum.cc	2017-12-09 17:33:37.000000000 +1000
++++ mysql-5.6.39-2/extra/innochecksum.cc	2018-04-07 10:17:51.496333194 +1000
+@@ -57,6 +57,13 @@
+ # include "ut0rnd.ic"
+ #endif
+ 
++//Quick hack: This will have problems on files > 2GB on 32-bit arch
++#if defined(__USE_FILE_OFFSET64) && __ANDROID_API__ < 24
++extern "C" {
++int fseeko(FILE* __fp, int32_t __offset, int __whence);
++}
++#endif
++
+ /* Global variables */
+ static my_bool verbose;
+ static my_bool debug;

@@ -1,0 +1,27 @@
+diff -Naur mysql-5.6.39/storage/innobase/row/row0log.cc mysql-5.6.39-2/storage/innobase/row/row0log.cc
+--- mysql-5.6.39/storage/innobase/row/row0log.cc	2017-12-09 17:33:37.000000000 +1000
++++ mysql-5.6.39-2/storage/innobase/row/row0log.cc	2018-04-06 19:30:05.645661412 +1000
+@@ -40,6 +40,10 @@
+ 
+ #include<map>
+ 
++#if __ANDROID_API__ < 21
++# define posix_fadvise(fd, offset, len, advice) /* nothing */
++#endif /* Android < 21 */
++
+ /** Table row modification operations during online table rebuild.
+ Delete-marked records are not copied to the rebuilt table. */
+ enum row_tab_op {
+diff -Naur mysql-5.6.39/storage/innobase/row/row0merge.cc mysql-5.6.39-2/storage/innobase/row/row0merge.cc
+--- mysql-5.6.39/storage/innobase/row/row0merge.cc	2017-12-09 17:33:37.000000000 +1000
++++ mysql-5.6.39-2/storage/innobase/row/row0merge.cc	2018-04-06 19:30:19.208684068 +1000
+@@ -43,6 +43,9 @@
+ #if defined __WIN__
+ # define posix_fadvise(fd, offset, len, advice) /* nothing */
+ #endif /* __WIN__ */
++#if __ANDROID_API__ < 21
++# define posix_fadvise(fd, offset, len, advice) /* nothing */
++#endif /* Android < 21 */
+ 
+ #ifdef UNIV_DEBUG
+ /** Set these in order ot enable debug printout. */

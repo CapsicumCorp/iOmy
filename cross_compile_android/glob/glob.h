@@ -36,13 +36,9 @@
 #ifndef _GLOB_H_
 #define	_GLOB_H_
 
+#include <stdio.h>
 #include <sys/cdefs.h>
 #include <sys/types.h>
-
-#ifndef	_SIZE_T_DECLARED
-typedef	__size_t	size_t;
-#define	_SIZE_T_DECLARED
-#endif
 
 struct stat;
 typedef struct {

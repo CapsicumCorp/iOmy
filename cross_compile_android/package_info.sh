@@ -225,7 +225,7 @@ LIGHTTPDBASEURL="http://download.lighttpd.net/lighttpd/releases-1.4.x/"
 LIGHTTPDGENTOOPKG="www-server/lighttpd"
 LIGHTTPDGENTOOVER="1.4.43"
 LIGHTTPDNEED_WEB_BROWSER=0
-LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.43.diff"
+LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.43.diff lighttpd_accept4_not_available.patch"
 
 PHPTITLE="php"
 PHPVER="7.1.14"
@@ -248,7 +248,7 @@ MYSQLBASEURL="http://cdn.mysql.com/Downloads/MySQL-5.6/"
 MYSQLGENTOOPKG="dev-db/mysql"
 MYSQLGENTOOVER="5.6.39"
 MYSQLNEED_WEB_BROWSER=0
-MYSQLPATCHES="mysql_change_s_iread_and_s_iwrite_to_s_irusr_and_s_iwusr.patch mysql_define_ushort.patch mysql_skip_wchar_iso_10646_check.patch"
+MYSQLPATCHES="mysql_change_s_iread_and_s_iwrite_to_s_irusr_and_s_iwusr.patch mysql_define_ushort.patch mysql_skip_wchar_iso_10646_check.patch mysql_android_handle_missing_posix_fadvise.patch mysql_fseeko_workaround.patch"
 
 MYSQLNATIVETITLE="${MYSQLTITLE} native"
 MYSQLNATIVEVER="${MYSQLVER}"
@@ -271,7 +271,7 @@ BUSYBOXBASEURL="https://www.busybox.net/downloads/"
 BUSYBOXGENTOOPKG="sys-apps/busybox"
 BUSYBOXGENTOOVER="1.28.0"
 BUSYBOXNEED_WEB_BROWSER=0
-BUSYBOXPATCHES="busybox-capability.patch"
+BUSYBOXPATCHES="busybox-capability.patch busybox_android_not_missing_tcdrain_syscall.patch busybox_android_remove_r_option_from_ldflags.patch"
 
 #BUSYBOXARMTITLE="BusyBox Arm"
 #BUSYBOXARMVER="v1.25.1"

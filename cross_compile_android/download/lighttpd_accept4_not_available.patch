@@ -1,0 +1,27 @@
+diff -Naur lighttpd-1.4.43/src/connections.c lighttpd-1.4.43-2/src/connections.c
+--- lighttpd-1.4.43/src/connections.c	2016-10-31 23:16:40.000000000 +1000
++++ lighttpd-1.4.43-2/src/connections.c	2018-04-06 19:02:00.244928326 +1000
+@@ -1026,15 +1026,15 @@
+ 
+ 	cnt_len = sizeof(cnt_addr);
+ 
+-#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
+-#if defined(__NetBSD__)
+-	cnt = paccept(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len, NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);
+-#else
+-	cnt = accept4(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len, SOCK_CLOEXEC | SOCK_NONBLOCK);
+-#endif
+-#else
++//#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
++//#if defined(__NetBSD__)
++//	cnt = paccept(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len, NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);
++//#else
++//	cnt = accept4(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len, SOCK_CLOEXEC | SOCK_NONBLOCK);
++//#endif
++//#else
+ 	cnt = accept(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len);
+-#endif
++//#endif
+ 	if (-1 == cnt) {
+ 		switch (errno) {
+ 		case EAGAIN:
