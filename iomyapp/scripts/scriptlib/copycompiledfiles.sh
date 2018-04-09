@@ -67,7 +67,7 @@ echo "Copying general library files"
 libfiles="
 libSDL-1.2.so.0
 libaio.so.1
-libcurl.so.5
+libcurl.so.4
 libfreetype.so.6
 libiconv.so.2
 libjpeg.so.62
