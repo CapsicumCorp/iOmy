@@ -271,7 +271,7 @@ BUSYBOXBASEURL="https://www.busybox.net/downloads/"
 BUSYBOXGENTOOPKG="sys-apps/busybox"
 BUSYBOXGENTOOVER="1.28.0"
 BUSYBOXNEED_WEB_BROWSER=0
-BUSYBOXPATCHES="busybox-capability.patch busybox_android_not_missing_tcdrain_syscall.patch busybox_android_remove_r_option_from_ldflags.patch"
+BUSYBOXPATCHES="busybox-capability.patch busybox_android_not_missing_tcdrain_syscall.patch"
 
 #BUSYBOXARMTITLE="BusyBox Arm"
 #BUSYBOXARMVER="v1.25.1"
