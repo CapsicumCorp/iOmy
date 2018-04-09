@@ -65,6 +65,7 @@ done
 # Copy general library files
 echo "Copying general library files"
 libfiles="
+libc++_shared.so
 libSDL-1.2.so.0
 libaio.so.1
 libcurl.so.4
