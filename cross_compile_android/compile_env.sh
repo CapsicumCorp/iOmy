@@ -76,8 +76,10 @@ if [ "${CC}" != "${prefix}-clang" ] ; then
   CXXFLAGS_EXTRA="${CXXFLAGS_EXTRA} -D__ANDROID_API__=${API}"
 fi
 if [ "${ARCH}" == "arm" ] ; then
-  CFLAGS_EXTRA="${CFLAGS_EXTRA} -mthumb"
-	CXXFLAGS_EXTRA="${CXXFLAGS_EXTRA} -mthumb"
+  # NOTE: mfpu defaults to neon with clang on armv7
+	# NOTE: -mthumb force the generation of 16-bit Thumb-2 instructions (Thumb-1 for armeabi). If omitted, the toolchain will emit 32-bit ARM instructions.
+  CFLAGS_EXTRA="${CFLAGS_EXTRA} -mthumb -mfpu=vfpv3-d16"
+	CXXFLAGS_EXTRA="${CXXFLAGS_EXTRA} -mthumb -mfpu=vfpv3-d16"
 	if [ "${CC}" == "${prefix}-clang" ] ; then
 	  # gcc defaults to arm, clang defaults to armv7-a
   	LDFLAGS_EXTRA="${LDFLAGS_EXTRA} -march=armv7-a -Wl,--fix-cortex-a8"
