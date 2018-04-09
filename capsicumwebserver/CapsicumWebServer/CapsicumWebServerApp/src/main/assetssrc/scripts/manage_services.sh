@@ -68,7 +68,7 @@ pie="pie"
 if [ -f "${sbin}/bin/${abi}/busybox" ] ; then
   BUSYBOX="${sbin}/bin/${abi}/busybox"
 elif [ -f "${sbin}/bin/${abi}/${pie}/busybox" ] ; then
-  BUSYBOX="${sbin}/bin/${abi}/${pie}/busybox" ] ; then
+  BUSYBOX="${sbin}/bin/${abi}/${pie}/busybox"
 else
   echo "Custom busybox not found"
   exit 2
