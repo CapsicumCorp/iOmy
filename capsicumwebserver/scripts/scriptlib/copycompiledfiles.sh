@@ -29,10 +29,6 @@ if [ "${compilepath}" == "" -o "${assetstmp}" == "" ] ; then
 	exit 1
 fi
 
-if [ ! -f "${compilepath}/download/busybox-arm" ] ; then
-  echo "Download busybox-arm binary to ${compilepath}/download"
-	exit 1
-fi
 cd "${assetstmp}/components"
 if [ $? != 0 ] ; then
   echo "Could not cd to ${assetstmp}/components"
@@ -47,19 +43,18 @@ fi
 echo "Removing old binary files"
 rm -fr bin/armeabi bin/armeabi/pie lib/armeabi mysql/sbin 2> /dev/null
 
-# Copy busybox
-echo "Copying busybox"
+# Create directories
+echo "Creating directories"
 mkdir -p bin/armeabi/pie
-if [ $? != 0 ] ; then
-  exit 1
-fi
-cp -ai "${compilepath}/download/busybox-arm" "bin/armeabi/busybox"
-if [ $? != 0 ] ; then
+result=$?
+mkdir -p lib/armeabi
+result2=$?
+if [ ${result} != 0 -o ${result2} != 0 ] ; then
   exit 1
 fi
 # Copy general binary files
 echo "Copying general binary files"
-binfiles="curl ffmpeg ffplay"
+binfiles="busybox curl ffmpeg"
 for binfile in ${binfiles}; do
   cp -ai "${compilepath}/compiled/bin/${binfile}" bin/armeabi/pie/
 	if [ $? != 0 ] ; then
@@ -69,14 +64,10 @@ done
 
 # Copy general library files
 echo "Copying general library files"
-mkdir -p lib/armeabi
-if [ $? != 0 ] ; then
-  exit 1
-fi
 libfiles="
 libSDL-1.2.so.0
 libaio.so.1
-libcurl.so.5
+libcurl.so.4
 libfreetype.so.6
 libiconv.so.2
 libjpeg.so.62
