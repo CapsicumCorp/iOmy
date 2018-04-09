@@ -65,11 +65,20 @@ export sbin="${app}/components"
 abi="armeabi"
 pie="pie"
 
-WHOAMI="${sbin}/bin/${abi}/busybox whoami"
-SED="${sbin}/bin/${abi}/busybox sed"
-PS="${sbin}/bin/${abi}/busybox ps"
-KILL="${sbin}/bin/${abi}/busybox kill"
-SLEEP="${sbin}/bin/${abi}/busybox sleep"
+if [ -f "${sbin}/bin/${abi}/busybox" ] ; then
+  BUSYBOX="${sbin}/bin/${abi}/busybox"
+elif [ -f "${sbin}/bin/${abi}/${pie}/busybox" ] ; then
+  BUSYBOX="${sbin}/bin/${abi}/${pie}/busybox" ] ; then
+else
+  echo "Custom busybox not found"
+  exit 2
+fi
+
+WHOAMI="${BUSYBOX} whoami"
+SED="${BUSYBOX} sed"
+PS="${BUSYBOX} ps"
+KILL="${BUSYBOX} kill"
+SLEEP="${BUSYBOX} sleep"
 
 USER=$(${WHOAMI})
 
