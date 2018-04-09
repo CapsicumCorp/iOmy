@@ -51,15 +51,15 @@ sap.ui.jsview("pages.security.SecurityData", {
             sideContent : iomy.widgets.getToolPageSideContent(oController),
             mainContents: [ 
                 new sap.m.ObjectHeader({
-                    title: "5020L Stream",
-                    number: "60",
+                    title: "{/title}",
+                    number: "{/count/thumbnails}",
                     numberUnit: "Thumbnails",
                 }),
                 new sap.m.IconTabBar({
                     items : [
                         new sap.m.IconTabFilter({
                             text: "Stream",
-                            icon : "sap-icon://task",
+                            icon : "sap-icon://video",
                             content : [
                                 new sap.m.Carousel ({
                                     pages: [
@@ -72,7 +72,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                         }),
                         new sap.m.IconTabFilter({
                             text: "Thumbnails",
-                            icon : "sap-icon://workflow-tasks",
+                            icon : "sap-icon://camera",
                             content : [
                                 new sap.m.Carousel ({
                                     pages: [

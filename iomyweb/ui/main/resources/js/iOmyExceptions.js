@@ -237,3 +237,16 @@ function StreamURLNotFoundException(message) {
     iOmyException.call(this, message);
     this.name = "StreamURLNotFoundException";
 }
+
+function ThumbnailURLNotFoundException(message) {
+	//------------------------------------------------------------------------//
+    // This exception can have a simple not found message if one is not
+	// provided.
+    //------------------------------------------------------------------------//
+    if (message === undefined || message === null || message === "") {
+        message = "Could not find the thumbnail IO in the given thing. The thing given may not be an Onvif stream.";
+    }
+    
+    iOmyException.call(this, message);
+    this.name = "ThumbnailURLNotFoundException";
+}

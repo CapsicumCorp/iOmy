@@ -44,6 +44,26 @@ $.extend(iomy.devices,{
     bLoadingFieldsFromAPI            : false,
     bLoadingFieldsFromOData            : false,
     
+    isDeviceCamera : function (iThingId) {
+        var mIDResult   = iomy.validation.isThingIDValid(iThingId);
+        var bIsCamera   = false;
+        var mThing;
+        
+        if (mIDResult.bIsValid) {
+            mThing = iomy.common.ThingList["_"+iThingId];
+            
+            if (mThing.TypeId === iomy.devices.onvif.ThingTypeId ||
+                mThing.TypeId === iomy.devices.ipcamera.ThingTypeId)
+            {
+                bIsCamera = true;
+            }
+        } else {
+            $.sap.log.error(mIDResult.aErrorMessages.join("\n"));
+        }
+        
+        return bIsCamera;
+    },
+    
     /**
      * Returns the current on/off status of a given device in the form of "On"
      * or "Off".
@@ -985,6 +1005,45 @@ $.extend(iomy.devices,{
         } finally {
             return aTasks;
         }
+    },
+    
+    /**
+     * Creates a list of cameras from the Thing list. Supported cameras are
+     * Onvif streams and IP Webcam streams.
+     * 
+     * @param {type} bJSObject   Specifies whether to return the list in an object (true) or an array (false, default).
+     * @returns {Array|Map}     Either an array or an object used as an associative array.
+     */
+    getCameraList : function (bJSObject) {
+        var vCameraList;
+        
+        //--------------------------------------------------------------------//
+        // By default the return value is a JavaScript array. When this flag
+        // is set to false, a JavaScript object will be returned instead.
+        //--------------------------------------------------------------------//
+        if (bJSObject === true) {
+            vCameraList = {};
+            
+            $.each(iomy.common.ThingList, function (sI, mDevice) {
+                if (iomy.devices.isDeviceCamera(mDevice.Id)) {
+                    vCameraList["_"+mDevice.Id] = mDevice;
+                }
+            });
+        } else {
+            vCameraList = [];
+            
+            try {
+                $.each(iomy.common.ThingList, function (sI, mDevice) {
+                    if (iomy.devices.isDeviceCamera(mDevice.Id)) {
+                        vCameraList.push(mDevice);
+                    }
+                });
+            } catch (e) {
+                $.sap.log.error("An error has occurred creating an array of cameras ("+e.name+"): " + e.message);
+            }
+        }
+        
+        return vCameraList;
     },
     
     getHexOfLightColour : function (mSettings) {

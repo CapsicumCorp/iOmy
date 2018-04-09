@@ -367,7 +367,7 @@ sap.ui.controller("pages.device.OnvifCamera", {
                     // Switch the collecting name status
                     bCollectingName = !bCollectingName;
                 } else {
-                    aUrlWhereClause.push("IO_PK eq "+mIO.Id)
+                    aUrlWhereClause.push("IO_PK eq "+mIO.Id);
                     bCollectingName = !bCollectingName;
                 }
             }

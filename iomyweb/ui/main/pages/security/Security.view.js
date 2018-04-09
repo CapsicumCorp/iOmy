@@ -45,6 +45,25 @@ sap.ui.jsview("pages.security.Security", {
     createContent : function(oController) {
         var oView = this;
         
+        var oTileTemplate = new sap.m.GenericTile ({
+            header: "{DisplayName}",
+            press : function (oEvent) {
+                iomy.common.NavigationChangePage( "pSecurityData" , {
+                    "CameraId" : oEvent.getSource().getBindingContext().getProperty("Id")
+                } , false);
+            },
+            tileContent: [
+                new sap.m.TileContent ({
+                    content: [
+                        new sap.m.Image ({
+                            src:"{ImgUrl}",
+                            height: "100px"
+                        })
+                   ]   
+                }) 
+            ]
+        }).addStyleClass("MarLeft10px MarTop10px");
+        
         return new sap.tnt.ToolPage(oView.createId("toolPage"), {
             title: "Security",
             header : iomy.widgets.getToolPageHeader( oController ),
@@ -58,115 +77,10 @@ sap.ui.jsview("pages.security.Security", {
                         iomy.widgets.DeviceToolbar(oController, "Security"),
                         new sap.ui.layout.HorizontalLayout({
                             allowWrapping: true,
-                            content: [
-                                new sap.m.GenericTile ({
-                                    header: "5020L Stream",
-                                    press : function () {
-                                        iomy.common.NavigationChangePage( "pSecurityData" , {} , false);
-                                    },
-                                    tileContent: [
-                                        new sap.m.TileContent ({
-                                            content: [
-                                               new sap.m.Image ({
-                                                   src:"http://Localhost/image/jpeg.cgi",
-                                                   height: "100px"
-                                               })  
-                                           ]   
-                                        }) 
-                                    ]
-                                }).addStyleClass("MarLeft10px MarTop10px"),
-                                new sap.m.GenericTile ({
-                                    header: "5020L Stream",
-                                    tileContent: [
-                                        new sap.m.TileContent ({
-                                            content: [
-                                               new sap.m.Image ({
-                                                   src:"http://Localhost/image/jpeg.cgi",
-                                                   height: "100px"
-                                               })  
-                                           ]   
-                                        }) 
-                                    ]
-                                }).addStyleClass("MarLeft10px MarTop10px"),
-                                new sap.m.GenericTile ({
-                                    header: "5020L Stream",
-                                    tileContent: [
-                                        new sap.m.TileContent ({
-                                            content: [
-                                               new sap.m.Image ({
-                                                   src:"http://Localhost/image/jpeg.cgi",
-                                                   height: "100px"
-                                               })  
-                                           ]   
-                                        }) 
-                                    ]
-                                }).addStyleClass("MarLeft10px MarTop10px"),
-                                new sap.m.GenericTile ({
-                                    header: "5020L Stream",
-                                    tileContent: [
-                                        new sap.m.TileContent ({
-                                            content: [
-                                               new sap.m.Image ({
-                                                   src:"http://Localhost/image/jpeg.cgi",
-                                                   height: "100px"
-                                               })  
-                                           ]   
-                                        }) 
-                                    ]
-                                }).addStyleClass("MarLeft10px MarTop10px"),
-                                new sap.m.GenericTile ({
-                                    header: "5020L Stream",
-                                    tileContent: [
-                                        new sap.m.TileContent ({
-                                            content: [
-                                               new sap.m.Image ({
-                                                   src:"http://Localhost/image/jpeg.cgi",
-                                                   height: "100px"
-                                               })  
-                                           ]   
-                                        }) 
-                                    ]
-                                }).addStyleClass("MarLeft10px MarTop10px"),
-                                new sap.m.GenericTile ({
-                                    header: "5020L Stream",
-                                    tileContent: [
-                                        new sap.m.TileContent ({
-                                            content: [
-                                               new sap.m.Image ({
-                                                   src:"http://Localhost/image/jpeg.cgi",
-                                                   height: "100px"
-                                               })  
-                                           ]   
-                                        }) 
-                                    ]
-                                }).addStyleClass("MarLeft10px MarTop10px"),
-                                new sap.m.GenericTile ({
-                                    header: "5020L Stream",
-                                    tileContent: [
-                                        new sap.m.TileContent ({
-                                            content: [
-                                               new sap.m.Image ({
-                                                   src:"http://Localhost/image/jpeg.cgi",
-                                                   height: "100px"
-                                               })  
-                                           ]   
-                                        }) 
-                                    ]
-                                }).addStyleClass("MarLeft10px MarTop10px"),
-                                new sap.m.GenericTile ({
-                                    header: "5020L Stream",
-                                    tileContent: [
-                                        new sap.m.TileContent ({
-                                            content: [
-                                               new sap.m.Image ({
-                                                   src:"http://Localhost/image/jpeg.cgi",
-                                                   height: "100px"
-                                               })  
-                                           ]   
-                                        }) 
-                                    ]
-                                }).addStyleClass("MarLeft10px MarTop10px")
-                            ]
+                            content: {
+                                path : "/lists/Cameras",
+                                template : oTileTemplate
+                            }
                         })
                     ]
                 })

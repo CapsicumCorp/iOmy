@@ -23,6 +23,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.security.SecurityData", {
+    
+    iCameraId : null,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -45,10 +47,39 @@ sap.ui.controller("pages.security.SecurityData", {
 				
 				//-- Defines the Device Type --//
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                
+                if (evt.data.CameraId !== undefined && evt.data.CameraId !== null) {
+                    oController.iCameraId = evt.data.CameraId;
+                } else {
+                    oController.iCameraId = null;
+                }
+                
+                oController.RefreshModel();
 			}
 		});
 			
 		
 	},
 	
+    RefreshModel : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oData       = {};
+        var oModel      = null;
+        
+        //------------------------------------------------//
+		//-- Build and Bind Model to the View           --//
+		//------------------------------------------------//
+        oData = {
+            "title" : iomy.common.ThingList["_"+oController.iCameraId].DisplayName,
+            "count" : {
+                "thumbnails" : 0
+            }
+        };
+        
+        oModel = new sap.ui.model.json.JSONModel(oData);
+        oModel.setSizeLimit(420);
+        oView.setModel(oModel);
+        
+    }
 });

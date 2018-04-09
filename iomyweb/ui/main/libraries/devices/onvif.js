@@ -35,18 +35,18 @@ $.extend(iomy.devices.onvif,{
     LinkTypeId                : 6,
     ThingTypeId               : 12,
     
-    RSStreamProfile        : 3970,
-    RSStreamURL            : 3971,
-    RSThumbnailProfile    : 3972,
-    RSThumbnailURL        : 3973,
-    RSPTZAxisX            : 3974,
-    RSPTZAxisY            : 3975,
+    RSStreamProfile         : 3970,
+    RSStreamURL             : 3971,
+    RSThumbnailProfile      : 3972,
+    RSThumbnailURL          : 3973,
+    RSPTZAxisX              : 3974,
+    RSPTZAxisY              : 3975,
     
     getStreamURL : function(mSettings) {
         var me                = this;
         var bError            = false;
         var aErrorMessages    = [];
-        var iIOId            = null;
+        var iIOId             = null;
         var iThingId;
         var sUrl;
         var mThingIdInfo;
@@ -93,15 +93,15 @@ $.extend(iomy.devices.onvif,{
             }
             
         } else {
-            throw new MissingSettingsMapException();
+            throw new MissingSettingsMapException("Thing ID must be given.");
         }
         
-        //--------------------------------------------------------------------//
-        // Check that the Thing ID passed the test. Throw an exception if not.
-        //--------------------------------------------------------------------//
-        if (bError) {
-            throw new ThingIDNotValidException(aErrorMessages.join("\n"));
-        }
+//        //--------------------------------------------------------------------//
+//        // Check that the Thing ID passed the test. Throw an exception if not.
+//        //--------------------------------------------------------------------//
+//        if (bError) {
+//            throw new ThingIDNotValidException(aErrorMessages.join("\n"));
+//        }
         
         //--------------------------------------------------------------------//
         // Fetch the IO for the stream URL
@@ -150,6 +150,131 @@ $.extend(iomy.devices.onvif,{
                 fnFail(response);
             }
         });
+    },
+    
+    getThumbnailURL : function(mSettings) {
+        var me                = this;
+        var bError            = false;
+        var aErrorMessages    = [];
+        var iIOId             = null;
+        var mRequest          = null;
+        var bRunRequest       = true;
+        var iThingId;
+        var sUrl;
+        var mThingIdInfo;
+        var mThing;
+        var fnSuccess;
+        var fnFail;
+        
+        //--------------------------------------------------------------------//
+        // Check that all the parameters are there
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined) {
+            //----------------------------------------------------------------//
+            // REQUIRED: Find the hub ID
+            //----------------------------------------------------------------//
+            mThingIdInfo    = iomy.validation.isThingIDValid(mSettings.ThingId);
+            bError            = !mThingIdInfo.bIsValid;
+            aErrorMessages    = mThingIdInfo.aErrorMessages;
+            
+            //----------------------------------------------------------------//
+            // Check for errors and throw an exception if there are errors.
+            //----------------------------------------------------------------//
+            if (bError) {
+                throw new ThingIDNotValidException("* "+aErrorMessages.join("\n* "));
+            } else {
+                iThingId = mSettings.ThingId;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Run the request now, or simply return the request
+            // data? (Default is to run it.
+            //----------------------------------------------------------------//
+            if (mSettings.runRequest !== undefined) {
+                bRunRequest = mSettings.runRequest;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onSuccess callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onSuccess === undefined) {
+                fnSuccess = function () {};
+            } else {
+                fnSuccess = mSettings.onSuccess;
+            }
+            
+            //----------------------------------------------------------------//
+            // OPTIONAL: Find the onFail callback function
+            //----------------------------------------------------------------//
+            if (mSettings.onFail === undefined) {
+                fnFail = function () {};
+            } else {
+                fnFail = mSettings.onFail;
+            }
+            
+        } else {
+            throw new MissingSettingsMapException("Thing ID must be given.");
+        }
+        
+//        //--------------------------------------------------------------------//
+//        // Check that the Thing ID passed the test. Throw an exception if not.
+//        //--------------------------------------------------------------------//
+//        if (bError) {
+//            throw new ThingIDNotValidException(aErrorMessages.join("\n"));
+//        }
+        
+        //--------------------------------------------------------------------//
+        // Fetch the IO for the thumbnail URL
+        //--------------------------------------------------------------------//
+        mThing = iomy.common.ThingList["_"+iThingId];
+        
+        $.each(mThing.IO, function (sIndex, mIO) {
+            
+            if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
+                if (mIO.RSTypeId === me.RSThumbnailURL) {
+                    iIOId = mIO.Id;
+                }
+            }
+            
+        });
+        
+        if (iIOId === null) {
+            throw new ThumbnailURLNotFoundException();
+        }
+        
+        //--------------------------------------------------------------------//
+        // Run a request to fetch the URL
+        //--------------------------------------------------------------------//
+        sUrl = iomy.apiodata.ODataLocation("datamedstring");
+        mRequest = {
+            Url                : sUrl,
+            Columns            : ["CALCEDVALUE"],
+            WhereClause        : ["IO_PK eq " + iIOId],
+            OrderByClause    : [],
+            
+            onSuccess : function (response, data) {
+                var mErrorInfo = {};
+                
+                if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE) {
+                    // Parse the URL through the success callback function.
+                    fnSuccess(data[0].CALCEDVALUE);
+                } else {
+                    mErrorInfo.status = -1;
+                    mErrorInfo.responseText = "No Thumbnail URL Found";
+                    fnFail(mErrorInfo);
+                }
+            },
+            
+            onFail : function (response) {
+                fnFail(response);
+            }
+        };
+        
+        if (bRunRequest) {
+            iomy.apiodata.AjaxRequest(mRequest);
+        }
+        
+        return mRequest;
     },
     
     loadStream : function (iThingId) {
