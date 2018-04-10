@@ -306,6 +306,53 @@ AjaxRequestQueue.prototype._run = function (sQueueIndex) {
                     self._run(sQueueIndex);
                 }
             };
+            
+            //----------------------------------------------------------------//
+            // Process the success and error callbacks for regular $.ajax
+            // requests.
+            //----------------------------------------------------------------//
+            mRequestParameters.success = function (response, status, xhr) {
+                self._successes++;
+
+                // Run the success callback of the request if it's defined.
+                if (mRequestData.success !== undefined) {
+                    mRequestData.success(response, status, xhr);
+                }
+            };
+
+            mRequestParameters.error = function (xhr, status, errorThrown) {
+                self._errors++;
+
+                // Run the failure callback of the request if it's defined.
+                if (mRequestData.error !== undefined) {
+                    mRequestData.error(xhr, status, errorThrown);
+                }
+            };
+            
+            mRequestParameters.complete = function (xhr, status) {
+                // Run the complete callback of the request if it's defined.
+                if (mRequestData.complete !== undefined) {
+                    mRequestData.complete(xhr, status);
+                }
+                
+                //------------------------------------------------------------//
+                // If there are no more requests in this queue, set its running
+                // flag to 0.
+                //------------------------------------------------------------//
+                if (self._requestQueues[sQueueIndex][0] === undefined) {
+                    self._requestQueuesStates[sQueueIndex] = 0;
+                }
+
+                //------------------------------------------------------------//
+                // Run another request if there are more, otherwise run the
+                // appropriate callback function.
+                //------------------------------------------------------------//
+                if (self.getRunningStateOfAllQueues() === 0) {
+                    self._runCallback();
+                } else {
+                    self._run(sQueueIndex);
+                }
+            };
 
             if (mRequestData.library !== undefined && mRequestData.library !== null) {
                 if (mRequestData.library.toLowerCase() === "php") {
@@ -313,22 +360,12 @@ AjaxRequestQueue.prototype._run = function (sQueueIndex) {
                 } else if (mRequestData.library.toLowerCase() === "odata") {
                     iomy.apiodata.AjaxRequest(mRequestParameters);
                 } else {
-    //                if (mRequestData.library !== undefined && mRequestData.library !== null) {
-    //                    if (typeof mRequestData.library === "object") {
-    //                        try {
-    //                            mRequestData.library.AjaxRequest(mRequestParameters);
-    //                        } catch (e) {
-    //                            $.sap.log.error("Invalid module parsed: "+e.message);
-    //                        }
-    //                    } else {
-    //
-    //                    }
-    //                } else {
-                        $.ajax(mRequestData);
-                    //}
+                    
+                    
+                    $.ajax(mRequestParameters);
                 }
             } else {
-                $.ajax(mRequestData);
+                $.ajax(mRequestParameters);
             }
         }
     }
@@ -359,7 +396,7 @@ AjaxRequestQueue.prototype._runCallback = function () {
         } else if (self._errors > 0 && self._successes > 0) {
             self._onWarning();
             
-        } else {
+        } else if (self._errors > 0 && self._successes === 0) {
             self._onFail();
         }
     }
