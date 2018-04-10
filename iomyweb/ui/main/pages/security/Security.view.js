@@ -56,7 +56,8 @@ sap.ui.jsview("pages.security.Security", {
                 new sap.m.TileContent ({
                     content: [
                         new sap.m.Image ({
-                            src:"{ImgUrl}",
+                            densityAware : false,
+                            src:"{ThumbnailUrl}",
                             height: "100px"
                         })
                    ]   

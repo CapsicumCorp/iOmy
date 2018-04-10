@@ -159,6 +159,9 @@ $.extend(iomy.devices.onvif,{
         var iIOId             = null;
         var mRequest          = null;
         var bRunRequest       = true;
+        var aUrlWhereClause   = [];
+        var sUrlWhereClause   = "";
+        var bCollectingUrl    = false;
         var iThingId;
         var sUrl;
         var mThingIdInfo;
@@ -228,29 +231,44 @@ $.extend(iomy.devices.onvif,{
         //--------------------------------------------------------------------//
         mThing = iomy.common.ThingList["_"+iThingId];
         
-        $.each(mThing.IO, function (sIndex, mIO) {
+//        $.each(mThing.IO, function (sIndex, mIO) {
+//            
+//            if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
+//                if (mIO.RSTypeId === me.RSThumbnailURL) {
+//                    iIOId = mIO.Id;
+//                }
+//            }
+//            
+//        });
+//        
+//        if (iIOId === null) {
+//            throw new ThumbnailURLNotFoundException();
+//        }
+        
+        // Prepare the filter statements for both OData requests
+        $.each(mThing.IO, function(sI,mIO) {
             
-            if (sIndex !== undefined && sIndex !== null && mIO !== undefined && mIO !== null) {
-                if (mIO.RSTypeId === me.RSThumbnailURL) {
-                    iIOId = mIO.Id;
+            if (sI !== null && sI !== undefined && mIO !== null && mIO !== undefined) {
+                if (bCollectingUrl) {
+                    aUrlWhereClause.push("IO_PK eq "+mIO.Id);
                 }
+                
+                bCollectingUrl = !bCollectingUrl;
             }
             
         });
         
-        if (iIOId === null) {
-            throw new ThumbnailURLNotFoundException();
-        }
+        sUrlWhereClause = aUrlWhereClause.join(" or ");
         
         //--------------------------------------------------------------------//
         // Run a request to fetch the URL
         //--------------------------------------------------------------------//
         sUrl = iomy.apiodata.ODataLocation("datamedstring");
         mRequest = {
-            Url                : sUrl,
-            Columns            : ["CALCEDVALUE"],
-            WhereClause        : ["IO_PK eq " + iIOId],
-            OrderByClause    : [],
+            Url             : sUrl,
+            Columns         : ["DATAMEDSTRING_VALUE"],
+            WhereClause     : [sUrlWhereClause],
+            OrderByClause   : [],
             
             onSuccess : function (response, data) {
                 var mErrorInfo = {};

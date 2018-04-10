@@ -1024,17 +1024,29 @@ $.extend(iomy.devices,{
         if (bJSObject === true) {
             vCameraList = {};
             
-            $.each(iomy.common.ThingList, function (sI, mDevice) {
-                if (iomy.devices.isDeviceCamera(mDevice.Id)) {
-                    vCameraList["_"+mDevice.Id] = mDevice;
-                }
-            });
+            try {
+                $.each(iomy.common.ThingList, function (sI, mDevice) {
+                    if (iomy.devices.isDeviceCamera(mDevice.Id)) {
+                        if (mDevice.TypeId === iomy.devices.onvif.ThingTypeId) {
+                            mDevice.ThumbnailUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+mDevice.Id;
+                        }
+                        
+                        vCameraList["_"+mDevice.Id] = mDevice;
+                    }
+                });
+            } catch (e) {
+                $.sap.log.error("An error has occurred creating an associative array of cameras ("+e.name+"): " + e.message);
+            }
         } else {
             vCameraList = [];
             
             try {
                 $.each(iomy.common.ThingList, function (sI, mDevice) {
                     if (iomy.devices.isDeviceCamera(mDevice.Id)) {
+                        if (mDevice.TypeId === iomy.devices.onvif.ThingTypeId) {
+                            mDevice.ThumbnailUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+mDevice.Id;
+                        }
+                        
                         vCameraList.push(mDevice);
                     }
                 });

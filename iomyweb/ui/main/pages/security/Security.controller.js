@@ -25,6 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("pages.security.Security", {
     
     CameraList : iomy.devices.getCameraList(),
+    
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -49,9 +50,9 @@ sap.ui.controller("pages.security.Security", {
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 oController.RefreshModel();
+                //oController.LoadImages();
 			}
 		});
-			
 		
 	},
     
@@ -64,6 +65,8 @@ sap.ui.controller("pages.security.Security", {
         //------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
+        oController.CameraList = iomy.devices.getCameraList();
+        
         oData = {
             "lists" : {
                 "Cameras" : oController.CameraList
@@ -82,25 +85,39 @@ sap.ui.controller("pages.security.Security", {
         var oModel          = oView.getModel();
         var oRequestQueue   = null;
         var aRequests       = [];
-        var aList           = oController.CameraList;
-        var bCollectingUrl  = false;
+        var aaList           = iomy.devices.getCameraList(true);
         
         try {
-            for (var i = 0; i < aList.length; i++) {
+            $.each(aaList, function (sI, mCamera) {
                 
-                aRequests.push(iomy.devices.onvif.getThumbnailURL({
-                    ThingId : aList[i].Id,
-                    runRequest : false,
+                if (mCamera.TypeId === iomy.devices.onvif.ThingTypeId) {
+                    aRequests.push({
+                        url: iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+mCamera.Id,
+                        cache: false,
+                        xhrFields: {
+                            responseType: 'blob'
+                        },
+                        success : function(data){
+                            var url = window.URL || window.webkitURL;
+                            oModel.setProperty("/lists/Cameras/_"+mCamera.positionInList+"/ThumbnailUrl", url.createObjectURL(data));
+                        },
+                        error :function(){
+                            
+                        }
+                    });
                     
-                    onSuccess : function (sUrl) {
-                        oController.CameraList[i].ImgUrl = sUrl;
-                        oController.RefreshModel();
-                    }
-                }));
-            }
+                } else if (mCamera.TypeId === iomy.devices.ipcamera.ThingTypeId) {
+                    
+                }
+            });
+            
+            oRequestQueue = new AjaxRequestQueue({
+                concurrentRequests : 3,
+                requests : aRequests
+            });
             
         } catch (e) {
-            
+            $.sap.log.error("Failed to prepare requests to load thumbnails ("+e.name+"): " + e.message);
         }
         
     }
