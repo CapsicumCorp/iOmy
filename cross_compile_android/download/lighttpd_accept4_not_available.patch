@@ -1,6 +1,6 @@
 diff -Naur lighttpd-1.4.43/src/connections.c lighttpd-1.4.43-2/src/connections.c
 --- lighttpd-1.4.43/src/connections.c	2016-10-31 23:16:40.000000000 +1000
-+++ lighttpd-1.4.43-2/src/connections.c	2018-04-06 19:02:00.244928326 +1000
++++ lighttpd-1.4.43-2/src/connections.c	2018-04-10 15:57:40.011948684 +1000
 @@ -1026,15 +1026,15 @@
  
  	cnt_len = sizeof(cnt_addr);
@@ -25,3 +25,58 @@ diff -Naur lighttpd-1.4.43/src/connections.c lighttpd-1.4.43-2/src/connections.c
  	if (-1 == cnt) {
  		switch (errno) {
  		case EAGAIN:
+diff -Naur lighttpd-1.4.43/src/fdevent.c lighttpd-1.4.43-2/src/fdevent.c
+--- lighttpd-1.4.43/src/fdevent.c	2016-10-31 23:16:40.000000000 +1000
++++ lighttpd-1.4.43-2/src/fdevent.c	2018-04-10 15:59:21.792004529 +1000
+@@ -288,17 +288,17 @@
+ }
+ 
+ int fdevent_fcntl_set_nb_cloexec_sock(fdevents *ev, int fd) {
+-#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
+-	return ((ev) && (ev->fcntl_set)) ? ev->fcntl_set(ev, fd) : 0;
+-#else
++//#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
++//	return ((ev) && (ev->fcntl_set)) ? ev->fcntl_set(ev, fd) : 0;
++//#else
+ 	return fdevent_fcntl_set_nb_cloexec(ev, fd);
+-#endif
++//#endif
+ }
+ 
+ int fdevent_socket_cloexec(int domain, int type, int protocol) {
+-#ifdef SOCK_CLOEXEC
+-	return socket(domain, type | SOCK_CLOEXEC, protocol);
+-#else
++//#ifdef SOCK_CLOEXEC
++//	return socket(domain, type | SOCK_CLOEXEC, protocol);
++//#else
+ 	int fd;
+ 	if (-1 != (fd = socket(domain, type, protocol))) {
+ #ifdef FD_CLOEXEC
+@@ -306,13 +306,13 @@
+ #endif
+ 	}
+ 	return fd;
+-#endif
++//#endif
+ }
+ 
+ int fdevent_socket_nb_cloexec(int domain, int type, int protocol) {
+-#ifdef SOCK_CLOEXEC
+-	return socket(domain, type | SOCK_CLOEXEC | SOCK_NONBLOCK, protocol);
+-#else
++//#ifdef SOCK_CLOEXEC
++//	return socket(domain, type | SOCK_CLOEXEC | SOCK_NONBLOCK, protocol);
++//#else
+ 	int fd;
+ 	if (-1 != (fd = socket(domain, type, protocol))) {
+ #ifdef FD_CLOEXEC
+@@ -323,7 +323,7 @@
+ #endif
+ 	}
+ 	return fd;
+-#endif
++//#endif
+ }
+ 
+ #ifndef O_NOCTTY

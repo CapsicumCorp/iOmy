@@ -215,17 +215,20 @@ FFMPEGGENTOOPKG="media-video/ffmpeg"
 FFMPEGGENTOOVER="3.2.4"
 FFMPEGNEED_WEB_BROWSER=0
 
+# lighttpd_accept4_not_available.patch is needed for older devices to prevent freezing due to
+#   SOCK_NONBLOCK and/or SOCK_CLOEXEC being ignored in the call to socket as
+#   they are defined with NDK unified headers
 LIGHTTPDTITLE="lighttpd"
-LIGHTTPDVER="1.4.43"
-LIGHTTPDPKG="lighttpd-1.4.43.tar.xz"
-LIGHTTPDCOMPILEDIR="lighttpd-1.4.43"
+LIGHTTPDVER="1.4.49"
+LIGHTTPDPKG="lighttpd-1.4.49.tar.xz"
+LIGHTTPDCOMPILEDIR="lighttpd-1.4.49"
 LIGHTTPDHOMEPAGE="http://www.lighttpd.net/"
 LIGHTTPDLICENSE="new-BSD"
 LIGHTTPDBASEURL="http://download.lighttpd.net/lighttpd/releases-1.4.x/"
 LIGHTTPDGENTOOPKG="www-server/lighttpd"
-LIGHTTPDGENTOOVER="1.4.43"
+LIGHTTPDGENTOOVER="1.4.49"
 LIGHTTPDNEED_WEB_BROWSER=0
-LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.43.diff lighttpd_accept4_not_available.patch"
+LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.49.diff lighttpd_1.4.49_accept4_not_available.patch"
 
 PHPTITLE="php"
 PHPVER="7.1.14"

@@ -1,0 +1,116 @@
+diff -Naur lighttpd-1.4.49/src/fdevent.c lighttpd-1.4.49-2/src/fdevent.c
+--- lighttpd-1.4.49/src/fdevent.c	2018-03-12 10:52:20.000000000 +1000
++++ lighttpd-1.4.49-2/src/fdevent.c	2018-04-10 16:30:08.025004359 +1000
+@@ -17,9 +17,9 @@
+ #include <fcntl.h>
+ #include <time.h>
+ 
+-#ifdef SOCK_CLOEXEC
+-static int use_sock_cloexec;
+-#endif
++//#ifdef SOCK_CLOEXEC
++//static int use_sock_cloexec;
++//#endif
+ 
+ int fdevent_config(server *srv) {
+ 	static const struct ev_map { fdevent_handler_t et; const char *name; } event_handlers[] =
+@@ -153,17 +153,17 @@
+ 	int type = srv->event_handler;
+ 	size_t maxfds;
+ 
+-      #ifdef SOCK_CLOEXEC
+-	/* Test if SOCK_CLOEXEC is supported by kernel.
+-	 * Linux kernels < 2.6.27 might return EINVAL if SOCK_CLOEXEC used
+-	 * https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=529929
+-	 * http://www.linksysinfo.org/index.php?threads/lighttpd-no-longer-starts-toastman-1-28-0510-7.73132/ */
+-	int fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
+-	if (fd >= 0) {
+-		use_sock_cloexec = 1;
+-		close(fd);
+-	}
+-      #endif
++//      #ifdef SOCK_CLOEXEC
++//	/* Test if SOCK_CLOEXEC is supported by kernel.
++//	 * Linux kernels < 2.6.27 might return EINVAL if SOCK_CLOEXEC used
++//	 * https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=529929
++//	 * http://www.linksysinfo.org/index.php?threads/lighttpd-no-longer-starts-toastman-1-28-0510-7.73132/ */
++//	int fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
++//	if (fd >= 0) {
++//		use_sock_cloexec = 1;
++//		close(fd);
++//	}
++//      #endif
+ 
+       #ifdef FDEVENT_USE_SELECT
+ 	if (type == FDEVENT_HANDLER_SELECT) {
+@@ -476,19 +476,19 @@
+ }
+ 
+ int fdevent_fcntl_set_nb_cloexec_sock(fdevents *ev, int fd) {
+-#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
+-	if (use_sock_cloexec)
+-		return 0;
+-#endif
++//#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
++//	if (use_sock_cloexec)
++//		return 0;
++//#endif
+ 	return fdevent_fcntl_set_nb_cloexec(ev, fd);
+ }
+ 
+ int fdevent_socket_cloexec(int domain, int type, int protocol) {
+ 	int fd;
+-#ifdef SOCK_CLOEXEC
+-	if (use_sock_cloexec)
+-		return socket(domain, type | SOCK_CLOEXEC, protocol);
+-#endif
++//#ifdef SOCK_CLOEXEC
++//	if (use_sock_cloexec)
++//		return socket(domain, type | SOCK_CLOEXEC, protocol);
++//#endif
+ 	if (-1 != (fd = socket(domain, type, protocol))) {
+ #ifdef FD_CLOEXEC
+ 		force_assert(-1 != fcntl(fd, F_SETFD, FD_CLOEXEC));
+@@ -499,10 +499,10 @@
+ 
+ int fdevent_socket_nb_cloexec(int domain, int type, int protocol) {
+ 	int fd;
+-#ifdef SOCK_CLOEXEC
+-	if (use_sock_cloexec)
+-		return socket(domain, type | SOCK_CLOEXEC | SOCK_NONBLOCK, protocol);
+-#endif
++//#ifdef SOCK_CLOEXEC
++//	if (use_sock_cloexec)
++//		return socket(domain, type | SOCK_CLOEXEC | SOCK_NONBLOCK, protocol);
++//#endif
+ 	if (-1 != (fd = socket(domain, type, protocol))) {
+ #ifdef FD_CLOEXEC
+ 		force_assert(-1 != fcntl(fd, F_SETFD, FD_CLOEXEC));
+@@ -561,17 +561,17 @@
+ 	int fd;
+ 	socklen_t len = (socklen_t) *addrlen;
+ 
+-      #if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
+-       #if defined(__NetBSD__)
+-	fd = paccept(listenfd, addr, &len, NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);
+-       #else
+-	fd = (use_sock_cloexec)
+-	  ? accept4(listenfd, addr, &len, SOCK_CLOEXEC | SOCK_NONBLOCK)
+-	  : accept(listenfd, addr, &len);
+-       #endif
+-      #else
++//      #if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
++//       #if defined(__NetBSD__)
++//	fd = paccept(listenfd, addr, &len, NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);
++//       #else
++//	fd = (use_sock_cloexec)
++//	  ? accept4(listenfd, addr, &len, SOCK_CLOEXEC | SOCK_NONBLOCK)
++//	  : accept(listenfd, addr, &len);
++//       #endif
++//      #else
+ 	fd = accept(listenfd, addr, &len);
+-      #endif
++//      #endif
+ 
+ 	if (fd >= 0) *addrlen = (size_t)len;
+ 	return fd;

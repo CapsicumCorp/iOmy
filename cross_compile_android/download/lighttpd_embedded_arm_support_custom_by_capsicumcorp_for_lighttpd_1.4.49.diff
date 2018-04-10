@@ -1,0 +1,23 @@
+diff -Naur lighttpd-1.4.49/src/Makefile.in lighttpd-1.4.49-2/src/Makefile.in
+--- lighttpd-1.4.49/src/Makefile.in	2018-03-12 10:52:34.000000000 +1000
++++ lighttpd-1.4.49-2/src/Makefile.in	2018-04-10 13:46:22.275263808 +1000
+@@ -1195,7 +1195,7 @@
+ @NO_RDYNAMIC_TRUE@liblightcomp_la_LIBADD = $(PCRE_LIB) $(CRYPTO_LIB) $(FAM_LIBS) $(LIBEV_LIBS) $(ATTR_LIB)
+ @NO_RDYNAMIC_FALSE@common_libadd = 
+ @NO_RDYNAMIC_TRUE@common_libadd = liblightcomp.la
+-common_module_ldflags = -module -export-dynamic $(common_ldflags)
++common_module_ldflags = -module -all-static $(common_ldflags)
+ mod_flv_streaming_la_SOURCES = mod_flv_streaming.c
+ mod_flv_streaming_la_LDFLAGS = $(common_module_ldflags)
+ mod_flv_streaming_la_LIBADD = $(common_libadd)
+@@ -1403,8 +1403,8 @@
+ @LIGHTTPD_STATIC_TRUE@	$(am__append_29) $(am__append_32) \
+ @LIGHTTPD_STATIC_TRUE@	$(am__append_34) $(am__append_36) \
+ @LIGHTTPD_STATIC_TRUE@	$(am__append_37)
+-@LIGHTTPD_STATIC_FALSE@lighttpd_LDFLAGS = -export-dynamic
+-@LIGHTTPD_STATIC_TRUE@lighttpd_LDFLAGS = -export-dynamic
++@LIGHTTPD_STATIC_FALSE@lighttpd_LDFLAGS = -all-static
++@LIGHTTPD_STATIC_TRUE@lighttpd_LDFLAGS = -all-static
+ proc_open_SOURCES = proc_open.c buffer.c
+ proc_open_LDADD = $(LIBUNWIND_LIBS)
+ proc_open_CPPFLAGS = -DDEBUG_PROC_OPEN
