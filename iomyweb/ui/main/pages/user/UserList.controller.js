@@ -26,8 +26,6 @@ sap.ui.controller("pages.user.UserList", {
     sMode:              "Show",
     aFormFragments:     {},
     
-    
-    
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
 * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
@@ -125,6 +123,19 @@ sap.ui.controller("pages.user.UserList", {
         
     },
     
+    ToggleControls : function (bEnabled) {
+        var oController = this;
+        var oView       = oController.getView();
+        var oModel      = oView.getModel();
+        
+        try {
+            oModel.setProperty("/enabled/Always", bEnabled);
+            
+        } catch (e) {
+            $.sap.log.error("Failed to enable or disable controls ("+e.name+"): " + e.message);
+        }
+    },
+    
     RefreshModel: function( oController, oConfig ) {
         //------------------------------------------------//
         //-- Declare Variables                          --//
@@ -132,7 +143,8 @@ sap.ui.controller("pages.user.UserList", {
         var oView           = oController.getView();
         var aUsers          = [];
         var sUserState      = "";
-        var oModel;
+        var oData           = {};
+        var oModel          = null;
         
         try {
             if (oConfig.data) {
@@ -161,26 +173,32 @@ sap.ui.controller("pages.user.UserList", {
                 //------------------------------------------------//
                 //-- Build and Bind Model to the View           --//
                 //------------------------------------------------//
-                oModel = new sap.ui.model.json.JSONModel({
+                oData = {
                     "UserList": aUsers
-                });
-
-                oView.setModel(oModel);
-
-                //------------------------------------------------//
-                //-- Trigger the onSuccess Event                --//
-                //------------------------------------------------//
-                if( oConfig.onSuccess ) {
-                    oConfig.onSuccess();
-                }
+                };
+                
             } else {
-                oModel = new sap.ui.model.json.JSONModel({
+                oData = {
                     "UserList": []
-                });
-
-                oView.setModel(oModel);
+                };
                 //throw new MissingArgumentException("User data is required. This is obtained from the users API to list all users.");
             }
+            
+            oData.enabled = {
+                "Always" : true
+            };
+            
+            oModel = new sap.ui.model.json.JSONModel(oData);
+
+            oView.setModel(oModel);
+
+            //------------------------------------------------//
+            //-- Trigger the onSuccess Event                --//
+            //------------------------------------------------//
+            if( oConfig.onSuccess ) {
+                oConfig.onSuccess();
+            }
+            
         } catch (e) {
             $.sap.log.error("Error refreshing the model ("+e.name+"): " + e.message);
         }
@@ -214,57 +232,79 @@ sap.ui.controller("pages.user.UserList", {
         var oAjaxQueue;
         
         try {
-            //--------------------------------------------------------------------//
-            // Prepare the request for each selected user if they're not already
-            // enabled.
-            //--------------------------------------------------------------------//
-            for (var i = 0; i < aSelectedUsers.length; i++) {
-                if (aSelectedUsers[i].Status === "Disabled") {
-                    aRequests.push({
-                        "library" : "PHP",
-                        "url" : iomy.apiphp.APILocation("users"),
-                        "data" : {
-                            "Mode" : "ChangeUserState",
-                            "Data" : JSON.stringify({
-                                "UserId" : aSelectedUsers[i].UserId,
-                                "NewState" : 1
-                            })
+            if (aSelectedUsers.length > 0) {
+                oController.ToggleControls(false);
+
+                //--------------------------------------------------------------------//
+                // Prepare the request for each selected user if they're not already
+                // enabled.
+                //--------------------------------------------------------------------//
+                for (var i = 0; i < aSelectedUsers.length; i++) {
+                    if (aSelectedUsers[i].Status === "Disabled") {
+                        aRequests.push({
+                            "library" : "PHP",
+                            "url" : iomy.apiphp.APILocation("users"),
+                            "data" : {
+                                "Mode" : "ChangeUserState",
+                                "Data" : JSON.stringify({
+                                    "UserId" : aSelectedUsers[i].UserId,
+                                    "NewState" : 1
+                                })
+                            }
+                        });
+                    }
+                }
+                
+                if (aRequests.length > 0) {
+                    //--------------------------------------------------------------------//
+                    // Put the requests in a queue. Run two at a time. Report the findings.
+                    // TODO: Use more informative error messages.
+                    //--------------------------------------------------------------------//
+                    oAjaxQueue = new AjaxRequestQueue({
+                        requests                : aRequests,
+                        concurrentRequests      : 2,
+
+                        onSuccess : function () {
+                            var sMessage    = "";
+
+                            if (aRequests.length === 1) {
+                                sMessage = "1 user enabled.";
+                            } else {
+                                sMessage = aRequests.length + " users enabled.";
+                            }
+
+                            iomy.common.showMessage({
+                                text : sMessage
+                            });
+
+                            oController.GetListOfUsers();
+                            //-- Buttons will be enabled once the user list has been refreshed --//
+                        },
+
+                        onWarning : function () {
+                            iomy.common.showWarning("Could not enable all users.", "",
+                                function () {
+                                    oController.ToggleControls(true);
+                                }
+                            );
+                        },
+
+                        onFail : function () {
+                            iomy.common.showError("Failed to enable any users.", "",
+                                function () {
+                                    oController.ToggleControls(true);
+                                }
+                            );
                         }
+
                     });
+                } else {
+                    oController.ToggleControls(true);
                 }
             }
-
-            oAjaxQueue = new AjaxRequestQueue({
-                requests                : aRequests,
-                concurrentRequests      : 1,
-
-                onSuccess : function () {
-                    var sMessage    = "";
-
-                    if (aRequests.length === 1) {
-                        sMessage = "1 user enabled.";
-                    } else {
-                        sMessage = aRequests.length + " users enabled.";
-                    }
-
-                    iomy.common.showMessage({
-                        text : sMessage
-                    });
-
-                    oController.GetListOfUsers();
-                },
-
-                onWarning : function () {
-                    iomy.common.showWarning("Could not enable all users.", "");
-                },
-
-                onFail : function () {
-                    iomy.common.showError("Failed to enable any users.", "");
-                }
-
-            });
         } catch (e) {
             $.sap.log.error("Error attempting to enable users ("+e.name+"): " + e.message);
+            oController.ToggleControls(true);
         }
         
     },
@@ -277,72 +317,90 @@ sap.ui.controller("pages.user.UserList", {
         var oAjaxQueue;
         
         try {
-            //--------------------------------------------------------------------//
-            // Prepare the request for each selected user. Three conditions must be
-            // met: 1. The user must NOT be the owner (first user), 2. The user
-            // cannot be currently logged in, and 3. The user should be enabled.
-            //--------------------------------------------------------------------//
-            for (var i = 0; i < aSelectedUsers.length; i++) {
-                if (aSelectedUsers[i].UserId !== 1 && aSelectedUsers[i].UserId !== 2) {
+            if (aSelectedUsers.length > 0) {
+                oController.ToggleControls(false);
 
-                    if (aSelectedUsers[i].UserId == iomy.common.UserInfo.UserId) {
-                        iomy.common.showWarning("Unable to disable yourself while logged in.", "Still logged in");
+                //--------------------------------------------------------------------//
+                // Prepare the request for each selected user. Three conditions must be
+                // met: 1. The user must NOT be the owner (first user), 2. The user
+                // cannot be currently logged in, and 3. The user should be enabled.
+                //--------------------------------------------------------------------//
+                for (var i = 0; i < aSelectedUsers.length; i++) {
+                    if (aSelectedUsers[i].UserId !== 1 && aSelectedUsers[i].UserId !== 2) {
 
-                    } else {
-                        if (aSelectedUsers[i].Status === "Enabled") {
-                            aRequests.push({
-                                "library" : "PHP",
-                                "url" : iomy.apiphp.APILocation("users"),
-                                "data" : {
-                                    "Mode" : "ChangeUserState",
-                                    "Data" : JSON.stringify({
-                                        "UserId" : aSelectedUsers[i].UserId,
-                                        "NewState" : 0
-                                    })
-                                }
-                            });
+                        if (aSelectedUsers[i].UserId == iomy.common.UserInfo.UserId) {
+                            iomy.common.showWarning("Unable to disable yourself while logged in.", "Still logged in");
+
+                        } else {
+                            if (aSelectedUsers[i].Status === "Enabled") {
+                                aRequests.push({
+                                    "library" : "PHP",
+                                    "url" : iomy.apiphp.APILocation("users"),
+                                    "data" : {
+                                        "Mode" : "ChangeUserState",
+                                        "Data" : JSON.stringify({
+                                            "UserId" : aSelectedUsers[i].UserId,
+                                            "NewState" : 0
+                                        })
+                                    }
+                                });
+                            }
                         }
+                    } else {
+                        iomy.common.showWarning("Cannot disable the owner.", "iOmy Owner");
                     }
+                }
+
+                if (aRequests.length > 0) {
+                    //--------------------------------------------------------------------//
+                    // Put the requests in a queue. Run two at a time. Report the findings.
+                    // TODO: Use more informative error messages.
+                    //--------------------------------------------------------------------//
+                    oAjaxQueue = new AjaxRequestQueue({
+                        requests                : aRequests,
+                        concurrentRequests      : 2,
+
+                        onSuccess : function () {
+                            var sMessage    = "";
+
+                            if (aRequests.length === 1) {
+                                sMessage = "1 user disabled.";
+                            } else {
+                                sMessage = aRequests.length + " users disabled.";
+                            }
+
+                            iomy.common.showMessage({
+                                text : sMessage
+                            });
+
+                            oController.GetListOfUsers();
+                            //-- Buttons will be enabled once the user list has been refreshed --//
+                        },
+
+                        onWarning : function () {
+                            iomy.common.showWarning("Could not disable all users.", "",
+                                function () {
+                                    oController.ToggleControls(true);
+                                }
+                            );
+                        },
+
+                        onFail : function () {
+                            iomy.common.showError("Failed to disable any users.", "",
+                                function () {
+                                    oController.ToggleControls(true);
+                                }
+                            );
+                        }
+
+                    });
                 } else {
-                    iomy.common.showWarning("Cannot disable the owner.", "iOmy Owner");
+                    oController.ToggleControls(true);
                 }
             }
-
-            //--------------------------------------------------------------------//
-            // Put the requests in a queue. Run two at a time. Report the findings.
-            // TODO: Use more informative error messages.
-            //--------------------------------------------------------------------//
-            oAjaxQueue = new AjaxRequestQueue({
-                requests                : aRequests,
-                concurrentRequests      : 2,
-
-                onSuccess : function () {
-                    var sMessage    = "";
-
-                    if (aRequests.length === 1) {
-                        sMessage = "1 user disabled.";
-                    } else {
-                        sMessage = aRequests.length + " users disabled.";
-                    }
-
-                    iomy.common.showMessage({
-                        text : sMessage
-                    });
-
-                    oController.GetListOfUsers();
-                },
-
-                onWarning : function () {
-                    iomy.common.showWarning("Could not disable all users.", "");
-                },
-
-                onFail : function () {
-                    iomy.common.showError("Failed to disable any users.", "");
-                }
-
-            });
         } catch (e) {
             $.sap.log.error("Error attempting to disable users ("+e.name+"): " + e.message);
+            oController.ToggleControls(true);
         }
         
     }

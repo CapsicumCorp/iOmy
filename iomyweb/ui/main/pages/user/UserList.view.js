@@ -70,6 +70,7 @@ sap.ui.jsview("pages.user.UserList", {
 			text: "Edit",
 			type: "Transparent",
 			width: "100%",
+            enabled : "{/enabled/Always}",
 			press : function (oEvent) {
 				iomy.common.NavigationChangePage( "pUserForm" , {
                     "userID" : oEvent.getSource().getBindingContext().getProperty("UserId"),
@@ -97,6 +98,7 @@ sap.ui.jsview("pages.user.UserList", {
                                         new sap.m.Button ({
                                             text: "Enable",
                                             type: sap.m.ButtonType.Accept,
+                                            enabled : "{/enabled/Always}",
 
                                             press : function () {
                                                 oController.EnableSelectedUsers();
@@ -105,6 +107,7 @@ sap.ui.jsview("pages.user.UserList", {
                                         new sap.m.Button({
                                             text: "Disable",
                                             type: sap.m.ButtonType.Reject,
+                                            enabled : "{/enabled/Always}",
 
                                             press : function () {
                                                 oController.DisableSelectedUsers();
