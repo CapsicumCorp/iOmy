@@ -58,7 +58,11 @@ sap.ui.jsview("pages.security.Security", {
                         new sap.m.Image ({
                             densityAware : false,
                             src:"{ThumbnailUrl}",
-                            height: "100px"
+                            height: "100px",
+                            
+                            error : function (oEvent) {
+                                oController.UpdateThumbnail(oEvent.getSource().getBindingContext().getProperty(""));
+                            }
                         })
                    ]   
                 }) 

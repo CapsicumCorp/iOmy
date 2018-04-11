@@ -1028,6 +1028,7 @@ $.extend(iomy.devices,{
                 $.each(iomy.common.ThingList, function (sI, mDevice) {
                     if (iomy.devices.isDeviceCamera(mDevice.Id)) {
                         if (mDevice.TypeId === iomy.devices.onvif.ThingTypeId) {
+                            mDevice.positionInList = vCameraList.length;
                             mDevice.ThumbnailUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+mDevice.Id;
                         }
                         
@@ -1044,6 +1045,7 @@ $.extend(iomy.devices,{
                 $.each(iomy.common.ThingList, function (sI, mDevice) {
                     if (iomy.devices.isDeviceCamera(mDevice.Id)) {
                         if (mDevice.TypeId === iomy.devices.onvif.ThingTypeId) {
+                            mDevice.positionInList = vCameraList.length;
                             mDevice.ThumbnailUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+mDevice.Id;
                         }
                         

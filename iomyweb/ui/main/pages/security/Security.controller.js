@@ -79,47 +79,60 @@ sap.ui.controller("pages.security.Security", {
         
     },
     
-    LoadImages : function () {
-        var oController     = this;
-        var oView           = oController.getView();
-        var oModel          = oView.getModel();
-        var oRequestQueue   = null;
-        var aRequests       = [];
-        var aaList           = iomy.devices.getCameraList(true);
+    UpdateThumbnail : function (mCamera) {
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
         
         try {
-            $.each(aaList, function (sI, mCamera) {
-                
-                if (mCamera.TypeId === iomy.devices.onvif.ThingTypeId) {
-                    aRequests.push({
-                        url: iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+mCamera.Id,
-                        cache: false,
-                        xhrFields: {
-                            responseType: 'blob'
-                        },
-                        success : function(data){
-                            var url = window.URL || window.webkitURL;
-                            oModel.setProperty("/lists/Cameras/_"+mCamera.positionInList+"/ThumbnailUrl", url.createObjectURL(data));
-                        },
-                        error :function(){
-                            
-                        }
-                    });
-                    
-                } else if (mCamera.TypeId === iomy.devices.ipcamera.ThingTypeId) {
-                    
-                }
-            });
+            var sUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+mCamera.Id;
             
-            oRequestQueue = new AjaxRequestQueue({
-                concurrentRequests : 3,
-                requests : aRequests
-            });
-            
+            oModel.setProperty("/lists/Cameras/"+mCamera.positionInList+"/ThumbnailUrl", sUrl);
         } catch (e) {
-            $.sap.log.error("Failed to prepare requests to load thumbnails ("+e.name+"): " + e.message);
+            $.sap.log.error("Failed to assign update thumbnail url API ("+e.name+"): " + e.message);
         }
-        
-    }
-	
+    },
+    
+//    LoadImages : function () {
+//        var oController     = this;
+//        var oView           = oController.getView();
+//        var oModel          = oView.getModel();
+//        var oRequestQueue   = null;
+//        var aRequests       = [];
+//        var aaList           = iomy.devices.getCameraList(true);
+//        
+//        try {
+//            $.each(aaList, function (sI, mCamera) {
+//                
+//                if (mCamera.TypeId === iomy.devices.onvif.ThingTypeId) {
+//                    aRequests.push({
+//                        url: iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+mCamera.Id,
+//                        cache: false,
+//                        xhrFields: {
+//                            responseType: 'blob'
+//                        },
+//                        success : function(data){
+//                            var url = window.URL || window.webkitURL;
+//                            oModel.setProperty("/lists/Cameras/"+mCamera.positionInList+"/ThumbnailUrl", url.createObjectURL(data));
+//                        },
+//                        error :function(){
+//                            
+//                        }
+//                    });
+//                    
+//                } else if (mCamera.TypeId === iomy.devices.ipcamera.ThingTypeId) {
+//                    
+//                }
+//            });
+//            
+//            oRequestQueue = new AjaxRequestQueue({
+//                concurrentRequests : 3,
+//                requests : aRequests
+//            });
+//            
+//        } catch (e) {
+//            $.sap.log.error("Failed to prepare requests to load thumbnails ("+e.name+"): " + e.message);
+//        }
+//        
+//    }
+//	
 });
