@@ -55,6 +55,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 }
                 
                 oController.RefreshModel();
+                oController.UpdateThumbnail();
 			}
 		});
 			
@@ -81,5 +82,34 @@ sap.ui.controller("pages.security.SecurityData", {
         oModel.setSizeLimit(420);
         oView.setModel(oModel);
         
+    },
+    
+    UpdateThumbnail : function () {
+        var oController = this;
+        var oView       = this.getView();
+        
+        try {
+            var sUrl = iomy.apiphp.APILocation("onvifthumbnail");
+            
+            iomy.apiphp.AjaxRequest({
+                url : sUrl,
+                data : {
+                    Mode : "UpdateThingThumbnail",
+                    ThingId : oController.iCameraId
+                },
+                
+                onSuccess : function (sType, mData) {
+                    if (mData.Error === true) {
+                        $.sap.log.error("Failed to update thumbnail: " + mData.ErrMesg);
+                    }
+                },
+                
+                onFail : function (response) {
+                    $.sap.log.error("Failed to update thumbnail: " + response.responseText);
+                }
+            })
+        } catch (e) {
+            $.sap.log.error("Failed to update thumbnail ("+e.name+"): " + e.message);
+        }
     }
 });
