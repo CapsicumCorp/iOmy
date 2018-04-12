@@ -50,51 +50,59 @@ sap.ui.jsview("pages.security.SecurityData", {
             header : iomy.widgets.getToolPageHeader( oController ),
             sideContent : iomy.widgets.getToolPageSideContent(oController),
             mainContents: [ 
-                new sap.m.ObjectHeader({
-                    title: "{/title}",
-                    number: "{/count/thumbnails}",
-                    numberUnit: "Thumbnails",
-                }),
-                new sap.m.IconTabBar({
-                    items : [
-                        new sap.m.IconTabFilter({
-                            text: "Stream",
-                            icon : "sap-icon://video",
-                            content : [
-                                new sap.m.Carousel ({
-                                    pages: [
-                                        new sap.m.Image ({
-                                            src:"http://Localhost/video/mjpg.cgi",
+                new sap.m.ScrollContainer({
+                    width : "100%",
+                    height : "100%",
+                    vertical : true,
+                    
+                    content : [
+                        new sap.m.ObjectHeader({
+                            title: "{/title}",
+                            number: "{/count/thumbnails}",
+                            numberUnit: "Thumbnails",
+                        }),
+                        new sap.m.IconTabBar({
+                            items : [
+                                new sap.m.IconTabFilter({
+                                    text: "Stream",
+                                    icon : "sap-icon://video",
+                                    content : [
+                                        new sap.m.Carousel ({
+                                            pages: [
+                                                new sap.m.Image ({
+                                                    src:"{/data/streamUrl}"
+                                                }) 
+                                            ]
                                         }) 
                                     ]
-                                }) 
-                            ]
-                        }),
-                        new sap.m.IconTabFilter({
-                            text: "Thumbnails",
-                            icon : "sap-icon://camera",
-                            content : [
-                                new sap.m.Carousel ({
-                                    pages: [
-                                        new sap.m.Image ({
-                                            src:"http://Localhost/image/jpeg.cgi",
-                                        }),
-                                        new sap.m.Image ({
-                                            src:"http://Localhost/image/jpeg.cgi",
-                                        }),
-                                        new sap.m.Image ({
-                                            src:"http://Localhost/image/jpeg.cgi",
-                                        }),
-                                        new sap.m.Image ({
-                                            src:"http://Localhost/image/jpeg.cgi",
-                                        }),
-                                        new sap.m.Image ({
-                                            src:"http://Localhost/image/jpeg.cgi",
-                                        }),
+                                }),
+                                new sap.m.IconTabFilter({
+                                    text: "Thumbnails",
+                                    icon : "sap-icon://camera",
+                                    content : [
+                                        new sap.m.Carousel ({
+                                            pages: [
+                                                new sap.m.Image ({
+                                                    src:"http://Localhost/image/jpeg.cgi",
+                                                }),
+                                                new sap.m.Image ({
+                                                    src:"http://Localhost/image/jpeg.cgi",
+                                                }),
+                                                new sap.m.Image ({
+                                                    src:"http://Localhost/image/jpeg.cgi",
+                                                }),
+                                                new sap.m.Image ({
+                                                    src:"http://Localhost/image/jpeg.cgi",
+                                                }),
+                                                new sap.m.Image ({
+                                                    src:"http://Localhost/image/jpeg.cgi",
+                                                }),
+                                            ]
+                                        })
                                     ]
-                                })
+                                }),
                             ]
-                        }),
+                        })
                     ]
                 })
             ]

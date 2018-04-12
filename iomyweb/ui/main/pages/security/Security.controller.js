@@ -65,7 +65,7 @@ sap.ui.controller("pages.security.Security", {
         //------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
-        oController.CameraList = iomy.devices.getCameraList();
+        oController.CameraList = iomy.devices.getCameraList(true);
         
         oData = {
             "lists" : {
@@ -86,7 +86,7 @@ sap.ui.controller("pages.security.Security", {
         try {
             var sUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+mCamera.Id;
             
-            oModel.setProperty("/lists/Cameras/"+mCamera.positionInList+"/ThumbnailUrl", sUrl);
+            oModel.setProperty("/lists/Cameras/_"+mCamera.Id+"/ThumbnailUrl", sUrl);
         } catch (e) {
             $.sap.log.error("Failed to assign update thumbnail url API ("+e.name+"): " + e.message);
         }

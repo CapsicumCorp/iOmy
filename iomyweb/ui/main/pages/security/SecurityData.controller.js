@@ -38,13 +38,8 @@ sap.ui.controller("pages.security.SecurityData", {
 		
 		oView.addEventDelegate({
 			onBeforeShow : function (evt) {
-				//----------------------------------------------------//
-				//-- Enable/Disable Navigational Forward Button		--//
-				//----------------------------------------------------//
-				
-				//-- Refresh the Navigational buttons --//
-				//-- IOMy.common.NavigationRefreshButtons( oController ); --//
-				
+				var iDeviceType = 0;
+                
 				//-- Defines the Device Type --//
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
@@ -54,8 +49,16 @@ sap.ui.controller("pages.security.SecurityData", {
                     oController.iCameraId = null;
                 }
                 
+                iDeviceType = iomy.common.ThingList["_"+oController.iCameraId].TypeId;
                 oController.RefreshModel();
-                oController.UpdateThumbnail();
+                
+                if (iDeviceType == iomy.devices.ipcamera.ThingTypeId) {
+                    oController.LoadMJPEGStream();
+                    
+                } else if (iDeviceType == iomy.devices.onvif.ThingTypeId) {
+                    oController.UpdateThumbnail();
+                    
+                }
 			}
 		});
 			
@@ -75,6 +78,9 @@ sap.ui.controller("pages.security.SecurityData", {
             "title" : iomy.common.ThingList["_"+oController.iCameraId].DisplayName,
             "count" : {
                 "thumbnails" : 0
+            },
+            "data"  : {
+                "streamUrl" : ""
             }
         };
         
@@ -110,6 +116,29 @@ sap.ui.controller("pages.security.SecurityData", {
             })
         } catch (e) {
             $.sap.log.error("Failed to update thumbnail ("+e.name+"): " + e.message);
+        }
+    },
+    
+    LoadMJPEGStream : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
+        
+        try {
+            iomy.devices.ipcamera.loadStreamUrl({
+                thingID : oController.iCameraId,
+
+                onSuccess : function (sUrl) {
+                    oModel.setProperty("/data/streamUrl", sUrl);
+                },
+
+                onFail : function (sError) {
+                    $.sap.log.error("Failed to load the stream URL: " + sError);
+                    iomy.common.showError(sError, "Error");
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to load the stream URL: " + e.message);
         }
     }
 });
