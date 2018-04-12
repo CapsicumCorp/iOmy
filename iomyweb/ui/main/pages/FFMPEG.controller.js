@@ -23,6 +23,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.FFMPEG", {
+    
+    iStreamId : null,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -45,10 +47,32 @@ sap.ui.controller("pages.FFMPEG", {
 				
 				//-- Defines the Device Type --//
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
+                
+                oController.iStreamId = evt.data.StreamId;
+                
+                if (oController.iStreamId !== undefined && oController.iStreamId !== null) {
+                    oController.RefreshModel();
+                }
 			}
 		});
 			
 		
 	},
+    
+    RefreshModel : function () {
+        var oController = this;
+        var oView       = this.getView();
+        var oData       = {};
+        var oModel      = null;
+        
+        oData = {
+            "data" : {
+                "videoContent" : "<iframe height='300px' width='700' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iStreamId+"'></iframe>"
+            }
+        };
+        
+        oModel = new sap.ui.model.json.JSONModel(oData);
+        oView.setModel(oModel);
+    }
 	
 });

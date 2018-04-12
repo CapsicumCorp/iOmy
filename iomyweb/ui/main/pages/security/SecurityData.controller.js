@@ -71,22 +71,26 @@ sap.ui.controller("pages.security.SecurityData", {
         var oData       = {};
         var oModel      = null;
         
-        //------------------------------------------------//
-		//-- Build and Bind Model to the View           --//
-		//------------------------------------------------//
-        oData = {
-            "title" : iomy.common.ThingList["_"+oController.iCameraId].DisplayName,
-            "count" : {
-                "thumbnails" : 0
-            },
-            "data"  : {
-                "streamUrl" : ""
-            }
-        };
-        
-        oModel = new sap.ui.model.json.JSONModel(oData);
-        oModel.setSizeLimit(420);
-        oView.setModel(oModel);
+        try {
+            //------------------------------------------------//
+            //-- Build and Bind Model to the View           --//
+            //------------------------------------------------//
+            oData = {
+                "title" : iomy.common.ThingList["_"+oController.iCameraId].DisplayName,
+                "count" : {
+                    "thumbnails" : 0
+                },
+                "data"  : {
+                    "streamUrl" : ""
+                }
+            };
+
+            oModel = new sap.ui.model.json.JSONModel(oData);
+            oModel.setSizeLimit(420);
+            oView.setModel(oModel);
+        } catch (e) {
+            $.sap.log.error("Failed to refresh the model ("+e.name+"): " + e.message);
+        }
         
     },
     
@@ -134,7 +138,7 @@ sap.ui.controller("pages.security.SecurityData", {
 
                 onFail : function (sError) {
                     $.sap.log.error("Failed to load the stream URL: " + sError);
-                    iomy.common.showError(sError, "Error");
+                    iomy.common.showError("Ensure that the connection settings are correct, and that the stream is online.", "Stream Not Available");
                 }
             });
         } catch (e) {

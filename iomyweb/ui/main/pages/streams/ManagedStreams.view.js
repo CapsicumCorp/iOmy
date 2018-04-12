@@ -86,7 +86,9 @@ sap.ui.jsview("pages.streams.ManagedStreams", {
             enabled : "{/controlsEnabled/Always}",
             press : function (oEvent) {
                 var iThingId = oEvent.getSource().getBindingContext().getProperty("ThingId");
-                iomy.devices.onvif.loadStream(iThingId);
+                //iomy.devices.onvif.loadStream(iThingId);
+                
+                iomy.common.NavigationChangePage("pFFMPEG", {"StreamId" : iThingId});
             }
 		});
 		

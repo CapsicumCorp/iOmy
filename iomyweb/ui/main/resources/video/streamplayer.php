@@ -12,7 +12,7 @@
 	if( isset( $_GET['StreamId'] ) ) {
 		if( $_GET['StreamId']!==null && $_GET['StreamId']!==false && $_GET['StreamId']!=="" ) {
 			if( ctype_alnum( $_GET['StreamId'] ) ) {
-				$sURL = "../../../restricted/streams/".$_GET['StreamId']."/stream.m3u8";
+				$sURL = "/streams/".$_GET['StreamId']."/stream.m3u8";
 			}
 		}
 	}

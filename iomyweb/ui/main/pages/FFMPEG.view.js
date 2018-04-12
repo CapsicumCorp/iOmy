@@ -64,7 +64,7 @@ sap.ui.jsview("pages.FFMPEG", {
 									items : [
 										new sap.ui.core.HTML({
 											preferDOM: true,
-										   content: "<iframe height='300px' width='700' scrolling='no' frameborder='0' src='resources/video/test.html'></iframe>"
+                                            content: "{/data/videoContent}"
 										}),
 									]
 								}).addStyleClass("ChildFlexGrow ChildTextCenter"),
