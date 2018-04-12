@@ -228,7 +228,7 @@ LIGHTTPDBASEURL="http://download.lighttpd.net/lighttpd/releases-1.4.x/"
 LIGHTTPDGENTOOPKG="www-server/lighttpd"
 LIGHTTPDGENTOOVER="1.4.49"
 LIGHTTPDNEED_WEB_BROWSER=0
-LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.49.diff lighttpd_1.4.49_accept4_not_available.patch"
+LIGHTTPDPATCHES="lighttpd_embedded_arm_support_custom_by_capsicumcorp_for_lighttpd_1.4.49.diff lighttpd_accept4_not_available.patch"
 
 PHPTITLE="php"
 PHPVER="7.1.14"

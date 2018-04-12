@@ -1,82 +1,25 @@
-diff -Naur lighttpd-1.4.43/src/connections.c lighttpd-1.4.43-2/src/connections.c
---- lighttpd-1.4.43/src/connections.c	2016-10-31 23:16:40.000000000 +1000
-+++ lighttpd-1.4.43-2/src/connections.c	2018-04-10 15:57:40.011948684 +1000
-@@ -1026,15 +1026,15 @@
- 
- 	cnt_len = sizeof(cnt_addr);
- 
--#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
--#if defined(__NetBSD__)
--	cnt = paccept(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len, NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);
--#else
--	cnt = accept4(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len, SOCK_CLOEXEC | SOCK_NONBLOCK);
--#endif
--#else
-+//#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
-+//#if defined(__NetBSD__)
-+//	cnt = paccept(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len, NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);
-+//#else
-+//	cnt = accept4(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len, SOCK_CLOEXEC | SOCK_NONBLOCK);
-+//#endif
-+//#else
- 	cnt = accept(srv_socket->fd, (struct sockaddr *) &cnt_addr, &cnt_len);
--#endif
-+//#endif
- 	if (-1 == cnt) {
- 		switch (errno) {
- 		case EAGAIN:
-diff -Naur lighttpd-1.4.43/src/fdevent.c lighttpd-1.4.43-2/src/fdevent.c
---- lighttpd-1.4.43/src/fdevent.c	2016-10-31 23:16:40.000000000 +1000
-+++ lighttpd-1.4.43-2/src/fdevent.c	2018-04-10 15:59:21.792004529 +1000
-@@ -288,17 +288,17 @@
- }
- 
- int fdevent_fcntl_set_nb_cloexec_sock(fdevents *ev, int fd) {
--#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
--	return ((ev) && (ev->fcntl_set)) ? ev->fcntl_set(ev, fd) : 0;
--#else
-+//#if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
-+//	return ((ev) && (ev->fcntl_set)) ? ev->fcntl_set(ev, fd) : 0;
-+//#else
- 	return fdevent_fcntl_set_nb_cloexec(ev, fd);
--#endif
-+//#endif
- }
- 
- int fdevent_socket_cloexec(int domain, int type, int protocol) {
--#ifdef SOCK_CLOEXEC
--	return socket(domain, type | SOCK_CLOEXEC, protocol);
--#else
-+//#ifdef SOCK_CLOEXEC
-+//	return socket(domain, type | SOCK_CLOEXEC, protocol);
-+//#else
+diff -Naur lighttpd-1.4.49/src/fdevent.c lighttpd-1.4.49-2/src/fdevent.c
+--- lighttpd-1.4.49/src/fdevent.c	2018-03-12 10:52:20.000000000 +1000
++++ lighttpd-1.4.49-2/src/fdevent.c	2018-04-12 16:36:01.504086685 +1000
+@@ -561,7 +561,7 @@
  	int fd;
- 	if (-1 != (fd = socket(domain, type, protocol))) {
- #ifdef FD_CLOEXEC
-@@ -306,13 +306,13 @@
- #endif
- 	}
- 	return fd;
--#endif
-+//#endif
- }
+ 	socklen_t len = (socklen_t) *addrlen;
  
- int fdevent_socket_nb_cloexec(int domain, int type, int protocol) {
--#ifdef SOCK_CLOEXEC
--	return socket(domain, type | SOCK_CLOEXEC | SOCK_NONBLOCK, protocol);
--#else
-+//#ifdef SOCK_CLOEXEC
-+//	return socket(domain, type | SOCK_CLOEXEC | SOCK_NONBLOCK, protocol);
-+//#else
- 	int fd;
- 	if (-1 != (fd = socket(domain, type, protocol))) {
- #ifdef FD_CLOEXEC
-@@ -323,7 +323,7 @@
- #endif
- 	}
- 	return fd;
--#endif
-+//#endif
- }
+-      #if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK)
++      #if defined(SOCK_CLOEXEC) && defined(SOCK_NONBLOCK) && __ANDROID_API__ >= 21
+        #if defined(__NetBSD__)
+ 	fd = paccept(listenfd, addr, &len, NULL, SOCK_CLOEXEC | SOCK_NONBLOCK);
+        #else
+@@ -571,6 +571,12 @@
+        #endif
+       #else
+ 	fd = accept(listenfd, addr, &len);
++	if (fd >= 0) {
++		if (0 != fdevent_fcntl_set_nb_cloexec(NULL, fd)) {
++			close(fd);
++			fd = 1;
++		}
++	}
+       #endif
  
- #ifndef O_NOCTTY
+ 	if (fd >= 0) *addrlen = (size_t)len;
