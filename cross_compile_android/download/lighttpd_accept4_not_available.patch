@@ -17,7 +17,7 @@ diff -Naur lighttpd-1.4.49/src/fdevent.c lighttpd-1.4.49-2/src/fdevent.c
 +	if (fd >= 0) {
 +		if (0 != fdevent_fcntl_set_nb_cloexec(NULL, fd)) {
 +			close(fd);
-+			fd = 1;
++			fd = -1;
 +		}
 +	}
        #endif
