@@ -52,12 +52,15 @@ sap.ui.controller("pages.security.SecurityData", {
                 iDeviceType = iomy.common.ThingList["_"+oController.iCameraId].TypeId;
                 oController.RefreshModel();
                 
-                if (iDeviceType == iomy.devices.ipcamera.ThingTypeId) {
-                    oController.LoadMJPEGStream();
-                    
-                } else if (iDeviceType == iomy.devices.onvif.ThingTypeId) {
-                    oController.UpdateThumbnail();
-                    
+                switch (iDeviceType) {
+                    case iomy.devices.ipcamera.ThingTypeId:
+                        oController.LoadMJPEGStream();
+                        break;
+                        
+                    case iomy.devices.onvif.ThingTypeId:
+                        oController.UpdateThumbnail();
+                        break;
+                        
                 }
 			}
 		});
@@ -81,7 +84,8 @@ sap.ui.controller("pages.security.SecurityData", {
                     "thumbnails" : 0
                 },
                 "data"  : {
-                    "streamUrl" : ""
+                    "streamUrl" : "",
+                    "thumbnailUrl" : ""
                 }
             };
 
@@ -97,27 +101,13 @@ sap.ui.controller("pages.security.SecurityData", {
     UpdateThumbnail : function () {
         var oController = this;
         var oView       = this.getView();
+        var oModel      = oView.getModel();
         
         try {
-            var sUrl = iomy.apiphp.APILocation("onvifthumbnail");
+            var sUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.iCameraId;
             
-            iomy.apiphp.AjaxRequest({
-                url : sUrl,
-                data : {
-                    Mode : "UpdateThingThumbnail",
-                    ThingId : oController.iCameraId
-                },
-                
-                onSuccess : function (sType, mData) {
-                    if (mData.Error === true) {
-                        $.sap.log.error("Failed to update thumbnail: " + mData.ErrMesg);
-                    }
-                },
-                
-                onFail : function (response) {
-                    $.sap.log.error("Failed to update thumbnail: " + response.responseText);
-                }
-            })
+            oModel.setProperty("/data/thumbnailUrl", sUrl);
+            
         } catch (e) {
             $.sap.log.error("Failed to update thumbnail ("+e.name+"): " + e.message);
         }

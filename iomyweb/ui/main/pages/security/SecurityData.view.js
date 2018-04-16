@@ -83,24 +83,15 @@ sap.ui.jsview("pages.security.SecurityData", {
                                         new sap.m.Carousel ({
                                             pages: [
                                                 new sap.m.Image ({
-                                                    src:"http://Localhost/image/jpeg.cgi",
-                                                }),
-                                                new sap.m.Image ({
-                                                    src:"http://Localhost/image/jpeg.cgi",
-                                                }),
-                                                new sap.m.Image ({
-                                                    src:"http://Localhost/image/jpeg.cgi",
-                                                }),
-                                                new sap.m.Image ({
-                                                    src:"http://Localhost/image/jpeg.cgi",
-                                                }),
-                                                new sap.m.Image ({
-                                                    src:"http://Localhost/image/jpeg.cgi",
-                                                }),
+                                                    densityAware : false,
+                                                    width : "90%",
+                                                    height : "90%",
+                                                    src:"{/data/thumbnailUrl}"
+                                                })
                                             ]
                                         })
                                     ]
-                                }),
+                                })
                             ]
                         })
                     ]
