@@ -24,7 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("pages.FFMPEG", {
     
-    iStreamId : null,
+    iThingId : null,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -38,19 +38,13 @@ sap.ui.controller("pages.FFMPEG", {
 		
 		oView.addEventDelegate({
 			onBeforeShow : function (evt) {
-				//----------------------------------------------------//
-				//-- Enable/Disable Navigational Forward Button		--//
-				//----------------------------------------------------//
-				
-				//-- Refresh the Navigational buttons --//
-				//-- IOMy.common.NavigationRefreshButtons( oController ); --//
 				
 				//-- Defines the Device Type --//
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
-                oController.iStreamId = evt.data.StreamId;
+                oController.iThingId = evt.data.ThingId;
                 
-                if (oController.iStreamId !== undefined && oController.iStreamId !== null) {
+                if (oController.iThingId !== undefined && oController.iThingId !== null) {
                     oController.RefreshModel();
                 }
 			}
@@ -64,10 +58,19 @@ sap.ui.controller("pages.FFMPEG", {
         var oView       = this.getView();
         var oData       = {};
         var oModel      = null;
+        var sTitle      = "";
+        
+        try {
+            sTitle = iomy.common.ThingList["_"+oController.iThingId].DisplayName;
+            
+        } catch (e) {
+            $.sap.log.error("Error setting the title ("+e.name+"): " + e.message);
+        }
         
         oData = {
+            "title" : sTitle,
             "data" : {
-                "videoContent" : "<iframe height='300px' width='700' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iStreamId+"'></iframe>"
+                "videoContent" : "<iframe height='300px' width='700' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iThingId+"'></iframe>"
             }
         };
         

@@ -55,7 +55,7 @@ sap.ui.jsview("pages.FFMPEG", {
 					horizontal: false,
 					height: "100%",
 					content : [
-						iomy.widgets.DeviceToolbar(oController, "FFMPEG"),
+						iomy.widgets.DeviceToolbar(oController, "{/title}"),
 						new sap.m.ScrollContainer({
 							vertical: true,
 							width: "100%",
@@ -70,7 +70,7 @@ sap.ui.jsview("pages.FFMPEG", {
 								}).addStyleClass("ChildFlexGrow ChildTextCenter"),
 							]
 						}),
-						new sap.m.FlexBox ({
+						/*new sap.m.FlexBox ({
 							layoutData : new sap.m.FlexItemData({
 								growFactor : 1
 							}),
@@ -81,14 +81,28 @@ sap.ui.jsview("pages.FFMPEG", {
 										new sap.m.Button ({
 											height: "50px",
 											width: "200px",
-											text: "^"
+											text: "^",
+
+                                            press : function () {
+                                                iomy.devices.onvif.ptzMove({
+                                                    ypos : -5,
+                                                    thingID : oController.iThingId
+                                                });
+                                            }
 										}),
 										new sap.m.HBox ({
 											items : [
 												new sap.m.Button ({
 													height: "50px",
 													width: "50px",
-													text: "<"	
+													text: "<",
+                                                    
+                                                    press : function () {
+                                                        iomy.devices.onvif.ptzMove({
+                                                            xpos : -5,
+                                                            thingID : oController.iThingId
+                                                        });
+                                                    }
 												}),
 												new sap.m.Button ({
 													height: "50px",
@@ -98,22 +112,36 @@ sap.ui.jsview("pages.FFMPEG", {
 												new sap.m.Button ({
 													height: "50px",
 													width: "50px",
-													text: ">"
+													text: ">",
+                                                    
+                                                    press : function () {
+                                                        iomy.devices.onvif.ptzMove({
+                                                            xpos : 5,
+                                                            thingID : oController.iThingId
+                                                        });
+                                                    }
 												}),
 											]
 										}),
 										new sap.m.Button ({
 											height: "50px",
 											width: "200px",
-											text: "v"
-										}),
+											text: "v",
+
+                                            press : function () {
+                                                iomy.devices.onvif.ptzMove({
+                                                    ypos : 5,
+                                                    thingID : oController.iThingId
+                                                });
+                                            }
+										})
 									]
-								}).addStyleClass("ElementCenter"),
+								}).addStyleClass("ElementCenter")
 							]
-						})
+						})*/
 					]
 				})
-			],
+			]
 		}).addStyleClass("MainBackground");
 	}
 });

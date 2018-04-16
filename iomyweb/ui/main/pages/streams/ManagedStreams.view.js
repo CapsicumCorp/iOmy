@@ -88,7 +88,7 @@ sap.ui.jsview("pages.streams.ManagedStreams", {
                 var iThingId = oEvent.getSource().getBindingContext().getProperty("ThingId");
                 //iomy.devices.onvif.loadStream(iThingId);
                 
-                iomy.common.NavigationChangePage("pFFMPEG", {"StreamId" : iThingId});
+                iomy.common.NavigationChangePage("pFFMPEG", {"ThingId" : iThingId});
             }
 		});
 		
@@ -118,7 +118,7 @@ sap.ui.jsview("pages.streams.ManagedStreams", {
                                                 if (iStreamCount > 0) {
                                                     iomy.common.NavigationChangePage("pAddStream",  {} , false);
                                                 } else {
-                                                    iomy.common.showInformation("You need to first create an Onvif Stream to manage one.", "No Onvif Streams.");
+                                                    iomy.common.showInformation("You need to create an Onvif stream first to manage one.", "No Onvif Streams.");
                                                 }
                                             }
                                         }),
