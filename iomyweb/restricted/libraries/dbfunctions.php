@@ -358,7 +358,7 @@ function dbAddPresetLogToPremiseLog( $iUserId, $iPresetLogActionId, $iUTS, $iPre
 	//--------------------------------------------//
 	if($bError===false) {
 		return $aResultInsert;
-
+	
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>"Insert PremiseLog: ".$sErrMesg );
 	}

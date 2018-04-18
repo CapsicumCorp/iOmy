@@ -98,7 +98,6 @@ if($bError===false) {
 		if( 
 			$sPostMode!=="LookupStreams"        && $sPostMode!=="AddStream"            &&
 			$sPostMode!=="EditStream"           
-			
 		) {
 			$bError = true;
 			$sErrMesg .= "Error Code:'0101' \n";
@@ -258,14 +257,12 @@ if($bError===false) {
 				$sErrMesg .= "Problem looking up the Info for the selected Hub.\n";
 				$sErrMesg .= $aHubData['ErrMesg'];
 			}
-			
 		}
 		
 		//------------------------------------------------------------//
 		//-- 3.2 - Extract values from the 'Data' JSON Parameter    --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
-			
 			//----------------------------------------------------//
 			//-- 3.2.1 - Extract 'Name'                         --//
 			//----------------------------------------------------//
@@ -444,7 +441,7 @@ if($bError===false) {
 		
 		
 		//------------------------------------------------------------//
-		//-- 3.2 - Lookup the ThingId                               --//
+		//-- 3.3 - Lookup the ThingId                               --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
 			if( $sPostMode==="AddStream" ) {
@@ -462,7 +459,6 @@ if($bError===false) {
 							$sErrMesg .= $aThingData['ErrMesg'];
 						}
 					}
-					
 				} catch( Exception $e0230 ) {
 					$bError = true;
 					$iErrCode  = 230;
@@ -473,14 +469,16 @@ if($bError===false) {
 		}
 		
 		//------------------------------------------------------------//
-		//-- 3.3 - Lookup the Managed Stream Id                     --//
+		//-- 3.4 - Lookup the Managed Stream Id                     --//
 		//------------------------------------------------------------//
 		if( $bError===false ) {
 			if( $sPostMode==="EditStream" ) {
 				try {
-					$aFunctionTemp2 = WatchInputsGetManagedCameraStreamFromStreamId( $iPostStreamId );
+					$aStreamInfoTemp = WatchInputsGetManagedCameraStreamFromStreamId( $iPostStreamId );
 					
-					if( $aFunctionTemp2['Error']===true ) {
+					if( $aStreamInfoTemp['Error']===false ) {
+						$iPostThingId = $aStreamInfoTemp['Data']['ThingId'];
+					} else {
 						$bError    = true;
 						$iErrCode  = 3201;
 						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
@@ -492,11 +490,12 @@ if($bError===false) {
 				} catch( Exception $e0240 ) {
 					$bError = true;
 					$iErrCode  = 240;
-					$sErrMesg .= "Error Code:'' \n";
-					$sErrMesg .= "Error: \n";
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Critical Error: Problem occurred trying to lookup the WatchInputs cameralib managed stream!\n";
 				}
 			}
 		}
+		
 	} catch( Exception $e0200 ) {
 		$bError    = true;
 		$iErrCode  = 200;
@@ -553,7 +552,10 @@ if( $bError===false ) {
 							$oTelnet->WriteArray( array( "quit\n" ) );
 							$oTelnet->FetchRows( "normal", 128, 1, true );
 							
-						} 
+						} else {
+							//-- No Results from Telnet due to an error --//
+							$aFunctionTemp2 = array();
+						}
 					} catch( Exception $e1410 ) {
 						//-- Display an Error Message --//
 						$bError    = true;
@@ -652,7 +654,6 @@ if( $bError===false ) {
 								"Capturing"       => "",
 								"InWatchInputs"   => false
 							);
-							
 						}
 						
 					}	//-- ENDFOREACH Database Stream --//
@@ -699,9 +700,25 @@ if( $bError===false ) {
 					}
 				}
 				
+				//--------------------------------------------------------------------//
+				//-- 5.2.3 - Update the IO to indicate the new Status               --//
+				//--------------------------------------------------------------------//
+				if( $bError===false ) {
+					$aIOTemp = WatchInputsManagedStreamUpdateIOValue( $iPostThingId, $iPostEnabled );
+					
+					if( $aIOTemp['Error']===true ) {
+						$bError    = true;
+						$iErrCode  = 2404;
+						$sErrMesg .= "Error Code:'2404' \n";
+						$sErrMesg .= "Problem when attempting to update the Stream IO Value. \n";
+						$sErrMesg .= $aIOTemp['ErrMesg'];
+					}
+				}
+				
 			} catch( Exception $e2400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
+				$iErrCode  = 2400;
 				$sErrMesg .= "Error Code:'2400' \n";
 				$sErrMesg .= $e2400->getMessage();
 			}
@@ -724,14 +741,30 @@ if( $bError===false ) {
 						$sErrMesg .= "Problem editing WatchInputs cameralib managed stream!\n";
 						$sErrMesg .= $aResult['ErrMesg'];
 					}
+				}
+				
+				//--------------------------------------------------------------------//
+				//-- 5.3.3 - Update the IO Value                                    --//
+				//--------------------------------------------------------------------//
+				if( $bError===false ) {
+					$aIOTemp = WatchInputsManagedStreamUpdateIOValue( $iPostThingId, $iPostEnabled );
 					
+					if( $aIOTemp['Error']===true ) {
+						$bError    = true;
+						$sErrMesg .= "Error Code:'3404' \n";
+						$sErrMesg .= "Problem when attempting to update the Stream IO Value. \n";
+						$sErrMesg .= $aIOTemp['ErrMesg'];
+					}
+				}
+				
+				//--------------------------------------------------------------------//
+				//-- 5.3.4 - Add current details to the results                     --//
+				//--------------------------------------------------------------------//
+				if( $bError===false ) {
+					$aFunctionTemp3 = WatchInputsGetManagedCameraStreamFromStreamId( $iPostStreamId );
 					
-					if( $bError===false ) {
-						$aFunctionTemp3 = WatchInputsGetManagedCameraStreamFromStreamId( $iPostStreamId );
-						
-						if( $aFunctionTemp3['Error']===false ) {
-							$aResult['Data'] = $aFunctionTemp3['Data'];
-						}
+					if( $aFunctionTemp3['Error']===false ) {
+						$aResult['Data'] = $aFunctionTemp3['Data'];
 					}
 				}
 				

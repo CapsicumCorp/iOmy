@@ -208,6 +208,9 @@ function LookupFunctionConstant( $sValue ) {
 		case "OnvifThumbnailUrlRSTypeId":
 			return 3973;
 			
+		case "WatchInputsManagedStreamRSTypeId":
+			return 3980;
+			
 		case "ModeRSTypeId":
 			return 3995;
 			
@@ -4636,6 +4639,91 @@ function WatchInputsManagedStreamEdit( $iStreamId, $sName, $iEnabled ) {
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
 	}
 }
+
+function WatchInputsManagedStreamUpdateIOValue( $iThingId, $iEnabled ) {
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	$bIOMatchFound      = false;        //-- BOOLEAN:   --//
+	$iIOId              = 0;            //-- INTEGER:   --//
+	$aIOListTemp        = array();      //-- ARRAY:     --//
+	
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	$iRSTypeId  = LookupFunctionConstant('WatchInputsManagedStreamRSTypeId');
+	
+	
+	
+	//------------------------------------------------------------//
+	//-- 3.0 - Lookup the IO                                    --//
+	//------------------------------------------------------------//
+	//-- Lookup all the IOs for the device --//
+	if( $bError===false ) {
+		$aIOListTemp = GetIOsFromThingId( $iThingId );
+		
+		if( $aIOListTemp['Error']===false ) {
+			if( count( $aIOListTemp['Data'] )>=1 ) {
+				foreach( $aIOListTemp['Data'] as $aIO ) {
+					
+					if( $aIO['RSTypeId']===$iRSTypeId ) {
+						$bIOMatchFound = true;
+						$iIOId = $aIO['IOId'];
+					}
+				}    //-- ENDFOREACH --//
+			}
+		} else {
+			//-- ERROR:  --//
+			$bError    = true;
+			$sErrMesg .= "Problem looking up the IOs on the desired Thing!\n";
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- 4.0 - Insert the IO (if missing)                       --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		if( $bIOMatchFound===false ) {
+			$aInsertIO = dbAddNewIO( $iThingId, $iRSTypeId, 1, 1, 1, -1, -1, -1, 1, "WatchInputsManaged", false );
+			
+			if( $aInsertIO['Error']===false ) {
+				$iIOId = $aInsertIO['LastId'];
+			} else {
+				$bError = true;
+				$sErrMesg .= "Problem inserting a new IO for the desired Thing!\n";
+			}
+			
+			//var_dump( $aInsertIO );
+		}
+	}
+	
+	
+	//------------------------------------------------------------//
+	//-- 6.0 - Insert the New IO Value                          --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		$iUTS = time();
+		
+		$aResult = InsertNewIODataValue( $iIOId, $iUTS, $iEnabled, false );
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return $aResult;
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
 
 
 //========================================================================================================================//
