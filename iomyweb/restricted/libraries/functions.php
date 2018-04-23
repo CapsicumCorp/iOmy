@@ -2824,6 +2824,20 @@ function WatchInputsHubRetrieveInfoAndPermission($iHubId) {
 	return $aResult;
 }
 
+
+function GetHubSecDetails( $iHubId ) {
+	$aResult = dbGetHubSecDetails( $iHubId );
+	
+	if( $aResult["Error"]===true ) {
+		//-- Display an Error --//
+		$aResult = array( "Error"=>true, "ErrMesg"=>"Hub wasn't found! \nHub either doesn't exist or you do not have permission to access it!\n" );
+		
+	}
+	
+	//-- Return the results --//
+	return $aResult;
+}
+
 //========================================================================================================================//
 //== #8.0# - Comm Functions                                                                                             ==//
 //========================================================================================================================//
@@ -6079,7 +6093,7 @@ function recursive_array_search( $sSearchString, $aArrayToSearch, $bCaseSensitiv
 						}
 						
 					//-- ELSEIF there is only a name and no namespace --//
-					} else if( isset($aSoapElement[1]) ) {
+					} else if( isset($aSoapElement[0]) ) {
 						
 						//--------------------------------//
 						//-- CASE IN-SENSITIVE          --//
@@ -6680,6 +6694,10 @@ function RebuildTheURL( $aUrlParameters ) {
 	}
 	
 }
+
+
+
+
 
 
 ?>

@@ -275,6 +275,9 @@ if( $bError===false ) {
 		if( $bError===false ) {
 			if( $sPostMode==="TurnOnZigbeeJoinMode" || $sPostMode==="GetRapidHAInfo" || $sPostMode==="CustomTelnetCommand" || $sPostMode==="RapidHAFormNetwork" ) {
 				try {
+					//------------------------------------------------//
+					//-- Retrieve Hub Information                   --//
+					//------------------------------------------------//
 					$aHubData = HubRetrieveInfoAndPermission( $iPostHubId );
 					
 					if( $aHubData['Error']===false ) {
@@ -291,6 +294,7 @@ if( $bError===false ) {
 							$sErrMesg .= "Error Code:'0211' \n";
 							$sErrMesg .= "The HubType is not supported by this API.\n";
 							$sErrMesg .= "Please use a valid HubId of a supported Hub (Android WatchInputs).\n";
+							
 						} else if( $sHubIPAddress===false || $sHubIPAddress===null || $sHubIPAddress==="" || strlen($sHubIPAddress)<2 ) {
 							$bError = true;
 							$iErrCode  = 212;
@@ -301,6 +305,28 @@ if( $bError===false ) {
 						
 						//var_dump( $aHubData['Data'] );
 						
+						//------------------------------------------------//
+						//-- Lookup Hub Security                        --//
+						//------------------------------------------------//
+						if( $bError===false ) {
+							$aHubSecTemp = GetHubSecDetails( $iPostHubId );
+							
+							if( $aHubSecTemp['Error']===false ) {
+								//-- Extract the Username and Password --//
+								$aHubTelnetOptions = array(
+									"Username" => $aHubSecTemp['Data']['HubSecUsername'],
+									"Password" => $aHubSecTemp['Data']['HubSecPassword']
+								);
+								
+							} else {
+								//-- ERROR --//
+								$bError    = true;
+								$iErrCode  = 215;
+								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+								$sErrMesg .= "Problem looking up the Hub Security Info!";
+								//$sErrMesg .= "";
+							}
+						} //-- ENDIF No Errors (Hubsec) --//
 					} else {
 						$bError    = true;
 						$iErrCode  = 213;
@@ -308,6 +334,7 @@ if( $bError===false ) {
 						$sErrMesg .= "Problem looking up the Info for the selected Hub.\n";
 						$sErrMesg .= $aHubData['ErrMesg'];
 					}
+					
 				} catch( Exception $e0214 ) {
 					$bError = true;
 					$iErrCode  = 214;
@@ -317,6 +344,7 @@ if( $bError===false ) {
 				}
 			}
 		}
+		
 	} catch( Exception $e0200 ) {
 		$bError = true;
 		$iErrCode  = 200;
@@ -351,7 +379,7 @@ if( $bError===false ) {
 				//----------------------------//
 				//-- RapidHA Info           --//
 				//----------------------------//
-				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
+				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0, $aHubTelnetOptions );
 				if( $oTelnet->bInitialised===true ) {
 					$oTelnet->WriteArray( array( "get_rapidha_info\n", "quit\n" ) );
 					$aResult['Data']['RapidHAInfo'] = $oTelnet->FetchRows( "normal", 128, 5, true );
@@ -366,7 +394,7 @@ if( $bError===false ) {
 				//----------------------------//
 				//-- Zigbee Info            --//
 				//----------------------------//
-				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
+				$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0, $aHubTelnetOptions );
 				if( $oTelnet->bInitialised===true ) {
 					$oTelnet->WriteArray( array( "get_zigbee_info\n", "quit\n" ) );
 					$aResult['Data']['ZigbeeInfo'] = $oTelnet->FetchRows( "normal", 128, 5, true );
@@ -410,7 +438,7 @@ if( $bError===false ) {
 						//----------------------------//
 						//-- RapidHA Info           --//
 						//----------------------------//
-						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
+						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0, $aHubTelnetOptions );
 						if( $oTelnet->bInitialised===true ) {
 							$oTelnet->WriteArray( array( "zigbee_enable_tempjoin ".$sCommAddress."\n", "quit\n" ) );
 							$aResult['Data']['JoinMode'] = $oTelnet->FetchRows( "normal", 128, 5, true );
@@ -464,7 +492,7 @@ if( $bError===false ) {
 					//----------------------------//
 					//-- RapidHA Info           --//
 					//----------------------------//
-					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
+					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0, $aHubTelnetOptions );
 					if( $oTelnet->bInitialised===true ) {
 						$oTelnet->WriteArray( array( "get_rapidha_info\n", "quit\n" ) );
 						$aTempFunctionResult1 = $oTelnet->FetchRows( "normal", 128, 5, true );
@@ -535,7 +563,7 @@ if( $bError===false ) {
 						//----------------------------//
 						//-- Form a Network         --//
 						//----------------------------//
-						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
+						$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0, $aHubTelnetOptions );
 						if( $oTelnet->bInitialised===true ) {
 							$oTelnet->WriteArray( array( "rapidha_form_network ".$sCommAddress."\n", "quit\n" ) );
 							$aResult['Data']['FormNetwork'] = $oTelnet->FetchRows( "normal", 128, 5, true );
@@ -582,7 +610,8 @@ if( $bError===false ) {
 					//----------------------------------------------------------------//
 					//-- Custom Command                                             --//
 					//----------------------------------------------------------------//
-					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0 );
+					$oTelnet = new PHPTelnet( $sHubIPAddress, 64932, "WatchInputs", 0, $aHubTelnetOptions );
+					
 					if( $oTelnet->bInitialised===true ) {
 						
 						//----------------------------//

@@ -52,11 +52,11 @@
 //== #1.0# - Functions to lookup View names                                                                             ==//
 //========================================================================================================================//
 
-//--------------------------------------------//
-//-- #1.1# - Data Views                     --//
-//--------------------------------------------//
-//-- Used to lookup the data view names     --//
-//--------------------------------------------//
+//----------------------------------------------------------------//
+//-- #1.1# - Data Views                                         --//
+//----------------------------------------------------------------//
+//-- Used to lookup the data view names                         --//
+//----------------------------------------------------------------//
 function DataViewName($sViewCategory, $sViewType) {
 	//----------------------------------------//
 	//-- 1.0 - Declare Variables            --//
@@ -4624,6 +4624,104 @@ function dbWatchInputsHubRetrieveInfoAndPermission( $iHubId ) {
 		return array( "Error"=>false, "Data"=>$aResult["Data"] );
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>"WatchInputsGetPremiseInfoFromId: ".$sErrMesg );
+	}
+}
+
+
+function dbGetHubSecDetails( $iHubId ) {
+	//----------------------------------------//
+	//-- 1.0 - Declare Variables            --//
+	//----------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	//-- 1.2 - Other Varirables --//
+	$aResult            = array();      //-- ARRAY:     --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions. --//
+	$bError             = false;        //-- BOOLEAN:   --//
+	$sErrMesg           = "";           //-- STRING:    --//
+	$sView              = "";           //-- STRING:    --//
+	$aInputVals         = array();      //-- ARRAY:     SQL bind input parameters. --//
+	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
+	
+	
+	//----------------------------------------//
+	//-- 2.0 - SQL Preperation              --//
+	//----------------------------------------//
+	if( $bError===false) {
+		try {
+			$sDBSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT \n";
+			$sSQL .= "    `HUB_PK`, \n";
+			$sSQL .= "    `HUB_PREMISE_FK`, \n";
+			$sSQL .= "    `HUB_NAME`, \n";
+			$sSQL .= "    `HUB_SERIALNUMBER`, \n";
+			$sSQL .= "    `HUB_IPADDRESS`, \n";
+			$sSQL .= "    `HUBTYPE_PK`, \n";
+			$sSQL .= "    `HUBSEC_PK`, \n";
+			$sSQL .= "    `HUBSEC_USERNAME`, \n";
+			$sSQL .= "    `HUBSEC_PASSWORD` \n";
+			$sSQL .= "FROM `".$sDBSchema."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sDBSchema."`.`PERMPREMISE` ON `USERS_PK`=`PERMPREMISE_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBSchema."`.`PREMISE` ON `PREMISE_PK`=`PERMPREMISE_PREMISE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBSchema."`.`HUB` ON `PREMISE_PK`=`HUB_PREMISE_FK` \n";
+			$sSQL .= "INNER JOIN `".$sDBSchema."`.`HUBTYPE` ON `HUB_HUBTYPE_FK`=`HUBTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sDBSchema."`.`HUBSEC` ON `HUB_PK`=`HUBSEC_HUB_FK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `PERMPREMISE_READ` = 1 \n";
+			$sSQL .= "AND `HUB_PK` = :HubId ";
+			$sSQL .= "LIMIT 1 ";
+			
+			//-- Set the SQL Input Parameters --//
+			$aInputVals = array(
+				array( "Name"=>"HubId",     "type"=>"INT",      "value"=>$iHubId    )
+			);
+			
+			//-- Set the SQL Output Columns --//
+			$aOutputCols = array(
+				array( "Name"=>"HubId",                         "type"=>"INT" ),
+				array( "Name"=>"PremiseId",                     "type"=>"INT" ),
+				array( "Name"=>"HubName",                       "type"=>"STR" ),
+				array( "Name"=>"HubSerialCode",                 "type"=>"STR" ),
+				array( "Name"=>"HubIpaddress",                  "type"=>"STR" ),
+				array( "Name"=>"HubTypeId",                     "type"=>"INT" ),
+				array( "Name"=>"HubSecId",                      "type"=>"INT" ),
+				array( "Name"=>"HubSecUsername",                "type"=>"STR" ),
+				array( "Name"=>"HubSecPassword",                "type"=>"STR" )
+			);
+			
+			//-- Execute the SQL Query --//
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+			
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	//--------------------------------------------//
+	//-- 4.0 - Error Check                      --//
+	//--------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult["Error"]===true) {
+				$bError = true;
+				$sErrMesg = $aResult["ErrMesg"];
+			}
+		} catch( Exception $e) {
+			//-- TODO: Add a proper error message --//
+		}
+	}
+	
+	//--------------------------------------------//
+	//-- 5.0 - Return Results or Error Message  --//
+	//--------------------------------------------// 
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"dbGetHubSecDetails: ".$sErrMesg );
 	}
 }
 

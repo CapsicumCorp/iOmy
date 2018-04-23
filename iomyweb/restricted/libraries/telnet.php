@@ -28,14 +28,18 @@ class PHPTelnet {
 	protected $sNetworkPort         = '';           //-- STRING:        Used to hold the IP Port that is used for Telent.           --//
 	protected $sTelnetType          = '';           //-- STRING:        --//
 	protected $iDebuggingType       = 0;            //-- INTEGER:       This sets what DebuggingType to use. 0=None; 1=DebuggingArrayOnly; 2=OutputAll --//
-
+	protected $aOptions             = array();      //-- ARRAY:         --//
+	
+	protected $iSockErrNo           = 0;            //-- INTEGER:       --//
+	protected $sSockErrStr          = "";           //-- STRING:        --//
+	
 	protected $sDeviceOnvifUrl      = '';           //-- STRING:        --//
 	protected $iDeltaTime           = 0;            //-- INTEGER:       --//
 	protected $aDateAndTime         = array();      //-- ARRAY:         --//
 	
 	public $bInitialised            = false;        //-- BOOLEAN:       --//
 	public $aErrorMessges           = array();      //-- ARRAY:         --//
-	public $aDebbugingLogs          = array();      //-- ARRAY:         --//
+	public $aDebuggingLogs          = array();      //-- ARRAY:         --//
 	
 	
 	protected $oSocket              = null;         //-- OBJECT:        --//
@@ -45,36 +49,37 @@ class PHPTelnet {
 	//========================================================================================================================//
 	//== #2.0# - CONSTRUCT FUNCTIONS                                                                                        ==//
 	//========================================================================================================================//
-	public function __construct( $sIPAddress, $sIPPort="23", $sTelnetType="WatchInputs", $iDebuggingType=0 ) {
-		//----------------------------------------------------//
-		//-- 1 - Initialise                                 --//
-		//----------------------------------------------------//
+	public function __construct( $sIPAddress, $sIPPort="23", $sTelnetType="WatchInputs", $iDebuggingType=0, $aOptions=array() ) {
+		//----------------------------------------------------------------//
+		//-- 1.0 - Initialise                                           --//
+		//----------------------------------------------------------------//
 		
 		$iSockErrNo             = 0;
 		$sSockErrStr            = "";
 		
-		//----------------------------------------------------//
-		//-- 2 - Store certain construction parameters      --//
-		//----------------------------------------------------//
+		//----------------------------------------------------------------//
+		//-- 2.0 - Store certain construction parameters                --//
+		//----------------------------------------------------------------//
 		$this->sNetworkAddress  = $sIPAddress;
 		$this->sNetworkPort     = $sIPPort;
 		$this->sTelnetType      = $sTelnetType;
 		$this->iDebuggingType   = $iDebuggingType;
+		$this->aOptions         = $aOptions;
 		
 		//$this->sUsername        = $sUsername;
 		//$this->sPassword        = $sPassword;
 		
 		
-		//----------------------------------------------------//
-		//-- 3 - Begin                                      --//
-		//----------------------------------------------------//
+		//----------------------------------------------------------------//
+		//-- 3.0 - Begin                                                --//
+		//----------------------------------------------------------------//
 		try {
 			//------------------------------------//
 			//-- Setup the Socket Object        --//
 			//------------------------------------//
-			error_reporting(E_ALL ^ E_WARNING); 
+			error_reporting(E_ALL ^ E_WARNING);
 			
-			$this->oSocket = fsockopen( $sIPAddress, $sIPPort, $iSockErrNo, $sSockErrStr, 2 );
+			$this->oSocket = fsockopen( $sIPAddress, $sIPPort, $this->iSockErrNo, $this->sSockErrStr, 2 );
 			
 			
 			//-- Check that the Socket object is not false --//
@@ -82,7 +87,34 @@ class PHPTelnet {
 				
 				stream_set_blocking( $this->oSocket, 1 );
 				stream_set_timeout( $this->oSocket, 2 );
-				$this->bInitialised = true;
+				
+				//--------------------------------------------------------//
+				//-- IF Type is WatchInputs                             --//
+				//--------------------------------------------------------//
+				if( $this->sTelnetType==="WatchInputs" ) {
+					//-- Perform Login --//
+					$aLoginTemp = $this->FetchRows( "watchinputslogin", 64, 3, false, false );
+					
+					if( is_array( $aLoginTemp ) ) {
+						if( count( $aLoginTemp )>=1 ) {
+							$aLastOutput = array_slice( $aLoginTemp, -1 );
+							
+							if( isset( $aLastOutput[0] ) && $aLastOutput[0]===">") {
+								$this->bInitialised = true;
+							}
+						}
+					}
+					
+					//echo "\n^^^^^^^^^^^\n";
+					//var_dump( $aLoginTemp );
+					//echo "\n^^^^^^^^^^^\n";
+					
+				//--------------------------------------------------------//
+				//-- ELSE flag that this is initialised                 --//
+				//--------------------------------------------------------//
+				} else {
+					$this->bInitialised = true;
+				}
 				
 			} else {
 				//-- Error --//
@@ -113,7 +145,6 @@ class PHPTelnet {
 	
 	
 	public function AddToDebuggingLog( $aLog ) {
-		
 		try {
 			switch( $this->iDebuggingType ) {
 				//------------------------------------//
@@ -121,7 +152,7 @@ class PHPTelnet {
 				//------------------------------------//
 				case 1:
 					//-- Add to the Logs --//
-					$this->aDebbugingLogs[] = $aLog;
+					$this->aDebuggingLogs[] = $aLog;
 					
 					//-- Success --//
 					return true;
@@ -134,7 +165,7 @@ class PHPTelnet {
 				//------------------------------------//
 				case 2:
 					//-- Add to the Logs --//
-					$this->aDebbugingLogs[] = $aLog;
+					$this->aDebuggingLogs[] = $aLog;
 					
 					//-- Output the debugging --//
 					if( is_string( $aLog ) ) {
@@ -186,7 +217,7 @@ class PHPTelnet {
 		if( $this->bInitialised===true ) {
 			foreach( $aInputArray as $sInput ) {
 				//-- Write the output --//
-				$InputResult = fwrite ( $this->oSocket, $sInput );
+				$InputResult = fwrite( $this->oSocket, $sInput );
 				
 				//-- Add to the Debugging log --//
 				$this->AddToDebuggingLog( 
@@ -206,6 +237,7 @@ class PHPTelnet {
 				return true;
 			}
 		}
+		//-- TODO: Add an ELSE ErrMesg --//
 		
 		//------------------------------------//
 		//-- 9 - Return failure             --//
@@ -218,10 +250,10 @@ class PHPTelnet {
 	//========================================================================================================================//
 	
 	
-	//====================================================================//
-	//== #5.1# -    ==//
-	//====================================================================//
-	public function FetchRows( $sFetchType="normal", $iMaxCol=null, $iMaxRows=25, $bHideComments=false ) {
+	//========================================================================================//
+	//== #5.1# -                                                                            ==//
+	//========================================================================================//
+	public function FetchRows( $sFetchType="normal", $iMaxCol=null, $iMaxRows=25, $bHideComments=false, $bHideEndOfOutputChars=true ) {
 		//--------------------------------------------------------//
 		//-- 1.0 - Declare Variables                            --//
 		//--------------------------------------------------------//
@@ -272,7 +304,7 @@ class PHPTelnet {
 			try {
 				switch( $this->sTelnetType ) {
 					case "WatchInputs":
-						$aResult = $this->GetRowsWatchInputs( $sFetchType, $iMaxCol, $iMaxRows, $bHideComments );
+						$aResult = $this->GetRowsWatchInputs( $sFetchType, $iMaxCol, $iMaxRows, $bHideComments, $bHideEndOfOutputChars );
 						break;
 						
 					default:
@@ -305,10 +337,10 @@ class PHPTelnet {
 	}
 	
 	
-	//====================================================================//
-	//== #5.2# - WatchInputs Variant                                    ==//
-	//====================================================================//
-	private function GetRowsWatchInputs( $sFetchType, $iMaxCol, $iMaxRows, $bHideComments ) {
+	//========================================================================================//
+	//== #5.2# - WatchInputs Variant                                                        ==//
+	//========================================================================================//
+	private function GetRowsWatchInputs( $sFetchType, $iMaxCol, $iMaxRows, $bHideComments, $bHideEndOfOutputChars ) {
 		//--------------------------------------------------------------------//
 		//-- 1.0 - Declare Variables                                        --//
 		//--------------------------------------------------------------------//
@@ -329,11 +361,14 @@ class PHPTelnet {
 		//--------------------------------------------------------------------//
 		//-- 5.0 - Fetch Data                                               --//
 		//--------------------------------------------------------------------//
-		while( !feof( $this->oSocket ) && $j<=$iMaxRows && $bFinished===false ) {
+		while( 
+			!feof( $this->oSocket )   && 
+			$j<=$iMaxRows             && 
+			$bFinished===false 
+		) {
 			
 			//-- Fetch the output --//
 			$sOutput = fgets( $this->oSocket, $iMaxCol )."\n";
-			
 			
 			//-- If output isn't false --//
 			if( $sOutput!==false ) {
@@ -348,34 +383,71 @@ class PHPTelnet {
 				$sFilteredOutput = filter_var( $sTrimedOutput, FILTER_UNSAFE_RAW, array( 'flags' => FILTER_FLAG_STRIP_LOW|FILTER_FLAG_STRIP_HIGH ) );
 				
 				//--------------------------------------------//
-				//-- STEP 3 - Remove GreaterThan symbols    --//
+				//-- STEP 3 - Perform FetchType Checks      --//
 				//--------------------------------------------//
-				if( $sFilteredOutput==="> logout" ) {
-					$sFilteredOutput = "";
+				if( $sFetchType==="watchinputslogin" ) {
 					
-					//-- Add to the debugging log --//
-					$this->AddToDebuggingLog(
-						array(
-							"Type"   => "Debug",
-							"Mesg"   => "Hide the logout message!"
-						)
-					);
+					if( $sFilteredOutput==="Username:" ) {
+						if( isset( $this->aOptions['Username'] ) ) {
+							$bResult1 = fwrite ( $this->oSocket, $this->aOptions['Username']."\n" );
+							$this->AddToDebuggingLog(
+								array(
+									"Type"   => "Output",
+									"Mesg"   => "Writing username!"
+								)
+							);
+						}
+						
+						
+					} else if( $sFilteredOutput==="Password:" ) {
+						if( isset( $this->aOptions['Password'] ) ) {
+							$bResult2 = fwrite ( $this->oSocket, $this->aOptions['Password']."\n" );
+							
+							$this->AddToDebuggingLog(
+								array(
+									"Type"   => "Output",
+									"Mesg"   => "Writing password!"
+								)
+							);
+						}
+					}
+				}
+				
+				
+				//--------------------------------------------//
+				//-- STEP 5 - Remove GreaterThan symbols    --//
+				//--------------------------------------------//
+				if( $bHideEndOfOutputChars===true ) {
+					if( $sFilteredOutput==="> logout" ) {
+						$sFilteredOutput = "";
+						
+						//-- Add to the debugging log --//
+						$this->AddToDebuggingLog(
+							array(
+								"Type"   => "Debug",
+								"Mesg"   => "Hide the logout message!"
+							)
+						);
+						
+					} else if( substr($sFilteredOutput, 0, 2)==='> ' ) {
+						$bFinished = true;
+						
+						//-- Add to the Result --//
+						$sFilteredOutput = substr( $sFilteredOutput, 2 );
+						
+					} else if( $sFilteredOutput==='>' ) {
+						$bFinished = true;
+						$sFilteredOutput = "";
+					}
 					
-				} else if( substr($sFilteredOutput, 0, 2)==='> ' ) {
+				} else if( substr($sFilteredOutput, 0, 1)==='>' ) {
 					$bFinished = true;
-					
-					//-- Add to the Result --//
-					$sFilteredOutput = substr( $sFilteredOutput, 2 );
-					
-				} else if( $sFilteredOutput==='>' ) {
-					$bFinished = true;
-					$sFilteredOutput = "";
 				}
 				
 				//--------------------------------------------//
-				//-- STEP 4 - Return the Results            --//
+				//-- STEP 6 - Return the Results            --//
 				//--------------------------------------------//
-				if( !empty($sFilteredOutput) ) {
+				if( !empty($sFilteredOutput)  ) {
 					//------------------------------------------------------------//
 					//-- IF Comment and filter out is enabled                   --//
 					//------------------------------------------------------------//
@@ -432,8 +504,6 @@ class PHPTelnet {
 			}
 		}
 		
-		
-		
 		//--------------------------------------------------------------------//
 		//-- 9.0 - Return the Results                                       --//
 		//--------------------------------------------------------------------//
@@ -451,8 +521,6 @@ class PHPTelnet {
 			return false;
 		}
 	}
-	
-	
 }
 
 
