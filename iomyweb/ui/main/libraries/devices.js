@@ -85,11 +85,10 @@ $.extend(iomy.devices,{
     },
     
     /**
-     * Returns the current on/off status of a given device in the form of "On"
-     * or "Off".
+     * Returns whether the device is on (1) or off (0).
      * 
      * @param {type} iThingId               ID of the device.
-     * @returns {String} Human-readable status
+     * @returns {number} Status             Numerical representation.
      */
     GetDeviceState : function (iThingId) {
         var iStatus;
@@ -1058,6 +1057,89 @@ $.extend(iomy.devices,{
         }
         
         return vCameraList;
+    },
+    
+    getManagedStreamList : function (mSettings) {
+        var bError              = false;
+        var aErrorMessages      = [];
+        
+        var fnSuccess   = function () {};
+        var fnFail      = function () {};
+        var iHubId      = iomy.common.LookupFirstHubToUseWithTelnet();
+        
+        //--------------------------------------------------------------------//
+        // Process the parameter map
+        //--------------------------------------------------------------------//
+        if (mSettings !== undefined && mSettings !== null) {
+            
+            if (mSettings.onSuccess !== undefined && mSettings.onSuccess !== null) {
+                fnSuccess = mSettings.onSuccess;
+                
+                if (typeof fnSuccess !== "function") {
+                    fnAppendError("Success callback is not a function. Found '"+typeof fnSuccess+"' instead.");
+                }
+            }
+            
+            if (mSettings.onFail !== undefined && mSettings.onFail !== null) {
+                fnFail = mSettings.onFail;
+                
+                if (typeof fnFail !== "function") {
+                    fnAppendError("Failure callback is not a function. Found '"+typeof fnFail+"' instead.");
+                }
+            }
+            
+            if (bError) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n\n"));
+            }
+            
+        }
+        
+        //--------------------------------------------------------------------//
+        // Attempt to look up the streams.
+        //--------------------------------------------------------------------//
+        try {
+            if (iHubId == 0) {
+                throw new PermissionException("You have no permission to access the managed stream list.");
+            }
+            
+            iomy.apiphp.AjaxRequest({
+                url     : iomy.apiphp.APILocation("managedstreams"),
+                data    : {
+                    "Mode" : "LookupStreams",
+                    "Id" : iHubId
+                },
+                
+                onSuccess : function (sType, mData) {
+                    try {
+                        if (sType === "JSON") {
+                            if (mData.Error !== true) {
+                                fnSuccess(mData.Data);
+                            } else {
+                                fnFail(mData.ErrMesg);
+                            }
+                        } else {
+                            fnFail("Error fetching managed stream list: response type should be 'json'. Received " + sType);
+                        }
+                        
+                    } catch (e) {
+                        var sError = "Error occurred in the success callback ("+e.name+"): " + e.message;
+                        $.sap.log.error(sError);
+                        fnFail(sError);
+                    }
+                },
+                
+                onFail : function (response) {
+                    var sError = "Error occurred while looking up streams: " + response.responseText;
+                    $.sap.log.error(sError);
+                    fnFail(sError);
+                }
+            });
+            
+        } catch (e) {
+            var sError = "Error occurred attempting to run the stream list request ("+e.name+"): " + e.message;
+            $.sap.log.error(sError);
+            fnFail(sError);
+        }
     },
     
     getHexOfLightColour : function (mSettings) {

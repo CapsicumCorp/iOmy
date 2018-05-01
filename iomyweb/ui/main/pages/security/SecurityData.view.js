@@ -67,13 +67,9 @@ sap.ui.jsview("pages.security.SecurityData", {
                                     text: "Stream",
                                     icon : "sap-icon://video",
                                     content : [
-                                        new sap.m.Carousel ({
-                                            pages: [
-                                                new sap.m.Image ({
-                                                    src:"{/data/streamUrl}"
-                                                }) 
-                                            ]
-                                        }) 
+                                        new sap.m.Carousel (oView.createId("streamTab"), {
+                                            pages: []
+                                        })
                                     ]
                                 }),
                                 new sap.m.IconTabFilter({

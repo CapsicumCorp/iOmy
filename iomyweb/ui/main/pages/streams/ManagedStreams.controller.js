@@ -82,7 +82,6 @@ sap.ui.controller("pages.streams.ManagedStreams", {
     
     LoadStreams : function () {
         var oController = this;
-        var iHubId      = iomy.common.LookupFirstHubToUseWithTelnet();
         
         oController.ToggleControls(false);
         
@@ -90,26 +89,17 @@ sap.ui.controller("pages.streams.ManagedStreams", {
         // Attempt to look up the streams.
         //--------------------------------------------------------------------//
         try {
-            if (iHubId == 0) {
-                throw new PermissionException("You have no permission to access the managed stream list.");
-            }
             
-            iomy.apiphp.AjaxRequest({
-                url     : iomy.apiphp.APILocation("managedstreams"),
-                data    : {
-                    "Mode" : "LookupStreams",
-                    "Id" : iHubId
-                },
-                
-                onSuccess : function (sType, mData) {
+            iomy.devices.getManagedStreamList({
+                onSuccess : function (aData) {
                     try {
                         oController.aStreams = [];
                         
                         //--------------------------------------------------------------------//
                         // Process the list of streams to be used for the model.
                         //--------------------------------------------------------------------//
-                        for (var i = 0; i < mData.Data.length; i++) {
-                            var mStream = mData.Data[i];
+                        for (var i = 0; i < aData.length; i++) {
+                            var mStream = aData[i];
                             var sStateText = "Disabled";
                             var mTemp      = {};
 
@@ -139,10 +129,10 @@ sap.ui.controller("pages.streams.ManagedStreams", {
                     }
                 },
                 
-                onFail : function (response) {
-                    $.sap.log.error("Error occurred while looking up streams: " + response.responseText);
+                onFail : function (sErrorMessage) {
+                    $.sap.log.error("Error occurred while looking up streams: " + sErrorMessage);
                     
-                    iomy.common.showError(response.responseText, "Error",
+                    iomy.common.showError(sErrorMessage, "Error",
                         function () {
                             oController.ToggleControls(true);
                         }
