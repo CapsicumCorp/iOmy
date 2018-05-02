@@ -1,5 +1,5 @@
 <?php
-	
+
 	//----------------------------------------------------//
 	//-- 1.0 - Declare Variables                        --//
 	//----------------------------------------------------//
@@ -40,9 +40,19 @@
 		<link href="resources/css/video-js.css" rel="stylesheet" />
 		<script src="resources/js/video.js"></script>
 		<script src="resources/js/videojs-contrib-hls.js"></script>
+        
+        <!--
+        I've added this to correct the width of the video stream being displayed.
+        -->
+        <style>
+            .my_video_1-dimensions {
+                width: 100%;
+                height: 268px;
+            }
+        </style>
 	</head>
 	<body>
-		<video id="my_video_1" class="video-js vjs-default-skin" controls autoplay preload="auto" width="640" height="268" data-setup='{}'>
+		<video id="my_video_1" class="video-js vjs-default-skin" controls autoplay preload="auto" width="100%" height="268" data-setup='{}'>
 			<source src="<?php echo $sURL; ?>" type="application/x-mpegURL" />
 		</video>
 	</body>

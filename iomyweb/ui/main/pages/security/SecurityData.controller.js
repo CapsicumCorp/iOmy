@@ -53,6 +53,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 iDeviceType = iomy.common.ThingList["_"+oController.iCameraId].TypeId;
                 oController.RefreshModel();
                 
+                oController.iCameraTypeId = iDeviceType;
                 oController.LoadStream();
                 
                 switch (iDeviceType) {
@@ -62,7 +63,6 @@ sap.ui.controller("pages.security.SecurityData", {
                         
                 }
                 
-                oController.iCameraTypeId = iDeviceType;
 			}
 		});
 			
@@ -116,26 +116,24 @@ sap.ui.controller("pages.security.SecurityData", {
     },
     
     LoadStream : function () {
-        var oController = this;
-        var oView       = this.getView();
-        var oModel      = oView.getModel();
+        var oController     = this;
+        var oView           = this.getView();
+        var oModel          = oView.getModel();
+        var sErrorMessage   = "Onvif streams need to be managed before viewing a stream.";
         
         try {
-            oView.byId("streamTab").removeAllContent();
+            oView.byId("streamTab").removeAllPages();
             
             switch (oController.iCameraTypeId) {
                 case iomy.devices.ipcamera.ThingTypeId:
                     //--------------------------------------------------------//
                     // Create the content of the stream tab.
                     //--------------------------------------------------------//
-                    oView.byId("streamTab").loadPage(
-                        new sap.m.Carousel ({
-                            pages: [
-                                new sap.m.Image ({
-                                    src:"{/data/streamUrl}"
-                                })
-                            ]
-                        }) 
+                    oView.byId("streamTab").addPage(
+                        new sap.m.Image ({
+                            densityAware : false,
+                            src:"{/data/streamUrl}"
+                        })
                     );
                 
                     //--------------------------------------------------------//
@@ -157,75 +155,96 @@ sap.ui.controller("pages.security.SecurityData", {
                     break; // The all-important break.
                     
                 case iomy.devices.onvif.ThingTypeId:
-                    //--------------------------------------------------------//
-                    // Generate a list of managed streams.
-                    //--------------------------------------------------------//
-                    iomy.devices.getManagedStreamList({
-                        
-                        onSuccess : function (aData) {
-                            //--------------------------------------------------------------------//
-                            // Process the list of streams to see if the Onvif stream is managed.
-                            //--------------------------------------------------------------------//
-                            var bManagedStream  = false;
-                            
-                            for (var i = 0; i < aData.length; i++) {
-                                var mStream         = aData[i];
-                                
-                                if (mStream.ThingId === oController.iCameraId) {
-                                    bManagedStream = true;
-                                    break;
+                    try {
+                        //--------------------------------------------------------//
+                        // Generate a list of managed streams.
+                        //--------------------------------------------------------//
+                        iomy.devices.getManagedStreamList({
+
+                            onSuccess : function (aData) {
+                                //--------------------------------------------------------------------//
+                                // Process the list of streams to see if the Onvif stream is managed.
+                                //--------------------------------------------------------------------//
+                                var bManagedStream  = false;
+
+                                for (var i = 0; i < aData.length; i++) {
+                                    var mStream         = aData[i];
+
+                                    if (mStream.ThingId === oController.iCameraId) {
+                                        bManagedStream = true;
+                                        break;
+                                    }
                                 }
-                            }
-                            
-                            if (bManagedStream) {
-                                //--------------------------------------------------------//
-                                // Create the content of the stream tab.
-                                //--------------------------------------------------------//
-                                oView.byId("streamTab").loadPage(
-                                    new sap.ui.core.HTML({
-                                        preferDOM: true,
-                                        content: "{/data/videoContent}"
-                                    })
-                                );
 
-                                oModel.setProperty("/data/videoContent", "<iframe height='300px' width='100%' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iCameraId+"'></iframe>");
+                                if (bManagedStream) {
+                                    //--------------------------------------------------------//
+                                    // Create the content of the stream tab.
+                                    //--------------------------------------------------------//
+                                    oView.byId("streamTab").addPage(
+                                        new sap.ui.core.HTML({
+                                            preferDOM: true,
+                                            content: "{/data/videoContent}"
+                                        })
+                                    );
 
-                            } else {
-                                //--------------------------------------------------------//
-                                // Create a notice to add this camera to the managed stream
-                                // list.
-                                //--------------------------------------------------------//
-                                oView.byId("streamTab").loadPage(
-                                    new sap.m.ObjectListItem (oView.createId("entryManagedStream"), {
-                                        title: "To view this stream on this page, it needs to be managed. Press to manage it.",
-                                        type: "Active",
-                                        press : function () {
-                                            iomy.common.NavigationChangePage("pAddStream" , {} , false);
-                                        }
-                                    })
-                                );
+                                    oModel.setProperty("/data/videoContent", "<iframe height='300px' width='100%' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iCameraId+"'></iframe>");
+
+                                } else {
+                                    //--------------------------------------------------------//
+                                    // Create a notice to add this camera to the managed stream
+                                    // list.
+                                    //--------------------------------------------------------//
+                                    oView.byId("streamTab").addPage(
+                                        new sap.m.ObjectListItem ({
+                                            title: sErrorMessage,
+                                            type: "Active",
+                                            attributes : [
+                                                new sap.m.ObjectAttribute ({
+                                                    text: "Tap to manage this stream"
+                                                })
+                                            ],
+                                            press : function () {
+                                                iomy.common.NavigationChangePage("pAddStream" , { "ThingId" : oController.iCameraId } , false);
+                                            }
+                                        })
+                                    );
+                                }
+                            },
+
+                            onFail : function (response) {
+                                iomy.common.showError(response, "Error");
                             }
-                        },
-                        
-                        onFail : function (response) {
-                            iomy.common.showError(response, "Error");
+
+                        });
+                    } catch (e) {
+                        //--------------------------------------------------------//
+                        // Create a notice that the camera stream must be managed.
+                        //--------------------------------------------------------//
+                        if (e.name === "PermissionException") {
+                            oView.byId("streamTab").addPage(
+                                new sap.m.ObjectListItem ({
+                                    title: sErrorMessage
+                                })
+                            );
+
+                        } else {
+                            throw e; // Rethrow the exception because something else has gone wrong;
                         }
-                        
-                    });
+                    }
                     
                     break;
             }
         } catch (e) {
             //--------------------------------------------------------//
-            // Create a notice to add this camera to the managed stream
-            // list.
+            // Create a notice that the stream failed to load.
             //--------------------------------------------------------//
-            oView.byId("streamTab").addContent(
-                new sap.m.ObjectListItem (oView.createId("entryManagedStream"), {
-                    title: "To view this stream on this page, it needs to be managed."
+            oView.byId("streamTab").addPage(
+                new sap.m.ObjectListItem ({
+                    title: "Failed to load the stream"
                 })
             );
-            $.sap.log.error("Failed to load the stream URL: " + e.message);
+            
+            $.sap.log.error("Failed to load the stream: " + e.message);
         }
     }
 });

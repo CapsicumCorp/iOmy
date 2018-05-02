@@ -70,7 +70,7 @@ sap.ui.controller("pages.FFMPEG", {
         oData = {
             "title" : sTitle,
             "data" : {
-                "videoContent" : "<iframe height='300px' width='700' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iThingId+"'></iframe>"
+                "videoContent" : "<iframe height='300px' width='100%' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iThingId+"'></iframe>"
             }
         };
         

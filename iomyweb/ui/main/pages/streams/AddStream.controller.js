@@ -25,6 +25,8 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("pages.streams.AddStream", {
     bStreamsAvailable : false,
     mStream : null,
+    
+    iThingIdForAdd : null,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -46,6 +48,12 @@ sap.ui.controller("pages.streams.AddStream", {
                     oController.mStream = oEvent.data.Stream;
                 } else {
                     oController.mStream = null;
+                    
+                    if (oEvent.data.ThingId !== null && oEvent.data.ThingId !== undefined) {
+                        oController.iThingIdForAdd = oEvent.data.Stream;
+                    } else {
+                        oController.iThingIdForAdd = null;
+                    }
                 }
                 
                 oController.RefreshModel(oController, {});
@@ -78,6 +86,7 @@ sap.ui.controller("pages.streams.AddStream", {
         var sTitle          = "";
         var aStreams        = iomy.devices.onvif.getListOfOnvifStreams();
         var bEnabled        = true;
+        var iThingIdToUse   = 0;
         
         if (oController.mStream === null) {
             sTitle = "Add Managed Camera Stream";
@@ -131,9 +140,15 @@ sap.ui.controller("pages.streams.AddStream", {
                 "Enabled" : bEnabled
             };
         } else {
+            if (oController.iThingIdForAdd !== null) {
+                iThingIdToUse = oController.iThingIdForAdd;
+            } else {
+                iThingIdToUse = aStreams[0].ThingId;
+            }
+            
             oModelData.fields = {
                 "CameraType" : "1",
-                "SelectedCamera" : aStreams[0].ThingId,
+                "SelectedCamera" : iThingIdToUse,
                 "Name" : "",
                 "Enabled" : bEnabled
             };

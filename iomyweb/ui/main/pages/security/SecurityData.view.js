@@ -59,7 +59,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                         new sap.m.ObjectHeader({
                             title: "{/title}",
                             number: "{/count/thumbnails}",
-                            numberUnit: "Thumbnails",
+                            numberUnit: "Thumbnail",
                         }),
                         new sap.m.IconTabBar({
                             items : [
