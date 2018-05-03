@@ -183,12 +183,12 @@ sap.ui.controller("pages.server.DBIndex", {
         try {
             if (sDBUsername === "") {
                 bError = true;
-                aErrorMessages.push("Database username is required.");
+                aErrorMessages.push("Database root username is required.");
             }
 
             if (sDBPassword === "") {
                 bError = true;
-                aErrorMessages.push("Database password is required.");
+                aErrorMessages.push("Database root password is required. This is found in the settings in the app.");
             }
         } catch (e) {
             bError = true;
