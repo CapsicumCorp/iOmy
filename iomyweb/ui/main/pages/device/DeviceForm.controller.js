@@ -28,6 +28,9 @@ sap.ui.controller("pages.device.DeviceForm", {
     
     bEditExisting           : false,
     bLoadingOnvifProfiles   : false,
+    bSubmitting             : false,
+    bProfilesLoaded         : false,
+    bAcceptingInput         : false,
     bZigbeeCommandMenuOpen  : false,
     DeviceOptions           : null,
     iThingId                : null,
@@ -97,6 +100,8 @@ sap.ui.controller("pages.device.DeviceForm", {
                     oController.iPremiseId = null;
                 }
                 
+                oController.bAcceptingInput = false;
+                
                 oController.loadDeviceForm();
             }
             
@@ -160,6 +165,7 @@ sap.ui.controller("pages.device.DeviceForm", {
             //if (!oController.bDeviceOptionSelectorDrawn) {
                 var oSBox = iomy.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
                     selectedKey : "start",
+                    enabled : "{/enabled/Always}",
                     change : function () {
                         var DevTypeSelect = this;
                         var sDevType = DevTypeSelect.getSelectedKey();
@@ -183,37 +189,53 @@ sap.ui.controller("pages.device.DeviceForm", {
         oView.byId("JoinDevicesButton").setEnabled(bEnabled && iomy.devices.zigbeesmartplug.bZigbeeModemsFound);
     },
     
-    ToggleSubmitCancelButtons : function (bEnabled) {
-        var oView = this.getView();
+    ToggleControls : function (bEnabled) {
+        var oController = this;
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
         
-        oView.byId("ButtonSubmit").setEnabled(bEnabled);
-        oView.byId("ButtonCancel").setEnabled(bEnabled);
+        oModel.setProperty("/enabled/Always",                       bEnabled);
+        oModel.setProperty("/enabled/IfOnvifProfilesHaveLoaded",    bEnabled && !oController.bLoadingOnvifProfiles && !oController.bSubmitting);
+        oModel.setProperty("/enabled/IfAcceptingInput",             bEnabled && oController.bAcceptingInput);
+        oModel.setProperty("/enabled/IfOnvifCameraIsSelected",      bEnabled && oController.bOnvifCameraSelected);
+        oModel.setProperty("/enabled/IfOnvifProfilesFound",         bEnabled && oController.bOnvifCameraSelected && oController.bProfilesLoaded);
+        
+//        oView.byId("ButtonSubmit").setEnabled(bEnabled);
+//        oView.byId("ButtonCancel").setEnabled(bEnabled);
     },
     
     ToggleOnvifStreamControls : function (bEnabled) {
-        var oView = this.getView();
+        var oController = this;
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
         
-        oView.byId("SelectOnvifServer").setEnabled(bEnabled);
-        oView.byId("InputStreamName").setEnabled(bEnabled);
-        oView.byId("SelectStreamProfile").setEnabled(bEnabled);
-        oView.byId("SelectThumbnailProfile").setEnabled(bEnabled);
-        oView.byId("ButtonSubmit").setEnabled(bEnabled);
+        oModel.setProperty("/enabled/IfOnvifCameraIsSelected", bEnabled && oController.bOnvifCameraSelected);
+        
+//        oView.byId("SelectOnvifServer").setEnabled(bEnabled);
+//        oView.byId("InputStreamName").setEnabled(bEnabled);
+//        oView.byId("SelectStreamProfile").setEnabled(bEnabled);
+//        oView.byId("SelectThumbnailProfile").setEnabled(bEnabled);
+//        oView.byId("ButtonSubmit").setEnabled(bEnabled);
     },
     
     ToggleEditIPWebcamControls : function (bEnabled) {
-        var oView = this.getView();
+        var oController = this;
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
         
-        oView.byId("DeviceName").setEnabled(bEnabled);
-        oView.byId("DeviceRoom").setEnabled(bEnabled);
-        oView.byId("InputCamType").setEnabled(bEnabled);
-        oView.byId("InputIPProtocol").setEnabled(bEnabled);
-        oView.byId("InputIPAddress").setEnabled(bEnabled);
-        oView.byId("InputIPPort").setEnabled(bEnabled);
-        oView.byId("InputPath").setEnabled(bEnabled);
-        oView.byId("InputUsername").setEnabled(bEnabled);
-        oView.byId("InputPassword").setEnabled(bEnabled);
+        oModel.setProperty("/enabled/IfAcceptingInput", bEnabled && !oController.bLoadingOnvifProfiles);
         
-        this.ToggleSubmitCancelButtons(bEnabled);
+//        oView.byId("DeviceName").setEnabled(bEnabled);
+//        oView.byId("DeviceRoom").setEnabled(bEnabled);
+//        oView.byId("InputCamType").setEnabled(bEnabled);
+//        oView.byId("InputIPProtocol").setEnabled(bEnabled);
+//        oView.byId("InputIPAddress").setEnabled(bEnabled);
+//        oView.byId("InputIPPort").setEnabled(bEnabled);
+//        oView.byId("InputPath").setEnabled(bEnabled);
+//        oView.byId("InputUsername").setEnabled(bEnabled);
+//        oView.byId("InputPassword").setEnabled(bEnabled);
+        
+        this.ToggleControls(bEnabled);
     },
     
     DevTypeToggle : function ( oController, sDevType) {
@@ -339,6 +361,14 @@ sap.ui.controller("pages.device.DeviceForm", {
             }
         };
         
+        oJSON.enabled = {
+            "Always"                    : true,
+            "IfOnvifProfilesHaveLoaded" : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
+            "IfAcceptingInput"          : true && oController.bAcceptingInput,
+            "IfOnvifCameraIsSelected"   : true && oController.bOnvifCameraSelected,
+            "IfOnvifProfilesFound"      : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
+        };
+        
         var fnComplete = function () {
             oView.setModel( 
                 new sap.ui.model.json.JSONModel(oJSON)
@@ -387,7 +417,8 @@ sap.ui.controller("pages.device.DeviceForm", {
                         fnSetData(mData);
                         
                         fnComplete();
-                        oController.ToggleEditIPWebcamControls(true);
+                        oController.bAcceptingInput = true;
+                        oController.ToggleControls(true);
                     },
                     
                     onWarning : function (mData, sErrorMessage) {
@@ -396,7 +427,8 @@ sap.ui.controller("pages.device.DeviceForm", {
                         iomy.common.showWarning(sErrorMessage, "Failed to load some data",
                             function () {
                                 fnComplete();
-                                oController.ToggleEditIPWebcamControls(true);
+                                oController.bAcceptingInput = true;
+                                oController.ToggleControls(true);
                             }
                         );
                     },
@@ -405,7 +437,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                         iomy.common.showError(sErrorMessage, "Failed to load data",
                             function () {
                                 fnComplete();
-                                oController.ToggleEditIPWebcamControls(true);
+                                oController.ToggleControls(true);
                             }
                         );
                     }
@@ -434,7 +466,6 @@ sap.ui.controller("pages.device.DeviceForm", {
     
     PrepareRoomListForModel : function (iPremiseId) {
         var oController         = this;
-        var oView               = this.getView();
         var bEditing            = this.bEditExisting;
         var aRoomList           = JSON.parse( JSON.stringify( iomy.common.RoomsList["_"+iPremiseId] ) );
         var iRoomCount          = iomy.functions.getNumberOfRoomsInPremise(iPremiseId);
@@ -500,11 +531,11 @@ sap.ui.controller("pages.device.DeviceForm", {
         var iLinkId     = oView.byId("SelectOnvifServer").getSelectedKey();
         var oModelData  = JSON.parse(oView.getModel().getJSON());
         
-        oController.ToggleOnvifStreamControls(false);
-        oView.byId("SelectOnvifServer").setEnabled(false);
-        
         if (iLinkId > 0) {
+            oController.bProfilesLoaded = false;
             oController.bLoadingOnvifProfiles = true;
+            oController.bOnvifCameraSelected = false;
+            oController.ToggleControls(false);
             
             oModelData.OnvifProfiles = {
                 "loading" : {
@@ -531,13 +562,15 @@ sap.ui.controller("pages.device.DeviceForm", {
                         };
 
                     }
-
-                    oController.ToggleOnvifStreamControls(true);
-                    oController.bLoadingOnvifProfiles = false;
                     
                     oView.setModel( 
                         new sap.ui.model.json.JSONModel(oModelData)
                     );
+
+                    oController.bLoadingOnvifProfiles = false;
+                    oController.bProfilesLoaded = true;
+                    oController.bOnvifCameraSelected = true;
+                    oController.ToggleControls(true);
                 },
 
                 onFail : function () {
@@ -549,24 +582,27 @@ sap.ui.controller("pages.device.DeviceForm", {
                         }
                     };
 
-                    oController.ToggleOnvifStreamControls(false);
-                    oView.byId("SelectOnvifServer").setEnabled(true);
-
-                    oController.bLoadingOnvifProfiles = false;
-                    
                     oView.setModel( 
                         new sap.ui.model.json.JSONModel(oModelData)
                     );
+
+                    oController.bLoadingOnvifProfiles = false;
+                    oController.bOnvifCameraSelected = true;
+                    oController.bProfilesLoaded = false;
+                    oController.ToggleControls(true);
                 }
             });
         } else {
             oModelData.OnvifProfiles = {};
+            oController.bLoadingOnvifProfiles = false;
+            oController.bOnvifCameraSelected = false;
+            oController.bProfilesLoaded = false;
 
             oView.setModel( 
                 new sap.ui.model.json.JSONModel(oModelData)
             );
             
-            oView.byId("SelectOnvifServer").setEnabled(true);
+            oController.ToggleControls(true);
         }
     },
     
@@ -595,7 +631,8 @@ sap.ui.controller("pages.device.DeviceForm", {
             oCurrentFormData.Room = 1;
         }
         
-        oController.ToggleSubmitCancelButtons(false);
+        oController.bSubmitting = true;
+        oController.ToggleControls(false);
         
         //--------------------------------------------------------------------//
         // Validate input first. If everything checks out, then create the
@@ -606,7 +643,8 @@ sap.ui.controller("pages.device.DeviceForm", {
         if (!mInputInfo.bIsValid) {
             iomy.common.showError(mInputInfo.aErrorMessages.join("\n\n"), "Error",
                 function () {
-                    oController.ToggleSubmitCancelButtons(true);
+                    oController.bSubmitting = false;
+                    oController.ToggleControls(true);
                 }
             )
         } else {
@@ -754,12 +792,17 @@ sap.ui.controller("pages.device.DeviceForm", {
                                         }
 
                                         if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+iomy.devices.onvif.ThingTypeId) {
-                                            oController.ToggleOnvifStreamControls(false);
-                                            oView.byId("SelectOnvifServer").setEnabled(true);
-                                            oView.byId("ButtonCancel").setEnabled(true);
-                                        } else {
-                                            oController.ToggleSubmitCancelButtons(true);
+                                            oController.bLoadingOnvifProfiles = false;
+                                            oController.bOnvifCameraSelected = false;
+                                            oController.bProfilesLoaded = false;
+                                            
+//                                            oController.ToggleControls(true);
+//                                        } else {
+//                                            oController.ToggleControls(true);
                                         }
+                                        
+                                        oController.bSubmitting = false;
+                                        oController.ToggleControls(true);
 
                                     }
                                 });
@@ -768,14 +811,16 @@ sap.ui.controller("pages.device.DeviceForm", {
                     } else {
                         jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
                         iomy.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {
-                            oController.ToggleSubmitCancelButtons(true);
+                            oController.bSubmitting = false;
+                            oController.ToggleControls(true);
                         });
                     }
                 } catch (e) {
                     var sErrorMessage = "Error creating device:\n\n"+e.message+"\n\n"+iomy.common.showContactSupportMessage();
                     jQuery.sap.log.error(sErrorMessage);
                     iomy.common.showError(sErrorMessage, "", function () {
-                        oController.ToggleSubmitCancelButtons(true);
+                        oController.bSubmitting = false;
+                        oController.ToggleControls(true);
                     });
                 }
 
@@ -784,7 +829,8 @@ sap.ui.controller("pages.device.DeviceForm", {
             mData.onFail = function (error) {
                 jQuery.sap.log.error("Error (HTTP Status "+error.status+"): "+error.responseText);
                 iomy.common.showError("Error creating device:\n\n"+error.responseText, "", function () {
-                    oController.ToggleSubmitCancelButtons(true);
+                    oController.bSubmitting = false;
+                    oController.ToggleControls(true);
                 });
             };
 
@@ -811,10 +857,10 @@ sap.ui.controller("pages.device.DeviceForm", {
         
         if (!bError) {
             if (oController.areThereChanges()) {
-                oController.ToggleSubmitCancelButtons(false);
+                oController.ToggleControls(false);
 
                 if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                    oController.ToggleEditIPWebcamControls(false);
+                    oController.ToggleControls(false);
                 }
 
                 //--------------------------------------------------------------------//
@@ -830,37 +876,36 @@ sap.ui.controller("pages.device.DeviceForm", {
                             if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                                 oController.SubmitIPWebcamData();
                             } else {
-                                oController.ToggleSubmitCancelButtons(true);
+                                oController.ToggleControls(true);
                                 oController.CancelInput();
                             }
                         },
 
                         onWarning : function () {
-                            oController.ToggleEditIPWebcamControls(true);
+                            oController.ToggleControls(true);
                         },
 
                         onFail : function () {
-                            oController.ToggleSubmitCancelButtons(true);
-                            oController.ToggleEditIPWebcamControls(true);
+                            oController.ToggleControls(true);
                         }
                     });
                 } catch (e) {
                     iomy.common.showError(e.message, "Error",
                         function () {
-                            oController.ToggleSubmitCancelButtons(true);
+                            oController.ToggleControls(true);
 
                             if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                                oController.ToggleEditIPWebcamControls(true);
+                                oController.ToggleControls(true);
                             }
                         }
                     );
                 }
             } else {
                 if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                    oController.ToggleEditIPWebcamControls(false);
+                    oController.ToggleControls(false);
                     oController.SubmitIPWebcamData();
                 } else {
-                    oController.ToggleSubmitCancelButtons(true);
+                    oController.ToggleControls(true);
                 }
             }
         }
@@ -872,7 +917,6 @@ sap.ui.controller("pages.device.DeviceForm", {
         var iThingID				= oController.iThingId;
 		var sOldThingText           = iomy.common.ThingList["_"+iThingID].DisplayName;
         var iOldRoomID              = iomy.common.ThingList["_"+iThingID].RoomId;
-        var oCurrentFormData        = oView.getModel().getProperty( "/CurrentDevice/" );
         var iRoomId                 = oView.byId("DeviceRoom").getSelectedKey();
         var sThingText              = oView.byId("DeviceName").getValue();
         
@@ -895,6 +939,9 @@ sap.ui.controller("pages.device.DeviceForm", {
             }
             
             if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                oController.bAcceptingInput = false;
+                oController.ToggleControls(false);
+                
                 iomy.devices.ipcamera.submitWebcamInformation({
                     thingID             : oController.iThingId,
                     
@@ -916,7 +963,8 @@ sap.ui.controller("pages.device.DeviceForm", {
                                     text : "IP Webcam updated."
                                 });
 
-                                oController.ToggleEditIPWebcamControls(true);
+                                oController.bAcceptingInput = true;
+                                oController.ToggleControls(true);
                                 oController.CancelInput();
                             }
                         });
@@ -925,8 +973,8 @@ sap.ui.controller("pages.device.DeviceForm", {
                     onFail : function (sErrorMessage) {
                         iomy.common.showError(sErrorMessage, "Failed to update settings",
                             function () {
-                                oController.ToggleEditIPWebcamControls(true);
-                                oController.ToggleSubmitCancelButtons(true);
+                                oController.bAcceptingInput = true;
+                                oController.ToggleControls(true);
                             }
                         );
                     }
@@ -937,7 +985,8 @@ sap.ui.controller("pages.device.DeviceForm", {
         } catch (e) {
             iomy.common.showError(e.message, "Failed to update settings",
                 function () {
-                    oController.ToggleEditIPWebcamControls(true);
+                    oController.bAcceptingInput = true;
+                    oController.ToggleControls(true);
                 }
             );
         }

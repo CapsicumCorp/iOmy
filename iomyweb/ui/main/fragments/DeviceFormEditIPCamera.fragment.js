@@ -10,7 +10,8 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 		
         var oRoomItemTemplate = new sap.ui.core.Item({
             key : "{RoomId}",
-            text : "{RoomName}"
+            text : "{RoomName}",
+            enabled : "{Enabled}"
         });
         
 		//--------------------------------------------//
@@ -37,7 +38,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 			toolbar : new sap.m.Toolbar({
 				content : [
 					new sap.m.Title ({
-						text: "Device Settings",
+						text: "Device Settings"
 					})
 				]
 			}).addStyleClass("MarBottom1d0Rem"),
@@ -49,7 +50,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
                             fields: [
                                 new sap.m.Input (oView.createId("DeviceName"), {
 									placeholder : "Display Name",
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/ThingName}"
 								})
                             ]
@@ -58,7 +59,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
                             label : "Room this device is located in",
                             fields: [
                                 new sap.m.Select (oView.createId("DeviceRoom"), {
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     selectedKey: "{/CurrentDevice/RoomId}",
                                     items: {
                                         path: "/Rooms",
@@ -71,7 +72,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 							label : "Type",
 							fields: [ 
 								new sap.m.Select(oView.createId("InputCamType"), {
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
 									selectedKey : "{/CurrentDevice/IPCamType}",
                                     items : {
                                         path : "/IPCamTypes",
@@ -80,7 +81,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
                                             text : "{TypeName}"
                                         })
                                     }
-								}),
+								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -88,20 +89,20 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 							fields: [ 
 								new sap.m.Input(oView.createId("InputIPProtocol"), {
 									placeholder: "Enter Protocol",
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/Protocol}"
 								}),
 								new sap.m.Input(oView.createId("InputIPAddress"), {
 									placeholder: "Enter IP Address",
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/IPAddress}"
 								}),
 								new sap.m.Input(oView.createId("InputIPPort"), {
 									placeholder: "Enter Port Number",
                                     type : "Number",
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/IPPort}"
-								}),
+								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -109,9 +110,9 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 							fields: [ 
 								new sap.m.Input(oView.createId("InputPath"), {
 									placeholder: "e.g. video",
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/Path}"
-								}),
+								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -119,9 +120,9 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 							fields: [ 
 								new sap.m.Input(oView.createId("InputUsername"), {
 									placeholder: "optional",
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/Username}"
-								}),
+								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -129,9 +130,9 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 							fields: [ 
 								new sap.m.Input(oView.createId("InputPassword"), {
 									placeholder: "optional",
-                                    enabled : false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/Password}"
-								}),
+								})
 							]
 						}),
                         new sap.ui.layout.form.FormElement({
@@ -140,7 +141,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
-                                    enabled: false,
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     press : function () {
                                         oController.EditDevice();
                                     }
@@ -148,6 +149,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
 									text: "Cancel",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CancelInput();
                                     }

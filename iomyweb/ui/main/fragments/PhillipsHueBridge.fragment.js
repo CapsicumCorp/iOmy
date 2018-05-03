@@ -44,6 +44,7 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 							fields: [ 
 								iomy.widgets.selectBoxHub(oView.createId("HubSelect"), {
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}",
+                                    enabled : "{/enabled/Always}",
                                     template : {
                                         path : "/Hubs",
                                         item : new sap.ui.core.Item({
@@ -63,6 +64,7 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 							fields: [ 
 								iomy.widgets.selectBoxRoom({
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}",
+                                    enabled : "{/enabled/Always}",
                                     template : {
                                         path : "/Rooms",
                                         item : new sap.ui.core.Item({
@@ -78,7 +80,8 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 							fields: [ 
 								new sap.m.Input ({
 									placeholder : "Name of the Bridge",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}",
+                                    enabled : "{/enabled/Always}"
 								})
 							]
 						}),
@@ -87,13 +90,15 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "Enter IP Address",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPAddress}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPAddress}",
+                                    enabled : "{/enabled/Always}"
 								}),
 								new sap.m.Input({
 									placeholder: "Enter Port Number",
                                     type : "Number",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPPort}"
-								}),
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPPort}",
+                                    enabled : "{/enabled/Always}"
+								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -101,7 +106,8 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 							fields: [ 
 								new sap.m.Input ({
 									placeholder : "Located in your Phillips Hue bridge manual",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DeviceToken}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DeviceToken}",
+                                    enabled : "{/enabled/Always}"
 								})
 							]
 						}),
@@ -111,6 +117,7 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CreateDevice();
                                     }
@@ -118,6 +125,7 @@ sap.ui.jsfragment("fragments.PhillipsHueBridge", {
 								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
 									text: "Cancel",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CancelInput();
                                     }

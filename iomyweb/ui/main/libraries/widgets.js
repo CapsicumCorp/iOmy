@@ -1643,7 +1643,6 @@ $.extend( iomy.widgets, {
     
     selectBoxOnvifServer : function (sId, mSettings) {
         var bFirstElementFound  = false;
-        var bEnabled            = true;
         var aItems              = [];
         var aFirstItem          = [];
         var sID;
@@ -1729,15 +1728,13 @@ $.extend( iomy.widgets, {
                         text : "No Onvif cameras or servers detected."
                     })
                 );
-            
-                bEnabled = false;
                 
             } else {
                 aItems = aFirstItem.concat(aItems);
             }
             
             mSettings.items = aItems;
-            mSettings.enabled = bEnabled;
+            //mSettings.enabled = bEnabled;
             
             if (sId !== null) {
                 oSBox = new sap.m.Select(sId, mSettings);

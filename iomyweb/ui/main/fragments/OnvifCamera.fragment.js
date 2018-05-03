@@ -44,6 +44,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							fields: [ 
 								iomy.widgets.selectBoxOnvifServer(oView.createId("SelectOnvifServer"), {
 									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/OnvifServer}",
+                                    enabled : "{/enabled/IfOnvifProfilesHaveLoaded}",
                                     change : function () {
                                         oController.LoadOnvifProfilesForSelectBoxes();
                                     }
@@ -54,7 +55,8 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							label : iomy.widgets.RequiredLabel("Stream Name"),
 							fields: [ 
 								new sap.m.Input(oView.createId("InputStreamName"), {
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/CameraName}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/CameraName}",
+                                    enabled : "{/enabled/IfOnvifProfilesFound}"
                                 })
 							]
 						}),
@@ -63,11 +65,12 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							fields: [ 
 								new sap.m.Select(oView.createId("SelectStreamProfile"), {
 									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StreamProfile}",
+                                    enabled : "{/enabled/IfOnvifProfilesFound}",
                                     items : {
                                         path : "/OnvifProfiles",
                                         template : new sap.ui.core.Item({
                                             key : "{Token}",
-                                            text : "{Name}"
+                                            text : "{Name}",
                                         })
                                     }
 								})
@@ -78,6 +81,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							fields: [ 
 								new sap.m.Select(oView.createId("SelectThumbnailProfile"), {
 									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/ThumbnailProfile}",
+                                    enabled : "{/enabled/IfOnvifProfilesFound}",
                                     items : {
                                         path : "/OnvifProfiles",
                                         template : new sap.ui.core.Item({
@@ -94,6 +98,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
+                                    enabled : "{/enabled/IfOnvifProfilesFound}",
                                     press : function () {
                                         if (oController.bLoadingOnvifProfiles !== true) {
                                             oController.CreateDevice();
@@ -103,6 +108,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
 									text: "Cancel",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CancelInput();
                                     }

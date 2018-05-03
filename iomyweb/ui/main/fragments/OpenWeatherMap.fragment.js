@@ -44,6 +44,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							fields: [ 
 								iomy.widgets.selectBoxHub(oView.createId("HubSelect"), {
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}",
+                                    enabled : "{/enabled/Always}",
                                     template : {
                                         path : "/Hubs",
                                         item : new sap.ui.core.Item({
@@ -63,6 +64,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							fields: [ 
 								iomy.widgets.selectBoxRoom({
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}",
+                                    enabled : "{/enabled/Always}",
                                     template : {
                                         path : "/Rooms",
                                         item : new sap.ui.core.Item({
@@ -77,7 +79,8 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							label : iomy.widgets.RequiredLabel("Display Name"),
 							fields: [ 
 								new sap.m.Input({
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}",
+                                    enabled : "{/enabled/Always}"
                                 })
 							]
 						}),
@@ -86,13 +89,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							fields: [ 
 								new sap.m.Input ({
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/KeyCode}",
-                                    liveChange : function () {
-//                                        if (this.getValue() === "") {
-//                                            this.setValueState(sap.ui.core.ValueState.Error);
-//                                        } else {
-//                                            this.setValueState(sap.ui.core.ValueState.None);
-//                                        }
-                                    }
+                                    enabled : "{/enabled/Always}"
                                 })
 							]
 						}),
@@ -100,7 +97,8 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 							label : iomy.widgets.RequiredLabel("Station Code"),
 							fields: [ 
 								new sap.m.Input ({
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StationCode}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StationCode}",
+                                    enabled : "{/enabled/Always}"
                                 })
 							]
 						}),
@@ -110,6 +108,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CreateDevice();
                                     }
@@ -117,6 +116,7 @@ sap.ui.jsfragment("fragments.OpenWeatherMap", {
 								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
 									text: "Cancel",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CancelInput();
                                     }

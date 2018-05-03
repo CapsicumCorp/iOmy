@@ -44,6 +44,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								iomy.widgets.selectBoxHub(oView.createId("HubSelect"), {
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Hub}",
+                                    enabled : "{/enabled/Always}",
                                     template : {
                                         path : "/Hubs",
                                         item : new sap.ui.core.Item({
@@ -63,6 +64,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								iomy.widgets.selectBoxRoom({
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}",
+                                    enabled : "{/enabled/Always}",
                                     template : {
                                         path : "/Rooms",
                                         item : new sap.ui.core.Item({
@@ -78,7 +80,8 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								new sap.m.Input ({
 									placeholder : "Name of the IP Webcam",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/LinkName}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/LinkName}",
+                                    enabled : "{/enabled/Always}"
 								})
 							]
 						}),
@@ -87,7 +90,8 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								new sap.m.Input ({
 									placeholder : "Name of the Camera Stream",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/DisplayName}",
+                                    enabled : "{/enabled/Always}"
 								})
 							]
 						}),
@@ -96,6 +100,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								new sap.m.Select({
 									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPCamType}",
+                                    enabled : "{/enabled/Always}",
                                     items : {
                                         path : "/IPCamTypes",
                                         template : new sap.ui.core.Item({
@@ -111,16 +116,19 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "Enter Protocol",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Protocol}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Protocol}",
+                                    enabled : "{/enabled/Always}"
 								}),
 								new sap.m.Input({
 									placeholder: "Enter IP Address",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPAddress}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPAddress}",
+                                    enabled : "{/enabled/Always}"
 								}),
 								new sap.m.Input({
 									placeholder: "Enter Port Number",
                                     type : "Number",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPPort}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPPort}",
+                                    enabled : "{/enabled/Always}"
 								}),
 							]
 						}),
@@ -129,7 +137,8 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "e.g. video",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Path}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Path}",
+                                    enabled : "{/enabled/Always}"
 								}),
 							]
 						}),
@@ -138,7 +147,8 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "optional",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Username}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Username}",
+                                    enabled : "{/enabled/Always}"
 								}),
 							]
 						}),
@@ -147,7 +157,8 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "optional",
-                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Password}"
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Password}",
+                                    enabled : "{/enabled/Always}"
 								}),
 							]
 						}),
@@ -157,6 +168,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CreateDevice();
                                     }
@@ -164,6 +176,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
 									text: "Cancel",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CancelInput();
                                     }

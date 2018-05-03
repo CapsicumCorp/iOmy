@@ -47,6 +47,7 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
                                 new sap.m.Input (oView.createId("DeviceName"), {
 									placeholder : "Display Name",
                                     value : "{/CurrentDevice/ThingName}",
+                                    enabled : "{/enabled/Always}",
                                     
                                     liveChange : function () {
                                         oController.ToggleSubmitButton();
@@ -59,6 +60,8 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
                             fields: [
                                 new sap.m.Select (oView.createId("DeviceRoom"), {
                                     selectedKey: "{/CurrentDevice/RoomId}",
+                                    enabled : "{/enabled/Always}",
+                                    
                                     items: {
                                         path: "/Rooms",
                                         template: oRoomItemTemplate
@@ -76,7 +79,7 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
-                                    enabled: oController.isOldRoomTheUnassigned(),
+                                    enabled : "{/enabled/IfAcceptingInput}",
                                     press : function () {
                                         oController.EditDevice();
                                     }
@@ -84,6 +87,7 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
 								new sap.m.Button (oView.createId("ButtonCancel"), {
 									type: sap.m.ButtonType.Reject,
 									text: "Cancel",
+                                    enabled : "{/enabled/Always}",
                                     press : function () {
                                         oController.CancelInput();
                                     }
