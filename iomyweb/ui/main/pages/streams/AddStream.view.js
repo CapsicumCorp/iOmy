@@ -103,7 +103,7 @@ sap.ui.jsview("pages.streams.AddStream", {
 															label : "Camera Type",
 															fields: [
 																new sap.m.Select ({
-                                                                    enabled : "{/controlsEnabled/MostControls}",
+                                                                    enabled : "{/controlsEnabled/Always}",
 																	selectedKey: "{/fields/CameraType}",
 																	items: {
 																		path : "/options/CameraTypes",
@@ -116,7 +116,7 @@ sap.ui.jsview("pages.streams.AddStream", {
 															label : "Select Camera",
 															fields: [
 																new sap.m.Select ({
-																	enabled : "{/controlsEnabled/IfHasStreams}",
+																	enabled : "{/controlsEnabled/IfAdding}",
 																	selectedKey: "{/fields/SelectedCamera}",
 																	items: {
                                                                         path : "/options/OnvifCameras",
@@ -129,7 +129,7 @@ sap.ui.jsview("pages.streams.AddStream", {
 															label : iomy.widgets.RequiredLabel("Stream Name"),
 															fields: [
 																new sap.m.Input ({
-																	enabled : "{/controlsEnabled/MostControls}",
+																	enabled : "{/controlsEnabled/Always}",
 																	value :"{/fields/Name}"
 																})
 															]
@@ -138,7 +138,7 @@ sap.ui.jsview("pages.streams.AddStream", {
 															label : "Enable Stream",
 															fields: [
 																new sap.m.CheckBox ({
-                                                                    enabled : "{/controlsEnabled/MostControls}",
+                                                                    enabled : "{/controlsEnabled/Always}",
 																	selected : "{/fields/Enabled}"
                                                                 })
 															]
@@ -155,7 +155,7 @@ sap.ui.jsview("pages.streams.AddStream", {
 																	}
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
-																	enabled : "{/controlsEnabled/MostControls}",
+																	enabled : "{/controlsEnabled/Always}",
 																	text: "Cancel",
 																	type: sap.m.ButtonType.Reject,
 																	press:   function( oEvent ) {

@@ -50,7 +50,7 @@ sap.ui.controller("pages.streams.AddStream", {
                     oController.mStream = null;
                     
                     if (oEvent.data.ThingId !== null && oEvent.data.ThingId !== undefined) {
-                        oController.iThingIdForAdd = oEvent.data.Stream;
+                        oController.iThingIdForAdd = oEvent.data.ThingId;
                     } else {
                         oController.iThingIdForAdd = null;
                     }
@@ -69,8 +69,9 @@ sap.ui.controller("pages.streams.AddStream", {
             var oModel      = oView.getModel();
             var sControl    = "/controlsEnabled/";
 
-            oModel.setProperty(sControl + "MostControls",   bEnabled);
-            oModel.setProperty(sControl + "IfHasStreams",   bEnabled && oController.bStreamsAvailable);
+            oModel.setProperty(sControl + "Always",         bEnabled);
+            oModel.setProperty(sControl + "IfHasStreams",   bEnabled && oController.bStreamsAvailable );
+            oModel.setProperty(sControl + "IfAdding",       bEnabled && oController.bStreamsAvailable && oController.mStream === null);
         } catch (e) {
             $.sap.log.error("Error enabling or disabling controls ("+e.name+"): " + e.message);
         }
@@ -121,8 +122,9 @@ sap.ui.controller("pages.streams.AddStream", {
                 ]
             },
             "controlsEnabled" : {
-                "MostControls"  : true,
-                "IfHasStreams"  : true && oController.bStreamsAvailable
+                "Always"        : true,
+                "IfHasStreams"  : true && oController.bStreamsAvailable,
+                "IfAdding"      : true && oController.bStreamsAvailable && oController.mStream === null
             }
         };
         
