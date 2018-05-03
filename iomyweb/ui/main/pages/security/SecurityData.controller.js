@@ -119,20 +119,39 @@ sap.ui.controller("pages.security.SecurityData", {
         var oController     = this;
         var oView           = this.getView();
         var oModel          = oView.getModel();
-        var sErrorMessage   = "Onvif streams need to be managed before viewing a stream.";
+        var sErrorMessage   = "Onvif stream not managed.";
+        
+        oView.byId("streamTab").removeAllPages();
+        oView.byId("streamTab").addPage(
+            new sap.m.ObjectListItem ({
+                title: "Loading..."
+            })
+        );
         
         try {
-            oView.byId("streamTab").removeAllPages();
             
             switch (oController.iCameraTypeId) {
                 case iomy.devices.ipcamera.ThingTypeId:
+                    oView.byId("streamTab").removeAllPages();
                     //--------------------------------------------------------//
                     // Create the content of the stream tab.
                     //--------------------------------------------------------//
                     oView.byId("streamTab").addPage(
                         new sap.m.Image ({
                             densityAware : false,
-                            src:"{/data/streamUrl}"
+                            src:"{/data/streamUrl}",
+                           
+                            error : function () {
+                                //--------------------------------------------------------//
+                                // Create a notice that the stream failed to load.
+                                //--------------------------------------------------------//
+                                oView.byId("streamTab").removeAllPages();
+                                oView.byId("streamTab").addPage(
+                                    new sap.m.ObjectListItem ({
+                                        title: "Failed to load the stream"
+                                    })
+                                );
+                            }
                         })
                     );
                 
@@ -166,6 +185,7 @@ sap.ui.controller("pages.security.SecurityData", {
                                 // Process the list of streams to see if the Onvif stream is managed.
                                 //--------------------------------------------------------------------//
                                 var bManagedStream  = false;
+                                oView.byId("streamTab").removeAllPages();
 
                                 for (var i = 0; i < aData.length; i++) {
                                     var mStream         = aData[i];
@@ -212,7 +232,17 @@ sap.ui.controller("pages.security.SecurityData", {
                             },
 
                             onFail : function (response) {
+                                oView.byId("streamTab").removeAllPages();
                                 iomy.common.showError(response, "Error");
+                                
+                                //--------------------------------------------------------//
+                                // Create a notice that the stream failed to load.
+                                //--------------------------------------------------------//
+                                oView.byId("streamTab").addPage(
+                                    new sap.m.ObjectListItem ({
+                                        title: "Failed to load the stream"
+                                    })
+                                );
                             }
 
                         });

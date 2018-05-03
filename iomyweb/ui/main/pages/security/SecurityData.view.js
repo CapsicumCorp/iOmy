@@ -68,7 +68,9 @@ sap.ui.jsview("pages.security.SecurityData", {
                                     icon : "sap-icon://video",
                                     content : [
                                         new sap.m.Carousel (oView.createId("streamTab"), {
-                                            pages: []
+                                            pages: [
+                                                
+                                            ]
                                         })
                                     ]
                                 }),
@@ -76,7 +78,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                                     text: "Thumbnails",
                                     icon : "sap-icon://camera",
                                     content : [
-                                        new sap.m.Carousel ({
+                                        new sap.m.Carousel (oView.createId("thumbnailTab"), {
                                             pages: [
                                                 new sap.m.Image ({
                                                     densityAware : false,
