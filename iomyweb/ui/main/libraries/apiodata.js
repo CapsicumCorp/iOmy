@@ -508,10 +508,10 @@ $.extend(iomy.apiodata,{
 							
 							
 							
-							//------------------------------------------------------------------------//
-							//-- 2.3.A - HTTP 500 STATUS CODE: The dreaded error code has occurred! --//
-							//------------------------------------------------------------------------//
-							if (err.status=='500') {
+							//-----------------------------------------------------------------------------//
+							//-- 2.3.A - HTTP 500 OR 503 STATUS CODE: A dreaded error code has occurred! --//
+							//-----------------------------------------------------------------------------//
+							if (err.status=='500' || err.status=='503') {
 								//-- Flag that the API is not complete and should possibly try again (if allowed) --//
 								this.bApiComplete = false;
 								
