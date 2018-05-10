@@ -494,6 +494,9 @@ public class InstallWizard {
             watchInputsTempFile.println("host=" + dbURI);
             watchInputsTempFile.println("username=" + watchInputsUsername);
             watchInputsTempFile.println("password=" + watchInputsPassword);
+            watchInputsTempFile.println("[cmdserver]");
+            watchInputsTempFile.println("username=" + hubUsername);
+            watchInputsTempFile.println("password=" + hubPassword);
             watchInputsTempFile.println("[webapiconfig]");
             watchInputsTempFile.println("hostname=" + dbURI);
             watchInputsTempFile.println("port=8080");
