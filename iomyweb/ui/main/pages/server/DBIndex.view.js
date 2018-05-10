@@ -92,7 +92,7 @@ sap.ui.jsview("pages.server.DBIndex", {
                                                             label : "Warning",
                                                             fields: [
                                                                 new sap.m.Text({
-                                                                    text: "If the database indices are enabled the load time of the application with be faster but uses significantly more storage.",
+                                                                    text: "If the database indices are enabled the load time of the application will be faster but uses significantly more storage.",
                                                                 })
                                                             ]
                                                         }),
