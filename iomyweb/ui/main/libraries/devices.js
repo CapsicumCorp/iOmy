@@ -44,24 +44,184 @@ $.extend(iomy.devices,{
     bLoadingFieldsFromAPI            : false,
     bLoadingFieldsFromOData            : false,
     
-    isDeviceCamera : function (iThingId) {
-        var mIDResult   = iomy.validation.isThingIDValid(iThingId);
-        var bIsCamera   = false;
-        var mThing;
+    /**
+     * Returns the heading of the group that the device belongs under in the
+     * device list.
+     * 
+     * Similar device types will grouped under the one
+     * category, that is a Philips Hue light, and a Bluetooth light will be
+     * grouped under lights.
+     * 
+     * @param {number} iThingId         ID of the device to check
+     * @returns {String}                Heading for the device list.
+     */
+    getDeviceListSectionHeading : function (iThingId) {
+        var sHeading    = "";
         
-        if (mIDResult.bIsValid) {
-            mThing = iomy.common.ThingList["_"+iThingId];
-            
-            if (mThing.TypeId === iomy.devices.onvif.ThingTypeId ||
-                mThing.TypeId === iomy.devices.ipcamera.ThingTypeId)
-            {
-                bIsCamera = true;
+        try {
+            var mIDResult   = iomy.validation.isThingIDValid(iThingId);
+            var mThing;
+
+            if (mIDResult.bIsValid) {
+                mThing = iomy.common.ThingList["_"+iThingId];
+
+                if (iomy.devices.isDeviceSmartPlug(iThingId)) {
+                    sHeading    = "Smart Plug";
+
+                } else if (iomy.devices.isDeviceLightBulb(iThingId)) {
+                    sHeading    = "Light Bulb";
+
+                } else if (iomy.devices.isDeviceCamera(iThingId)) {
+                    sHeading    = "Webcam";
+
+                } else {
+                    sHeading    = mThing.TypeName;
+
+                }
+            } else {
+                $.sap.log.error(mIDResult.aErrorMessages.join("\n"));
             }
-        } else {
-            $.sap.log.error(mIDResult.aErrorMessages.join("\n"));
+        } catch (e) {
+            $.sap.log.error("Failed to create a suitable heading for the device list ("+e.name+"): " + e.message);
         }
         
-        return bIsCamera;
+        return sHeading;
+    },
+    
+    /**
+     * Returns the JSON key of the group that the device belongs under in the
+     * device list.data object.
+     * 
+     * Similar device types will grouped under the one
+     * category, that is a Philips Hue light, and a Bluetooth light will be
+     * grouped under lights.
+     * 
+     * @param {number} iThingId         ID of the device to check
+     * @returns {String}                JSON key.
+     */
+    getDeviceListSectionKey : function (iThingId) {
+        var sKey        = "";
+        
+        try {
+            var mIDResult   = iomy.validation.isThingIDValid(iThingId);
+            var mThing;
+
+            if (mIDResult.bIsValid) {
+                mThing = iomy.common.ThingList["_"+iThingId];
+
+                if (iomy.devices.isDeviceSmartPlug(iThingId)) {
+                    sKey        = "Plug";
+
+                } else if (iomy.devices.isDeviceLightBulb(iThingId)) {
+                    sKey        = "Light";
+
+                } else if (iomy.devices.isDeviceCamera(iThingId)) {
+                    sKey        = "Webcam";
+
+                } else {
+                    sKey        = "thingType"+mThing.TypeId;
+
+                }
+            } else {
+                $.sap.log.error(mIDResult.aErrorMessages.join("\n"));
+            }
+        } catch (e) {
+            $.sap.log.error("Failed to create a key for the device list data JSON ("+e.name+"): " + e.message);
+        }
+        
+        return sKey;
+    },
+    
+    /**
+     * Sees whether the device is a camera or not.
+     * 
+     * @param {type} iThingId       ID of the device
+     * @returns {Boolean}           Whether the device is a camera or not.
+     */
+    isDeviceCamera : function (iThingId) {
+        var bResult     = false;
+        
+        try {
+            var mIDResult   = iomy.validation.isThingIDValid(iThingId);
+            var mThing;
+
+            if (mIDResult.bIsValid) {
+                mThing = iomy.common.ThingList["_"+iThingId];
+
+                if (mThing.TypeId === iomy.devices.onvif.ThingTypeId ||
+                    mThing.TypeId === iomy.devices.ipcamera.ThingTypeId)
+                {
+                    bResult = true;
+                }
+            } else {
+                $.sap.log.error(mIDResult.aErrorMessages.join("\n"));
+            }
+        } catch (e) {
+            $.sap.log.error("Failed to verify that the device is a camera ("+e.name+"): " + e.message);
+        }
+        
+        return bResult;
+    },
+    
+    /**
+     * Sees whether the device is a smart plug or not.
+     * 
+     * @param {type} iThingId       ID of the device
+     * @returns {Boolean}           Whether the device is a camera or not.
+     */
+    isDeviceSmartPlug : function (iThingId) {
+        var bResult     = false;
+        
+        try {
+            var mIDResult   = iomy.validation.isThingIDValid(iThingId);
+            var mThing;
+
+            if (mIDResult.bIsValid) {
+                mThing = iomy.common.ThingList["_"+iThingId];
+
+                if (mThing.TypeId === iomy.devices.zigbeesmartplug.ThingTypeId)
+                {
+                    bResult = true;
+                }
+            } else {
+                $.sap.log.error(mIDResult.aErrorMessages.join("\n"));
+            }
+        } catch (e) {
+            $.sap.log.error("Failed to verify that the device is a smart plug ("+e.name+"): " + e.message);
+        }
+        
+        return bResult;
+    },
+    
+    /**
+     * Sees whether the device is a light bulb or not.
+     * 
+     * @param {type} iThingId       ID of the device
+     * @returns {Boolean}           Whether the device is a camera or not.
+     */
+    isDeviceLightBulb : function (iThingId) {
+        var bResult     = false;
+        
+        try {
+            var mIDResult   = iomy.validation.isThingIDValid(iThingId);
+            var mThing;
+
+            if (mIDResult.bIsValid) {
+                mThing = iomy.common.ThingList["_"+iThingId];
+
+                if (mThing.TypeId === iomy.devices.philipshue.ThingTypeId ||
+                    mThing.TypeId === iomy.devices.csrmesh.ThingTypeId)
+                {
+                    bResult = true;
+                }
+            } else {
+                $.sap.log.error(mIDResult.aErrorMessages.join("\n"));
+            }
+        } catch (e) {
+            $.sap.log.error("Failed to verify that the device is a light bulb ("+e.name+"): " + e.message);
+        }
+        
+        return bResult;
     },
     
     /**

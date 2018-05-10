@@ -62,18 +62,28 @@ $.extend(iomy.functions, {
 
                     if ((iPremiseId === 0 || iPremiseId == mThing.PremiseId) && (iRoomId === 0 || iRoomId == mThing.RoomId)) {
                         //--------------------------------------------//
-                        //-- If Grouping isn't setup yet            --//
+                        // Get the header and key.
                         //--------------------------------------------//
-                        if( aaDeviceList["thingType"+mThing.TypeId] === undefined ) {
-                            //-- Define the Grouping --//
-                            aaDeviceList["thingType"+mThing.TypeId] = {
-                                "Name": mThing.TypeName,        //-- Display the name of the Grouping --//
-                                "Prefix":"Dev",                 //-- Prefix to make object have a unique Id --//
-                                "Devices":[]                    //-- Array to store the devices in the Grouping --//
-                            };
-                        }
+                        var sHeading    = iomy.devices.getDeviceListSectionHeading(mThing.Id);
+                        var sKey        = iomy.devices.getDeviceListSectionKey(mThing.Id);
+                        
+                        if (sHeading !== "" && sKey !== "") {
+                            //--------------------------------------------//
+                            //-- If Grouping isn't setup yet            --//
+                            //--------------------------------------------//
+                            if( aaDeviceList[sKey] === undefined ) {
+                                //-- Define the Grouping --//
+                                aaDeviceList[sKey] = {
+                                    "Name": sHeading,        //-- Display the name of the Grouping --//
+                                    "Prefix":"Dev",                 //-- Prefix to make object have a unique Id --//
+                                    "Devices":[]                    //-- Array to store the devices in the Grouping --//
+                                };
+                            }
 
-                        aDevicesInAlphabeticalOrder.push(mThing);
+                            aDevicesInAlphabeticalOrder.push(mThing);
+                        } else {
+                            $.sap.log.error("Either the heading or the key failed to load.");
+                        }
                     }
                 }
             });
@@ -109,22 +119,33 @@ $.extend(iomy.functions, {
                         if ( mThing!==undefined ) {
 
                             if ((iPremiseId === 0 || iPremiseId == mThing.PremiseId) && (iRoomId === 0 || iRoomId == mThing.RoomId)) {
+                                
                                 //--------------------------------------------//
-                                //-- Add the Devices into the Grouping        --//
+                                // Get the key.
                                 //--------------------------------------------//
-                                aaDeviceList["thingType"+mThing.TypeId].Devices.push({
-                                    "DeviceId":          mThing.Id,
-                                    "DeviceName":        mThing.DisplayName,
-                                    "DeviceTypeId":      mThing.TypeId,
-                                    "DeviceTypeName":    mThing.TypeName,
-                                    "DeviceStatus":      mThing.Status,
-                                    "LinkId":            mThing.LinkId,
-                                    "PermToggle":        mThing.PermToggle,
-                                    "IOs":               mThing.IO,
-                                    "RoomId":            mThing.RoomId,
-                                    "PremiseId":         mThing.PremiseId,
-                                    "UILastUpdate":      mThing.UILastUpdate
-                                });
+                                var sKey        = iomy.devices.getDeviceListSectionKey(mThing.Id);
+
+                                if (sKey !== "") {
+                                    //--------------------------------------------//
+                                    //-- Add the Devices into the Grouping        --//
+                                    //--------------------------------------------//
+                                    aaDeviceList[sKey].Devices.push({
+                                        "DeviceId":          mThing.Id,
+                                        "DeviceName":        mThing.DisplayName,
+                                        "DeviceTypeId":      mThing.TypeId,
+                                        "DeviceTypeName":    mThing.TypeName,
+                                        "DeviceStatus":      mThing.Status,
+                                        "LinkId":            mThing.LinkId,
+                                        "PermToggle":        mThing.PermToggle,
+                                        "IOs":               mThing.IO,
+                                        "RoomId":            mThing.RoomId,
+                                        "PremiseId":         mThing.PremiseId,
+                                        "UILastUpdate":      mThing.UILastUpdate
+                                    });
+                                    
+                                } else {
+                                    $.sap.log.error("The key is missing.");
+                                }
                             }
                         }
                     });
