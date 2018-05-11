@@ -89,7 +89,117 @@ sap.ui.jsview("pages.security.SecurityData", {
                                             ]
                                         })
                                     ]
-                                })
+                                }),
+                                new sap.m.IconTabFilter({
+                                    text: "Settings",
+                                    icon : "sap-icon://settings",
+                                    content : [
+                                        new sap.ui.layout.form.Form( oView.createId("CameraSettings_Form"),{
+											editable: true,
+											layout : new sap.ui.layout.form.ResponsiveGridLayout ({
+												labelSpanXL: 3,
+												labelSpanL: 3,
+												labelSpanM: 3,
+												labelSpanS: 12,
+												adjustLabelSpan: false,
+												emptySpanXL: 3,
+												emptySpanL: 2,
+												emptySpanM: 0,
+												emptySpanS: 0,
+												columnsXL: 1,
+												columnsL: 1,
+												columnsM: 1,
+												columnsS: 1,
+												singleContainerFullSize: false
+											}),
+											toolbar : new sap.m.Toolbar({
+												content : [
+													new sap.m.Title (oView.createId("CameraSettingsTitle"),{
+                                                        text : "Camera Settings"
+													}),
+												]
+											}).addStyleClass("MarBottom1d0Rem"),
+											formContainers : [
+												new sap.ui.layout.form.FormContainer({
+													formElements : [
+														/* new sap.ui.layout.form.FormElement({
+															label : "Onvif Authentication",
+															fields: [
+																new sap.m.Select({
+																	items : [
+																		new sap.ui.core.Item ({
+																			key: "1",
+																			text: "No Auth"
+																		}),
+                                                                        new sap.ui.core.Item ({
+																			key: "2",
+																			text: "Username Only"
+																		}),
+																		new sap.ui.core.Item ({
+																			key: "3",
+																			text: "Username and Password"
+																		})
+                                                                    ]
+																})
+															]
+														}),*/
+                                                        new sap.ui.layout.form.FormElement({
+															label : "Stream Authentication",
+															fields: [
+																new sap.m.Select({
+																	items : [
+																		new sap.ui.core.Item ({
+																			key: "1",
+																			text: "No Auth Required"
+																		}),
+                                                                        new sap.ui.core.Item ({
+																			key: "2",
+																			text: "Username and Password"
+																		}),
+																		new sap.ui.core.Item ({
+																			key: "3",
+																			text: "Stream Username and Password"
+																		})
+                                                                    ]
+																})
+															]
+														}),
+                                                        new sap.ui.layout.form.FormElement({
+															label : "Disable PTZ Controls",
+															fields: [
+																new sap.m.CheckBox({
+                                                                    enabled : true
+                                                                })
+															]
+														}),
+														new sap.ui.layout.form.FormElement({
+															label: "",
+															fields: [
+																new sap.m.Button (oView.createId("ButtonSubmit"), {
+																	text: "Update",
+																	type: sap.m.ButtonType.Accept,
+                                                               /*     enabled : "{/UpdateEnabled}",
+                                                                    press : function () {
+                                                                        oController.submitRuleInformation();
+                                                                    } */
+																}),
+																new sap.m.Button (oView.createId("ButtonCancel"), {
+																	text: "Cancel",
+																	type: sap.m.ButtonType.Reject,
+                                                                /*    enabled : "{/FormControlsEnabled}",
+                                                                    
+                                                                    press : function () {
+                                                                        oController.GoToRulesList();
+                                                                    } */
+																})
+															]
+														})
+													]
+												})
+											]
+										})
+                                    ]
+                                }),
                             ]
                         })
                     ]
