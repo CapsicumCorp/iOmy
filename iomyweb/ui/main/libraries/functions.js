@@ -27,7 +27,24 @@ iomy.functions = new sap.ui.base.Object();
 
 $.extend(iomy.functions, {
     
-    
+    /**
+     * Generates the JSON data structure to be used in the Device List page.
+     * Each device is grouped under its particular kind, so Philips Hue and
+     * Bluetooth lights are under the lights category.
+     * 
+     * It also accepts two filters: one for a premise, and the other a room.
+     * These filters are optional.
+     * 
+     * Example:
+     * 
+     * mSettings.filter {
+     *     premiseID : 1,
+     *     roomID : 3
+     * };
+     * 
+     * @param {type} mSettings      JS Object containing parameters
+     * @returns {unresolved}
+     */
     createDeviceListData : function (mSettings) {
         var bError                      = false;
         var aaDeviceList                = {};
@@ -55,6 +72,11 @@ $.extend(iomy.functions, {
 
             }
 
+            //--------------------------------------------------------------------//
+            // Process the thing list to prepare the device list object with group
+            // headings, prefixes for widget IDs, and an empty array for devices to
+            // go into their groups.
+            //--------------------------------------------------------------------//
             $.each( iomy.common.ThingList, function( sIndex, mThing ) {
 
                 //-- Check to make sure the Device is defined (Best to do this for each result from a foreach) --//
@@ -74,7 +96,7 @@ $.extend(iomy.functions, {
                             if( aaDeviceList[sKey] === undefined ) {
                                 //-- Define the Grouping --//
                                 aaDeviceList[sKey] = {
-                                    "Name": sHeading,        //-- Display the name of the Grouping --//
+                                    "Name": sHeading,               //-- Display the name of the Grouping --//
                                     "Prefix":"Dev",                 //-- Prefix to make object have a unique Id --//
                                     "Devices":[]                    //-- Array to store the devices in the Grouping --//
                                 };
@@ -88,6 +110,9 @@ $.extend(iomy.functions, {
                 }
             });
 
+            //--------------------------------------------------------------------//
+            // Sort each device alphabetically.
+            //--------------------------------------------------------------------//
             aDevicesInAlphabeticalOrder.sort(
                 function (a, b) {
                     var sA = a.DisplayName.toLowerCase();
@@ -127,7 +152,7 @@ $.extend(iomy.functions, {
 
                                 if (sKey !== "") {
                                     //--------------------------------------------//
-                                    //-- Add the Devices into the Grouping        --//
+                                    // Add the Devices into the Grouping
                                     //--------------------------------------------//
                                     aaDeviceList[sKey].Devices.push({
                                         "DeviceId":          mThing.Id,
@@ -161,6 +186,12 @@ $.extend(iomy.functions, {
         
     },
     
+    /**
+     * Grabs the red, green, and blue values from a "rgb()" string.
+     * 
+     * @param {type} sColourString      "rgb(x,x,x)"
+     * @returns {object}        Red, green, and blue values.
+     */
     extractRGBValuesFromString : function (sColourString) {
         var aFigures;
         
@@ -1097,8 +1128,6 @@ $.extend(iomy.functions, {
 	 * 
 	 * @param {type} iThingId		ID of the Thing
 	 * @returns {Object}			Map containing the hub that a thing is associated with.
-	 * 
-	 * @throws IllegalArgumentException when the Thing ID is either not given, invalid, or if it refers to a thing that doesn't exist.
 	 */
 	getHubConnectedToThing : function (iThingId) {
         try {
@@ -1161,7 +1190,7 @@ $.extend(iomy.functions, {
         //--------------------------------------------------------------------//
         // Check that the UTS has been given.
         //--------------------------------------------------------------------//
-        if (mSettings === undefined || mSettings === null || mSettings.UTS === undefined) {
+        if (mSettings === undefined || mSettings === null || mSettings.UTS === undefined || mSettings.UTS === null) {
             //----------------------------------------------------------------//
             // Report and throw an exception if no UTS is given.
             //----------------------------------------------------------------//
@@ -1281,12 +1310,14 @@ $.extend(iomy.functions, {
     getLinkConnInfo : function (iLinkId) {
         
         try {
+            // Validate the link ID.
             var mLinkValidation = iomy.validation.isLinkIDValid(iLinkId);
             
             if (!mLinkValidation.bIsValid) {
                 throw new MissingSettingsMapException(mLinkValidation.aErrorMessages.join("\n"));
             }
             
+            // Fetch and return the link connection information.
             var mLink = iomy.common.LinkList["_"+iLinkId];
             var mLinkConnInfo = {
                 LinkConnId              : mLink.LinkConnId,
