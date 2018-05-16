@@ -64,6 +64,11 @@ $aVerTemp                   = array();      //-- ARRAY:         --//
 
 $iLinkId                    = 0;            //-- INTEGER:       --//
 $iThingId                   = 0;            //-- INTEGER:       The current ThingId that is either retrieved from the POST Variable or after an Thing Insert occurs. --//
+$sPostUsername              = "";           //-- STRING:        --//
+$sPostPassword              = "";           //-- STRING:        --//
+$iAuthType                  = 0;            //-- INTEGER:       --//
+$sAuthUsername              = "";           //-- STRING:        --//
+$sAuthPassword              = "";           //-- STRING:        --//
 
 
 //------------------------------------------------------------//
@@ -680,8 +685,8 @@ if( $bError===false ) {
 						//-- Extract values --//
 						$iPlannedNextRunUnixTS = $aRuleTemp['Data']['NextRunUTS'];
 						$sPostTime = $aRuleTemp['Data']['Time'];
-						
 					}
+					
 				} else {
 					//-- ERROR: Problem with the results of the desired rule --//
 					$bError    = true;
@@ -783,7 +788,7 @@ if( $bError===false ) {
 							//-- The ThingId that the user passed is not a Onvif Stream --//
 							$bError     = true;
 							$iErrCode   = 7201;
-							$sErrMesg  .= "Error Code:'7201' \n";
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg  .= "The specified Thing is not a Onvif Stream!\n";
 							$sErrMesg  .= "Please use the ThingId of a valid Onvif Stream.\n";
 						}
@@ -792,7 +797,7 @@ if( $bError===false ) {
 						//-- The ThingId that the user passed is not a Onvif Stream --//
 						$bError     = true;
 						$iErrCode   = 7204;
-						$sErrMesg  .= "Error Code:'7204' \n";
+						$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
 						$sErrMesg  .= "Failed to find the ThingId of the desired device!\n";
 						$sErrMesg  .= "Please use the valid ThingId in the HTTP POST \"Id\" parameter of a Thing that this user has access to.\n";
 					}
@@ -826,7 +831,7 @@ if( $bError===false ) {
 							} else {
 								$bError = true;
 								$iErrCode  = 7206;
-								$sErrMesg .= "Error Code:'7206' \n";
+								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 								$sErrMesg .= "Problem when fetching the Link Comm Info\n";
 								$sErrMesg .= $aCommInfo['ErrMesg'];
 							}
@@ -834,7 +839,7 @@ if( $bError===false ) {
 						} else {
 							$bError = true;
 							$iErrCode  = 7205;
-							$sErrMesg .= "Error Code:'7205' \n";
+							$sErrMesg .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg .= "Problem when fetching the Link info\n";
 							$sErrMesg .= $aTempFunctionResult2['ErrMesg'];
 						}
@@ -850,10 +855,103 @@ if( $bError===false ) {
 						
 						if( $oPHPOnvifClient->bInitialised===false ) {
 							$bError = true;
-							$iErrCode  = 7210; 
+							$iErrCode  = 7210;
 							$sErrMesg .= "Error Code:'7210'\n";
 							$sErrMesg .= "Couldn't initialise Onvif Class!\n";
 							$sErrMesg .= json_encode( $oPHPOnvifClient->aErrorMessges );
+						}
+					}
+					
+					
+					//--------------------------------------------------------------------//
+					//-- 4.5.4 - Lookup the Stream Authentication                       --//
+					//--------------------------------------------------------------------//
+					if( $bError===false ) {
+						//------------------------------------------------------------//
+						//-- 4.5.4.1 - Lookup AuthType                              --//
+						//------------------------------------------------------------//
+						if( $bError===false ) {
+							try {
+								$aTempStreamAuthType = WatchInputsGetRSTypeRawValueForThing( $iPostId, 3969 );
+							
+								if( $aTempStreamAuthType['Error']===false ) {
+									$iAuthType = $aTempStreamAuthType['Data']['DataValue'];
+								} else {
+									$iAuthType = 0;
+								}
+								
+							} catch( exception $e7240 ) {
+								$iAuthType = 0;
+							}
+						}
+						
+						
+						
+						//------------------------------------------------------------//
+						//-- 4.5.4.2 - Lookup Stream Username                       --//
+						//------------------------------------------------------------//
+						if( $bError===false ) {
+							try {
+								$aTempUsername = WatchInputsGetRSTypeRawValueForThing( $iPostId, 3962 );
+								
+								if( $aTempUsername['Error']===false ) {
+									$sAuthUsername = $aTempUsername['Data']['DataValue'];
+								} else {
+									$sAuthUsername = "";
+								}
+								
+							} catch( exception $e7241 ) {
+								//----------------------------------------------------//
+								//-- IF AuthType is "No Auth" or "Link Auth"        --//
+								//----------------------------------------------------//
+								if( $iAuthType===0 || $iAuthType===1 ) {
+									$sAuthUsername = "";
+									
+								//----------------------------------------------------//
+								//-- ELSE Error                                     --//
+								//----------------------------------------------------//
+								} else {
+									$bError = true;
+									$iErrCode  = 7241;
+									$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+									$sErrMesg .= "Failed to lookup the Stream Username!\n";
+									$sErrMesg .= "Please check with the administrator of your iOmy system as there appears to be issues with the stream device.\n";
+								}
+							}
+						}
+						
+						//------------------------------------------------------------//
+						//-- 4.5.4.3 - Lookup Stream Password                       --//
+						//------------------------------------------------------------//
+						if( $bError===false ) {
+							try {
+								$aTempPassword = WatchInputsGetRSTypeRawValueForThing( $iPostId, 3963 );
+								
+								if( $aTempPassword['Error']===false ) {
+									$sAuthPassword = $aTempPassword['Data']['DataValue'];
+									
+								} else {
+									$sAuthPassword = "";
+								}
+								
+							} catch( exception $e7242 ) {
+								//----------------------------------------------------//
+								//-- IF AuthType is "No Auth" or "Link Auth"        --//
+								//----------------------------------------------------//
+								if( $iAuthType===0 || $iAuthType===1 ) {
+									$sAuthPassword = "";
+									
+								//----------------------------------------------------//
+								//-- ELSE Error                                     --//
+								//----------------------------------------------------//
+								} else {
+									$bError = true;
+									$iErrCode  = 7242;
+									$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+									$sErrMesg .= "Failed to lookup the Stream Password!\n";
+									$sErrMesg .= "Please check with the administrator of your iOmy system as there appears to be issues with the stream device.\n";
+								}
+							}
 						}
 					}
 				} catch( exception $e7200 ) {
@@ -1286,7 +1384,7 @@ if($bError===false) {
 				if( $bError===false ) {
 					
 					//------------------------------------------------------------//
-					//-- 3.6.3.1 - Lookup Thing Information                     --//
+					//-- 5.6.3.1 - Lookup Thing Information                     --//
 					//------------------------------------------------------------//
 					$aTempResult1 = WatchInputsGetThingInfo( $iPostId );
 						
@@ -1307,7 +1405,7 @@ if($bError===false) {
 					
 					
 					//------------------------------------------------------------//
-					//-- 3.6.3.2 - Lookup Link Information                      --//
+					//-- 5.6.3.2 - Lookup Link Information                      --//
 					//------------------------------------------------------------//
 					if( $bError===false ) {
 						$aTempResult2 = WatchInputsGetLinkInfo( $aThingInfo['LinkId'] );
@@ -1327,7 +1425,7 @@ if($bError===false) {
 					
 					
 					//------------------------------------------------------------//
-					//-- 3.6.3.3 - Lookup Comm Information                      --//
+					//-- 5.6.3.3 - Lookup Comm Information                      --//
 					//------------------------------------------------------------//
 					if( $bError===false ) {
 						$aTempResult3 = WatchInputsGetCommInfo( $aLinkInfo['LinkCommId'] );
@@ -1496,9 +1594,9 @@ if($bError===false) {
 							$aResult = WatchInputsGetMostRecentOnvifStreamProfile( $iPostId );
 							
 							if( $aResult["Error"]===false ) {
-								//----------------//
-								//-- RTSP       --//
-								//----------------//
+								//----------------------------//
+								//-- RTSP                   --//
+								//----------------------------//
 								$aProfile = array (
 									"ProfileToken" => $aResult["Data"]["DataValue"]
 								);
@@ -1507,10 +1605,67 @@ if($bError===false) {
 								
 								if( $aStreamUriRTSP['Error']===false ) {
 									if( isset( $aStreamUriRTSP['Uri'] ) ) {
+										//----------------------------------------------------//
+										//-- Add the Authentication to the device           --//
+										//----------------------------------------------------//
+										$aUriTemp = false;
+										
+										//------------------------------------------------//
+										//-- IF Link Auth injection needed              --//
+										//------------------------------------------------//
+										if( $iAuthType===1 ) {
+											if( $sPostUsername!=="" ) {
+												if( $sPostPassword==="" ) {
+													$aUriTemp = ParseReplaceAndRebuildUrl( $aStreamUriRTSP['Uri'], array( "user"=>$sPostUsername ) );
+													
+												} else {
+													$aUriTemp = ParseReplaceAndRebuildUrl( $aStreamUriRTSP['Uri'], array( "user"=>$sPostUsername, "password"=>$sPostPassword ) );
+												}
+											} else {
+												$sStreamUrl = $aStreamUriRTSP['Uri'];
+											}
+											
+											
+											
+										//------------------------------------------------//
+										//-- ELSEIF Special Auth injection needed       --//
+										//------------------------------------------------//
+										} else if( $iAuthType===2 ) {
+											if( $sAuthUsername!=="" ) {
+												if( $sAuthPassword==="" ) {
+													$sStreamUrl = ParseReplaceAndRebuildUrl( $aStreamUriRTSP['Uri'], array( "user"=>$sAuthUsername ) );
+												} else {
+													$aUriTemp = ParseReplaceAndRebuildUrl( $aStreamUriRTSP['Uri'], array( "user"=>$sAuthUsername, "password"=>$sAuthPassword ) );
+												}
+											} else {
+												$sStreamUrl = $aStreamUriRTSP['Uri'];
+											}
+											
+										//------------------------------------------------//
+										//-- ELSE No Auth injection needed              --//
+										//------------------------------------------------//
+										} else {
+											$sStreamUrl = $aStreamUriRTSP['Uri'];
+										}
+										
+										
+										//------------------------------------------------//
+										//-- Extract URL                                --//
+										//------------------------------------------------//
+										if( $aUriTemp!==false && isset( $aUriTemp['Error'] ) ) {
+											if( $aUriTemp['Error']===false) {
+												$sStreamUrl = $aUriTemp['Url'];
+											}
+										}
+										
+										
+										//------------------------------------------------//
+										//-- Setup the Results                          --//
+										//------------------------------------------------//
 										$aResult = array(
 											"Error"  => false,
 											"Data"   => array(
-												$aStreamUriRTSP['Uri'] 
+												$sStreamUrl
 											)
 										);
 										
@@ -1529,7 +1684,7 @@ if($bError===false) {
 								$bError    = true;
 								$iErrCode  = 7402;
 								$sErrMesg .= "Error Code:'7402' \n";
-								$sErrMesg .= "Error loooking up the !\n";
+								$sErrMesg .= "Error loooking up the Stream Profile!\n";
 								$sErrMesg .= $aResult['ErrMesg']." \n";
 							}
 						}

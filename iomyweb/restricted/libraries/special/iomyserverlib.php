@@ -4190,6 +4190,7 @@ function DB_CreateDefaultData1( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3963,396,'Password','0'); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3964,396,'Path','0'); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3965,396,'Protocol','0'); \n";
+			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3969,396,'Stream Auth Required','0'); \n";
 			
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3970,399,'Stream Profile Name',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3971,399,'Stream Url',0); \n";
@@ -4199,7 +4200,6 @@ function DB_CreateDefaultData1( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3975,399,'PTZ Y Axis',0); \n";
 			
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3980,398,'WatchInputs Managed Stream',0); \n";
-			
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3995,399,'Interface Mode',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3996,399,'Pulses per Value Control',0); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RSTYPE` (RSTYPE_PK,RSTYPE_RSTARIFF_FK,RSTYPE_NAME,RSTYPE_MAIN) VALUES (3999,399,'DevicePort On/Off State',0); \n";
@@ -5546,6 +5546,8 @@ function DB_CreateDefaultData5( $sDBName ) {
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 6, 'Turn Thing Off (Once only, API)' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 7, 'Turn Thing On (Reoccurring, API)' ); \n";
 			$sSQL .= "INSERT INTO `".$sDBName."`.`RULE1TYPE` ( `RULE1TYPE_PK`, `RULE1TYPE_NAME` ) VALUES ( 8, 'Turn Thing Off (Reoccurring, API)' ); \n";
+			
+			
 			/*============================================================
 			  == #6.9# - TARGETCOMP                                     ==
 			  ============================================================*/

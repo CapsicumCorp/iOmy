@@ -1478,7 +1478,6 @@ class PHPOnvif {
 					}
 				}
 				
-				
 			} else {
 				//-- Error --//
 				$bError   = true;
@@ -1885,7 +1884,7 @@ class PHPOnvif {
 		$bTransactionStarted    = false;            //-- BOOLEAN:   Used to inidicates if a transacation has been started so that either a commit or rollback can be passed to the database --//
 		
 		$iUTS                   = 0;                //-- INTEGER:   --//
-		
+		$iAuthType              = 0;                //-- INTEGER:   --//
 		$sUsername              = "";               //-- STRING:    --//
 		$sPassword              = "";               //-- STRING:    --//
 		
@@ -1893,7 +1892,7 @@ class PHPOnvif {
 		global $oRestrictedApiCore;
 		
 		//--------------------------------------------------------------------//
-		//-- 3.0 - Lookup the List of Stream Profiles                       --//
+		//-- 2.0 - Lookup the List of Stream Profiles                       --//
 		//--------------------------------------------------------------------//
 		if( $bError===false ) {
 			$aTempFunctionResult	= $this->GetProfiles();
@@ -1912,7 +1911,7 @@ class PHPOnvif {
 		}
 		
 		//--------------------------------------------------------------------//
-		//-- 4.0 - Fetch each Stream Uri from each profile                  --//
+		//-- 3.0 - Fetch each Stream Uri from each profile                  --//
 		//--------------------------------------------------------------------//
 		if( $bError===false ) {
 			//------------------------------------//
@@ -2013,9 +2012,9 @@ class PHPOnvif {
 			} //-- ENDFOREACH Profile --//
 			
 			
-			//--------------------------------//
-			//-- Error Checking             --//
-			//--------------------------------//
+			//------------------------------------------------------------//
+			//-- Error Checking                                         --//
+			//------------------------------------------------------------//
 			if( $bError===false ) {
 				if( $bFound1===false && $bFound2===false ) {
 					//-- ERROR: Both the "Stream" and "Thumbnail" profiles can't be found --//
@@ -2036,6 +2035,105 @@ class PHPOnvif {
 					$sErrMesg .= "The Thumbnail profile can not be found!\n";
 					
 				}
+			}
+		}
+		
+		//--------------------------------------------------------------------//
+		//-- 4.0 - Setup AuthType                                           --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ) {
+			//------------------------------------------------------------//
+			//-- 4.1 - Setup AuthType                                   --//
+			//------------------------------------------------------------//
+			if( $aPostStreamAuth!==false && $aPostStreamAuth!==null && isset( $aPostStreamAuth['AuthType'] ) ) {
+				//------------------------------------------------------------//
+				//-- 6.2.A.1 - Set the AuthType                             --//
+				//------------------------------------------------------------//
+				
+				//--------------------------------------------------------//
+				//-- IF AuthType is Link Username and Password          --//
+				//--------------------------------------------------------//
+				if( $aPostStreamAuth['AuthType']===1 || $aPostStreamAuth['AuthType']==="1" ) {
+					$iAuthType = 1;
+					
+					
+				//--------------------------------------------------------//
+				//-- ELSEIF AuthType is Custom Username and Password    --//
+				//--------------------------------------------------------//
+				} else if( $aPostStreamAuth['AuthType']===2 || $aPostStreamAuth['AuthType']==="2" ) {
+					$iAuthType = 2;
+					
+				//--------------------------------------------------------//
+				//-- ELSE No extra Auth needed                          --//
+				//--------------------------------------------------------//
+				} else {
+					$iAuthType = 0;
+				}
+				
+				//------------------------------------------------------------//
+				//-- 6.2.A.2 - Store the Username and Password              --//
+				//------------------------------------------------------------//
+				if( $iAuthType===1 || $iAuthType===2 ) {
+					//--------------------------------------------//
+					//-- Set Variables                          --//
+					//--------------------------------------------//
+					if( $iAuthType===1 ) {
+						$aLinkInfo = dbGetLinkInfo( $iLinkId );
+						
+						if( $aLinkInfo['Error']===false ) {
+							$sUsername = $aLinkInfo['Data']['LinkConnUsername'];
+							$sPassword = $aLinkInfo['Data']['LinkConnPassword'];
+						}
+						
+					} else if( $iAuthType===2 ) {
+						if( isset( $aPostStreamAuth['Username'] ) ) {
+							$sUsername = $aPostStreamAuth['Username'];
+						}
+						
+						if( isset( $aPostStreamAuth['Password'] ) ) {
+							$sPassword = $aPostStreamAuth['Password'];
+						}
+					}
+					
+					
+					//--------------------------------------------//
+					//-- Add the Username (and Password)        --//
+					//--------------------------------------------//
+					if( $sUsername!==null && $sUsername!==false && $sUsername!=="" ) {
+						if( $sPassword!==null && $sPassword!==false && $sPassword!=="" ) {
+							//----------------------------------------------------//
+							//-- Add the Username and password to the URLs      --//
+							//----------------------------------------------------//
+							$aFunctionTemp4 = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername, "password"=>$sPassword ) );
+							$aFunctionTemp5 = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername, "password"=>$sPassword ) );
+							
+							if( $aFunctionTemp4['Error']===false && $aFunctionTemp5['Error']===false ) {
+								$aStreamProfile['Uri'] = $aFunctionTemp4['Url'];
+								$aThumbProfile['Uri']  = $aFunctionTemp5['Url'];
+							} else {
+								$bError    = true;
+								$sErrMesg .= "Problem adding the username and password to the Url!\n";
+							}
+							
+						} else {
+							//----------------------------------------------------//
+							//-- Add the Username to the URLs                   --//
+							//----------------------------------------------------//
+							$aFunctionTemp4 = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername ) );
+							$aFunctionTemp5 = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername) );
+							
+							if( $aFunctionTemp4['Error']===false && $aFunctionTemp5['Error']===false ) {
+								$aStreamProfile['Uri'] = $aFunctionTemp4['Url'];
+								$aThumbProfile['Uri']  = $aFunctionTemp5['Url'];
+							} else {
+								$bError    = true;
+								$sErrMesg .= "Problem adding the username and password to the Url!\n";
+							}
+						}
+					}
+				}
+			} else {
+				$iAuthType = 0;
 			}
 		}
 		
@@ -2120,12 +2218,24 @@ class PHPOnvif {
 						"SampleRate"        => "-1",
 						"SampleRateMax"     => "-1",
 						"SampleRateLimit"   => "-1"
+					),
+					//-- Auth Type --//
+					array(
+						"RSType"            => "3969",
+						"UoM"               => "1",
+						"Type"              => "2",
+						"Name"              => "AuthType",
+						"BaseConvert"       => "1",
+						"SampleRate"        => "-1",
+						"SampleRateMax"     => "-1",
+						"SampleRateLimit"   => "-1"
 					)
 				)
 			);
 			
+			
 			//--------------------------------------------//
-			//-- 5.2 - Start the Transaction            --//
+			//-- 5.5 - Start the Transaction            --//
 			//--------------------------------------------//
 			$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
 			
@@ -2138,7 +2248,7 @@ class PHPOnvif {
 			
 			
 			//--------------------------------------------//
-			//-- 5.3 - Call the Insert Function         --//
+			//-- 5.6 - Call the Insert Function         --//
 			//--------------------------------------------//
 			//-- Add the new thing --//
 			$aNewThingResult = PrepareAddNewThing( $iLinkId, $aThingData, 0, "", "" );
@@ -2160,25 +2270,8 @@ class PHPOnvif {
 		//-- 6.0 - Insert the Profile Names and URLs into the database      --//
 		//--------------------------------------------------------------------//
 		if( $bError===false ) {
-			
 			//-- Store the current time --//
 			$iUTS = time();
-			
-			//-- Check if the Username and Password are required on the streams --//
-			if( isset( $aPostStreamAuth['Username'] ) && isset( $aPostStreamAuth['Password'] ) ) {
-				$sUsername = $aPostStreamAuth['Username'];
-				$sPassword = $aPostStreamAuth['Password'];
-				
-				
-				if( $sUsername!==null && $sUsername!==false && $sUsername!=="" ) {
-					if( $sPassword!==null && $sPassword!==false && $sPassword!=="" ) {
-						
-						//-- Add the Username and password to the URLs --//
-						$aStreamProfile['Uri'] = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername, "password"=>$sPassword ) );
-						$aThumbProfile['Uri']  = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername, "password"=>$sPassword ) );
-					}
-				}
-			}
 			
 			//----------------------------------------------------------------//
 			//-- Foreach IO add the appropriate value to the database       --//
@@ -2235,6 +2328,11 @@ class PHPOnvif {
 									//-- Password --//
 									case 3963:
 										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sPassword, true );
+										break;
+										
+									//-- AuthType --//
+									case 3969:
+										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $iAuthType, true );
 										break;
 										
 									//-- Unknown Id --//
@@ -2295,15 +2393,6 @@ class PHPOnvif {
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	//================================================================================================//
 	//== EDIT EXISTING DEVICE IN THE DATABASE                                                       ==//
 	//================================================================================================//
@@ -2342,6 +2431,7 @@ class PHPOnvif {
 		$iThumbnailUrlIOId      = 0;                //-- INTEGER:   --//
 		$iUsernameIOId          = 0;                //-- INTEGER:   --//
 		$iPasswordIOId          = 0;                //-- INTEGER:   --//
+		$iAuthTypeIOId          = 0;                //-- INTEGER:   --//
 		
 		//-- Global Variables --//
 		global $oRestrictedApiCore;
@@ -2353,6 +2443,7 @@ class PHPOnvif {
 		$iRSTypeIdThumbnailUrl     = LookupFunctionConstant("OnvifThumbnailUrlRSTypeId");
 		$iRSTypeIdUsername         = LookupFunctionConstant("StreamUsernameRSTypeId");
 		$iRSTypeIdPassword         = LookupFunctionConstant("StreamPasswordRSTypeId");
+		$iRSTypeIdAuthType         = LookupFunctionConstant("StreamAuthTypeRSTypeId");
 		
 		//--------------------------------------------------------------------//
 		//-- 3.0 - Lookup the List of Stream Profiles                       --//
@@ -2567,6 +2658,11 @@ class PHPOnvif {
 					//----------------------------//
 					} else if( $aIO['RSTypeId']===$iRSTypeIdThumbnailUrl ) {
 						$iPasswordIOId = $aIO['IOId'];
+						
+					//----------------------------//
+					//-- Auth Type              --//
+					//----------------------------//
+					} else if( $aIO['RSTypeId']===$iRSTypeIdAuthType ) {
 						
 					}
 				} //-- END Foreach --//
@@ -2932,9 +3028,9 @@ class PHPOnvif {
 	
 	
 	//================================================================================================//
-	//== 
+	//== *DEPRECATED FUNCTION* 
 	//================================================================================================//
-	public function CreateFFMPEGStream( $sUrl, $sFoldername ) {
+/*	public function CreateFFMPEGStream( $sUrl, $sFoldername ) {
 		//------------------------------------------------//
 		//-- 1.0 - Declare Variables                    --//
 		//------------------------------------------------//
@@ -2983,9 +3079,9 @@ class PHPOnvif {
 			$sScript .= $sFilePath;
 			
 			//------------------------------------------------//
-			//-- 5.0 - Execute the script                   --//
+			//-- 5.0 - Debugging                            --//
 			//------------------------------------------------//
-			$aResult = exec($sScript, $oOutput);
+			//$aResult = exec($sScript, $oOutput);
 			//echo "Success! \n\n".$sScript."\n\n";
 			
 			//------------------------------------------------//
@@ -2998,8 +3094,8 @@ class PHPOnvif {
 				"Error" =>false, 
 				"Data"  =>array(
 					"Script"            => $sScript,
-					"Output"            => $oOutput,
-					"Result"            => $aResult,
+					//"Output"            => $oOutput,
+					//"Result"            => $aResult,
 				)
 			);
 			
@@ -3011,7 +3107,7 @@ class PHPOnvif {
 			);
 		}
 	}
-	
+*/
 	
 	//================================================================================================//
 	//== GET SOAP BODY FROM RESULT                                                                  ==//

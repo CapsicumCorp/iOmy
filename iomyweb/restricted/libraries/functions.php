@@ -196,6 +196,9 @@ function LookupFunctionConstant( $sValue ) {
 		case "StreamPathRSTypeId":
 			return 3964;
 			
+		case "StreamAuthTypeRSTypeId":
+			return 3969;
+			
 		case "OnvifStreamProfileRSTypeId":
 			return 3970;
 			
@@ -4376,6 +4379,72 @@ function WatchInputsGetMostRecentOnvifStreamProfile( $iThingId ) {
 }
 
 
+function WatchInputsGetRSTypeRawValueForThing( $iThingId, $iRSTypeId ) {
+	//----------------------------------------------------------------------------------------------------//
+	//-- Description: This function is used to fetch all the IOs that are attached to a certain Thing.  --//
+	//----------------------------------------------------------------------------------------------------//
+	
+	//------------------------------------------------------------//
+	//-- 1.0 - Initialise                                       --//
+	//------------------------------------------------------------//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an error has been caught.       --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message of the caught message.     --//
+	$aResult            = array();      //-- ARRAY:     Used to store the Database function results.        --//
+	
+	$iIOId              = 0;            //-- INTEGER:   --//
+	$iDataTypeId        = 0;            //-- INTEGER:   --//
+	//------------------------------------------------------------//
+	//-- 2.0 - Begin                                            --//
+	//------------------------------------------------------------//
+	
+	
+	//------------------------------------------------------------//
+	//-- 4.0 - Lookup the IO for that RSType                    --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		$aIOInfo = dbWatchInputsGetIOFromRSTypeId( $iThingId, $iRSTypeId );
+		
+		if( $aIOInfo["Error"]===false ) {
+			if( count( $aIOInfo["Data"] )>1 ) {
+				//-- Extract IO and DataType --//
+				$iIOId       = $aIOInfo['Data']['IOId'];
+				$iDataTypeId = $aIOInfo['Data']['DataTypeId'];
+				
+			} else {
+				//-- Display an Error --//
+				return array( "Error"=>true, "ErrMesg"=>"Find to find any IOs that match the desired RSType! \nPlease check that the IO you are looking for exists.\n");
+			}
+		} else {
+			//-- Display an Error --//
+			return array( "Error"=>true, "ErrMesg"=>"Error trying to find any IOs that match the desired RSType! \nPlease check that the IO you are looking for exists.\n");
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- 5.0 - Lookup the Most Recent Value                     --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		$aResult = dbWatchInputsGetMostRecentRawValue( $iIOId, $iDataTypeId );
+		
+		if( $aResult["Error"]===true ) {
+			//-- Display an Error --//
+			return array( "Error"=>true, "ErrMesg"=>"Failed to find data for the desired IO!\n");
+		}
+	}
+	
+	//------------------------------------------------------------//
+	//-- 9.0 - Return the Results or Error Message              --//
+	//------------------------------------------------------------//
+	if( $bError===false ) {
+		//-- No Errors --//
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		//-- Error Occurred --//
+		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
+	}
+}
+
+
 //========================================================================================================================//
 //== #13.0# - Graph Functions                                                                                           ==//
 //========================================================================================================================//
@@ -6544,7 +6613,15 @@ function ParseReplaceAndRebuildUrl( $sUrl, $aReplaceData ) {
 	//-- 8.0 - BUILD THE URL                    --//
 	//--------------------------------------------//
 	if( $bError===false ) {
-		$sFinishedURL = RebuildTheURL( $aUrlParmeters );
+		$aFinishedURL = RebuildTheURL( $aUrlParmeters );
+		
+		if( $aFinishedURL['Error']===false ) {
+			$sFinishedURL = $aFinishedURL['Url'];
+		} else {
+			$bError    = false;
+			$sErrMesg .= "Unable to parse the URL! \n";
+			$sErrMesg .= $aFinishedURL['ErrMesg'];
+		}
 	}
 	
 	
@@ -6564,7 +6641,6 @@ function ParseReplaceAndRebuildUrl( $sUrl, $aReplaceData ) {
 
 
 function RebuildTheURL( $aUrlParameters ) {
-	
 	//--------------------------------------------//
 	//-- 1.0 - DECLARE VARIABLES                --//
 	//--------------------------------------------//
@@ -6608,21 +6684,30 @@ function RebuildTheURL( $aUrlParameters ) {
 	//------------------------------------//
 	//-- 4.2 - Username and Password    --//
 	if( $bError===false ) {
-		if( isset( $aUrlParameters['user'] ) && isset( $aUrlParameters['password'] ) ) {
-			//-- Check if the 'user' and 'password' is valid --//
+		//------------------------------------//
+		//-- Validate the User              --//
+		//------------------------------------//
+		if( isset( $aUrlParameters['user'] ) ) {
 			if( $aUrlParameters['user']!==null && $aUrlParameters['user']!==false && $aUrlParameters['user']!=="" ) {
-				if( $aUrlParameters['password']!==null && $aUrlParameters['password']!==false && $aUrlParameters['password']!=="" ) {
+				//------------------------------------//
+				//-- IF Username and Password       --//
+				//------------------------------------//
+				if( isset( $aUrlParameters['password'] ) && $aUrlParameters['password']!==null && $aUrlParameters['password']!==false && $aUrlParameters['password']!=="" ) {
 					//-- Create the Authentication section --//
 					$sAuthSection = urlencode( $aUrlParameters['user'] ).":".urlencode( $aUrlParameters['password']."@" );
+					
+				//------------------------------------//
+				//-- ELSE Username Only             --//
+				//------------------------------------//
+				} else {
+					$sAuthSection = urlencode( $aUrlParameters['user']."@" );
+					
 				}
 			}
-		} else {
-			//-- Leave blank --//
-			
 		}
 	}
 	
-		
+	
 	//------------------------------------//
 	//-- 4.3 - Host                     --//
 	if( $bError===false ) {

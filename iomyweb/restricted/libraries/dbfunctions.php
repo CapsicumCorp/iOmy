@@ -145,7 +145,7 @@ function DataViewName($sViewCategory, $sViewType) {
 		//-- String255 (255-Char) --//
 		} else if($sViewType==="String255") {
 			$aResult = array(
-				"Error"             => false, 
+				"Error"             => false,
 				"View"              => "VR_DATASTRING255", 
 				"UTS"               => "DATASTRING255_DATE",
 				"Value"             => "DATASTRING255_VALUE",
@@ -8678,6 +8678,130 @@ function dbAddNewIO( $iThingId, $iRSTypesId, $iUoMId, $iIOTypeId, $iIOState, $fS
 }
 
 
+function dbWatchInputsGetIOFromRSTypeId( $iThingId, $iRSTypeId ) {
+	//--------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+	
+	
+	//--------------------------------------------------------------------//
+	//-- 2.0 - PREPARE                                                  --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			$sSchema = dbGetCurrentSchema();
+			
+			$sSQL .= "SELECT \n";
+			$sSQL .= "	`IO_PK`, \n";
+			$sSQL .= "	`IO_NAME`, \n";
+			$sSQL .= "	`IO_BASECONVERT`, \n";
+			$sSQL .= "	`IO_SAMPLERATECURRENT`, \n";
+			$sSQL .= "	`IO_SAMPLERATELIMIT`, \n";
+			$sSQL .= "	`IO_SAMPLERATEMAX`, \n";
+			$sSQL .= "	`IO_STATE`, \n";
+			$sSQL .= "	`IO_STATECHANGEID`, \n";
+			$sSQL .= "	`IOTYPE_PK`, \n";
+			$sSQL .= "	`IOTYPE_NAME`, \n";
+			$sSQL .= "	`IOTYPE_ENUM`, \n";
+			$sSQL .= "	`DATATYPE_PK`, \n";
+			$sSQL .= "	`DATATYPE_NAME`, \n";
+			$sSQL .= "	`THING_PK`, \n";
+			$sSQL .= "	`LINK_PK`, \n";
+			$sSQL .= "	`USERS_PK` \n";
+			$sSQL .= "FROM `".$sSchema."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PERMHUB` ON `USERS_PK`=`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`HUB` ON `HUB_PK`=`PERMHUB_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `THING_PK` = :ThingId \n";
+			$sSQL .= "AND `IO_RSTYPES_FK` = :RSTypeId \n";
+			$sSQL .= "ORDER BY `IO_PK` DESC \n";
+			$sSQL .= "LIMIT 1; \n";
+			
+			//-- Input binding --//
+			$aInputVals = array(
+				array( "Name"=>"ThingId",           "type"=>"BINT",     "value"=>$iThingId  ),
+				array( "Name"=>"RSTypeId",          "type"=>"INT",      "value"=>$iRSTypeId )
+			);
+			
+			//-- Output Binding --//
+			$aOutputCols = array(
+				array( "Name"=>"IOId",                      "type"=>"BINT"  ),
+				array( "Name"=>"IOName",                    "type"=>"STR"   ),
+				array( "Name"=>"IOBaseConvert",             "type"=>"FLO"   ),
+				array( "Name"=>"IOSampleRateCurrent",       "type"=>"INT"   ),
+				array( "Name"=>"IOSampleRateLimit",         "type"=>"INT"   ),
+				array( "Name"=>"IOSampleRateMax",           "type"=>"INT"   ),
+				array( "Name"=>"IOStatus",                  "type"=>"INT"   ),
+				array( "Name"=>"IOStatusCode",              "type"=>"STR"   ),
+				array( "Name"=>"IOTypeId",                  "type"=>"INT"   ),
+				array( "Name"=>"IOTypeName",                "type"=>"STR"   ),
+				array( "Name"=>"DataEnumeration",           "type"=>"INT"   ),
+				array( "Name"=>"DataTypeId",                "type"=>"INT"   ),
+				array( "Name"=>"DataTypeName",              "type"=>"STR"   ),
+				array( "Name"=>"ThingId",                   "type"=>"BINT"  ),
+				array( "Name"=>"LinkId",                    "type"=>"BINT"  ),
+				array( "Name"=>"UserId",                    "type"=>"BINT"  )
+			);
+			
+		} catch( Exception $e2 ) {
+			$bError   = true;
+			$sErrMesg = $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------------------------------//
+	//-- 5.0 - Execute the SQL                                          --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+		} catch( Exception $e5 ) {
+			$bError   = true;
+			$sErrMesg = $e5->getMessage();
+		}
+	}
+	
+	//--------------------------------------------------------------------//
+	//-- 6.0 - Check the Results                                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+		} catch( Exception $e6 ) {
+			$bError   = true;
+			$sErrMesg = $e6->getMessage();
+		}
+	}
+	
+	//--------------------------------------------------------------------//
+	//-- 9.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"WatchInputsGetIOFromRSTypeId: ".$sErrMesg );
+	}
+}
 
 //========================================================================================================================//
 //== #11.0# - IO DATA Functions                                                                                         ==//
@@ -9358,8 +9482,281 @@ function dbWatchInputsGetMostRecentOnvifStreamProfile( $iThingId ) {
 	} else {
 		return array( "Error"=>true, "ErrMesg"=>"WatchInputsOnvifStreamProfile: ".$sErrMesg );
 	}
-	
 }
+
+
+function dbWatchInputsGetMostRecentRawValue( $iIOId, $iDataType ) {
+	//--------------------------------------------------------------------//
+	//-- 1.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	
+	//-- 1.1 - Global Variables --//
+	global $oRestrictedApiCore;
+	
+	
+	//-- 1.2 - Other Varirables --//
+	$bError             = false;        //-- BOOLEAN:   Used to indicate if an Error has been caught. --//
+	$sErrMesg           = "";           //-- STRING:    Stores the error message when an error has been caught --//
+	$aResult            = array();      //-- ARRAY:     This variable is for the SQL result --//
+	$aReturn            = array();      //-- ARRAY:     Used to store the result that will be returned at the end of this function.  --//
+	$sSQL               = "";           //-- STRING:    Used to store the SQL string so it can be passed to the database functions.  --//
+	
+	$sSQLSelectCols     = "";
+	$sSQLTables         = "";
+	$sSQLOrderBy        = "";
+	$sValueType         = "";
+	
+	
+	//--------------------------------------------------------------------//
+	//-- 2.0 - PREPARE                                                  --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			//-- Lookup Schema --//
+			$sSchema = dbGetCurrentSchema();
+			
+			//-- Lookup DataType Specific SQL --//
+			switch( $iDataType ) {
+				//------------------------------------------------//
+				//-- (1) TINY INTEGER                           --//
+				//------------------------------------------------//
+				case 1:
+					//-- Select Columns --//
+					$sSQLSelectCols .= "    `DATATINYINT_PK`, \n";
+					$sSQLSelectCols .= "    `DATATINYINT_DATE`, \n";
+					$sSQLSelectCols .= "    `DATATINYINT_DATE` AS \"UTS\", \n";
+					$sSQLSelectCols .= "    `DATATINYINT_VALUE`, \n";
+					//-- Table --//
+					$sSQLTables  .= "INNER JOIN `".$sSchema."`.`DATATINYINT` ON `IO_PK`=`DATATINYINT_IO_FK` \n";
+					//-- Order By --//
+					$sSQLOrderBy .= "ORDER BY `DATATINYINT_DATE` DESC \n";
+					//-- Value Type --//
+					$sValueType   = "INT";
+					break;
+					
+				//------------------------------------------------//
+				//-- (2) INTEGER                                --//
+				//------------------------------------------------//
+				case 2:
+					//-- Select Columns --//
+					$sSQLSelectCols .= "    `DATAINT_PK`, \n";
+					$sSQLSelectCols .= "    `DATAINT_DATE`, \n";
+					$sSQLSelectCols .= "    `DATAINT_DATE` AS \"UTS\", \n";
+					$sSQLSelectCols .= "    `DATAINT_VALUE`, \n";
+					//-- Table --//
+					$sSQLTables .= "INNER JOIN `".$sSchema."`.`DATAINT` ON `IO_PK`=`DATAINT_IO_FK` \n";
+					//-- Order By --//
+					$sSQLOrderBy .= "ORDER BY `DATAINT_DATE` DESC \n";
+					//-- Value Type --//
+					$sValueType   = "INT";
+					break;
+					
+				//------------------------------------------------//
+				//-- (3) BIG INTEGER                            --//
+				//------------------------------------------------//
+				case 3:
+					//-- Select Columns --//
+					$sSQLSelectCols .= "    `DATABIGINT_PK`, \n";
+					$sSQLSelectCols .= "    `DATABIGINT_DATE`, \n";
+					$sSQLSelectCols .= "    `DATABIGINT_DATE` AS \"UTS\", \n";
+					$sSQLSelectCols .= "    `DATABIGINT_VALUE`, \n";
+					//-- Table --//
+					$sSQLTables .= "INNER JOIN `".$sSchema."`.`DATABIGINT` ON `IO_PK`=`DATABIGINT_IO_FK` \n";
+					//-- Order By --//
+					$sSQLOrderBy .= "ORDER BY `DATABIGINT_DATE` DESC \n";
+					//-- Value Type --//
+					$sValueType   = "BINT";
+					break;
+					
+				//------------------------------------------------//
+				//-- (4) FLOATING POINT                         --//
+				//------------------------------------------------//
+				case 4:
+					//-- Select Columns --//
+					$sSQLSelectCols .= "    `DATAFLOAT_PK`, \n";
+					$sSQLSelectCols .= "    `DATAFLOAT_DATE`, \n";
+					$sSQLSelectCols .= "    `DATAFLOAT_DATE` AS \"UTS\", \n";
+					$sSQLSelectCols .= "    `DATAFLOAT_VALUE`, \n";
+					//-- Table --//
+					$sSQLTables .= "INNER JOIN `".$sSchema."`.`DATAFLOAT` ON `IO_PK`=`DATAFLOAT_IO_FK` \n";
+					//-- Order By --//
+					$sSQLOrderBy .= "ORDER BY `DATAFLOAT_DATE` DESC \n";
+					//-- Value Type --//
+					$sValueType   = "FLO";
+					break;
+					
+				//------------------------------------------------//
+				//-- (5) TINY STRING                            --//
+				//------------------------------------------------//
+				case 5:
+					$sSQLSelectCols .= "    `DATATINYSTRING_PK`, \n";
+					$sSQLSelectCols .= "    `DATATINYSTRING_DATE`, \n";
+					$sSQLSelectCols .= "    `DATATINYSTRING_DATE` AS \"UTS\", \n";
+					$sSQLSelectCols .= "    `DATATINYSTRING_VALUE`, \n";
+					//-- Table --//
+					$sSQLTables .= "INNER JOIN `".$sSchema."`.`DATATINYSTRING` ON `IO_PK`=`DATATINYSTRING_IO_FK` \n";
+					//-- Order By --//
+					$sSQLOrderBy .= "ORDER BY `DATATINYSTRING_DATE` DESC \n";
+					//-- Value Type --//
+					$sValueType   = "STR";
+					break;
+					
+				//------------------------------------------------//
+				//-- (6) SHORT STRING                           --//
+				//------------------------------------------------//
+				case 6:
+					//-- Select Columns --//
+					$sSQLSelectCols .= "    `DATASHORTSTRING_PK`, \n";
+					$sSQLSelectCols .= "    `DATASHORTSTRING_DATE`, \n";
+					$sSQLSelectCols .= "    `DATASHORTSTRING_DATE` AS \"UTS\", \n";
+					$sSQLSelectCols .= "    `DATASHORTSTRING_VALUE`, \n";
+					//-- Table --//
+					$sSQLTables .= "INNER JOIN `".$sSchema."`.`DATASHORTSTRING` ON `IO_PK`=`DATASHORTSTRING_IO_FK` \n";
+					//-- Order By --//
+					$sSQLOrderBy .= "ORDER BY `DATASHORTSTRING_DATE` DESC \n";
+					//-- Value Type --//
+					$sValueType   = "STR";
+					break;
+					
+				//------------------------------------------------//
+				//-- (7) MEDIUM STRING                          --//
+				//------------------------------------------------//
+				case 7:
+					//-- Select Columns --//
+					$sSQLSelectCols .= "    `DATAMEDSTRING_PK`, \n";
+					$sSQLSelectCols .= "    `DATAMEDSTRING_DATE`, \n";
+					$sSQLSelectCols .= "    `DATAMEDSTRING_DATE` AS \"UTS\", \n";
+					$sSQLSelectCols .= "    `DATAMEDSTRING_VALUE`, \n";
+					//-- Table --//
+					$sSQLTables .= "INNER JOIN `".$sSchema."`.`DATAMEDSTRING` ON `IO_PK`=`DATAMEDSTRING_IO_FK` \n";
+					//-- Order By --//
+					$sSQLOrderBy .= "ORDER BY `DATAMEDSTRING_DATE` DESC \n";
+					//-- Value Type --//
+					$sValueType   = "STR";
+					break;
+					
+				//------------------------------------------------//
+				//-- (8) LONG STRING                            --//
+				//------------------------------------------------//
+				case 8:
+					//-- Select Columns --//
+					$sSQLSelectCols .= "    `DATALONGSTRING_PK`, \n";
+					$sSQLSelectCols .= "    `DATALONGSTRING_DATE`, \n";
+					$sSQLSelectCols .= "    `DATALONGSTRING_DATE` AS \"UTS\", \n";
+					$sSQLSelectCols .= "    `DATALONGSTRING_VALUE`, \n";
+					//-- Table --//
+					$sSQLTables .= "INNER JOIN `".$sSchema."`.`DATALONGSTRING` ON `IO_PK`=`DATALONGSTRING_IO_FK` \n";
+					//-- Order By --//
+					$sSQLOrderBy .= "ORDER BY `DATALONGSTRING_DATE` DESC \n";
+					//-- Value Type --//
+					$sValueType   = "STR";
+					break;
+				
+				//------------------------------------------------//
+				//-- DEFAULT                                    --//
+				//------------------------------------------------//
+				default:
+					$bError    = true;
+					$sErrMesg .= "Unsupported IO DataType!\n";
+					$sErrMesg .= "Please use a supported IO DataType between the range of 1 and 8.\n";
+			}
+		} catch( Exception $e1 ) {
+			$bError    = true;
+			$sErrMesg .= "Critcal error setting up variables that will be used in the query! \n";
+			$sErrMesg .= $e1->getMessage();
+		}
+	}
+	
+	
+	//--------------------------------------------------------------------//
+	//-- 4.0 - Build the SQL Query                                      --//
+	//--------------------------------------------------------------------//
+	
+	if( $bError===false ) {
+		try {
+			$sSQL .= "SELECT \n";
+			$sSQL .= $sSQLSelectCols;
+			$sSQL .= "    `IO_PK`, \n";
+			$sSQL .= "    `THING_PK`, \n";
+			$sSQL .= "    `LINK_PK` \n";
+			//$sSQL .= "	`USERS_PK` \n";
+			$sSQL .= "FROM `".$sSchema."`.`USERS` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`PERMHUB` ON `USERS_PK`=`PERMHUB_USERS_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`HUB` ON `HUB_PK`=`PERMHUB_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`COMM` ON `HUB_PK`=`COMM_HUB_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`LINK` ON `COMM_PK`=`LINK_COMM_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`THING` ON `LINK_PK`=`THING_LINK_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`IO` ON `THING_PK`=`IO_THING_FK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`IOTYPE` ON `IO_IOTYPE_FK`=`IOTYPE_PK` \n";
+			$sSQL .= "INNER JOIN `".$sSchema."`.`DATATYPE` ON `IOTYPE_DATATYPE_FK`=`DATATYPE_PK` \n";
+			$sSQL .= $sSQLTables;
+			$sSQL .= "WHERE CURRENT_USER LIKE CONCAT(`USERS_USERNAME`, '@%') \n";
+			$sSQL .= "AND `IO_PK` = :IOId \n";
+			$sSQL .= $sSQLOrderBy;
+			$sSQL .= "LIMIT 1; \n";
+			
+			//-- Input binding --//
+			$aInputVals = array(
+				array( "Name"=>"IOId",              "type"=>"BINT",     "value"=>$iIOId )
+			);
+			
+			//-- Output Binding --//
+			$aOutputCols = array(
+				array( "Name"=>"DataId",            "type"=>"BINT"      ),
+				array( "Name"=>"Timestamp",         "type"=>"TSC"       ),
+				array( "Name"=>"UnixTS",            "type"=>"BINT"      ),
+				array( "Name"=>"DataValue",         "type"=>$sValueType ),
+				array( "Name"=>"IOId",              "type"=>"BINT"      ),
+				array( "Name"=>"ThingId",           "type"=>"BINT"      ),
+				array( "Name"=>"LinkId",            "type"=>"BINT"      )
+			);
+			
+		} catch( Exception $e2 ) {
+			$bError    = true;
+			$sErrMesg .= "Critcal error when attempting to build the Query! \n";
+			$sErrMesg .= $e2->getMessage();
+		}
+	}
+	
+	//--------------------------------------------------------------------//
+	//-- 5.0 - Execute the SQL                                          --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			$aResult = $oRestrictedApiCore->oRestrictedDB->FullBindQuery( $sSQL, $aInputVals, $aOutputCols, 1 );
+		} catch( Exception $e5 ) {
+			$bError   = true;
+			$sErrMesg = $e5->getMessage();
+		}
+	}
+	
+	//--------------------------------------------------------------------//
+	//-- 6.0 - Check the Results                                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		try {
+			if( $aResult['Error']===true ) {
+				$bError   = true;
+				$sErrMesg = $aResult['ErrMesg'];
+			}
+		} catch( Exception $e6 ) {
+			$bError   = true;
+			$sErrMesg = $e6->getMessage();
+		}
+	}
+	
+	//--------------------------------------------------------------------//
+	//-- 9.0 - Declare Variables                                        --//
+	//--------------------------------------------------------------------//
+	if( $bError===false ) {
+		return array( "Error"=>false, "Data"=>$aResult["Data"] );
+	} else {
+		return array( "Error"=>true, "ErrMesg"=>"WatchInputsGetMostRecentRawValue: ".$sErrMesg );
+	}
+}
+
+
+
 
 
 
@@ -10389,7 +10786,6 @@ function dbLookupTableIndicies( $sTableName ) {
 	$sSchema            = "";           //-- STRING:    Used to store the name of the schema that needs updating.    --//
 	$aInputVals         = array();      //-- ARRAY:     Used to store the SQL Input values so they can be bound to the query to help prevent injection --//
 	$aOutputCols        = array();      //-- ARRAY:     An array with information about what columns are expected to be returned from the database and any extra formatting that needs to be done. --//
-	
 	
 	
 	//----------------------------------------------------//
