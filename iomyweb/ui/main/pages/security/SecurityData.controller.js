@@ -115,6 +115,10 @@ sap.ui.controller("pages.security.SecurityData", {
         }
     },
     
+    /**
+     * Loads either an Onvif stream managed by WatchInputs, or an image tag
+     * pointing to a MJPEG stream.
+     */
     LoadStream : function () {
         var oController     = this;
         var oView           = this.getView();

@@ -92,6 +92,38 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 								})
 							]
 						}),
+                        new sap.ui.layout.form.FormElement({
+                            label : "Stream Authentication",
+                            fields: [
+                                new sap.m.Select({
+                                    selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StreamAuthMethod}",
+                                    enabled : "{/enabled/IfOnvifProfilesFound}",
+                                    items : [
+                                        new sap.ui.core.Item ({
+                                            key: 1,
+                                            text: "No Auth Required"
+                                        }),
+                                        new sap.ui.core.Item ({
+                                            key: 2,
+                                            text: "Camera Username and Password"
+                                        }),
+                                        new sap.ui.core.Item ({
+                                            key: 3,
+                                            text: "Stream Username and Password"
+                                        })
+                                    ]
+                                })
+                            ]
+                        }),
+//                        new sap.ui.layout.form.FormElement({
+//                            label : "Disable PTZ Controls",
+//                            enabled : "{/enabled/IfOnvifProfilesFound}",
+//                            fields: [
+//                                new sap.m.CheckBox({
+//                                    enabled : true
+//                                })
+//                            ]
+//                        }),
 						new sap.ui.layout.form.FormElement({
 							label : "",
 							fields: [

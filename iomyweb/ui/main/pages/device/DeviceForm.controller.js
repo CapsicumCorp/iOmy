@@ -741,6 +741,30 @@ sap.ui.controller("pages.device.DeviceForm", {
                             "CameraName" : oCurrentFormData.CameraName
                         }
                     };
+                    
+                    //--------------------------------------------------------------------//
+                    // Check what authorisation method is used and add it to the request
+                    // parameters.
+                    //--------------------------------------------------------------------//
+                    switch (oCurrentFormData.StreamAuthMethod) {
+                        case 2:
+                            mData.data.StreamAuth = JSON.stringify({
+                                "AuthType" : oCurrentFormData.StreamAuthMethod,
+                            });
+                            break;
+
+                        case 3:
+                            mData.data.StreamAuth = JSON.stringify({
+                                "AuthType" : oCurrentFormData.StreamAuthMethod,
+                                "Username" : oCurrentFormData.StreamUsername,
+                                "Password" : oCurrentFormData.StreamPassword
+                            });
+                            break;
+                            
+                        default:
+                            break;
+                    }
+                    
                     break;
 
                 default :

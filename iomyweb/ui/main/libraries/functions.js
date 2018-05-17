@@ -1112,7 +1112,8 @@ $.extend(iomy.functions, {
                 "CameraName" : "",
                 "OnvifServer" : "",
                 "StreamProfile" : "",
-                "ThumbnailProfile" : ""
+                "ThumbnailProfile" : "",
+                "StreamAuthMethod" : 1
             };
         } catch (e) {
             structOptions = {};
