@@ -1113,7 +1113,9 @@ $.extend(iomy.functions, {
                 "OnvifServer" : "",
                 "StreamProfile" : "",
                 "ThumbnailProfile" : "",
-                "StreamAuthMethod" : 1
+                "StreamAuthMethod" : 0,
+                "StreamUsername" : "",
+                "StreamPassword" : ""
             };
         } catch (e) {
             structOptions = {};

@@ -98,7 +98,7 @@ sap.ui.jsfragment("fragments.OnvifServer", {
                                     type : "Number",
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/IPPort}",
                                     enabled : "{/enabled/Always}"
-								}),
+								})
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
@@ -114,7 +114,7 @@ sap.ui.jsfragment("fragments.OnvifServer", {
 							label : "Password",
 							fields: [ 
 								new sap.m.Input({
-                                    type : "Password",
+                                    type : sap.m.InputType.Password,
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Password}",
                                     enabled : "{/enabled/Always}"
                                 })
@@ -138,7 +138,7 @@ sap.ui.jsfragment("fragments.OnvifServer", {
                                     press : function () {
                                         oController.CancelInput();
                                     }
-								}),
+								})
 							]
 						}),
 					]

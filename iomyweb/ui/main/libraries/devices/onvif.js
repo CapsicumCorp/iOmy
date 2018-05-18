@@ -320,6 +320,13 @@ $.extend(iomy.devices.onvif,{
         }
     },
     
+    saveStreamInformation : function (mSettings) {
+        var iThingId    = 0;
+        var mThing      = {};
+        
+        
+    },
+    
     /**
      * Retrives a list of profiles within an Onvif server identified by its link
      * ID. A callback function must be used if you wish to retrieve the results.

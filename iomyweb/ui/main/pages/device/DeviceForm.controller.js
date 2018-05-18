@@ -218,6 +218,20 @@ sap.ui.controller("pages.device.DeviceForm", {
 //        oView.byId("ButtonSubmit").setEnabled(bEnabled);
     },
     
+    ToggleOnvifStreamAuthenticationForm : function () {
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
+        var iAuthType   = oModel.getProperty("/thingType"+iomy.devices.onvif.ThingTypeId+"/StreamAuthMethod");
+        var bVisible    = iAuthType == 2;
+        
+        if (bVisible) {
+            oModel.setProperty("/visible/IfStreamAuthSelected", bVisible);
+        } else {
+            oModel.setProperty("/thingType"+iomy.devices.onvif.ThingTypeId+"/StreamUsername", "");
+            oModel.setProperty("/thingType"+iomy.devices.onvif.ThingTypeId+"/StreamPassword", "");
+        }
+    },
+    
     ToggleEditIPWebcamControls : function (bEnabled) {
         var oController = this;
         var oView       = this.getView();
@@ -367,6 +381,10 @@ sap.ui.controller("pages.device.DeviceForm", {
             "IfAcceptingInput"          : true && oController.bAcceptingInput,
             "IfOnvifCameraIsSelected"   : true && oController.bOnvifCameraSelected,
             "IfOnvifProfilesFound"      : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
+        };
+        
+        oJSON.visible = {
+            "IfStreamAuthSelected" : false
         };
         
         var fnComplete = function () {
@@ -746,14 +764,15 @@ sap.ui.controller("pages.device.DeviceForm", {
                     // Check what authorisation method is used and add it to the request
                     // parameters.
                     //--------------------------------------------------------------------//
+                    oCurrentFormData.StreamAuthMethod = parseInt(oCurrentFormData.StreamAuthMethod);
                     switch (oCurrentFormData.StreamAuthMethod) {
-                        case 2:
+                        case 1:
                             mData.data.StreamAuth = JSON.stringify({
-                                "AuthType" : oCurrentFormData.StreamAuthMethod,
+                                "AuthType" : oCurrentFormData.StreamAuthMethod
                             });
                             break;
 
-                        case 3:
+                        case 2:
                             mData.data.StreamAuth = JSON.stringify({
                                 "AuthType" : oCurrentFormData.StreamAuthMethod,
                                 "Username" : oCurrentFormData.StreamUsername,

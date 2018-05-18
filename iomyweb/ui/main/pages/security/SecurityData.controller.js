@@ -87,6 +87,15 @@ sap.ui.controller("pages.security.SecurityData", {
                 "data"  : {
                     "streamUrl" : "",
                     "thumbnailUrl" : ""
+                },
+                "enabled" : {
+                    "always" : true
+                },
+                "fields" : {
+                    "ptzEnabled" : true,
+                    "streamAuthType" : 0,
+                    "streamUsername" : "",
+                    "streamPassword" : ""
                 }
             };
 
@@ -279,6 +288,27 @@ sap.ui.controller("pages.security.SecurityData", {
             );
             
             $.sap.log.error("Failed to load the stream: " + e.message);
+        }
+    },
+    
+    SaveStreamData : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var oModel              = oView.getModel();
+        var oSettingsFormData   = oModel.getProperty("/fields");
+        
+        try {
+            iomy.devices.onvif.saveStreamData({
+                thingID : oController.iCameraId,
+                displayName : oSettingsFormData.streamName
+            });
+            
+        } catch (e) {
+            iomy.common.showError(e.message, "Error",
+                function () {
+                    
+                }
+            );
         }
     }
 });

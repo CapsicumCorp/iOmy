@@ -100,21 +100,46 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
                                     enabled : "{/enabled/IfOnvifProfilesFound}",
                                     items : [
                                         new sap.ui.core.Item ({
-                                            key: 1,
+                                            key: 0,
                                             text: "No Auth Required"
                                         }),
                                         new sap.ui.core.Item ({
-                                            key: 2,
+                                            key: 1,
                                             text: "Camera Username and Password"
                                         }),
                                         new sap.ui.core.Item ({
-                                            key: 3,
+                                            key: 2,
                                             text: "Stream Username and Password"
                                         })
-                                    ]
+                                    ],
+                                    
+                                    change : function () {
+                                        oController.ToggleOnvifStreamAuthenticationForm();
+                                    }
                                 })
                             ]
                         }),
+                        new sap.ui.layout.form.FormElement({
+							label : iomy.widgets.RequiredLabel("Stream Username"),
+                            visible : "{/visible/IfStreamAuthSelected}",
+							fields: [ 
+								new sap.m.Input({
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StreamUsername}",
+                                    enabled : "{/enabled/IfOnvifProfilesFound}"
+                                })
+							]
+						}),
+                        new sap.ui.layout.form.FormElement({
+							label : iomy.widgets.RequiredLabel("Stream Password"),
+                            visible : "{/visible/IfStreamAuthSelected}",
+							fields: [ 
+								new sap.m.Input({
+                                    value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StreamPassword}",
+                                    enabled : "{/enabled/IfOnvifProfilesFound}",
+                                    type : sap.m.InputType.Password
+                                })
+							]
+						}),
 //                        new sap.ui.layout.form.FormElement({
 //                            label : "Disable PTZ Controls",
 //                            enabled : "{/enabled/IfOnvifProfilesFound}",
