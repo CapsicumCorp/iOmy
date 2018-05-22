@@ -2433,6 +2433,11 @@ class PHPOnvif {
 		$iPasswordIOId          = 0;                //-- INTEGER:   --//
 		$iAuthTypeIOId          = 0;                //-- INTEGER:   --//
 		
+		$aLinkInfo              = array();          //-- ARRAY:     --//
+		$iAuthType              = 0;                //-- INTEGER:   --//
+		$sUsername              = "";               //-- STRING:    --//
+		$sPassword              = "";               //-- STRING:    --//
+		
 		//-- Global Variables --//
 		global $oRestrictedApiCore;
 		
@@ -2446,7 +2451,7 @@ class PHPOnvif {
 		$iRSTypeIdAuthType         = LookupFunctionConstant("StreamAuthTypeRSTypeId");
 		
 		//--------------------------------------------------------------------//
-		//-- 3.0 - Lookup the List of Stream Profiles                       --//
+		//-- 3.1 - Lookup the List of Stream Profiles                       --//
 		//--------------------------------------------------------------------//
 		if( $bError===false ) {
 			$aTempFunctionResult = $this->GetProfiles();
@@ -2465,7 +2470,7 @@ class PHPOnvif {
 		}
 		
 		//--------------------------------------------------------------------//
-		//-- 4.0 - Fetch each Stream Uri from each profile                  --//
+		//-- 3.2 - Fetch each Stream Uri from each profile                  --//
 		//--------------------------------------------------------------------//
 		if( $bError===false ) {
 			//------------------------------------//
@@ -2593,22 +2598,120 @@ class PHPOnvif {
 			//--------------------------------------------------------------------//
 			//-- Check if the Username and Password are required on the streams --//
 			//--------------------------------------------------------------------//
-			if( isset( $aPostStreamAuth['Username'] ) && isset( $aPostStreamAuth['Password'] ) ) {
-				$sUsername = $aPostStreamAuth['Username'];
-				$sPassword = $aPostStreamAuth['Password'];
-				
-				
-				if( $sUsername!==null && $sUsername!==false && $sUsername!=="" ) {
-					if( $sPassword!==null && $sPassword!==false && $sPassword!=="" ) {
-						
-						//-- Add the Username and password to the URLs --//
-						$aStreamProfile['Uri'] = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername, "password"=>$sPassword ) );
-						$aThumbProfile['Uri']  = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername, "password"=>$sPassword ) );
-					}
-				}
-			}
+			//if( isset( $aPostStreamAuth['Username'] ) && isset( $aPostStreamAuth['Password'] ) ) {
+			//	$sUsername = $aPostStreamAuth['Username'];
+			//	$sPassword = $aPostStreamAuth['Password'];
+			//	
+			//	
+			//	if( $sUsername!==null && $sUsername!==false && $sUsername!=="" ) {
+			//		if( $sPassword!==null && $sPassword!==false && $sPassword!=="" ) {
+			//			
+			//			//-- Add the Username and password to the URLs --//
+			//			$aStreamProfile['Uri'] = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername, "password"=>$sPassword ) );
+			//			$aThumbProfile['Uri']  = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername, "password"=>$sPassword ) );
+			//		}
+			//	}
+			//}
 		}
 		
+		
+		//--------------------------------------------------------------------//
+		//-- 3.3 - Setup AuthType                                           --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ) {
+			//------------------------------------------------------------//
+			//-- 4.1 - Setup AuthType                                   --//
+			//------------------------------------------------------------//
+			if( $aPostStreamAuth!==false && $aPostStreamAuth!==null && isset( $aPostStreamAuth['AuthType'] ) ) {
+				//------------------------------------------------------------//
+				//-- 6.2.A.1 - Set the AuthType                             --//
+				//------------------------------------------------------------//
+				
+				//--------------------------------------------------------//
+				//-- IF AuthType is Link Username and Password          --//
+				//--------------------------------------------------------//
+				if( $aPostStreamAuth['AuthType']===1 || $aPostStreamAuth['AuthType']==="1" ) {
+					$iAuthType = 1;
+					
+					
+				//--------------------------------------------------------//
+				//-- ELSEIF AuthType is Custom Username and Password    --//
+				//--------------------------------------------------------//
+				} else if( $aPostStreamAuth['AuthType']===2 || $aPostStreamAuth['AuthType']==="2" ) {
+					$iAuthType = 2;
+					
+				//--------------------------------------------------------//
+				//-- ELSE No extra Auth needed                          --//
+				//--------------------------------------------------------//
+				} else {
+					$iAuthType = 0;
+				}
+				
+				//------------------------------------------------------------//
+				//-- 6.2.A.2 - Store the Username and Password              --//
+				//------------------------------------------------------------//
+				if( $iAuthType===1 || $iAuthType===2 ) {
+					//--------------------------------------------//
+					//-- Set Variables                          --//
+					//--------------------------------------------//
+					if( $iAuthType===1 ) {
+						$aLinkInfo = dbGetLinkInfo( $iLinkId );
+						
+						if( $aLinkInfo['Error']===false ) {
+							$sUsername = $aLinkInfo['Data']['LinkConnUsername'];
+							$sPassword = $aLinkInfo['Data']['LinkConnPassword'];
+						}
+						
+					} else if( $iAuthType===2 ) {
+						if( isset( $aPostStreamAuth['Username'] ) ) {
+							$sUsername = $aPostStreamAuth['Username'];
+						}
+						
+						if( isset( $aPostStreamAuth['Password'] ) ) {
+							$sPassword = $aPostStreamAuth['Password'];
+						}
+					}
+					
+					//--------------------------------------------//
+					//-- Add the Username (and Password)        --//
+					//--------------------------------------------//
+					if( $sUsername!==null && $sUsername!==false && $sUsername!=="" ) {
+						if( $sPassword!==null && $sPassword!==false && $sPassword!=="" ) {
+							//----------------------------------------------------//
+							//-- Add the Username and password to the URLs      --//
+							//----------------------------------------------------//
+							$aFunctionTemp4 = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername, "password"=>$sPassword ) );
+							$aFunctionTemp5 = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername, "password"=>$sPassword ) );
+							
+							if( $aFunctionTemp4['Error']===false && $aFunctionTemp5['Error']===false ) {
+								$aStreamProfile['Uri'] = $aFunctionTemp4['Url'];
+								$aThumbProfile['Uri']  = $aFunctionTemp5['Url'];
+							} else {
+								$bError    = true;
+								$sErrMesg .= "Problem adding the username and password to the Url!\n";
+							}
+							
+						} else {
+							//----------------------------------------------------//
+							//-- Add the Username to the URLs                   --//
+							//----------------------------------------------------//
+							$aFunctionTemp4 = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername ) );
+							$aFunctionTemp5 = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername) );
+							
+							if( $aFunctionTemp4['Error']===false && $aFunctionTemp5['Error']===false ) {
+								$aStreamProfile['Uri'] = $aFunctionTemp4['Url'];
+								$aThumbProfile['Uri']  = $aFunctionTemp5['Url'];
+							} else {
+								$bError    = true;
+								$sErrMesg .= "Problem adding the username and password to the Url!\n";
+							}
+						}
+					}
+				}
+			} else {
+				$iAuthType = 0;
+			}
+		}
 		
 		//--------------------------------------------------------------------//
 		//-- 5.0 - Lookup the IOs that need to be replaced                  --//
@@ -2650,20 +2753,20 @@ class PHPOnvif {
 					//----------------------------//
 					//-- Username               --//
 					//----------------------------//
-					} else if( $aIO['RSTypeId']===$iRSTypeIdThumbnailUrl ) {
+					} else if( $aIO['RSTypeId']===$iRSTypeIdUsername ) {
 						$iUsernameIOId = $aIO['IOId'];
 						
 					//----------------------------//
 					//-- Password               --//
 					//----------------------------//
-					} else if( $aIO['RSTypeId']===$iRSTypeIdThumbnailUrl ) {
+					} else if( $aIO['RSTypeId']===$iRSTypeIdPassword ) {
 						$iPasswordIOId = $aIO['IOId'];
 						
 					//----------------------------//
 					//-- Auth Type              --//
 					//----------------------------//
 					} else if( $aIO['RSTypeId']===$iRSTypeIdAuthType ) {
-						
+						$iAuthTypeIOId = $aIO['IOId'];
 					}
 				} //-- END Foreach --//
 				
@@ -2713,27 +2816,46 @@ class PHPOnvif {
 					$sErrMesg .= "Error Code:'3215' \n";
 					$sErrMesg .= "Can not find the 'Password' IO.\n";
 					
+				} else if( !($iAuthTypeIOId>0) ) {
+					//-- Id isn't greater than zero --//
+					$bError    = true;
+					$iErrCode  = 3216;
+					$sErrMesg .= "Error Code:'3216' \n";
+					$sErrMesg .= "Can not find the 'AuthType' IO.\n";
+					
 				//----------------------------------------------------//
 				//-- ELSE Assume that there isn't any errors        --//
 				//----------------------------------------------------//
 				} else {
-					
 					//--------------------------------------------//
 					//-- Setup the current unix timestamp       --//
 					//--------------------------------------------//
 					$iUTS = time();
 					
 					//--------------------------------------------//
+					//-- Start the Transaction                  --//
+					//--------------------------------------------//
+					$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
+					
+					if( $bTransactionStarted===false ) {
+						$bError    = true;
+						$iErrCode  = 3420;
+						$sErrMesg .= "Error Code:'3420' \n";
+						$sErrMesg .= "Database Error! \n";
+						$sErrMesg .= "Problem when trying to start the transaction! \n";
+					}
+			
+					//--------------------------------------------//
 					//-- Insert the new "Stream Profile"        --//
 					//--------------------------------------------//
 					if( $bError===false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iStreamProfileIOId, $iUTS, $sStreamProfileName );
+						$aTempFunctionResult4 = InsertNewIODataValue( $iStreamProfileIOId, $iUTS, $sStreamProfileName, true );
 						
 						if( $aTempFunctionResult4['Error']===true ) {
 							$bError     = true;
-							$iErrCode   = 3412;
-							$sErrMesg  .= "Error Code:'3412' \n";
-							$sErrMesg  .= "Critical Error updating the \"Stream Profile\" value!\n";
+							$iErrCode   = 3421;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Error updating the \"Stream Profile\" value!\n";
 							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
 						}
 					}
@@ -2742,12 +2864,12 @@ class PHPOnvif {
 					//-- Insert the new "Stream Url"            --//
 					//--------------------------------------------//
 					if( $bError===false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iStreamUrlIOId, $iUTS, $aStreamProfile['Uri'] );
+						$aTempFunctionResult4 = InsertNewIODataValue( $iStreamUrlIOId, $iUTS, $aStreamProfile['Uri'], true );
 						
 						if( $aTempFunctionResult4['Error']===true ) {
 							$bError     = true;
-							$iErrCode   = 3413;
-							$sErrMesg  .= "Error Code:'3413' \n";
+							$iErrCode   = 3422;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg  .= "Critical Error updating the \"Stream Url\" value!\n";
 							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
 						}
@@ -2757,12 +2879,12 @@ class PHPOnvif {
 					//-- Insert the new "Thumbnail Profile"     --//
 					//--------------------------------------------//
 					if( $bError===false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iThumbnailProfileIOId, $iUTS, $sThumbnailProfileName );
+						$aTempFunctionResult4 = InsertNewIODataValue( $iThumbnailProfileIOId, $iUTS, $sThumbnailProfileName, true );
 						
 						if( $aTempFunctionResult4['Error']===true ) {
 							$bError     = true;
-							$iErrCode   = 3414;
-							$sErrMesg  .= "Error Code:'3414' \n";
+							$iErrCode   = 3423;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg  .= "Critical Error updating the \"Thumbnail Profile\" value!\n";
 							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
 						}
@@ -2773,12 +2895,12 @@ class PHPOnvif {
 					//-- Insert the new "Thumbnail Url"         --//
 					//--------------------------------------------//
 					if( $bError===false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iThumbnailUrlIOId, $iUTS, $aThumbProfile['Uri'] );
+						$aTempFunctionResult4 = InsertNewIODataValue( $iThumbnailUrlIOId, $iUTS, $aThumbProfile['Uri'], true );
 						
 						if( $aTempFunctionResult4['Error']===true ) {
 							$bError     = true;
-							$iErrCode   = 3415;
-							$sErrMesg  .= "Error Code:'3415' \n";
+							$iErrCode   = 3424;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg  .= "Critical Error updating the \"Thumbnail Url\" value!\n";
 							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
 						}
@@ -2788,12 +2910,12 @@ class PHPOnvif {
 					//-- Insert the new "Username"              --//
 					//--------------------------------------------//
 					if( $bError===false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iUsernameIOId, $iUTS, $sUsername );
+						$aTempFunctionResult4 = InsertNewIODataValue( $iUsernameIOId, $iUTS, $sUsername, true );
 						
 						if( $aTempFunctionResult4['Error']===true ) {
 							$bError     = true;
-							$iErrCode   = 3416;
-							$sErrMesg  .= "Error Code:'3416' \n";
+							$iErrCode   = 3425;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg  .= "Critical Error updating the \"Username\" value!\n";
 							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
 						}
@@ -2803,13 +2925,28 @@ class PHPOnvif {
 					//-- Insert the new "Password"              --//
 					//--------------------------------------------//
 					if( $bError===false ) {
-						$aTempFunctionResult4 = InsertNewIODataValue( $iPasswordIOId, $iUTS, $sPassword );
+						$aTempFunctionResult4 = InsertNewIODataValue( $iPasswordIOId, $iUTS, $sPassword, true );
 						
 						if( $aTempFunctionResult4['Error']===true ) {
 							$bError     = true;
-							$iErrCode   = 3417;
-							$sErrMesg  .= "Error Code:'3417' \n";
+							$iErrCode   = 3426;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
 							$sErrMesg  .= "Critical Error updating the \"Password\" value!\n";
+							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+						}
+					}
+					
+					//--------------------------------------------//
+					//-- Insert the new "AuthType"              --//
+					//--------------------------------------------//
+					if( $bError===false ) {
+						$aTempFunctionResult4 = InsertNewIODataValue( $iAuthTypeIOId, $iUTS, $iAuthType, true );
+						
+						if( $aTempFunctionResult4['Error']===true ) {
+							$bError     = true;
+							$iErrCode   = 3427;
+							$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+							$sErrMesg  .= "Critical Error updating the \"AuthType\" value!\n";
 							$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
 						}
 					}
@@ -2837,115 +2974,9 @@ class PHPOnvif {
 			}
 		}
 		
-		//--------------------------------------------------------------------//
-		//-- 6.0 - Insert the Profile Names and URLs into the database      --//
-		//--------------------------------------------------------------------//
-		if( $bError===false ) {
-			
-			//-- Store the current time --//
-			$iUTS = time();
-			
-			//-- Check if the Username and Password are required on the streams --//
-			if( isset( $aPostStreamAuth['Username'] ) && isset( $aPostStreamAuth['Password'] ) ) {
-				$sUsername = $aPostStreamAuth['Username'];
-				$sPassword = $aPostStreamAuth['Password'];
-				
-				
-				if( $sUsername!==null && $sUsername!==false && $sUsername!=="" ) {
-					if( $sPassword!==null && $sPassword!==false && $sPassword!=="" ) {
-						
-						//-- Add the Username and password to the URLs --//
-						$aStreamProfile['Uri'] = ParseReplaceAndRebuildUrl( $aStreamProfile['Uri'], array( "user"=>$sUsername, "password"=>$sPassword ) );
-						$aThumbProfile['Uri']  = ParseReplaceAndRebuildUrl( $aThumbProfile['Uri'],  array( "user"=>$sUsername, "password"=>$sPassword ) );
-					}
-				}
-			}
-			
-			//----------------------------------------------------------------//
-			//-- Foreach IO add the appropriate value to the database       --//
-			//----------------------------------------------------------------//
-			foreach( $aNewThingResult['Thing']['IOs'] as $iIOId ) {
-				if( $bError===false ) {
-					if( $iIOId!==null && $iIOId!==false && $iIOId>0 ) {
-						//----------------------------------------------------------------//
-						//-- Lookup the IO Info                                         --//
-						//----------------------------------------------------------------//
-						$aIOInfoTemp = GetIOInfo( $iIOId );
-						
-						if( $aIOInfoTemp['Error']===true ) {
-							$bError    = true;
-							$iErrCode  = 0;
-							$sErrMesg .= "Problem looking up one of the new IO! \n";
-							$sErrMesg .= $aIOInfoTemp["ErrMesg"];
-						}
-						
-						//----------------------------------------------------------------//
-						//-- Insert the appropriate value                               --//
-						//----------------------------------------------------------------//
-						if( $bError===false ) {
-							if( isset( $aIOInfoTemp['Data']['RSTypeId'] ) ) {
-								//----------------------------//
-								//-- Check the RSType       --//
-								//----------------------------//
-								switch( $aIOInfoTemp['Data']['RSTypeId'] ) {
-									//-- Stream Profile --//
-									case 3970:
-										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sStreamProfileName, true );
-										break;
-										
-									//-- Stream Url --//
-									case 3971:
-										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $aStreamProfile['Uri'], true );
-										break;
-										
-									//-- Thumbnail Profile --//
-									case 3972:
-										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sThumbnailProfileName, true );
-										break;
-										
-									//-- Thumbnail Url --//
-									case 3973:
-										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $aThumbProfile['Uri'], true );
-										break;
-										
-									//-- Username --//
-									case 3962:
-										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sUsername, true );
-										break;
-										
-									//-- Password --//
-									case 3963:
-										$aInsertResult = InsertNewIODataValue( $iIOId, $iUTS, $sPassword, true );
-										break;
-										
-									//-- Unknown Id --//
-									default:
-										//echo "<br />\nUnknown RSTypeId!<br />\n";
-										//$aInsertResult = array( "Error"=>false );
-										break;
-										
-								}	//-- ENDSWITCH  --//
-								
-								//----------------------------//
-								//-- Check for Errors       --//
-								//----------------------------//
-								if( $aInsertResult['Error']===true ) {
-									$bError = true;
-									$sErrMesg .= "Error inserting data in the new IOs!\n";
-									$sErrMesg .= $aInsertResult['ErrMesg'];
-									$sErrMesg .= "\n";
-								}
-								
-							}	//-- ENDIF RSTypeId is present --//
-						}	//-- ENDIF No errors have occurred --//
-					}
-				}	//-- ENDIF No errors --//
-			}	//-- ENDFOREACH IO --//
-		}	//-- ENDIF No errors --//
-		
 		
 		//--------------------------------------------------------------------//
-		//-- 8.0 - Insert the Profile Names and URLs into the database      --//
+		//-- 8.0 - Commit or Rollback Transaction                           --//
 		//--------------------------------------------------------------------//
 		if($bTransactionStarted===true) {
 			//--------------------------------------------//
@@ -2966,7 +2997,7 @@ class PHPOnvif {
 		//--------------------------------------------------------------------//
 		if($bError===false) {
 			//-- No Errors --//
-			return array( "Error"=>false, "Data"=>$aResult );
+			return $aResult;
 			
 		} else {
 			//-- Error Occurred --//
@@ -2974,9 +3005,634 @@ class PHPOnvif {
 		}
 	}
 	
+
+	//================================================================================================//
+	//== EDIT EXISTING DEVICE IN THE DATABASE                                                       ==//
+	//================================================================================================//
+	public function EditThingAuthTypeInDB( $iThingId, $aPostStreamAuth ) {
+		//----------------------------------------------------------------//
+		//-- 1.0 - INITIALISE                                           --//
+		//----------------------------------------------------------------//
+		
+		//-- Declare Variables --//
+		$bError                 = false;            //-- BOOLEAN:   --//
+		$iErrCode               = 0;                //-- INTEGER:   --//
+		$sErrMesg               = "";               //-- STRING:    --//
+		$aResult                = array();          //-- ARRAY:     --//
+		
+		$aIOList                = array();          //-- ARRAY:     Holds the list of IOs that can be found on the Thing --//
+		$bFound1                = false;            //-- BOOLEAN:   Used to indicate if a profile has been found --//
+		$bFound2                = false;            //-- BOOLEAN:   Used to indicate if a profile has been found --//
+		
+		$aThingData             = array();          //-- ARRAY:     Used to store the Thing data 
+		$aThingResult           = array();          //-- ARRAY:     Used to store the results of the function that inserts the Thing and its IOs into the database --//
+		$aStreamProfile         = array();          //-- ARRAY:     Used to hold the desired Stream profile once it has been found from the other profiles --//
+		$aThumbProfile          = array();          //-- ARRAY:     Used to hold the desired Thumbnail profile once it has been found from the other profiles --//
+		$aIOInfoTemp            = array();          //-- ARRAY:     Used to hold the IO Info lookup 
+		$aInsertResult          = array();          //-- ARRAY:     --//
+		$bTransactionStarted    = false;            //-- BOOLEAN:   Used to inidicates if a transacation has been started so that either a commit or rollback can be passed to the database --//
+		
+		$iUTS                   = time();           //-- INTEGER:   --//
+		$sUsername              = "";               //-- STRING:    --//
+		$sPassword              = "";               //-- STRING:    --//
+		
+		$iStreamProfileIOId     = 0;                //-- INTEGER:   --//
+		$iStreamUrlIOId         = 0;                //-- INTEGER:   --//
+		$iThumbnailProfileIOId  = 0;                //-- INTEGER:   --//
+		$iThumbnailUrlIOId      = 0;                //-- INTEGER:   --//
+		$iUsernameIOId          = 0;                //-- INTEGER:   --//
+		$iPasswordIOId          = 0;                //-- INTEGER:   --//
+		$iAuthTypeIOId          = 0;                //-- INTEGER:   --//
+		$iSProfileIODataTypeId  = 0;                //-- INTEGER:   --//
+		$iTProfileIODataTypeId  = 0;                //-- INTEGER:   --//
+		
+		$aLinkInfo              = array();          //-- ARRAY:     --//
+		$iAuthType              = 0;                //-- INTEGER:   --//
+		$sUsername              = "";               //-- STRING:    --//
+		$sPassword              = "";               //-- STRING:    --//
+		
+		//-- Global Variables --//
+		global $oRestrictedApiCore;
+		
+		//-- Constants --//
+		$iRSTypeIdStreamProfile    = LookupFunctionConstant("OnvifStreamProfileRSTypeId");
+		$iRSTypeIdStreamUrl        = LookupFunctionConstant("OnvifStreamUrlRSTypeId");
+		$iRSTypeIdThumbnailProfile = LookupFunctionConstant("OnvifThumbnailProfileRSTypeId");
+		$iRSTypeIdThumbnailUrl     = LookupFunctionConstant("OnvifThumbnailUrlRSTypeId");
+		$iRSTypeIdUsername         = LookupFunctionConstant("StreamUsernameRSTypeId");
+		$iRSTypeIdPassword         = LookupFunctionConstant("StreamPasswordRSTypeId");
+		$iRSTypeIdAuthType         = LookupFunctionConstant("StreamAuthTypeRSTypeId");
+		
+		
+		//--------------------------------------------------------------------//
+		//-- 3.1 - Lookup the IOs that need to be replaced                  --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ) {
+			//-- List all IOs attached to that Thing --//
+			$aTempFunctionResult1 = GetIOsFromThingId( $iThingId );
+			//-- Parse the results --//
+			if( $aTempFunctionResult1['Error']===false ) {
+				
+				//-----------------------------------------------------------------------------------------//
+				//-- Verify that the desired IO Ids are found and stored to their appropiate variables   --//
+				//-----------------------------------------------------------------------------------------//
+				foreach( $aTempFunctionResult1['Data'] as $aIO ) {
+					//----------------------------//
+					//-- Stream Profile         --//
+					//----------------------------//
+					if( $aIO['RSTypeId']===$iRSTypeIdStreamProfile ) {
+						$iStreamProfileIOId    = $aIO['IOId'];
+						$iSProfileIODataTypeId = $aIO['DataTypeId'];
+						
+					//----------------------------//
+					//-- Stream Url             --//
+					//----------------------------//
+					} else if( $aIO['RSTypeId']===$iRSTypeIdStreamUrl ) {
+						$iStreamUrlIOId = $aIO['IOId'];
+						
+					//----------------------------//
+					//-- Thumbnail Profile      --//
+					//----------------------------//
+					} else if( $aIO['RSTypeId']===$iRSTypeIdThumbnailProfile ) {
+						$iThumbnailProfileIOId = $aIO['IOId'];
+						$iTProfileIODataTypeId = $aIO['DataTypeId'];
+						
+					//----------------------------//
+					//-- Thumbnail Url          --//
+					//----------------------------//
+					} else if( $aIO['RSTypeId']===$iRSTypeIdThumbnailUrl ) {
+						$iThumbnailUrlIOId = $aIO['IOId'];
+						
+					//----------------------------//
+					//-- Username               --//
+					//----------------------------//
+					} else if( $aIO['RSTypeId']===$iRSTypeIdUsername ) {
+						$iUsernameIOId = $aIO['IOId'];
+						
+					//----------------------------//
+					//-- Password               --//
+					//----------------------------//
+					} else if( $aIO['RSTypeId']===$iRSTypeIdPassword ) {
+						$iPasswordIOId = $aIO['IOId'];
+						
+					//----------------------------//
+					//-- Auth Type              --//
+					//----------------------------//
+					} else if( $aIO['RSTypeId']===$iRSTypeIdAuthType ) {
+						$iAuthTypeIOId = $aIO['IOId'];
+					}
+				} //-- END Foreach --//
+				
+				
+				//----------------------------------------------------//
+				//-- IF a IOId couldn't be retrieved                --//
+				//----------------------------------------------------//
+				if( !($iStreamUrlIOId>0) ) {
+					//-- Id isn't greater than zero --//
+					$bError    = true;
+					$iErrCode  = 6511;
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Can not find the 'Stream Url' IO.\n";
+					
+				} else if( !($iThumbnailUrlIOId>0) ) {
+					//-- Id isn't greater than zero --//
+					$bError    = true;
+					$iErrCode  = 6513;
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Can not find the 'Thumbnail Url' IO.\n";
+					
+				} else if( !($iUsernameIOId>0) ) {
+					//-- Id isn't greater than zero --//
+					$bError    = true;
+					$iErrCode  = 6514;
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Can not find the 'Username' IO.\n";
+					
+				} else if( !($iPasswordIOId>0) ) {
+					//-- Id isn't greater than zero --//
+					$bError    = true;
+					$iErrCode  = 6515;
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Can not find the 'Password' IO.\n";
+					
+				} else if( !($iAuthTypeIOId>0) ) {
+					//-- Id isn't greater than zero --//
+					$bError    = true;
+					$iErrCode  = 6516;
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Can not find the 'AuthType' IO.\n";
+				}
+			} else {
+				//-- Display the error --//
+				$bError = true;
+				$iErrCode  = 6520;
+				$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+				$sErrMesg .= "Error when retrieving the IOs from the ThingId \n";
+				$sErrMesg .= $aTempFunctionResult1['ErrMesg'];
+			}
+		}
+		
+		//--------------------------------------------------------------------//
+		//-- 3.2 - Lookup Current URLs                                      --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ) {
+			//------------------------------------------------------------//
+			//-- 3.2.1 - Lookup the Most Recent Profile Values          --//
+			//------------------------------------------------------------//
+			
+			//-- Lookup Most Recent Stream Profile --//
+			$aFunctionTemp1 = GetIODataMostRecent( $iSProfileIODataTypeId, $iStreamProfileIOId, $iUTS );
+			//-- Lookup Most Recent Thumbnail Profile --//
+			$aFunctionTemp2 = GetIODataMostRecent( $iTProfileIODataTypeId, $iThumbnailProfileIOId, $iUTS );
+			
+			if( $aFunctionTemp1['Error']===false && $aFunctionTemp2['Error']===false ) {
+				$sStreamProfileName    = $aFunctionTemp1['Data']['Value'];
+				$sThumbnailProfileName = $aFunctionTemp2['Data']['Value'];
+				
+				//----------------------------------------------------//
+				//-- Lookup valid profiles from the Device          --//
+				//----------------------------------------------------//
+				$aFunctionTemp3 = $this->GetProfiles();
+				
+				if( $aFunctionTemp3['Error']===false ) {
+					$aProfiles = $this->ExtractProfiles( $aFunctionTemp3['Result'] );
+					
+					if( $aProfiles['Error']===true ) {
+						$bError    = true;
+						$iErrCode  = 6523;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Failed to extract the Onvif Profiles!\n";
+					}
+				} else {
+					$bError    = true;
+					$iErrCode  = 6522;
+					$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg .= "Failed to fetch the Onvif Profiles!\n";
+				}
+			} else {
+				$bError    = true;
+				$iErrCode  = 6521;
+				$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+				$sErrMesg .= "Failed to lookup the current profiles from the database.";
+			}
+			
+			
+			//------------------------------------------------------------//
+			//-- 3.2.2 - Lookup URLs for those Profiles                 --//
+			//------------------------------------------------------------//
+			if( $bError===false ) {
+				//------------------------------------//
+				//-- Reset the "bFound" Variables   --//
+				//------------------------------------//
+				$bFound1 = false;
+				$bFound2 = false;
+				
+				//------------------------------------//
+				//-- FOREACH Profile                --//
+				//------------------------------------//
+				foreach( $aProfiles['Data'] as $Key => $aProfile ) {
+					//------------------------------------------------------------//
+					//-- If no match has been found for the "StreamProfile"     --//
+					//------------------------------------------------------------//
+					if( $bFound1===false ) {
+						//----------------------------------------//
+						//-- "StreamProfile" match is found     --//
+						//----------------------------------------//
+						if( $aProfile['ProfileToken']===$sStreamProfileName ) {
+							
+							//-- Flag that a match has been found for the "StreamProfile" --//
+							$bFound1 = true;
+							
+							//-- Lookup the stream URI --//
+							$aStreamUri = $this->GetAndExtractStreamURI( $aProfile, 'RTSP', false );
+							
+							//-- IF no Errors --//
+							if( $aStreamUri['Error']===false ) {
+								//-- IF a Url is returned --//
+								if( isset( $aStreamUri['Uri'] ) ) {
+									$sStreamProfileURL = $aStreamUri['Uri'];
+									
+									//----------------------------------------//
+									//-- SETUP THE STREAM PROFILE ARRAY     --//
+									//----------------------------------------//
+									//$aStreamProfile        = $aProfile;
+									//$aStreamProfile['Uri'] = $aStreamUri['Uri'];
+									
+									
+									//----------------------------------------------------------------//
+									//-- If the "Thumb" profile is the same as the "Stream" profile --//
+									//----------------------------------------------------------------//
+									if( $sStreamProfileName===$sThumbnailProfileName ) {
+										//-- Flag that the "ThumbProfile" has been found --//
+										$bFound2 = true;
+										//-- Copy the StreamURL to the ThumbnailURL --//
+										$aThumbnailProfileURL = $sStreamProfileURL;
+									}
+									
+								//-- Else no stream uri was returned --//
+								} else {
+									$bError = true;
+									$iErrCode  = 6532;
+									$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+									$sErrMesg .= "Error looking up the Stream Profile\n";
+									$sErrMesg .= "Can't find the Url in the results\n";
+								}
+								
+							//-- Else error looking up the stream URI --//
+							} else {
+								$bError = true;
+								$iErrCode  = 6531;
+								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+								$sErrMesg .= "Error looking up the Stream Profile\n";
+								$sErrMesg .= $aStreamUri['ErrMesg']."\n";
+							}
+						} //-- ELSE do nothing --//
+					}
+					
+					
+					//------------------------------------------------------------//
+					//-- If no match has been found for the "ThumbProfile"      --//
+					//------------------------------------------------------------//
+					if( $bFound2===false ) {
+						if( $aProfile['ProfileToken']===$sThumbnailProfileName ) {
+							
+							//-- Flag that a match has been found for the "StreamProfile" --//
+							$bFound2 = true;
+							
+							//-- Lookup the stream URI --//
+							$aThumbUri = $this->GetAndExtractStreamURI( $aProfile, 'RTSP', false );
+							
+							//-- IF no Errors --//
+							if( $aThumbUri['Error']===false ) {
+								//--------------------------------//
+								//-- IF a Url is returned       --//
+								//--------------------------------//
+								if( isset( $aThumbUri['Uri'] ) ) {
+									$aThumbnailProfileURL = $aThumbUri['Uri'];
+									
+								//-------------------------------------------
+								//-- ELSE error looking up the stream URI --//
+								} else {
+									$bError = true;
+									$iErrCode  = 6533;
+									$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+									$sErrMesg .= "Error looking up the Stream Profile\n";
+									$sErrMesg .= $aThumbUri['ErrMesg']."\n";
+								}
+							} //-- ELSE do nothing --//
+						} //-- ENDIF Profile matches the "Thumbnail Profile Name" --//
+					} //-- ENDIF No matches for thumbanils (bFound2) --//
+				} //-- ENDFOREACH Profile --//
+				
+				
+				//--------------------------------//
+				//-- Error Checking             --//
+				//--------------------------------//
+				if( $bError===false ) {
+					if( $bFound1===false && $bFound2===false ) {
+						//-- ERROR: Both the "Stream" and "Thumbnail" profiles can't be found --//
+						$bError = true;
+						$iErrCode  = 6535;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Problem looking up the profiles!\n";
+						$sErrMesg .= "Both the Stream profile and the Thumbnail profile can not be found!\n";
+						
+					} else if( $bFound1===false ) {
+						//-- ERROR: The "Stream" profile can't be found --//
+						$bError = true;
+						$iErrCode  = 6536;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Problem looking up the profiles!\n";
+						$sErrMesg .= "The Stream profile can not be found!\n";
+						
+					} else if( $bFound2===false ) {
+						//-- ERROR: The "Thumbnail" profile can't be found --//
+						$bError = true;
+						$iErrCode  = 6537;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Problem looking up the profiles!\n";
+						$sErrMesg .= "The Thumbnail profile can not be found!\n";
+					}
+				}
+			}
+		}
+		
+		
+		//--------------------------------------------------------------------//
+		//-- 3.3 - Setup AuthType                                           --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ) {
+			//------------------------------------------------------------//
+			//-- 3.3.1 - Setup AuthType                                 --//
+			//------------------------------------------------------------//
+			if( $aPostStreamAuth!==false && $aPostStreamAuth!==null && isset( $aPostStreamAuth['AuthType'] ) ) {
+				//------------------------------------------------------------//
+				//-- 3.3.1.A.1 - Set the AuthType                           --//
+				//------------------------------------------------------------//
+				
+				//--------------------------------------------------------//
+				//-- IF AuthType is Link Username and Password          --//
+				//--------------------------------------------------------//
+				if( $aPostStreamAuth['AuthType']===1 || $aPostStreamAuth['AuthType']==="1" ) {
+					$iAuthType = 1;
+					
+				//--------------------------------------------------------//
+				//-- ELSEIF AuthType is Custom Username and Password    --//
+				//--------------------------------------------------------//
+				} else if( $aPostStreamAuth['AuthType']===2 || $aPostStreamAuth['AuthType']==="2" ) {
+					$iAuthType = 2;
+					
+				//--------------------------------------------------------//
+				//-- ELSE No extra Auth needed                          --//
+				//--------------------------------------------------------//
+				} else {
+					$iAuthType = 0;
+				}
+				
+				//------------------------------------------------------------//
+				//-- 3.3.1.A.2 - Store the Username and Password            --//
+				//------------------------------------------------------------//
+				if( $iAuthType===1 || $iAuthType===2 ) {
+					//--------------------------------------------//
+					//-- Set Variables                          --//
+					//--------------------------------------------//
+					if( $iAuthType===1 ) {
+						$aLinkInfo = dbGetLinkInfo( $iLinkId );
+						
+						if( $aLinkInfo['Error']===false ) {
+							$sUsername = $aLinkInfo['Data']['LinkConnUsername'];
+							$sPassword = $aLinkInfo['Data']['LinkConnPassword'];
+						}
+						
+					} else if( $iAuthType===2 ) {
+						if( isset( $aPostStreamAuth['Username'] ) ) {
+							$sUsername = $aPostStreamAuth['Username'];
+						}
+						
+						if( isset( $aPostStreamAuth['Password'] ) ) {
+							$sPassword = $aPostStreamAuth['Password'];
+						}
+					}
+					
+					//--------------------------------------------//
+					//-- Add the Username (and Password)        --//
+					//--------------------------------------------//
+					if( $sUsername!==null && $sUsername!==false && $sUsername!=="" ) {
+						if( $sPassword!==null && $sPassword!==false && $sPassword!=="" ) {
+							//----------------------------------------------------//
+							//-- Add the Username and password to the URLs      --//
+							//----------------------------------------------------//
+							$aFunctionTemp4 = ParseReplaceAndRebuildUrl( $sStreamProfileURL, array( "user"=>$sUsername, "password"=>$sPassword ) );
+							$aFunctionTemp5 = ParseReplaceAndRebuildUrl( $aThumbnailProfileURL,  array( "user"=>$sUsername, "password"=>$sPassword ) );
+							
+							if( $aFunctionTemp4['Error']===false && $aFunctionTemp5['Error']===false ) {
+								$sStreamProfileURL     = $aFunctionTemp4['Url'];
+								$aThumbnailProfileURL  = $aFunctionTemp5['Url'];
+							} else {
+								$bError    = true;
+								$iErrCode  = 6540;
+								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+								$sErrMesg .= "Problem adding the username and password to the Url!\n";
+							}
+							
+						} else {
+							//----------------------------------------------------//
+							//-- Add the Username to the URLs                   --//
+							//----------------------------------------------------//
+							$aFunctionTemp4 = ParseReplaceAndRebuildUrl( $sStreamProfileURL, array( "user"=>$sUsername ) );
+							$aFunctionTemp5 = ParseReplaceAndRebuildUrl( $aThumbnailProfileURL,  array( "user"=>$sUsername) );
+							
+							if( $aFunctionTemp4['Error']===false && $aFunctionTemp5['Error']===false ) {
+								$sStreamProfileURL     = $aFunctionTemp4['Url'];
+								$aThumbnailProfileURL  = $aFunctionTemp5['Url'];
+							} else {
+								$bError    = true;
+								$iErrCode  = 6541;
+								$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+								$sErrMesg .= "Problem adding the username and password to the Url!\n";
+							}
+						}
+					}
+				}
+			} else {
+				$iAuthType = 0;
+			}
+		}
+		
+		//--------------------------------------------------------------------//
+		//-- 5.0 - Lookup the IOs that need to be replaced                  --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ) {
+			//--------------------------------------------//
+			//-- Setup the current unix timestamp       --//
+			//--------------------------------------------//
+			
+			
+			//--------------------------------------------//
+			//-- Start the Transaction                  --//
+			//--------------------------------------------//
+			$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
+			
+			if( $bTransactionStarted===false ) {
+				$bError    = true;
+				$iErrCode  = 6542;
+				$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+				$sErrMesg .= "Database Error! \n";
+				$sErrMesg .= "Problem when trying to start the transaction! \n";
+			}
+			
+			//--------------------------------------------//
+			//-- Insert the new "Stream Url"            --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				$aTempFunctionResult4 = InsertNewIODataValue( $iStreamUrlIOId, $iUTS, $sStreamProfileURL, true );
+				
+				if( $aTempFunctionResult4['Error']===true ) {
+					$bError     = true;
+					$iErrCode   = 6543;
+					$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg  .= "Critical Error updating the \"Stream Url\" value!\n";
+					$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+				}
+			}
+			
+			//--------------------------------------------//
+			//-- Insert the new "Thumbnail Url"         --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				$aTempFunctionResult4 = InsertNewIODataValue( $iThumbnailUrlIOId, $iUTS, $aThumbnailProfileURL, true );
+				
+				if( $aTempFunctionResult4['Error']===true ) {
+					$bError     = true;
+					$iErrCode   = 6544;
+					$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg  .= "Critical Error updating the \"Thumbnail Url\" value!\n";
+					$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+				}
+			}
+			
+			//--------------------------------------------//
+			//-- Insert the new "Username"              --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				$aTempFunctionResult4 = InsertNewIODataValue( $iUsernameIOId, $iUTS, $sUsername, true );
+				
+				if( $aTempFunctionResult4['Error']===true ) {
+					$bError     = true;
+					$iErrCode   = 6545;
+					$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg  .= "Critical Error updating the \"Username\" value!\n";
+					$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+				}
+			}
+			
+			//--------------------------------------------//
+			//-- Insert the new "Password"              --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				$aTempFunctionResult4 = InsertNewIODataValue( $iPasswordIOId, $iUTS, $sPassword, true );
+				
+				if( $aTempFunctionResult4['Error']===true ) {
+					$bError     = true;
+					$iErrCode   = 6546;
+					$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg  .= "Critical Error updating the \"Password\" value!\n";
+					$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+				}
+			}
+			
+			//--------------------------------------------//
+			//-- Insert the new "AuthType"              --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				$aTempFunctionResult4 = InsertNewIODataValue( $iAuthTypeIOId, $iUTS, $iAuthType, true );
+				
+				if( $aTempFunctionResult4['Error']===true ) {
+					$bError     = true;
+					$iErrCode   = 6547;
+					$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg  .= "Critical Error updating the \"AuthType\" value!\n";
+					$sErrMesg  .= $aTempFunctionResult4['ErrMesg'];
+				}
+			}
+			
+			//--------------------------------------------//
+			//-- Create the Result array                --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				$aResult = array(
+					"Error"     => false,
+					"Data"      => array(
+						array( "Success" => true )
+					)
+				);
+			}
+		}
+		
+		//--------------------------------------------------------------------//
+		//-- 8.0 - Commit or Rollback Transaction                           --//
+		//--------------------------------------------------------------------//
+		if($bTransactionStarted===true) {
+			//--------------------------------------------//
+			//-- End the Transaction                    --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				//-- Commit the changes --//
+				$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
+				
+			} else {
+				//-- Rollback changes --//
+				$oRestrictedApiCore->oRestrictedDB->dbRollback();
+			}
+		}
+		
+		//--------------------------------------------------------------------//
+		//-- 9.0 - RETURN RESULTS                                           --//
+		//--------------------------------------------------------------------//
+		if($bError===false) {
+			//-- No Errors --//
+			return $aResult;
+			
+		} else {
+			//-- Error Occurred --//
+			return array( "Error"=>true, "ErrCode"=>$iErrCode, "ErrMesg"=>$sErrMesg );
+		}
+	}
 	
-	
-	
+	//================================================================================================//
+	//== Edit UI Enable PTZ Controls                                                                ==//
+	//================================================================================================//
+/*	public function EditUIEnabledPTZControls( $iThingId, $iNewValue ) {
+		//--------------------------------------------------------------------//
+		//-- 1.0 - INITIALISE                                               --//
+		//--------------------------------------------------------------------//
+		
+		
+		//--------------------------------------------------------------------//
+		//-- 5.0 - MAIN SECTION                                             --//
+		//--------------------------------------------------------------------//
+		
+		
+		
+		//--------------------------------------------------------------------//
+		//-- 8.0 - COMMIT OR ROLLBACK TRANSACTION                           --//
+		//--------------------------------------------------------------------//
+		
+		
+		//--------------------------------------------------------------------//
+		//-- 9.0 - RETURN RESULTS                                           --//
+		//--------------------------------------------------------------------//
+		if($bError===false) {
+			//-- No Errors --//
+			return $aResult;
+			
+		} else {
+			//-- Error Occurred --//
+			return array( "Error"=>true, "ErrCode"=>$iErrCode, "ErrMesg"=>$sErrMesg );
+		}
+	}
+*/
+
 	//================================================================================================//
 	//== 
 	//================================================================================================//
@@ -3238,7 +3894,7 @@ class PHPOnvif {
 		$sEnvelope     .= $sEnvelopeContent;
 		$sEnvelope     .= $this->CreateEndOfEnvelope( $sEnvelopeType );
 		
-
+		
 		//----------------------------------------------------------------//
 		//-- 6.0 - EXECUTE AND RETURN                                   --//
 		//----------------------------------------------------------------//

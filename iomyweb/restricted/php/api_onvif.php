@@ -137,7 +137,7 @@ if($bError===false) {
 			$sPostMode!=="NetAddressCheckForOnvif"      && $sPostMode!=="NetAddressListCapabilities"    && 
 			$sPostMode!=="NetAddressLookupDeviceTime"   && $sPostMode!=="LookupVideoSources"            && 
 			$sPostMode!=="LookupProfiles"               && $sPostMode!=="ChangeThingProfiles"           &&
-			$sPostMode!=="LookupCapabilities"           
+			$sPostMode!=="LookupCapabilities"           && $sPostMode!=="ChangeStreamAuth"              
 			
 		) {
 			$bError    = true;
@@ -285,7 +285,7 @@ if($bError===false) {
 	//-- 2.2.3.A - Retrieve Thing Id                    --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" ) {
+		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" ) {
 			try {
 				//-- Retrieve the "ThingId" --//
 				$iPostThingId = $aHTTPData["ThingId"];
@@ -362,7 +362,7 @@ if($bError===false) {
 			}
 		}
 	}
-
+	
 	
 	//----------------------------------------------------//
 	//-- 2.2.?.? - Retrieve "StreamProfile"             --//
@@ -557,12 +557,12 @@ if($bError===false) {
 		}
 	}
 	
-
+	
 	//----------------------------------------------------//
 	//-- 2.2.?.? - Retrieve Stream Authentication       --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" ) {
+		if( $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" ) {
 			try {
 				//-- Retrieve the "CapabilitiesType" --//
 				$sPostStreamAuth = $aHTTPData["StreamAuth"];
@@ -776,7 +776,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 4.4 - Lookup Thing Info                                    ==//
 		//================================================================//
-		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" ) {
+		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" ) {
 			
 			$iOnvifThingTypeId = LookupFunctionConstant("OnvifThingTypeId");
 			
@@ -818,7 +818,8 @@ if( $bError===false ) {
 			$sPostMode==="LookupVideoSources"   || $sPostMode==="NewThing"             || 
 			$sPostMode==="PTZAbsoluteMove"      || $sPostMode==="PTZTimedMove"         || 
 			$sPostMode==="LookupProfiles"       || $sPostMode==="ListServerInfo"       || 
-			$sPostMode==="ChangeThingProfiles"  || $sPostMode==="LookupCapabilities"
+			$sPostMode==="ChangeThingProfiles"  || $sPostMode==="LookupCapabilities"   ||
+			$sPostMode==="ChangeStreamAuth"     
 		) {
 			//----------------------------------------------------------------------------//
 			//-- STEP 2: Look up the details to the "Link" that belongs to that "Thing" --//
@@ -877,7 +878,7 @@ if( $bError===false ) {
 				$sPostMode==="LookupVideoSources"       || $sPostMode==="LookupProfiles"           || 
 				$sPostMode==="PTZAbsoluteMove"          || $sPostMode==="PTZTimedMove"             || 
 				$sPostMode==="PTZTimedMove"             || $sPostMode==="ChangeThingProfiles"      || 
-				$sPostMode==="LookupCapabilities"       
+				$sPostMode==="LookupCapabilities"       || $sPostMode==="ChangeStreamAuth"         
 			) {
 				//--------------------------------------------------------------------//
 				//-- 4.6.1 - Check if a PHPOnvif class can be created for that IP   --//
@@ -1066,7 +1067,6 @@ if( $bError===false ) {
 						$sErrMesg .= $oPHPOnvifClient['ErrMesg'];
 					}
 				}
-				
 			} catch( Exception $e4400 ) {
 				//-- Display an Error Message --//
 				$bError    = true;
@@ -1183,7 +1183,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 5.6 - MODE: Add New LINK or THING                          ==//
 		//================================================================//
-		} else if( $sPostMode==="AddNewOnvifServer" || $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" ) {
+		} else if( $sPostMode==="AddNewOnvifServer" || $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" ) {
 			try {
 				if( $sPostMode==="AddNewOnvifServer" ) {
 					//--------------------------------------------------------------------//
@@ -1226,10 +1226,10 @@ if( $bError===false ) {
 						$sErrMesg .= "Error occurred while submitting the Link into the Database.\n";
 						$sErrMesg .= $aResult['ErrMesg'];
 					}
-						
+					
 				} else if( $sPostMode==="NewThing" ) {
 					//--------------------------------------------------------------------//
-					//-- Lookup if the User has the "Write" Permission to the Device   --//
+					//-- Lookup if the User has the "Write" Permission to the Device    --//
 					//--------------------------------------------------------------------//
 					if( $iLinkPermWrite!==1 ) {
 						$bError = true;
@@ -1261,7 +1261,7 @@ if( $bError===false ) {
 					//--------------------------------------------------------------------//
 					if( $iLinkPermWrite!==1 ) {
 						$bError = true;
-						$sErrMesg .= "Error Code:'6432' \n";
+						$sErrMesg .= "Error Code:'6434' \n";
 						$sErrMesg .= "Permission issue detected!\n";
 						$sErrMesg .= "The User doesn't appear to have the \"Write\" permission to add a Thing.\n";
 					}
@@ -1277,11 +1277,38 @@ if( $bError===false ) {
 						
 						if( $aResult['Error']===true ) {
 							$bError = true;
-							$sErrMesg .= "Error Code:'6433' \n";
-							$sErrMesg .= "Error occurred while submitting the Thing into the Database\n";
+							//$sErrMesg .= "Error Code:'6435' \n";
+							//$sErrMesg .= "Error occurred while submitting the Thing into the Database\n";
 							$sErrMesg .= $aResult['ErrMesg'];
 						}
 					}
+				} else if( $sPostMode==="ChangeStreamAuth" ) {
+					//--------------------------------------------------------------------//
+					//-- Lookup if the User has the "Write" Permission to the Device    --//
+					//--------------------------------------------------------------------//
+					if( $iLinkPermWrite!==1 ) {
+						$bError = true;
+						$sErrMesg .= "Error Code:'6500' \n";
+						$sErrMesg .= "Permission issue detected!\n";
+						$sErrMesg .= "The User doesn't appear to have the \"Write\" permission to add a Thing.\n";
+					}
+					
+					//--------------------------------------------------------------------//
+					//-- Add the stream to the database                                 --//
+					//--------------------------------------------------------------------//
+					if( $bError===false ) {
+						//--------------------------------//
+						//-- Create the Profile         --//
+						//--------------------------------//
+						$aResult = $oPHPOnvifClient->EditThingAuthTypeInDB( $iPostThingId, $sPostStreamProfileName, $sPostThumbProfileName, $aPostStreamAuth );
+						
+						if( $aResult['Error']===true ) {
+							$bError = true;
+							$iErrCode  = $aResult['ErrCode'];
+							$sErrMesg .= $aResult['ErrMesg'];
+						}
+					}
+					
 				}
 			} catch( Exception $e6400 ) {
 				//-- Display an Error Message --//
