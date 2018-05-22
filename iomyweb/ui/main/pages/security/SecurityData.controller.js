@@ -68,6 +68,14 @@ sap.ui.controller("pages.security.SecurityData", {
 			
 		
 	},
+    
+    ToggleStreamDataFields : function (bEnabled) {
+        var oController = this;
+        var oView       = oController.getView();
+        var oModel      = oView.getModel();
+        
+        oModel.setProperty("/enabled/always", bEnabled);
+    },
 	
     RefreshModel : function () {
         var oController = this;
@@ -298,17 +306,42 @@ sap.ui.controller("pages.security.SecurityData", {
         var oSettingsFormData   = oModel.getProperty("/fields");
         
         try {
-            iomy.devices.onvif.saveStreamData({
+            oController.ToggleStreamDataFields(false);
+            
+            iomy.devices.onvif.changeStreamAuthMethod({
                 thingID : oController.iCameraId,
-                displayName : oSettingsFormData.streamName
+                authType : oSettingsFormData.streamAuthType,
+                streamUsername : oSettingsFormData.streamUsername,
+                streamPassword : oSettingsFormData.streamPassword,
+                
+                onSuccess : function () {
+                    iomy.common.showMessage({
+                        text : "Stream data updated."
+                    });
+                    
+                    oController.ToggleStreamDataFields(true);
+                    oController.RefreshModel();
+                },
+                
+                onFail : function (sErrorMessage) {
+                    iomy.common.showError(sErrorMessage, "Error",
+                        function () {
+                            oController.ToggleStreamDataFields(true);
+                        }
+                    );
+                }
             });
             
         } catch (e) {
             iomy.common.showError(e.message, "Error",
                 function () {
-                    
+                    oController.ToggleStreamDataFields(true);
                 }
             );
         }
+    },
+    
+    LoadStreamAuthSettings : function () {
+        
     }
 });

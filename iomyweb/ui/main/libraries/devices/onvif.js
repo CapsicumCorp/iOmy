@@ -321,10 +321,301 @@ $.extend(iomy.devices.onvif,{
     },
     
     saveStreamInformation : function (mSettings) {
-        var iThingId    = 0;
-        var mThing      = {};
+        var iLinkId             = 0;
+        var iThingId            = 0;
+        var mThing              = {};
+        var aErrorMessages      = [];
+        var sDisplayName        = "";
+        var sStreamProfile      = "";
+        var sThumbnailProfile   = "";
+        var sAPIMode            = "";
+        var mAPIData            = {};
+        var iAuthType           = 0;        // No authentication is default.
+        var sStreamUsername     = "";
+        var sStreamPassword     = "";
         
+        var fnSuccess       = function () {};
+        var fnFail          = function () {};
         
+        var sNoLinkIdMessage  = "Link ID must be specified for adding a stream.";
+        var sNoThingIdMessage = "Thing ID must be specified for editing a stream.";
+        
+        try {
+            //------------------------------------------------------------------------------//
+            // Process the settings map if it's there.
+            //------------------------------------------------------------------------------//
+            if (iomy.validation.isValueGiven(mSettings)) {
+                mThing = iomy.common.ThingList["_"+iThingId];
+
+                //------------------------------------------------------------------------------//
+                // See if the link ID is given. If so, then we are adding a stream.
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.linkID )) {
+                    iLinkId = mSettings.linkID;
+                    sAPIMode = "NewThing";
+                    
+                    //------------------------------------------------------------------------------//
+                    // Check that the link ID is valid.
+                    //------------------------------------------------------------------------------//
+                    var mLinkIdValidation = iomy.validation.isLinkIDValid(iLinkId);
+
+                    if (!mLinkIdValidation.bIsValid) {
+                        aErrorMessages = aErrorMessages.concat( mLinkIdValidation.aErrorMessages );
+                    }
+                    
+                } else {
+                    //------------------------------------------------------------------------------//
+                    // Otherwise, see if the thing ID is given. For editing a stream this is required.
+                    //------------------------------------------------------------------------------//
+                    if (iomy.validation.isValueGiven( mSettings.thingID )) {
+                        iThingId = mSettings.thingID;
+                        sAPIMode = "ChangeThingProfiles";
+
+                        //------------------------------------------------------------------------------//
+                        // Check that the thing ID is valid.
+                        //------------------------------------------------------------------------------//
+                        var mThingIdValidation = iomy.validation.isThingIDValid(iThingId);
+
+                        if (!mThingIdValidation.bIsValid) {
+                            aErrorMessages = aErrorMessages.concat( mThingIdValidation.aErrorMessages );
+                        }
+
+                    } else {
+                        aErrorMessages.push(sNoThingIdMessage);
+                    }
+                }
+                
+                //------------------------------------------------------------------------------//
+                // Check that the display name is given.
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.displayName )) {
+                    sDisplayName = mSettings.displayName;
+                } else {
+                    aErrorMessages.push("The display name for the stream must be given.");
+                }
+                
+                //------------------------------------------------------------------------------//
+                // Check that the stream profile is given.
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.streamProfile )) {
+                    sStreamProfile = mSettings.streamProfile;
+                } else {
+                    aErrorMessages.push("Stream profile needs to be specified.");
+                }
+
+                //------------------------------------------------------------------------------//
+                // Check that the thumbnail profile is given.
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.streamProfile )) {
+                    sThumbnailProfile = mSettings.thumbnailProfile;
+                } else {
+                    aErrorMessages.push("Thumbnail profile needs to be specified.");
+                }
+
+                //------------------------------------------------------------------------------//
+                // Read the authentication type of the stream. 0 is the default (No Auth).
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.authType )) {
+                    iAuthType = mSettings.authType;
+
+                    //------------------------------------------------------------------------------//
+                    // If stream authentication is selected, make sure its username and password are
+                    // given.
+                    //------------------------------------------------------------------------------//
+                    if (iAuthType === 2) {
+                        if (iomy.validation.isValueGiven( mSettings.streamUsername )) {
+                            sStreamUsername = mSettings.streamUsername;
+                        } else {
+                            aErrorMessages.push("Stream username is required.");
+                        }
+
+                        if (iomy.validation.isValueGiven( mSettings.streamPassword )) {
+                            sStreamPassword = mSettings.streamPassword;
+                        } else {
+                            aErrorMessages.push("Stream password is required.");
+                        }
+                    }
+                }
+                
+            } else {
+                aErrorMessages.push(sNoLinkIdMessage);
+                aErrorMessages.push(sNoThingIdMessage);
+            }
+
+            if (aErrorMessages.length > 0) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+            
+            //------------------------------------------------------------------------------//
+            // Attempt to save the data.
+            //------------------------------------------------------------------------------//
+            mAPIData = {
+                "Mode" : sAPIMode,
+                "CameraName" : sDisplayName,
+                "StreamProfile" : sStreamProfile,
+                "ThumbnailProfile" : sThumbnailProfile
+            };
+            
+            switch (sAPIMode) {
+                case "NewThing" :
+                    mAPIData.LinkId = iLinkId;
+                    break;
+                    
+                case "ChangeThingProfiles" :
+                    mAPIData.ThingId = iThingId;
+                    break;
+            }
+            
+            if (iAuthType === 2) {
+                mAPIData.StreamAuth = JSON.stringify({
+                    "AuthType" : iAuthType,
+                    "Username" : sStreamUsername,
+                    "Password" : sStreamPassword
+                });
+            } else {
+                mAPIData.StreamAuth = JSON.stringify({
+                    "AuthType" : iAuthType
+                });
+            }
+            
+            iomy.apiphp.AjaxRequest({
+                url : iomy.apiphp.APILocation("onvif"),
+                data : mAPIData,
+                
+                onSuccess : function (sType, mData) {
+                    try {
+                        if (sType === "JSON") {
+                            if (mData.Error === true) {
+                                $.sap.log.error(mData.ErrMesg);
+                                fnFail(mData.ErrMesg);
+                                
+                            } else {
+                                fnSuccess(mData);
+                            }
+                        } else {
+                            fnFail("API returned " + sType + ", expected JSON.");
+                        }
+                    } catch (e) {
+                        fnFail("Failure in the success callback in saveStreamInformation() ("+e.name+"): " + e.message);
+                    }
+                },
+                
+                onFail : function (response) {
+                    fnFail(response.responseText);
+                }
+            });
+            
+        } catch (e) {
+            fnFail("Error occurred in saveStreamInformation ("+e.name+"): " + e.message);
+        }
+    },
+    
+    changeStreamAuthMethod : function (mSettings) {
+        var iThingId            = 0;
+        var aErrorMessages      = [];
+        var mAPIData            = {};
+        var iAuthType           = 0;        // No authentication is default.
+        var sStreamUsername     = "";
+        var sStreamPassword     = "";
+        
+        var sNoThingIdMessage = "Thing ID must be specified for editing a stream.";
+        
+        try {
+            if (iomy.validation.isValueGiven(mSettings)) {
+                //------------------------------------------------------------------------------//
+                // Otherwise, see if the thing ID is given. For editing a stream this is required.
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.thingID )) {
+                    iThingId = mSettings.thingID;
+
+                    //------------------------------------------------------------------------------//
+                    // Check that the thing ID is valid.
+                    //------------------------------------------------------------------------------//
+                    var mThingIdValidation = iomy.validation.isThingIDValid(iThingId);
+
+                    if (!mThingIdValidation.bIsValid) {
+                        aErrorMessages = aErrorMessages.concat( mThingIdValidation.aErrorMessages );
+                    }
+
+                } else {
+                    aErrorMessages.push(sNoThingIdMessage);
+                }
+
+                //------------------------------------------------------------------------------//
+                // Read the authentication type of the stream. 0 is the default (No Auth).
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.authType )) {
+                    iAuthType = mSettings.authType;
+
+                    //------------------------------------------------------------------------------//
+                    // If stream authentication is selected, make sure its username and password are
+                    // given.
+                    //------------------------------------------------------------------------------//
+                    if (iAuthType === 2) {
+                        if (iomy.validation.isValueGiven( mSettings.streamUsername )) {
+                            sStreamUsername = mSettings.streamUsername;
+                        } else {
+                            aErrorMessages.push("Stream username is required.");
+                        }
+
+                        if (iomy.validation.isValueGiven( mSettings.streamPassword )) {
+                            sStreamPassword = mSettings.streamPassword;
+                        } else {
+                            aErrorMessages.push("Stream password is required.");
+                        }
+                    }
+                }
+            }
+            
+            //------------------------------------------------------------------------------//
+            // Attempt to save the data.
+            //------------------------------------------------------------------------------//
+            mAPIData = {
+                "Mode" : "ChangeStreamAuth",
+                "ThingId" : iThingId
+            };
+            
+            if (iAuthType === 2) {
+                mAPIData.StreamAuth = JSON.stringify({
+                    "AuthType" : iAuthType,
+                    "Username" : sStreamUsername,
+                    "Password" : sStreamPassword
+                });
+            } else {
+                mAPIData.StreamAuth = JSON.stringify({
+                    "AuthType" : iAuthType
+                });
+            }
+            
+            iomy.apiphp.AjaxRequest({
+                url : iomy.apiphp.APILocation("onvif"),
+                data : mAPIData,
+                
+                onSuccess : function (sType, mData) {
+                    try {
+                        if (sType === "JSON") {
+                            if (mData.Error === true) {
+                                $.sap.log.error(mData.ErrMesg);
+                                fnFail(mData.ErrMesg);
+                                
+                            } else {
+                                fnSuccess(mData);
+                            }
+                        } else {
+                            fnFail("API returned " + sType + ", expected JSON.");
+                        }
+                    } catch (e) {
+                        fnFail("Failure in the success callback in changeStreamAuthMethod() ("+e.name+"): " + e.message);
+                    }
+                },
+                
+                onFail : function (response) {
+                    fnFail(response.responseText);
+                }
+            });
+        } catch (e) {
+            fnFail("Error occurred in changeStreamAuthMethod ("+e.name+"): " + e.message);
+        }
     },
     
     /**

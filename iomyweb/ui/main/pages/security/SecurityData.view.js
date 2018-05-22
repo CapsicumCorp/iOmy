@@ -147,17 +147,19 @@ sap.ui.jsview("pages.security.SecurityData", {
 															label : "Stream Authentication",
 															fields: [
 																new sap.m.Select({
+                                                                    enabled : "{/enabled/IfAllowed}",
+                                                                    selectedKey : "{/fields/streamAuthMethod}",
 																	items : [
 																		new sap.ui.core.Item ({
-																			key: "1",
+																			key: "0",
 																			text: "No Auth Required"
 																		}),
                                                                         new sap.ui.core.Item ({
-																			key: "2",
-																			text: "Username and Password"
+																			key: "1",
+																			text: "Camera Username and Password"
 																		}),
 																		new sap.ui.core.Item ({
-																			key: "3",
+																			key: "2",
 																			text: "Stream Username and Password"
 																		})
                                                                     ]
@@ -165,23 +167,45 @@ sap.ui.jsview("pages.security.SecurityData", {
 															]
 														}),
                                                         new sap.ui.layout.form.FormElement({
-															label : "Disable PTZ Controls",
-															fields: [
-																new sap.m.CheckBox({
-                                                                    enabled : true
+                                                            label : iomy.widgets.RequiredLabel("Stream Username"),
+                                                            visible : "{/visible/IfStreamAuthSelected}",
+                                                            fields: [ 
+                                                                new sap.m.Input({
+                                                                    value : "{/fields/streamUsername}",
+                                                                    enabled : "{/enabled/IfAllowed}"
                                                                 })
-															]
-														}),
+                                                            ]
+                                                        }),
+                                                        new sap.ui.layout.form.FormElement({
+                                                            label : iomy.widgets.RequiredLabel("Stream Password"),
+                                                            visible : "{/visible/IfStreamAuthSelected}",
+                                                            fields: [
+                                                                new sap.m.Input({
+                                                                    value : "{/fields/streamPassword}",
+                                                                    enabled : "{/enabled/IfAllowed}",
+                                                                    type : sap.m.InputType.Password
+                                                                })
+                                                            ]
+                                                        }),
+//                                                        new sap.ui.layout.form.FormElement({
+//															label : "Disable PTZ Controls",
+//															fields: [
+//																new sap.m.CheckBox({
+//                                                                    enabled : "{/enabled/IfAllowed}",
+//                                                                    selectedKey : "{/fields/ptzAllowed}",
+//                                                                })
+//															]
+//														}),
 														new sap.ui.layout.form.FormElement({
 															label: "",
 															fields: [
 																new sap.m.Button (oView.createId("ButtonSubmit"), {
 																	text: "Update",
 																	type: sap.m.ButtonType.Accept,
-                                                               /*     enabled : "{/UpdateEnabled}",
+                                                                    enabled : "{/UpdateEnabled}",
                                                                     press : function () {
                                                                         oController.submitRuleInformation();
-                                                                    } */
+                                                                    }
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
 																	text: "Cancel",
@@ -189,7 +213,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                                                                 /*    enabled : "{/FormControlsEnabled}",
                                                                     
                                                                     press : function () {
-                                                                        oController.GoToRulesList();
+                                                                        oController.LoadStreamAuthSettings();
                                                                     } */
 																})
 															]
