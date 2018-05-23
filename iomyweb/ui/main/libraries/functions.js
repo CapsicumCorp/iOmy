@@ -1434,6 +1434,24 @@ $.extend(iomy.functions, {
         return structOptions;
     },
     
+    getNumberOf : function (oJSObject) {
+        var iCount = 0;
+     
+        try {
+            $.each(oJSObject, function (sKey, vValue) {
+                if (sKey !== undefined && sKey !== null && vValue !== undefined && vValue !== null) {
+                    iCount++;
+                }
+            });
+        } catch (e) {
+            iCount = -1;
+            $.sap.log.error("Failed to find the number of elements in a JSON variable ("+e.name+"): " + e.message);
+            
+        } finally {
+            return iCount;
+        }
+    },
+    
     getNumberOfDevicesInPremise : function (iPremiseId) {
         var iCount = 0;
         

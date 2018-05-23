@@ -74,7 +74,22 @@ sap.ui.controller("pages.security.SecurityData", {
         var oView       = oController.getView();
         var oModel      = oView.getModel();
         
-        oModel.setProperty("/enabled/always", bEnabled);
+        oModel.setProperty("/enabled/IfAllowed", bEnabled);
+        oModel.setProperty("/enabled/Always", bEnabled);
+    },
+    
+    ToggleOnvifStreamAuthenticationForm : function () {
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
+        var iAuthType   = oModel.getProperty("/fields/streamAuthType");
+        var bVisible    = iAuthType == 2;
+        
+        oModel.setProperty("/visible/IfStreamAuthSelected", bVisible);
+        
+        if (!bVisible) {
+            oModel.setProperty("/fields/streamUsername", "");
+            oModel.setProperty("/fields/streamPassword", "");
+        }
     },
 	
     RefreshModel : function () {
@@ -97,7 +112,10 @@ sap.ui.controller("pages.security.SecurityData", {
                     "thumbnailUrl" : ""
                 },
                 "enabled" : {
-                    "always" : true
+                    "IfAllowed" : true
+                },
+                "visible" : {
+                    "IfStreamAuthSelected" : false
                 },
                 "fields" : {
                     "ptzEnabled" : true,
@@ -299,7 +317,7 @@ sap.ui.controller("pages.security.SecurityData", {
         }
     },
     
-    SaveStreamData : function () {
+    SaveStreamAuthSettings : function () {
         var oController         = this;
         var oView               = oController.getView();
         var oModel              = oView.getModel();
@@ -310,7 +328,7 @@ sap.ui.controller("pages.security.SecurityData", {
             
             iomy.devices.onvif.changeStreamAuthMethod({
                 thingID : oController.iCameraId,
-                authType : oSettingsFormData.streamAuthType,
+                authType : parseInt(oSettingsFormData.streamAuthType),
                 streamUsername : oSettingsFormData.streamUsername,
                 streamPassword : oSettingsFormData.streamPassword,
                 
@@ -321,6 +339,14 @@ sap.ui.controller("pages.security.SecurityData", {
                     
                     oController.ToggleStreamDataFields(true);
                     oController.RefreshModel();
+                    oModel.setProperty("/fields/streamAuthType", oSettingsFormData.streamAuthType);
+                    
+                    switch (oController.iCameraTypeId) {
+                        case iomy.devices.onvif.ThingTypeId:
+                            oController.UpdateThumbnail();
+                            break;
+
+                    }
                 },
                 
                 onFail : function (sErrorMessage) {
@@ -342,6 +368,38 @@ sap.ui.controller("pages.security.SecurityData", {
     },
     
     LoadStreamAuthSettings : function () {
+        var oController     = this;
+        var oView           = oController.getView();
+        var oModel          = oView.getModel();
         
+        try {
+            oController.ToggleStreamDataFields(false);
+            
+            iomy.devices.onvif.loadStreamAuthMethod({
+                thingID : oController.iCameraId,
+                
+                onSuccess : function (iAuthType) {
+                    console.log(iAuthType);
+                    oModel.setProperty("/fields/streamAuthType", iAuthType);
+                    
+                    oController.ToggleStreamDataFields(true);
+                },
+                
+                onFail : function (sErrorMessage) {
+                    iomy.common.showError(sErrorMessage, "Error",
+                        function () {
+                            oController.ToggleStreamDataFields(true);
+                        }
+                    );
+                }
+            });
+            
+        } catch (e) {
+            iomy.common.showError(e.message, "Error",
+                function () {
+                    oController.ToggleStreamDataFields(true);
+                }
+            );
+        }
     }
 });

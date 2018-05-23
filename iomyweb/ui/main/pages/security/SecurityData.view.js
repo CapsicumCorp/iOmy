@@ -148,21 +148,25 @@ sap.ui.jsview("pages.security.SecurityData", {
 															fields: [
 																new sap.m.Select({
                                                                     enabled : "{/enabled/IfAllowed}",
-                                                                    selectedKey : "{/fields/streamAuthMethod}",
+                                                                    selectedKey : "{/fields/streamAuthType}",
 																	items : [
 																		new sap.ui.core.Item ({
-																			key: "0",
+																			key: 0,
 																			text: "No Auth Required"
 																		}),
                                                                         new sap.ui.core.Item ({
-																			key: "1",
+																			key: 1,
 																			text: "Camera Username and Password"
 																		}),
 																		new sap.ui.core.Item ({
-																			key: "2",
+																			key: 2,
 																			text: "Stream Username and Password"
 																		})
-                                                                    ]
+                                                                    ],
+                                                                    
+                                                                    change : function () {
+                                                                        oController.ToggleOnvifStreamAuthenticationForm();
+                                                                    }
 																})
 															]
 														}),
@@ -202,19 +206,19 @@ sap.ui.jsview("pages.security.SecurityData", {
 																new sap.m.Button (oView.createId("ButtonSubmit"), {
 																	text: "Update",
 																	type: sap.m.ButtonType.Accept,
-                                                                    enabled : "{/UpdateEnabled}",
+                                                                    enabled : "{/enabled/IfAllowed}",
                                                                     press : function () {
-                                                                        oController.submitRuleInformation();
+                                                                        oController.SaveStreamAuthSettings();
                                                                     }
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
 																	text: "Cancel",
 																	type: sap.m.ButtonType.Reject,
-                                                                /*    enabled : "{/FormControlsEnabled}",
+                                                                    enabled : "{/enabled/Always}",
                                                                     
                                                                     press : function () {
                                                                         oController.LoadStreamAuthSettings();
-                                                                    } */
+                                                                    }
 																})
 															]
 														})
@@ -223,7 +227,7 @@ sap.ui.jsview("pages.security.SecurityData", {
 											]
 										})
                                     ]
-                                }),
+                                })
                             ]
                         })
                     ]

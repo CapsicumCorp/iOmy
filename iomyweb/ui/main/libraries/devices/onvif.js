@@ -35,6 +35,7 @@ $.extend(iomy.devices.onvif,{
     LinkTypeId                : 6,
     ThingTypeId               : 12,
     
+    RSStreamAuthRequired    : 3969,
     RSStreamProfile         : 3970,
     RSStreamURL             : 3971,
     RSThumbnailProfile      : 3972,
@@ -437,6 +438,32 @@ $.extend(iomy.devices.onvif,{
                     }
                 }
                 
+                //---------------------------------------------------------------------------//
+                // If there is a success callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onSuccess)) {
+                    if (iomy.validation.isFunction(mSettings.onSuccess)) {
+                        fnSuccess = mSettings.onSuccess;
+                        
+                    } else {
+                        aErrorMessages.push("onSuccess is not a function. Found " + typeof mSettings.onSuccess);
+                    }
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a failure callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onFail)) {
+                    if (iomy.validation.isFunction(mSettings.onFail)) {
+                        fnFail = mSettings.onFail;
+                        
+                    } else {
+                        aErrorMessages.push("onFail is not a function. Found " + typeof mSettings.onFail);
+                    }
+                }
+                
             } else {
                 aErrorMessages.push(sNoLinkIdMessage);
                 aErrorMessages.push(sNoThingIdMessage);
@@ -518,6 +545,9 @@ $.extend(iomy.devices.onvif,{
         var sStreamUsername     = "";
         var sStreamPassword     = "";
         
+        var fnSuccess   = function () {};
+        var fnFail      = function () {};
+        
         var sNoThingIdMessage = "Thing ID must be specified for editing a stream.";
         
         try {
@@ -563,6 +593,32 @@ $.extend(iomy.devices.onvif,{
                         } else {
                             aErrorMessages.push("Stream password is required.");
                         }
+                    }
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a success callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onSuccess)) {
+                    if (iomy.validation.isFunction(mSettings.onSuccess)) {
+                        fnSuccess = mSettings.onSuccess;
+                        
+                    } else {
+                        aErrorMessages.push("onSuccess is not a function. Found " + typeof mSettings.onSuccess);
+                    }
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a failure callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onFail)) {
+                    if (iomy.validation.isFunction(mSettings.onFail)) {
+                        fnFail = mSettings.onFail;
+                        
+                    } else {
+                        aErrorMessages.push("onFail is not a function. Found " + typeof mSettings.onFail);
                     }
                 }
             }
@@ -615,6 +671,126 @@ $.extend(iomy.devices.onvif,{
             });
         } catch (e) {
             fnFail("Error occurred in changeStreamAuthMethod ("+e.name+"): " + e.message);
+        }
+    },
+    
+    loadStreamAuthMethod : function (mSettings) {
+        var iThingId        = null;
+        var iIOId           = null;
+        var mThing          = {};
+        var aErrorMessages  = [];
+        var fnSuccess       = function () {};
+        var fnFail          = function () {};
+        
+        var sNoThingIdMessage = "Thing ID must be specified for editing a stream.";
+        
+        try {
+            if (iomy.validation.isValueGiven(mSettings)) {
+                //------------------------------------------------------------------------------//
+                // Otherwise, see if the thing ID is given. For editing a stream this is required.
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.thingID )) {
+                    iThingId = mSettings.thingID;
+
+                    //------------------------------------------------------------------------------//
+                    // Check that the thing ID is valid.
+                    //------------------------------------------------------------------------------//
+                    var mThingIdValidation = iomy.validation.isThingIDValid(iThingId);
+
+                    if (!mThingIdValidation.bIsValid) {
+                        aErrorMessages = aErrorMessages.concat( mThingIdValidation.aErrorMessages );
+                    } else {
+                        mThing = iomy.common.ThingList["_"+iThingId];
+                    }
+
+                } else {
+                    aErrorMessages.push(sNoThingIdMessage);
+                }
+
+                //---------------------------------------------------------------------------//
+                // If there is a success callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onSuccess)) {
+                    if (iomy.validation.isFunction(mSettings.onSuccess)) {
+                        fnSuccess = mSettings.onSuccess;
+                        
+                    } else {
+                        aErrorMessages.push("onSuccess is not a function. Found " + typeof mSettings.onSuccess);
+                    }
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a failure callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onFail)) {
+                    if (iomy.validation.isFunction(mSettings.onFail)) {
+                        fnFail = mSettings.onFail;
+                        
+                    } else {
+                        aErrorMessages.push("onSuccess is not a function. Found " + typeof mSettings.onFail);
+                    }
+                }
+                
+            } else {
+                aErrorMessages.push(sNoThingIdMessage);
+            }
+            
+            if (aErrorMessages.length > 0) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+            
+            //--------------------------------------------------------------------------------//
+            // Find the stream auth IO.
+            //--------------------------------------------------------------------------------//
+            $.each(mThing.IO, function (sI, mIO) {
+                if (mIO.RSTypeId == iomy.devices.onvif.RSStreamAuthRequired) {
+                    iIOId = mIO.IOId;
+                    return false;
+                }
+            });
+            
+            //--------------------------------------------------------------------------------//
+            // Run the OData request if the IO is found.
+            //--------------------------------------------------------------------------------//
+            if (iIOId !== null) {
+                iomy.apiodata.AjaxRequest({
+                    Url             : iomy.apiodata.ODataLocation("dataint"),
+                    Columns         : ["CALCEDVALUE"],
+                    WhereClause     : ["IO_PK eq " + iIOId],
+                    OrderByClause   : [],
+                    
+                    onSuccess : function (responseType, data) {
+                        try {
+                            if (responseType === "JSON") {
+                                if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE) {
+                                    // Parse the URL through the success callback function.
+                                    fnSuccess(data[0].CALCEDVALUE);
+                                } else {
+                                    $.sap.log.error(JSON.stringify(data));
+                                    fnFail("Cannot find the stream auth settings.");
+                                }
+                            } else {
+                                fnFail("API returned " + responseType + ", expected JSON.");
+                            }
+                            
+                        } catch (e) {
+                            fnFail("Failure in the success callback in loadStreamAuthMethod() ("+e.name+"): " + e.message);
+                        }
+                    },
+            
+                    onFail : function (response) {
+                        fnFail(response);
+                    }
+                });
+                
+            } else {
+                fnFail("Cannot retrieve the stream auth settings.");
+            }
+            
+        } catch (e) {
+            fnFail(e.message);
         }
     },
     

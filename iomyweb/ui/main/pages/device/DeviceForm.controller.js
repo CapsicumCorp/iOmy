@@ -224,9 +224,9 @@ sap.ui.controller("pages.device.DeviceForm", {
         var iAuthType   = oModel.getProperty("/thingType"+iomy.devices.onvif.ThingTypeId+"/StreamAuthMethod");
         var bVisible    = iAuthType == 2;
         
-        if (bVisible) {
-            oModel.setProperty("/visible/IfStreamAuthSelected", bVisible);
-        } else {
+        oModel.setProperty("/visible/IfStreamAuthSelected", bVisible);
+        
+        if (!bVisible) {
             oModel.setProperty("/thingType"+iomy.devices.onvif.ThingTypeId+"/StreamUsername", "");
             oModel.setProperty("/thingType"+iomy.devices.onvif.ThingTypeId+"/StreamPassword", "");
         }
