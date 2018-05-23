@@ -196,6 +196,9 @@ function LookupFunctionConstant( $sValue ) {
 		case "StreamPathRSTypeId":
 			return 3964;
 			
+		case "StreamUIPTZControlsTypeRSTypeId":
+			return 3968;
+			
 		case "StreamAuthTypeRSTypeId":
 			return 3969;
 			
@@ -450,7 +453,7 @@ function AddPresetLogToPremiseLog( $iPresetLogId, $iUTS, $iPremiseId, $sCustom1 
 	if( $bError===false ) {
 		//-- No Errors --//
 		return array( "Error"=>false);
-
+		
 	} else {
 		//-- Error Occurred --//
 		return array( "Error"=>true, "ErrMesg"=>$sErrMesg );
@@ -4160,6 +4163,7 @@ function GetIODataMostRecent( $iDataType, $sIOId, $sEndUTS, $iRowLimit=1 ) {
 	
 	//-- Retrieve the IO Aggregation Data --//
 	$aResult = dbGetIODataMostRecent( $aConvertedDataType["Value"], $iIOId, $iEndUTS, $iRowLimit );
+	
 	//-- Return the results --//
 	return $aResult;
 }

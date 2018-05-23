@@ -112,7 +112,8 @@ if($bError===false) {
 		array( "Name"=>'PosY',                      "DataType"=>'FLO' ),
 		array( "Name"=>'Zoom',                      "DataType"=>'FLO' ),
 		array( "Name"=>'Timeout',                   "DataType"=>'FLO' ),
-		array( "Name"=>'CapabilitiesType',          "DataType"=>'STR' )
+		array( "Name"=>'CapabilitiesType',          "DataType"=>'STR' ),
+		array( "Name"=>'NewUIControlValue',         "DataType"=>'INT' )
 	);
 	$aHTTPData = FetchHTTPDataParameters($RequiredParmaters);
 }
@@ -137,8 +138,8 @@ if($bError===false) {
 			$sPostMode!=="NetAddressCheckForOnvif"      && $sPostMode!=="NetAddressListCapabilities"    && 
 			$sPostMode!=="NetAddressLookupDeviceTime"   && $sPostMode!=="LookupVideoSources"            && 
 			$sPostMode!=="LookupProfiles"               && $sPostMode!=="ChangeThingProfiles"           &&
-			$sPostMode!=="LookupCapabilities"           && $sPostMode!=="ChangeStreamAuth"              
-			
+			$sPostMode!=="LookupCapabilities"           && $sPostMode!=="ChangeStreamAuth"              &&
+			$sPostMode!=="ChangeUIPTZControls"          
 		) {
 			$bError    = true;
 			$sErrMesg .= "Error Code:'0101' \n";
@@ -285,7 +286,7 @@ if($bError===false) {
 	//-- 2.2.3.A - Retrieve Thing Id                    --//
 	//----------------------------------------------------//
 	if( $bError===false ) {
-		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" ) {
+		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" || $sPostMode==="ChangeUIPTZControls" ) {
 			try {
 				//-- Retrieve the "ThingId" --//
 				$iPostThingId = $aHTTPData["ThingId"];
@@ -635,12 +636,38 @@ if($bError===false) {
 					$sErrMesg .= "eg. \n \"Home Onvif Server\", \"Work Onvif Server\" or \"Front Door Camera\" \n\n";
 				}
 				
-			} catch( Exception $e0136 ) {
+			} catch( Exception $e0138 ) {
 				$bError = true;
 				$sErrMesg .= "Error Code:'0138' \n";
 				$sErrMesg .= "Incorrect \"DisplayName\" parameter!\n";
 				$sErrMesg .= "Please use a valid \"DisplayName\" parameter\n";
 				$sErrMesg .= "eg. \n \"Home Onvif Server\", \"Work Onvif Server\" or \"Front Door Camera\" \n\n";
+			}
+		}
+	}
+	
+	
+	if( $bError===false ) {
+		if( $sPostMode==="ChangeUIPTZControls" ) {
+			try {
+				$sPostNewUIControlValue = $aHTTPData["NewUIControlValue"];
+				
+				if( $sPostNewUIControlValue!==0 && $sPostNewUIControlValue!==1 ) {
+					$bError    = true;
+					$iErrCode  = 139;
+					$sErrMesg .= "Error Code:'0139' \n";
+					$sErrMesg .= "Invalid \"NewUIControlValue\" parameter! \n";
+					$sErrMesg .= "Please use a valid \"NewUIControlValue\" parameter\n";
+					$sErrMesg .= "eg. \n 0 or 1 \n\n";
+				}
+				
+			} catch( Exception $e0140 ) {
+				$bError = true;
+				$iErrCode  = 140;
+				$sErrMesg .= "Error Code:'0140' \n";
+				$sErrMesg .= "Incorrect \"NewUIControlValue\" parameter!\n";
+				$sErrMesg .= "Please use a valid \"NewUIControlValue\" parameter\n";
+				$sErrMesg .= "eg. \n 0 or 1 \n\n";
 			}
 		}
 	}
@@ -776,7 +803,7 @@ if( $bError===false ) {
 		//================================================================//
 		//== 4.4 - Lookup Thing Info                                    ==//
 		//================================================================//
-		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" ) {
+		if( $sPostMode==="PTZAbsoluteMove" || $sPostMode==="PTZTimedMove" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" || $sPostMode==="ChangeUIPTZControls" ) {
 			
 			$iOnvifThingTypeId = LookupFunctionConstant("OnvifThingTypeId");
 			
@@ -819,7 +846,7 @@ if( $bError===false ) {
 			$sPostMode==="PTZAbsoluteMove"      || $sPostMode==="PTZTimedMove"         || 
 			$sPostMode==="LookupProfiles"       || $sPostMode==="ListServerInfo"       || 
 			$sPostMode==="ChangeThingProfiles"  || $sPostMode==="LookupCapabilities"   ||
-			$sPostMode==="ChangeStreamAuth"     
+			$sPostMode==="ChangeStreamAuth"     || $sPostMode==="ChangeUIPTZControls"  
 		) {
 			//----------------------------------------------------------------------------//
 			//-- STEP 2: Look up the details to the "Link" that belongs to that "Thing" --//
@@ -878,7 +905,8 @@ if( $bError===false ) {
 				$sPostMode==="LookupVideoSources"       || $sPostMode==="LookupProfiles"           || 
 				$sPostMode==="PTZAbsoluteMove"          || $sPostMode==="PTZTimedMove"             || 
 				$sPostMode==="PTZTimedMove"             || $sPostMode==="ChangeThingProfiles"      || 
-				$sPostMode==="LookupCapabilities"       || $sPostMode==="ChangeStreamAuth"         
+				$sPostMode==="LookupCapabilities"       || $sPostMode==="ChangeStreamAuth"         || 
+				$sPostMode==="ChangeUIPTZControls"      
 			) {
 				//--------------------------------------------------------------------//
 				//-- 4.6.1 - Check if a PHPOnvif class can be created for that IP   --//
@@ -1183,7 +1211,11 @@ if( $bError===false ) {
 		//================================================================//
 		//== 5.6 - MODE: Add New LINK or THING                          ==//
 		//================================================================//
-		} else if( $sPostMode==="AddNewOnvifServer" || $sPostMode==="NewThing" || $sPostMode==="ChangeThingProfiles" || $sPostMode==="ChangeStreamAuth" ) {
+		} else if( 
+			$sPostMode==="AddNewOnvifServer"    || $sPostMode==="NewThing"             || 
+			$sPostMode==="ChangeThingProfiles"  || $sPostMode==="ChangeStreamAuth"     || 
+			$sPostMode==="ChangeUIPTZControls"  
+		) {
 			try {
 				if( $sPostMode==="AddNewOnvifServer" ) {
 					//--------------------------------------------------------------------//
@@ -1309,6 +1341,32 @@ if( $bError===false ) {
 						}
 					}
 					
+				} else if( $sPostMode==="ChangeUIPTZControls" ) {
+					//--------------------------------------------------------------------//
+					//-- Lookup if the User has the "Write" Permission to the Device    --//
+					//--------------------------------------------------------------------//
+					if( $iLinkPermWrite!==1 ) {
+						$bError = true;
+						$sErrMesg .= "Error Code:'6550' \n";
+						$sErrMesg .= "Permission issue detected!\n";
+						$sErrMesg .= "The User doesn't appear to have the \"Write\" permission to add a Thing.\n";
+					}
+					
+					//--------------------------------------------------------------------//
+					//-- Add the stream to the database                                 --//
+					//--------------------------------------------------------------------//
+					if( $bError===false ) {
+						//--------------------------------//
+						//-- Create the Profile         --//
+						//--------------------------------//
+						$aResult = $oPHPOnvifClient->EditUIEnabledPTZControls( $iPostThingId, $sPostNewUIControlValue );
+						
+						if( $aResult['Error']===true ) {
+							$bError = true;
+							$iErrCode  = $aResult['ErrCode'];
+							$sErrMesg .= $aResult['ErrMesg'];
+						}
+					}
 				}
 			} catch( Exception $e6400 ) {
 				//-- Display an Error Message --//

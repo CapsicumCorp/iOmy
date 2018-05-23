@@ -2844,7 +2844,7 @@ class PHPOnvif {
 						$sErrMesg .= "Database Error! \n";
 						$sErrMesg .= "Problem when trying to start the transaction! \n";
 					}
-			
+					
 					//--------------------------------------------//
 					//-- Insert the new "Stream Profile"        --//
 					//--------------------------------------------//
@@ -3602,27 +3602,158 @@ class PHPOnvif {
 	//================================================================================================//
 	//== Edit UI Enable PTZ Controls                                                                ==//
 	//================================================================================================//
-/*	public function EditUIEnabledPTZControls( $iThingId, $iNewValue ) {
+	public function EditUIEnabledPTZControls( $iThingId, $iNewValue ) {
 		//--------------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                               --//
 		//--------------------------------------------------------------------//
 		
+		//-- Declare Variables --//
+		$bError                 = false;            //-- BOOLEAN:   --//
+		$iErrCode               = 0;                //-- INTEGER:   --//
+		$sErrMesg               = "";               //-- STRING:    --//
+		$aResult                = array();          //-- ARRAY:     --//
+		
+		//--  --//
+		$bTransactionStarted    = false;            //-- BOOLEAN:   --//
+		$iUIPTZControlsIOId     = 0;                //-- INTEGER:   --//
+		$aTempFunctionResult1   = array();
+		
+		//-- Global Variables --//
+		global $oRestrictedApiCore;
+		
+		//-- Lookup Constants --//
+		$iRSTypeIdUIPTZControls = LookupFunctionConstant("StreamUIPTZControlsTypeRSTypeId");
+		
+		//--------------------------------------------------------------------//
+		//-- 3.0 - PREPARE                                                  --//
+		//--------------------------------------------------------------------//
+		if( $bError===false ) {
+			//-- Lookup if the IO exists --//
+			$aTempFunctionResult1 = GetIOsFromThingId( $iThingId );
+			
+			//-- Parse the results --//
+			if( $aTempFunctionResult1['Error']===false ) {
+				//--------------------------------------------------------------------//
+				//-- Search for the "UI PTZ Controls" IO                            --//
+				//--------------------------------------------------------------------//
+				foreach( $aTempFunctionResult1['Data'] as $aIO ) {
+					//--------------------------------------------//
+					//-- Stream Profile                         --//
+					//--------------------------------------------//
+					if( $aIO['RSTypeId']===$iRSTypeIdUIPTZControls ) {
+						$iUIPTZControlsIOId = $aIO['IOId'];
+						
+					}
+				} //-- END Foreach --//
+				
+				//--------------------------------------------------------------------//
+				//-- IF a IOId couldn't be retrieved                                --//
+				//--------------------------------------------------------------------//
+				if( !($iUIPTZControlsIOId>0) ) {
+					//--------------------------------------------//
+					//-- Prepare IO Data                        --//
+					//--------------------------------------------//
+					$aNewIO = array(
+						"RSType"            => $iRSTypeIdUIPTZControls,
+						"UoM"               => "1",
+						"Type"              => "1",
+						"Name"              => "UI PTZ Controls",
+						"BaseConvert"       => "1",
+						"SampleRate"        => "-1",
+						"SampleRateMax"     => "-1",
+						"SampleRateLimit"   => "-1"
+					);
+					
+					//--------------------------------------------//
+					//-- Add the IO to the Thing                --//
+					//--------------------------------------------//
+					$aInsertIOResult = PrepareAddNewIO( $iThingId, $aNewIO, 1 );
+					
+					//--------------------------------------------//
+					//-- Check For Errors                       --//
+					//--------------------------------------------//
+					if( $aInsertIOResult['Error']===false ) {
+						$iUIPTZControlsIOId = $aInsertIOResult['IOId'];
+						
+					} else {
+						//-- ERROR - Failed to insert the new IO value --//
+						$bError    = true;
+						$iErrCode  = 6552;
+						$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+						$sErrMesg .= "Failed to insert the IO.\n";
+						$sErrMesg .= $aInsertIOResult['ErrMesg'];
+					}
+				} 
+				
+			} else {
+				//-- Display the error --//
+				$bError    = true;
+				$iErrCode  = 6551;
+				$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+				$sErrMesg .= "Error when retrieving the IOs from the ThingId \n";
+				$sErrMesg .= $aTempFunctionResult1['ErrMesg'];
+			}
+		}
 		
 		//--------------------------------------------------------------------//
 		//-- 5.0 - MAIN SECTION                                             --//
 		//--------------------------------------------------------------------//
-		
-		
+		if( $bError===false ) {
+			//--------------------------------------------//
+			//-- Setup the current unix timestamp       --//
+			//--------------------------------------------//
+			$iUTS = time();
+			
+			//--------------------------------------------//
+			//-- Start the Transaction                  --//
+			//--------------------------------------------//
+			$bTransactionStarted = $oRestrictedApiCore->oRestrictedDB->dbBeginTransaction();
+			
+			if( $bTransactionStarted===false ) {
+				$bError    = true;
+				$iErrCode  = 6553;
+				$sErrMesg .= "Error Code:'".$iErrCode."' \n";
+				$sErrMesg .= "Database Error! \n";
+				$sErrMesg .= "Problem when trying to start the transaction! \n";
+			}
+			
+			//--------------------------------------------//
+			//-- Insert the new Value                   --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				$aResult = InsertNewIODataValue( $iUIPTZControlsIOId, $iUTS, $iNewValue, true );
+				
+				if( $aResult['Error']===true ) {
+					$bError     = true;
+					$iErrCode   = 6554;
+					$sErrMesg  .= "Error Code:'".$iErrCode."' \n";
+					$sErrMesg  .= "Error updating the \"Stream Profile\" value!\n";
+					$sErrMesg  .= $aResult['ErrMesg'];
+				}
+			}
+		}
 		
 		//--------------------------------------------------------------------//
 		//-- 8.0 - COMMIT OR ROLLBACK TRANSACTION                           --//
 		//--------------------------------------------------------------------//
-		
+		if($bTransactionStarted===true) {
+			//--------------------------------------------//
+			//-- End the Transaction                    --//
+			//--------------------------------------------//
+			if( $bError===false ) {
+				//-- Commit the changes --//
+				$oRestrictedApiCore->oRestrictedDB->dbEndTransaction();
+				
+			} else {
+				//-- Rollback changes --//
+				$oRestrictedApiCore->oRestrictedDB->dbRollback();
+			}
+		}
 		
 		//--------------------------------------------------------------------//
 		//-- 9.0 - RETURN RESULTS                                           --//
 		//--------------------------------------------------------------------//
-		if($bError===false) {
+		if( $bError===false ) {
 			//-- No Errors --//
 			return $aResult;
 			
@@ -3631,8 +3762,8 @@ class PHPOnvif {
 			return array( "Error"=>true, "ErrCode"=>$iErrCode, "ErrMesg"=>$sErrMesg );
 		}
 	}
-*/
-
+	
+	
 	//================================================================================================//
 	//== 
 	//================================================================================================//
@@ -3673,7 +3804,7 @@ class PHPOnvif {
 		//-- 5.0 - Parse the output                     --//
 		//------------------------------------------------//
 		return array( 
-			"Error" =>false, 
+			"Error" =>false,
 			"Data"  =>array(
 				"Script"            => $sScript,
 				"Output"            => $oOutput,
