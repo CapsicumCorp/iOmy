@@ -118,7 +118,7 @@ sap.ui.controller("pages.security.SecurityData", {
                     "IfStreamAuthSelected" : false
                 },
                 "fields" : {
-                    "ptzEnabled" : true,
+                    "ptzDisabled" : true,
                     "streamAuthType" : 0,
                     "streamUsername" : "",
                     "streamPassword" : ""
@@ -317,7 +317,80 @@ sap.ui.controller("pages.security.SecurityData", {
         }
     },
     
-    SaveStreamAuthSettings : function () {
+    SaveStreamSettings : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var oModel              = oView.getModel();
+        var oSettingsFormData   = oModel.getProperty("/fields");
+        var aErrorMessages      = [];
+        
+        try {
+            oController.ToggleStreamDataFields(false);
+            
+            //---------------------------------------------------------------------------------//
+            // Go to change the stream authentication type and then toggle PTZ controls.
+            //---------------------------------------------------------------------------------//
+            iomy.devices.onvif.changeStreamAuthMethod({
+                thingID : oController.iCameraId,
+                authType : parseInt(oSettingsFormData.streamAuthType),
+                streamUsername : oSettingsFormData.streamUsername,
+                streamPassword : oSettingsFormData.streamPassword,
+                
+                onComplete : function () {
+                    //-- Toggle PTZ controls no matter what. --//
+                    iomy.devices.onvif.togglePTZControls({
+                        thingID : oController.iCameraId,
+                        enabled : !oSettingsFormData.ptzDisabled,
+
+                        onComplete : function () {
+                            if (aErrorMessages.length === 0) {
+                                var iNewAuthType = oSettingsFormData.streamAuthType;
+                                
+                                iomy.common.showMessage({
+                                    text : "Stream data updated."
+                                });
+
+                                oController.ToggleStreamDataFields(true);
+                                oController.RefreshModel();
+                                oModel.setProperty("/fields/streamAuthType", iNewAuthType);
+                                oController.ToggleOnvifStreamAuthenticationForm();
+
+                                switch (oController.iCameraTypeId) {
+                                    case iomy.devices.onvif.ThingTypeId:
+                                        oController.UpdateThumbnail();
+                                        break;
+
+                                }
+                            } else {
+                                iomy.common.showError(aErrorMessages.join("\n"), "Error",
+                                    function () {
+                                        oController.ToggleStreamDataFields(true);
+                                    }
+                                );
+                            }
+                        },
+
+                        onFail : function (sErrorMessage) {
+                            aErrorMessages.push(sErrorMessage);
+                        }
+                    });
+                },
+                
+                onFail : function (sErrorMessage) {
+                    aErrorMessages.push(sErrorMessage);
+                }
+            });
+            
+        } catch (e) {
+            iomy.common.showError(e.message, "Error",
+                function () {
+                    oController.ToggleStreamDataFields(true);
+                }
+            );
+        }
+    },
+    
+    /*TogglePTZControls : function () {
         var oController         = this;
         var oView               = oController.getView();
         var oModel              = oView.getModel();
@@ -326,11 +399,9 @@ sap.ui.controller("pages.security.SecurityData", {
         try {
             oController.ToggleStreamDataFields(false);
             
-            iomy.devices.onvif.changeStreamAuthMethod({
+            iomy.devices.onvif.togglePTZControls({
                 thingID : oController.iCameraId,
-                authType : parseInt(oSettingsFormData.streamAuthType),
-                streamUsername : oSettingsFormData.streamUsername,
-                streamPassword : oSettingsFormData.streamPassword,
+                enabled : parseInt(oSettingsFormData.ptzDisabled),
                 
                 onSuccess : function () {
                     iomy.common.showMessage({
@@ -365,7 +436,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 }
             );
         }
-    },
+    },*/
     
     LoadStreamAuthSettings : function () {
         var oController     = this;
@@ -383,6 +454,7 @@ sap.ui.controller("pages.security.SecurityData", {
                     oModel.setProperty("/fields/streamAuthType", iAuthType);
                     
                     oController.ToggleStreamDataFields(true);
+                    oController.ToggleOnvifStreamAuthenticationForm();
                 },
                 
                 onFail : function (sErrorMessage) {

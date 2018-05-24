@@ -520,7 +520,7 @@ $.extend(iomy.devices.onvif,{
                                 fnSuccess(mData);
                             }
                         } else {
-                            fnFail("API returned " + sType + ", expected JSON.");
+                            fnFail("API returned " + sType + " saveStreamInformation(), expected JSON.");
                         }
                     } catch (e) {
                         fnFail("Failure in the success callback in saveStreamInformation() ("+e.name+"): " + e.message);
@@ -547,6 +547,7 @@ $.extend(iomy.devices.onvif,{
         
         var fnSuccess   = function () {};
         var fnFail      = function () {};
+        var fnComplete  = function () {};
         
         var sNoThingIdMessage = "Thing ID must be specified for editing a stream.";
         
@@ -621,6 +622,19 @@ $.extend(iomy.devices.onvif,{
                         aErrorMessages.push("onFail is not a function. Found " + typeof mSettings.onFail);
                     }
                 }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a completed callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onComplete)) {
+                    if (iomy.validation.isFunction(mSettings.onComplete)) {
+                        fnComplete = mSettings.onComplete;
+                        
+                    } else {
+                        aErrorMessages.push("onComplete is not a function. Found " + typeof mSettings.onComplete);
+                    }
+                }
             }
             
             //------------------------------------------------------------------------------//
@@ -653,24 +667,166 @@ $.extend(iomy.devices.onvif,{
                             if (mData.Error === true) {
                                 $.sap.log.error(mData.ErrMesg);
                                 fnFail(mData.ErrMesg);
+                                fnComplete();
                                 
                             } else {
                                 fnSuccess(mData);
+                                fnComplete();
                             }
                         } else {
-                            fnFail("API returned " + sType + ", expected JSON.");
+                            fnFail("API returned " + sType + " changeStreamAuthMethod(), expected JSON.");
+                            fnComplete();
                         }
                     } catch (e) {
                         fnFail("Failure in the success callback in changeStreamAuthMethod() ("+e.name+"): " + e.message);
+                        fnComplete();
                     }
                 },
                 
                 onFail : function (response) {
                     fnFail(response.responseText);
+                    fnComplete();
                 }
             });
         } catch (e) {
             fnFail("Error occurred in changeStreamAuthMethod ("+e.name+"): " + e.message);
+        }
+    },
+    
+    togglePTZControls : function (mSettings) {
+        var iThingId            = 0;
+        var aErrorMessages      = [];
+        var mAPIData            = {};
+        var iEnabled            = 0;
+        
+        var fnSuccess   = function () {};
+        var fnFail      = function () {};
+        var fnComplete  = function () {};
+        
+        var sNoThingIdMessage = "Thing ID must be specified for editing a stream.";
+        
+        try {
+            if (iomy.validation.isValueGiven(mSettings)) {
+                //------------------------------------------------------------------------------//
+                // Otherwise, see if the thing ID is given. For editing a stream this is required.
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.thingID )) {
+                    iThingId = mSettings.thingID;
+
+                    //------------------------------------------------------------------------------//
+                    // Check that the thing ID is valid.
+                    //------------------------------------------------------------------------------//
+                    var mThingIdValidation = iomy.validation.isThingIDValid(iThingId);
+
+                    if (!mThingIdValidation.bIsValid) {
+                        aErrorMessages = aErrorMessages.concat( mThingIdValidation.aErrorMessages );
+                    }
+
+                } else {
+                    aErrorMessages.push(sNoThingIdMessage);
+                }
+
+                //---------------------------------------------------------------------------//
+                // Check that the new state is present.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.enabled)) {
+                    if (iomy.validation.isBoolean(mSettings.enabled)) {
+                        if (mSettings.enabled) {
+                            iEnabled = 1;
+                        } else {
+                            iEnabled = 0;
+                        }
+                        
+                    } else {
+                        aErrorMessages.push("enabled is not a boolean. Found " + typeof mSettings.enabled);
+                    }
+                } else {
+                    aErrorMessages.push("Whether the PTZ controls are enabled or not should be specified.");
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a success callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onSuccess)) {
+                    if (iomy.validation.isFunction(mSettings.onSuccess)) {
+                        fnSuccess = mSettings.onSuccess;
+                        
+                    } else {
+                        aErrorMessages.push("onSuccess is not a function. Found " + typeof mSettings.onSuccess);
+                    }
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a failure callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onFail)) {
+                    if (iomy.validation.isFunction(mSettings.onFail)) {
+                        fnFail = mSettings.onFail;
+                        
+                    } else {
+                        aErrorMessages.push("onFail is not a function. Found " + typeof mSettings.onFail);
+                    }
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a completed callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onComplete)) {
+                    if (iomy.validation.isFunction(mSettings.onComplete)) {
+                        fnComplete = mSettings.onComplete;
+                        
+                    } else {
+                        aErrorMessages.push("onComplete is not a function. Found " + typeof mSettings.onComplete);
+                    }
+                }
+            }
+            
+            //------------------------------------------------------------------------------//
+            // Attempt to save the data.
+            //------------------------------------------------------------------------------//
+            mAPIData = {
+                "Mode" : "ChangeUIPTZControls",
+                "ThingId" : iThingId,
+                "NewUIControlValue" : iEnabled
+            };
+            
+            iomy.apiphp.AjaxRequest({
+                url : iomy.apiphp.APILocation("onvif"),
+                data : mAPIData,
+                
+                onSuccess : function (sType, mData) {
+                    try {
+                        if (sType === "JSON") {
+                            if (mData.Error === true) {
+                                $.sap.log.error(mData.ErrMesg);
+                                fnFail(mData.ErrMesg);
+                                fnComplete();
+                                
+                            } else {
+                                fnSuccess(mData);
+                                fnComplete();
+                            }
+                        } else {
+                            fnFail("API returned " + sType + " in togglePTZControls(), expected JSON.");
+                            fnComplete();
+                        }
+                    } catch (e) {
+                        fnFail("Failure in the success callback in togglePTZControls() ("+e.name+"): " + e.message);
+                        fnComplete();
+                    }
+                },
+                
+                onFail : function (response) {
+                    fnFail(response.responseText);
+                    fnComplete();
+                }
+            });
+        } catch (e) {
+            fnFail("Error occurred in togglePTZControls() ("+e.name+"): " + e.message);
+            fnComplete();
         }
     },
     
@@ -729,7 +885,7 @@ $.extend(iomy.devices.onvif,{
                         fnFail = mSettings.onFail;
                         
                     } else {
-                        aErrorMessages.push("onSuccess is not a function. Found " + typeof mSettings.onFail);
+                        aErrorMessages.push("onFail is not a function. Found " + typeof mSettings.onFail);
                     }
                 }
                 
@@ -746,7 +902,7 @@ $.extend(iomy.devices.onvif,{
             //--------------------------------------------------------------------------------//
             $.each(mThing.IO, function (sI, mIO) {
                 if (mIO.RSTypeId == iomy.devices.onvif.RSStreamAuthRequired) {
-                    iIOId = mIO.IOId;
+                    iIOId = mIO.Id;
                     return false;
                 }
             });
@@ -764,15 +920,16 @@ $.extend(iomy.devices.onvif,{
                     onSuccess : function (responseType, data) {
                         try {
                             if (responseType === "JSON") {
-                                if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE) {
+                                if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE !== null && data[0].CALCEDVALUE !== undefined) {
                                     // Parse the URL through the success callback function.
                                     fnSuccess(data[0].CALCEDVALUE);
                                 } else {
+                                    $.sap.log.error("Value found upon error: " + data[0].CALCEDVALUE);
                                     $.sap.log.error(JSON.stringify(data));
                                     fnFail("Cannot find the stream auth settings.");
                                 }
                             } else {
-                                fnFail("API returned " + responseType + ", expected JSON.");
+                                fnFail("API returned " + responseType + " in loadStreamAuthMethod(), expected JSON.");
                             }
                             
                         } catch (e) {

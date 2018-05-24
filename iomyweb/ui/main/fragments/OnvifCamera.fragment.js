@@ -140,15 +140,16 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
                                 })
 							]
 						}),
-//                        new sap.ui.layout.form.FormElement({
-//                            label : "Disable PTZ Controls",
-//                            enabled : "{/enabled/IfOnvifProfilesFound}",
-//                            fields: [
-//                                new sap.m.CheckBox({
-//                                    enabled : true
-//                                })
-//                            ]
-//                        }),
+                        new sap.ui.layout.form.FormElement({
+                            label : "Disable PTZ Controls",
+                            enabled : "{/enabled/IfOnvifProfilesFound}",
+                            fields: [
+                                new sap.m.CheckBox({
+                                    enabled : "{/enabled/PTZEnabled}",
+                                    selected : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/PTZDisabled}"
+                                })
+                            ]
+                        }),
 						new sap.ui.layout.form.FormElement({
 							label : "",
 							fields: [

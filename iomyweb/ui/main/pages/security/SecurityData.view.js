@@ -191,15 +191,15 @@ sap.ui.jsview("pages.security.SecurityData", {
                                                                 })
                                                             ]
                                                         }),
-//                                                        new sap.ui.layout.form.FormElement({
-//															label : "Disable PTZ Controls",
-//															fields: [
-//																new sap.m.CheckBox({
-//                                                                    enabled : "{/enabled/IfAllowed}",
-//                                                                    selectedKey : "{/fields/ptzAllowed}",
-//                                                                })
-//															]
-//														}),
+                                                        new sap.ui.layout.form.FormElement({
+															label : "Disable PTZ Controls",
+															fields: [
+																new sap.m.CheckBox({
+                                                                    enabled : "{/enabled/IfAllowed}",
+                                                                    selected : "{/fields/ptzDisabled}",
+                                                                })
+															]
+														}),
 														new sap.ui.layout.form.FormElement({
 															label: "",
 															fields: [
@@ -208,7 +208,7 @@ sap.ui.jsview("pages.security.SecurityData", {
 																	type: sap.m.ButtonType.Accept,
                                                                     enabled : "{/enabled/IfAllowed}",
                                                                     press : function () {
-                                                                        oController.SaveStreamAuthSettings();
+                                                                        oController.SaveStreamSettings();
                                                                     }
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
