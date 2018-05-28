@@ -814,43 +814,59 @@ sap.ui.controller("pages.device.DeviceForm", {
                             }
                         }
 
-                        iomy.common.RefreshCoreVariables({
-                            onSuccess : function () {
-                                oController.RefreshModel({
-                                    onSuccess : function () {
-                                        iomy.common.showMessage({
-                                            text : "Device successfully created",
-                                            view : oView
-                                        });
+                        //----------------------------------------------------------------------------------------//
+                        // If a stream was added, then we should apply the PTZ control option.
+                        //----------------------------------------------------------------------------------------//
+                        if (sDevTypeKey === "thingType"+iomy.devices.onvif.ThingTypeId) {
+                            iomy.devices.onvif.togglePTZControls({
+                                thingID : data.Data.Data[0].ThingId,
+                                enabled : oCurrentFormData.PTZDisabled,
 
-                                        if (iomy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                            oView.byId("DevTypeSelect").setSelectedKey("thingType"+iomy.devices.onvif.ThingTypeId);
+                                onFail : function (sErrorMessage) {
+                                    
+                                },
 
-                                            //oCurrentFormData.OnvifServer = iLinkId;
-                                            oController.DevTypeToggle(oController, "thingType"+iomy.devices.onvif.ThingTypeId);
+                                onComplete : function (mData) {
+                                    iomy.common.RefreshCoreVariables({
+                                        onSuccess : function () {
+                                            oController.RefreshModel({
+                                                onSuccess : function () {
+                                                    iomy.common.showMessage({
+                                                        text : "Device successfully created",
+                                                        view : oView
+                                                    });
 
-                                        } else {
-                                            oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
-                                            //iomy.common.NavigationChangePage("pBlock", {}, true);
+                                                    if (iomy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                                        oView.byId("DevTypeSelect").setSelectedKey("thingType"+iomy.devices.onvif.ThingTypeId);
+
+                                                        //oCurrentFormData.OnvifServer = iLinkId;
+                                                        oController.DevTypeToggle(oController, "thingType"+iomy.devices.onvif.ThingTypeId);
+
+                                                    } else {
+                                                        oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
+                                                        //iomy.common.NavigationChangePage("pBlock", {}, true);
+                                                    }
+
+                                                    if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+iomy.devices.onvif.ThingTypeId) {
+                                                        oController.bLoadingOnvifProfiles = false;
+                                                        oController.bOnvifCameraSelected = false;
+                                                        oController.bProfilesLoaded = false;
+
+            //                                            oController.ToggleControls(true);
+            //                                        } else {
+            //                                            oController.ToggleControls(true);
+                                                    }
+
+                                                    oController.bSubmitting = false;
+                                                    oController.ToggleControls(true);
+
+                                                }
+                                            });
                                         }
-
-                                        if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+iomy.devices.onvif.ThingTypeId) {
-                                            oController.bLoadingOnvifProfiles = false;
-                                            oController.bOnvifCameraSelected = false;
-                                            oController.bProfilesLoaded = false;
-                                            
-//                                            oController.ToggleControls(true);
-//                                        } else {
-//                                            oController.ToggleControls(true);
-                                        }
-                                        
-                                        oController.bSubmitting = false;
-                                        oController.ToggleControls(true);
-
-                                    }
-                                });
-                            }
-                        });
+                                    });
+                                }
+                            });
+                        }
                     } else {
                         jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
                         iomy.common.showError("Error creating device:\n\n"+data.ErrMesg, "", function () {

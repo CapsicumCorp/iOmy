@@ -35,6 +35,7 @@ $.extend(iomy.devices.onvif,{
     LinkTypeId                : 6,
     ThingTypeId               : 12,
     
+    RSDisabledPTZControls   : 3968,
     RSStreamAuthRequired    : 3969,
     RSStreamProfile         : 3970,
     RSStreamURL             : 3971,
@@ -737,6 +738,14 @@ $.extend(iomy.devices.onvif,{
                             iEnabled = 0;
                         }
                         
+                    } else if (iomy.validation.isNumber(mSettings.enabled)) {
+                        if (mSettings.enabled < 0 || mSettings.enabled > 1) {
+                            iEnabled = 0;
+                            $.sap.log.error("enabled was not 0 or 1. Defaulting to disabled (0).");
+                        } else {
+                            iEnabled = mSettings.enabled;
+                        }
+                        
                     } else {
                         aErrorMessages.push("enabled is not a boolean. Found " + typeof mSettings.enabled);
                     }
@@ -837,8 +846,9 @@ $.extend(iomy.devices.onvif,{
         var aErrorMessages  = [];
         var fnSuccess       = function () {};
         var fnFail          = function () {};
+        var fnComplete      = function () {};
         
-        var sNoThingIdMessage = "Thing ID must be specified for editing a stream.";
+        var sNoThingIdMessage = "Thing ID must be specified for loading stream authentication settings.";
         
         try {
             if (iomy.validation.isValueGiven(mSettings)) {
@@ -889,6 +899,19 @@ $.extend(iomy.devices.onvif,{
                     }
                 }
                 
+                //---------------------------------------------------------------------------//
+                // If there is a completed callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onComplete)) {
+                    if (iomy.validation.isFunction(mSettings.onComplete)) {
+                        fnComplete = mSettings.onComplete;
+                        
+                    } else {
+                        aErrorMessages.push("onComplete is not a function. Found " + typeof mSettings.onComplete);
+                    }
+                }
+                
             } else {
                 aErrorMessages.push(sNoThingIdMessage);
             }
@@ -923,31 +946,180 @@ $.extend(iomy.devices.onvif,{
                                 if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE !== null && data[0].CALCEDVALUE !== undefined) {
                                     // Parse the URL through the success callback function.
                                     fnSuccess(data[0].CALCEDVALUE);
+                                    fnComplete();
                                 } else {
                                     $.sap.log.error("Value found upon error: " + data[0].CALCEDVALUE);
                                     $.sap.log.error(JSON.stringify(data));
                                     fnFail("Cannot find the stream auth settings.");
+                                    fnComplete();
                                 }
                             } else {
                                 fnFail("API returned " + responseType + " in loadStreamAuthMethod(), expected JSON.");
+                                fnComplete();
                             }
                             
                         } catch (e) {
                             fnFail("Failure in the success callback in loadStreamAuthMethod() ("+e.name+"): " + e.message);
+                            fnComplete();
                         }
                     },
             
                     onFail : function (response) {
                         fnFail(response);
+                        fnComplete();
                     }
                 });
                 
             } else {
                 fnFail("Cannot retrieve the stream auth settings.");
+                fnComplete();
             }
             
         } catch (e) {
             fnFail(e.message);
+            fnComplete();
+        }
+    },
+    
+    loadPTZControlStatus : function (mSettings) {
+        var iThingId        = null;
+        var iIOId           = null;
+        var mThing          = {};
+        var aErrorMessages  = [];
+        var fnSuccess       = function () {};
+        var fnFail          = function () {};
+        var fnComplete      = function () {};
+        
+        var sNoThingIdMessage = "Thing ID must be specified for finding out whether the PTZ controls are disabled or not.";
+        
+        try {
+            if (iomy.validation.isValueGiven(mSettings)) {
+                //------------------------------------------------------------------------------//
+                // Otherwise, see if the thing ID is given. For editing a stream this is required.
+                //------------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven( mSettings.thingID )) {
+                    iThingId = mSettings.thingID;
+
+                    //------------------------------------------------------------------------------//
+                    // Check that the thing ID is valid.
+                    //------------------------------------------------------------------------------//
+                    var mThingIdValidation = iomy.validation.isThingIDValid(iThingId);
+
+                    if (!mThingIdValidation.bIsValid) {
+                        aErrorMessages = aErrorMessages.concat( mThingIdValidation.aErrorMessages );
+                    } else {
+                        mThing = iomy.common.ThingList["_"+iThingId];
+                    }
+
+                } else {
+                    aErrorMessages.push(sNoThingIdMessage);
+                }
+
+                //---------------------------------------------------------------------------//
+                // If there is a success callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onSuccess)) {
+                    if (iomy.validation.isFunction(mSettings.onSuccess)) {
+                        fnSuccess = mSettings.onSuccess;
+                        
+                    } else {
+                        aErrorMessages.push("onSuccess is not a function. Found " + typeof mSettings.onSuccess);
+                    }
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a failure callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onFail)) {
+                    if (iomy.validation.isFunction(mSettings.onFail)) {
+                        fnFail = mSettings.onFail;
+                        
+                    } else {
+                        aErrorMessages.push("onFail is not a function. Found " + typeof mSettings.onFail);
+                    }
+                }
+                
+                //---------------------------------------------------------------------------//
+                // If there is a completed callback defined, use it after making sure it's a
+                // function.
+                //---------------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onComplete)) {
+                    if (iomy.validation.isFunction(mSettings.onComplete)) {
+                        fnComplete = mSettings.onComplete;
+                        
+                    } else {
+                        aErrorMessages.push("onComplete is not a function. Found " + typeof mSettings.onComplete);
+                    }
+                }
+                
+            } else {
+                aErrorMessages.push(sNoThingIdMessage);
+            }
+            
+            if (aErrorMessages.length > 0) {
+                throw new IllegalArgumentException(aErrorMessages.join("\n"));
+            }
+            
+            //--------------------------------------------------------------------------------//
+            // Find the stream auth IO.
+            //--------------------------------------------------------------------------------//
+            $.each(mThing.IO, function (sI, mIO) {
+                if (mIO.RSTypeId == iomy.devices.onvif.RSDisabledPTZControls) {
+                    iIOId = mIO.Id;
+                    return false;
+                }
+            });
+            
+            //--------------------------------------------------------------------------------//
+            // Run the OData request if the IO is found.
+            //--------------------------------------------------------------------------------//
+            if (iIOId !== null) {
+                iomy.apiodata.AjaxRequest({
+                    Url             : iomy.apiodata.ODataLocation("dataint"),
+                    Columns         : ["CALCEDVALUE"],
+                    WhereClause     : ["IO_PK eq " + iIOId],
+                    OrderByClause   : [],
+                    
+                    onSuccess : function (responseType, data) {
+                        try {
+                            if (responseType === "JSON") {
+                                if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE !== null && data[0].CALCEDVALUE !== undefined) {
+                                    // Parse the URL through the success callback function.
+                                    fnSuccess(data[0].CALCEDVALUE);
+                                    fnComplete();
+                                } else {
+                                    //$.sap.log.error("Value found upon error: " + data[0].CALCEDVALUE);
+                                    $.sap.log.error(JSON.stringify(data));
+                                    fnFail("Cannot find out if the PTZ controls are disabled.");
+                                    fnComplete();
+                                }
+                            } else {
+                                fnFail("API returned " + responseType + " in loadPTZControlStatus(), expected JSON.");
+                                fnComplete();
+                            }
+                            
+                        } catch (e) {
+                            fnFail("Failure in the success callback in loadPTZControlStatus() ("+e.name+"): " + e.message);
+                            fnComplete();
+                        }
+                    },
+            
+                    onFail : function (response) {
+                        fnFail(response);
+                        fnComplete();
+                    }
+                });
+                
+            } else {
+                fnFail("Cannot retrieve the PTZ control disabled status.");
+                fnComplete();
+            }
+            
+        } catch (e) {
+            fnFail(e.message);
+            fnComplete();
         }
     },
     

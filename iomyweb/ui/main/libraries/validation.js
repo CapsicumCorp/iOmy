@@ -416,6 +416,10 @@ $.extend(iomy.validation, {
         return typeof fnValue === "boolean";
     },
     
+    isNumber: function (fnValue) {
+        return typeof fnValue === "number";
+    },
+    
     isValueGiven : function (vValue) {
         return typeof vValue !== "undefined" && vValue !== null;
     },

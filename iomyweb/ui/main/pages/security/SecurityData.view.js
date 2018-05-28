@@ -217,7 +217,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                                                                     enabled : "{/enabled/Always}",
                                                                     
                                                                     press : function () {
-                                                                        oController.LoadStreamAuthSettings();
+                                                                        oController.LoadStreamSettings();
                                                                     }
 																})
 															]

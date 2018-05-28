@@ -145,7 +145,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
                             enabled : "{/enabled/IfOnvifProfilesFound}",
                             fields: [
                                 new sap.m.CheckBox({
-                                    enabled : "{/enabled/PTZEnabled}",
+                                    enabled : "{/enabled/IfOnvifProfilesFound}",
                                     selected : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/PTZDisabled}"
                                 })
                             ]
