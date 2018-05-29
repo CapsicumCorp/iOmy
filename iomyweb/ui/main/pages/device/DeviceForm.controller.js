@@ -798,9 +798,11 @@ sap.ui.controller("pages.device.DeviceForm", {
                         jQuery.sap.log.debug("Success: "+JSON.stringify(data));
 
                         //--------------------------------------------------------------//
-                        // Find the new Link ID                                         //
+                        // Find the new Link ID.
                         //--------------------------------------------------------------//
                         var iLinkId = 0;
+                        
+                        var aErrorMessages = [];
 
                         // Should be in this variable
                         if (data.Data !== undefined) {
@@ -823,49 +825,21 @@ sap.ui.controller("pages.device.DeviceForm", {
                                 enabled : oCurrentFormData.PTZDisabled,
 
                                 onFail : function (sErrorMessage) {
-                                    
+                                    aErrorMessages.push(sErrorMessage);
                                 },
 
-                                onComplete : function (mData) {
-                                    iomy.common.RefreshCoreVariables({
-                                        onSuccess : function () {
-                                            oController.RefreshModel({
-                                                onSuccess : function () {
-                                                    iomy.common.showMessage({
-                                                        text : "Device successfully created",
-                                                        view : oView
-                                                    });
-
-                                                    if (iomy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
-                                                        oView.byId("DevTypeSelect").setSelectedKey("thingType"+iomy.devices.onvif.ThingTypeId);
-
-                                                        //oCurrentFormData.OnvifServer = iLinkId;
-                                                        oController.DevTypeToggle(oController, "thingType"+iomy.devices.onvif.ThingTypeId);
-
-                                                    } else {
-                                                        oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
-                                                        //iomy.common.NavigationChangePage("pBlock", {}, true);
-                                                    }
-
-                                                    if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+iomy.devices.onvif.ThingTypeId) {
-                                                        oController.bLoadingOnvifProfiles = false;
-                                                        oController.bOnvifCameraSelected = false;
-                                                        oController.bProfilesLoaded = false;
-
-            //                                            oController.ToggleControls(true);
-            //                                        } else {
-            //                                            oController.ToggleControls(true);
-                                                    }
-
-                                                    oController.bSubmitting = false;
-                                                    oController.ToggleControls(true);
-
-                                                }
-                                            });
-                                        }
-                                    });
+                                onComplete : function () {
+                                    if (aErrorMessages.length > 0) {
+                                        iomy.common.showWarning("Unable to set the PTZ control settings:\n\n" + aErrorMessages.join("\n\n"), "", function () {
+                                            oController.ReloadCoreVariables(iLinkId);
+                                        });
+                                    } else {
+                                        oController.ReloadCoreVariables(iLinkId);
+                                    }
                                 }
                             });
+                        } else {
+                            oController.ReloadCoreVariables(iLinkId);
                         }
                     } else {
                         jQuery.sap.log.error("An error has occurred with the link ID: consult the \"Success\" output above this console");
@@ -900,6 +874,48 @@ sap.ui.controller("pages.device.DeviceForm", {
         }
     },
     
+    ReloadCoreVariables : function (iLinkId) {
+        var oController         = this;
+        var oView               = oController.getView();
+        
+        try {
+            iomy.common.RefreshCoreVariables({
+                onSuccess : function () {
+                    oController.RefreshModel({
+                        onSuccess : function () {
+                            iomy.common.showMessage({
+                                text : "Device successfully created"
+                            });
+
+                            if (iomy.functions.getLinkTypeIDOfLink(iLinkId) === 6) {
+                                oView.byId("DevTypeSelect").setSelectedKey("thingType"+iomy.devices.onvif.ThingTypeId);
+
+                                //oCurrentFormData.OnvifServer = iLinkId;
+                                oController.DevTypeToggle(oController, "thingType"+iomy.devices.onvif.ThingTypeId);
+
+                            } else {
+                                oController.DevTypeToggle(oController, oView.byId("DevTypeSelect").getSelectedKey());
+                                //iomy.common.NavigationChangePage("pBlock", {}, true);
+                            }
+
+                            if (oView.byId("DevTypeSelect").getSelectedKey() === "thingType"+iomy.devices.onvif.ThingTypeId) {
+                                oController.bLoadingOnvifProfiles = false;
+                                oController.bOnvifCameraSelected = false;
+                                oController.bProfilesLoaded = false;
+                            }
+
+                            oController.bSubmitting = false;
+                            oController.ToggleControls(true);
+
+                        }
+                    });
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Error attempting to refresh the core variables after creating a device ("+e.name+"): " + e.message);
+        }
+    },
+    
     EditDevice : function () {
         var oController         = this;
         var oView               = oController.getView();
@@ -917,10 +933,6 @@ sap.ui.controller("pages.device.DeviceForm", {
         if (!bError) {
             if (oController.areThereChanges()) {
                 oController.ToggleControls(false);
-
-                if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                    oController.ToggleControls(false);
-                }
 
                 //--------------------------------------------------------------------//
                 // Run the request to edit an existing device.
@@ -952,10 +964,6 @@ sap.ui.controller("pages.device.DeviceForm", {
                     iomy.common.showError(e.message, "Error",
                         function () {
                             oController.ToggleControls(true);
-
-                            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                                oController.ToggleControls(true);
-                            }
                         }
                     );
                 }
