@@ -72,18 +72,10 @@ sap.ui.controller("pages.premise.PremiseForm", {
     
     TogglePremiseInfoControls : function (bEnabled) {
         var oView           = this.getView();
-        var oPremiseObject  = oView.getModel().getProperty("/Information/");
+        var oModel          = oView.getModel();
         
         try {
-            $.each(oPremiseObject, function (sKey) {
-                if (oView.byId("Select"+sKey) !== undefined) {
-                    oView.byId("Select"+sKey).setEnabled(bEnabled);
-                }
-
-                if (oView.byId("Input"+sKey) !== undefined) {
-                    oView.byId("Input"+sKey).setEnabled(bEnabled);
-                }
-            });
+            oModel.setProperty("/enabled/Always", bEnabled);
         } catch (e) {
             $.sap.log.error("Error toggling premise information controls: " + e.message);
         }
@@ -91,18 +83,10 @@ sap.ui.controller("pages.premise.PremiseForm", {
     
     TogglePremiseAddressControls : function (bEnabled) {
         var oView           = this.getView();
-        var oPremiseObject  = oView.getModel().getProperty("/Address/");
+        var oModel          = oView.getModel();
         
         try {
-            $.each(oPremiseObject, function (sKey) {
-                if (oView.byId("Select"+sKey) !== undefined) {
-                    oView.byId("Select"+sKey).setEnabled(bEnabled);
-                }
-
-                if (oView.byId("Input"+sKey) !== undefined) {
-                    oView.byId("Input"+sKey).setEnabled(bEnabled);
-                }
-            });
+            oModel.setProperty("/enabled/Always", bEnabled);
         } catch (e) {
             $.sap.log.error("Error toggling premise address controls: " + e.message);
         }
@@ -185,6 +169,9 @@ sap.ui.controller("pages.premise.PremiseForm", {
                     "Regions"   : iomy.common.Regions,
                     "Languages" : iomy.common.Languages,
                     "Timezones" : iomy.common.Timezones
+                },
+                "enabled"       : {
+                    "Always"    : true
                 }
             });
             
@@ -252,12 +239,20 @@ sap.ui.controller("pages.premise.PremiseForm", {
         oController.TogglePremiseInfoControls(false);
         
         if (oFormData.Name === "") {
-            iomy.common.showError("Premise must have a name.");
+            iomy.common.showError("Premise must have a name.", "Name Missing",
+                function () {
+                    oController.TogglePremiseInfoControls(true);
+                }
+            );
             return;
         }
         
         if (oFormData.Name.length < 3) {
-            iomy.common.showError("Premise name must be at least 3 characters long.");
+            iomy.common.showError("Premise name must be at least 3 characters long.", "Name Too Short",
+                function () {
+                    oController.TogglePremiseInfoControls(true);
+                }
+            );
             return;
         }
         
@@ -280,13 +275,15 @@ sap.ui.controller("pages.premise.PremiseForm", {
                                     text : "Premise information successfully updated."
                                 });
 
-                                oController.RefreshModel();
                                 oController.ToggleButtonsAndView( oController, "ShowInfo" );
+                                oController.TogglePremiseInfoControls(true);
+                                oController.RefreshModel();
                             }
 
                         });
                     } catch (e) {
                         $.sap.log.error("Error attempting to reload the core variables ("+e.name+"): " + e.message);
+                        oController.TogglePremiseInfoControls(true);
                     }
                 },
 
@@ -343,6 +340,7 @@ sap.ui.controller("pages.premise.PremiseForm", {
                                     text : "Premise address successfully updated."
                                 });
 
+                                oController.TogglePremiseAddressControls(true);
                                 oController.RefreshModel();
                                 oController.ToggleButtonsAndView( oController, "ShowAddress" );
                                 oController.loadLocaleInfo();
@@ -351,6 +349,7 @@ sap.ui.controller("pages.premise.PremiseForm", {
                         });
                     } catch (e) {
                         $.sap.log.error("Error attempting to reload the core variables ("+e.name+"): " + e.message);
+                        oController.TogglePremiseAddressControls(true);
                     }
                 },
 
@@ -365,7 +364,7 @@ sap.ui.controller("pages.premise.PremiseForm", {
         } catch (e) {
             iomy.common.showError(e.message, "Error",
                 function () {
-                    oController.TogglePremiseInfoControls(true);
+                    oController.TogglePremiseAddressControls(true);
                 }
             );
         }

@@ -66,10 +66,14 @@ sap.ui.controller("pages.security.Security", {
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
         oController.CameraList = iomy.devices.getCameraList(true);
+        var iElements = iomy.functions.getNumberOf(oController.CameraList);
         
         oData = {
             "lists" : {
                 "Cameras" : oController.CameraList
+            },
+            "visible" : {
+                "IfNoCamerasFound" : iElements === 0
             }
         };
         

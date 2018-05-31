@@ -108,6 +108,11 @@ sap.ui.controller("pages.user.UserSettings", {
                     ConfirmPassword     : ""
                 },
 
+                "PremisePermInfo": {
+                    "CurrentLevel"  : 2,
+                    "PremiseId"     : 1
+                },
+                
                 "RoomPermInfo": {
                     "CurrentLevel"  : 2,
                     "RoomId"        : 0,
@@ -131,6 +136,10 @@ sap.ui.controller("pages.user.UserSettings", {
                         "Key" : 4,
                         "Text" : "Read/Write"
                     }
+                },
+                
+                "enabled" : {
+                    "Always" : true
                 }
             };
             
@@ -208,34 +217,36 @@ sap.ui.controller("pages.user.UserSettings", {
 	},
     
     TogglePasswordControls : function (bEnabled) {
-        var oView = this.getView();
+        var oView           = this.getView();
+        var oModel          = oView.getModel();
         
-        oView.byId("InputOldPassword").setEnabled(bEnabled);
-        oView.byId("InputNewPassword").setEnabled(bEnabled);
-        oView.byId("InputConfirmPassword").setEnabled(bEnabled);;
+        try {
+            oModel.setProperty("/enabled/Always", bEnabled);
+        } catch (e) {
+            $.sap.log.error("Error toggling password text fields ("+e.name+"): " + e.message);
+        }
     },
     
     ToggleInformationControls : function (bEnabled) {
-        var oView = this.getView();
+        var oView           = this.getView();
+        var oModel          = oView.getModel();
         
-        oView.byId("InputGivenNames").setEnabled(bEnabled);
-        oView.byId("InputSurname").setEnabled(bEnabled);
-        oView.byId("InputDisplayName").setEnabled(bEnabled);
-        oView.byId("InputEmail").setEnabled(bEnabled);
-        oView.byId("InputMobile").setEnabled(bEnabled);
+        try {
+            oModel.setProperty("/enabled/Always", bEnabled);
+        } catch (e) {
+            $.sap.log.error("Error toggling user information text fields ("+e.name+"): " + e.message);
+        }
     },
     
     ToggleAddressControls : function (bEnabled) {
-        var oView = this.getView();
+        var oView           = this.getView();
+        var oModel          = oView.getModel();
         
-        oView.byId("SelectLanguage").setEnabled(bEnabled);
-        oView.byId("InputAddressLine1").setEnabled(bEnabled);
-        oView.byId("InputAddressLine2").setEnabled(bEnabled);
-        oView.byId("InputAddressLine3").setEnabled(bEnabled);
-        oView.byId("InputSubregion").setEnabled(bEnabled);
-        oView.byId("InputPostCode").setEnabled(bEnabled);
-        oView.byId("SelectRegion").setEnabled(bEnabled);
-        oView.byId("SelectTimezone").setEnabled(bEnabled);
+        try {
+            oModel.setProperty("/enabled/Always", bEnabled);
+        } catch (e) {
+            $.sap.log.error("Error toggling user address text fields ("+e.name+"): " + e.message);
+        }
     },
 	
 	UpdateUserInfoValues: function () {

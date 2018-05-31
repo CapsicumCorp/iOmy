@@ -31,6 +31,7 @@ sap.ui.jsfragment("fragments.UserEditAddressEdit", {
 					label : "Language",
 					fields: [
 						new sap.m.Select ({
+							enabled : "{/enabled/Always}",
 							selectedKey: "{/UserInfo/LanguageId}",
 							items: {
 								path: "/Languages",
@@ -43,6 +44,7 @@ sap.ui.jsfragment("fragments.UserEditAddressEdit", {
 					label : "Street Address:",
 					fields: [
 						new sap.m.Input ({
+                            enabled : "{/enabled/Always}",
 							value:"{/UserInfo/Line1}"
 						})
 					]
@@ -51,6 +53,7 @@ sap.ui.jsfragment("fragments.UserEditAddressEdit", {
 					label : "Unit Number (if applicable):",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value:"{/UserInfo/Line2}"
 						})
 					]
@@ -59,6 +62,7 @@ sap.ui.jsfragment("fragments.UserEditAddressEdit", {
 					label : "City / Suburb",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value:"{/UserInfo/Line3}"
 						})
 					]
@@ -67,27 +71,30 @@ sap.ui.jsfragment("fragments.UserEditAddressEdit", {
 					label : "State / Province",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value: "{/UserInfo/SubRegion}"
-						}),
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Post Code / Zip Code",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value: "{/UserInfo/Postcode}"
-						}),
+						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
 					label : "Country / Region",
 					fields: [
 						new sap.m.Select ({
+							enabled : "{/enabled/Always}",
 							selectedKey: "{/UserInfo/RegionId}",
 							items: {
 								path: "/Regions",
 								template: oItemTemplateRegions
-							},
+							}
 						})
 					]
 				}),
@@ -95,6 +102,7 @@ sap.ui.jsfragment("fragments.UserEditAddressEdit", {
 					label : "Timezone",
 					fields: [
 						new sap.m.Select ({
+							enabled : "{/enabled/Always}",
 							selectedKey: "{/UserInfo/TimezoneId}",
 							items: {
 								path: "/Timezones",

@@ -25,6 +25,7 @@ sap.ui.jsfragment("fragments.UserEditPremPermEdit", {
 					label : "Premise",
 					fields: [
 						new sap.m.Select ({
+							enabled : "{/enabled/Always}",
 							selectedKey: "{/Form/PremisePerm/Id}",
 							items: {
 								path: "/PremiseSelectOptions",
@@ -45,6 +46,7 @@ sap.ui.jsfragment("fragments.UserEditPremPermEdit", {
 					label : "Permission Level",
 					fields: [
 						new sap.m.Select ({
+							enabled : "{/enabled/Always}",
 							selectedKey: "{/Form/PremisePerm/PermLevel}",
 							enabled: "{ path:'/Form/PremisePerm/PermLevel', formatter:'iomy.common.LookupPremPermLevelEditable'}", 
 							items: {

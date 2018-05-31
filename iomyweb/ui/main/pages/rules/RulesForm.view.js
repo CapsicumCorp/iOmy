@@ -137,7 +137,7 @@ sap.ui.jsview("pages.rules.RulesForm", {
 														}),
 														new sap.ui.layout.form.FormElement({
 															//label : "Display Name",
-															label : "Rule Name",
+															label : iomy.widgets.RequiredLabel("Rule Name"),
 															fields: [
 																new sap.m.Input({
                                                                     value : "{/Form/Name}",

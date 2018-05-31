@@ -17,6 +17,7 @@ sap.ui.jsfragment("fragments.premise.InfoEdit", {
 					label : iomy.widgets.RequiredLabel("Name"),
 					fields: [
 						new sap.m.Input(oView.createId("InputName"), {
+                            enabled : "{/enabled/Always}",
                             value : "{/Information/Name}"
 						})
 					]
@@ -25,6 +26,7 @@ sap.ui.jsfragment("fragments.premise.InfoEdit", {
 					label : "Description",
 					fields: [
 						new sap.m.Input (oView.createId("InputDesc"), {
+                            enabled : "{/enabled/Always}",
                             value : "{/Information/Desc}"
 						})
 					]
@@ -33,7 +35,8 @@ sap.ui.jsfragment("fragments.premise.InfoEdit", {
 					label : "Bedrooms",
 					fields: [
 						new sap.m.Select (oView.createId("SelectBedroomCountId"), {
-							selectedKey : "{/Information/BedroomCountId}",
+							enabled : "{/enabled/Always}",
+                            selectedKey : "{/Information/BedroomCountId}",
 							items : {
                                 path : "/Options/BedroomCount",
                                 template : new sap.ui.core.Item({
@@ -48,7 +51,8 @@ sap.ui.jsfragment("fragments.premise.InfoEdit", {
 					label : "Floors",
 					fields: [
 						new sap.m.Select (oView.createId("SelectFloorCountId"), {
-							selectedKey : "{/Information/FloorCountId}",
+							enabled : "{/enabled/Always}",
+                            selectedKey : "{/Information/FloorCountId}",
 							items : {
                                 path : "/Options/FloorCount",
                                 template : new sap.ui.core.Item({
@@ -63,7 +67,8 @@ sap.ui.jsfragment("fragments.premise.InfoEdit", {
 					label : "Occupants",
 					fields: [
 						new sap.m.Select (oView.createId("SelectOccupantCountId"), {
-							selectedKey : "{/Information/OccupantCountId}",
+							enabled : "{/enabled/Always}",
+                            selectedKey : "{/Information/OccupantCountId}",
 							items : {
                                 path : "/Options/OccupantCount",
                                 template : new sap.ui.core.Item({
@@ -78,7 +83,8 @@ sap.ui.jsfragment("fragments.premise.InfoEdit", {
 					label : "Rooms",
 					fields: [
 						new sap.m.Select (oView.createId("SelectRoomCountId"), {
-							selectedKey : "{/Information/RoomCountId}",
+							enabled : "{/enabled/Always}",
+                            selectedKey : "{/Information/RoomCountId}",
 							items : {
                                 path : "/Options/RoomCount",
                                 template : new sap.ui.core.Item({

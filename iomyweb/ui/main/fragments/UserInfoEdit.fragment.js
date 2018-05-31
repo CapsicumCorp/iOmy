@@ -17,7 +17,8 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Given Names",
 					fields: [
 						new sap.m.Input (oView.createId("InputGivenNames"), {
-							value:"{/UserInfo/Givenname}"
+							enabled: "{/enabled/Always}",
+                            value:"{/UserInfo/Givenname}"
 						})
 					]
 				}),
@@ -25,7 +26,8 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Surname",
 					fields: [
 						new sap.m.Input (oView.createId("InputSurname"), {
-							value:"{/UserInfo/Surname}"
+							enabled: "{/enabled/Always}",
+                            value:"{/UserInfo/Surname}"
 						})
 					]
 				}),
@@ -33,7 +35,8 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Display Name",
 					fields: [
 						new sap.m.Input (oView.createId("InputDisplayName"), {
-							value:"{/UserInfo/Displayname}"
+							enabled: "{/enabled/Always}",
+                            value:"{/UserInfo/Displayname}"
 						})
 					]
 				}),
@@ -41,7 +44,8 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Alert Email",
 					fields: [
 						new sap.m.Input (oView.createId("InputEmail"), {
-							value:"{/UserInfo/Email}"
+							enabled: "{/enabled/Always}",
+                            value:"{/UserInfo/Email}"
 						})
 					]
 				}),
@@ -49,7 +53,8 @@ sap.ui.jsfragment("fragments.UserInfoEdit", {
 					label : "Alert Mobile",
 					fields: [
 						new sap.m.Input (oView.createId("InputMobile"), {
-							value: "{/UserInfo/Phone}"
+							enabled: "{/enabled/Always}",
+                            value: "{/UserInfo/Phone}"
 						}),
 					]
 				})

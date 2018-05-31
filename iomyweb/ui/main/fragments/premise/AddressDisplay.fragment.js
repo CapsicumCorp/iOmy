@@ -30,7 +30,7 @@ sap.ui.jsfragment("fragments.premise.AddressDisplay", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Unit Number (if applicable)",
+					label : "Unit Number",
 					fields: [
 						new sap.m.Text ({
 							text:"{/Address/AddressLine2}"

@@ -92,14 +92,16 @@ sap.ui.jsview("pages.premise.PremiseForm", {
 														}
 													}),
 													new sap.m.Button( oView.createId("InfoBlock_BtnSave"), {
-														icon:    "sap-icon://save",
+														enabled: "{/enabled/Always}",
+                                                        icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
                                                             oController.SubmitPremiseInformation();
 														}
 													}),
 													new sap.m.Button( oView.createId("InfoBlock_BtnCancel"), {
-														icon:    "sap-icon://cancel",
+														enabled: "{/enabled/Always}",
+                                                        icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
 															oController.RefreshModel();
@@ -146,7 +148,7 @@ sap.ui.jsview("pages.premise.PremiseForm", {
 														text: "Premise Address",
 													}),
 													new sap.m.ToolbarSpacer ({}),
-													new sap.m.Button ( oView.createId("AddrBlock_BtnEdit"), {
+													new sap.m.Button( oView.createId("AddrBlock_BtnEdit"), {
 														icon:    "sap-icon://edit",
 														type:    "Transparent",
 														press:   function() {
@@ -154,14 +156,16 @@ sap.ui.jsview("pages.premise.PremiseForm", {
 														}
 													}),
 													new sap.m.Button( oView.createId("AddrBlock_BtnSave"), {
-														icon:    "sap-icon://save",
+														enabled: "{/enabled/Always}",
+                                                        icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
 															oController.SubmitPremiseAddress();
 														}
 													}),
 													new sap.m.Button( oView.createId("AddrBlock_BtnCancel"), {
-														icon:    "sap-icon://cancel",
+														enabled: "{/enabled/Always}",
+                                                        icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
                                                             oController.TogglePremiseAddressControls(false);

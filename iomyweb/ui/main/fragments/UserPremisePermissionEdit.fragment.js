@@ -6,6 +6,16 @@ sap.ui.jsfragment("fragments.UserPremisePermissionEdit", {
 		//-- 1.0 - DECLARE VARIABLES                --//
 		//--------------------------------------------//
 		var oFragContent = null;
+        
+        var oItemTemplatePremises = new sap.ui.core.Item({
+			key:  "{Id}",
+			text: "{Name}"
+		});
+        
+        var oItemTemplatePermissionLevels = new sap.ui.core.Item({
+			key:  "{Key}",
+			text: "{Text}"
+		});
 		
 		//--------------------------------------------//
 		//-- 5.0 - CREATE UI                        --//
@@ -16,14 +26,12 @@ sap.ui.jsfragment("fragments.UserPremisePermissionEdit", {
 					label : "Premise",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"Freshwater Office"
-								}),
-								new sap.ui.core.Item ({
-									text:"etc"
-								}),
-							]
+                            enabled: "{/enabled/Always}",
+                            selectedKey : "{/PremisePermInfo/PremiseId}",
+							items: {
+								path: "/Premises",
+								template: oItemTemplatePremises
+							}
 						})
 					]
 				}),
@@ -31,20 +39,12 @@ sap.ui.jsfragment("fragments.UserPremisePermissionEdit", {
 					label : "Permission Level",
 					fields: [
 						new sap.m.Select ({
-							items : [
-								new sap.ui.core.Item ({
-									text:"No Access"
-								}),
-								new sap.ui.core.Item ({
-									text:"Read"
-								}),
-								new sap.ui.core.Item ({
-									text:"Read/Write"
-								}),
-								new sap.ui.core.Item ({
-									text:"Premise Management, Read/Write"
-								}),
-							]
+							enabled: "{/enabled/Always}",
+                            selectedKey : "{/PremisePermInfo/CurrentLevel}",
+							items: {
+								path: "/PermLevels",
+								template: oItemTemplatePermissionLevels
+							}
 						})
 					]
 				}),

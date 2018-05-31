@@ -17,7 +17,8 @@ sap.ui.jsfragment("fragments.UserPasswordEdit", {
 					label : iomy.widgets.RequiredLabel("Current Password"),
 					fields: [
 						new sap.m.Input (oView.createId("InputOldPassword"), {
-							value: "{/Password/OldPassword}",
+							enabled: "{/enabled/Always}",
+                            value: "{/Password/OldPassword}",
                             type: "Password"
 						})
 					]
@@ -26,7 +27,8 @@ sap.ui.jsfragment("fragments.UserPasswordEdit", {
 					label : iomy.widgets.RequiredLabel("New Password"),
 					fields: [
 						new sap.m.Input (oView.createId("InputNewPassword"), {
-							value: "{/Password/NewPassword}",
+							enabled: "{/enabled/Always}",
+                            value: "{/Password/NewPassword}",
                             type: "Password"
 						})
 					]
@@ -35,7 +37,8 @@ sap.ui.jsfragment("fragments.UserPasswordEdit", {
 					label : iomy.widgets.RequiredLabel("Confirm Password"),
 					fields: [
 						new sap.m.Input (oView.createId("InputConfirmPassword"), {
-							value: "{/Password/ConfirmPassword}",
+							enabled: "{/enabled/Always}",
+                            value: "{/Password/ConfirmPassword}",
                             type: "Password"
 						})
 					]

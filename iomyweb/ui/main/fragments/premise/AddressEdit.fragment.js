@@ -17,6 +17,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "Language",
 					fields: [
 						new sap.m.Select (oView.createId("SelectLanguageId"), {
+                            enabled : "{/enabled/Always}",
                             selectedKey : "{/Address/LanguageId}",
 							items : {
                                 path : "/Options/Languages",
@@ -28,17 +29,19 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 						})
 					]
 				}),new sap.ui.layout.form.FormElement({
-					label : iomy.widgets.RequiredLabel("Street Address"),
+					label : "Street Address",
 					fields: [
 						new sap.m.Input (oView.createId("InputAddressLine1"), {
+                            enabled : "{/enabled/Always}",
                             value : "{/Address/AddressLine1}"
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Unit Number (if applicable)",
+					label : "Unit Number",
 					fields: [
 						new sap.m.Input (oView.createId("InputAddressLine2"), {
+                            enabled : "{/enabled/Always}",
                             value : "{/Address/AddressLine2}"
 						})
 					]
@@ -47,6 +50,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "City / Suburb",
 					fields: [
 						new sap.m.Input (oView.createId("InputAddressLine3"), {
+                            enabled : "{/enabled/Always}",
                             value : "{/Address/AddressLine3}"
 						})
 					]
@@ -55,6 +59,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "State / Province",
 					fields: [
 						new sap.m.Input (oView.createId("InputSubregion"), {
+                            enabled : "{/enabled/Always}",
                             value : "{/Address/Subregion}"
 						})
 					]
@@ -63,6 +68,7 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "Post Code / Zip Code",
 					fields: [
 						new sap.m.Input (oView.createId("InputPostCode"), {
+                            enabled : "{/enabled/Always}",
                             value : "{/Address/PostCode}"
 						})
 					]
@@ -71,7 +77,8 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "Country / Region",
 					fields: [
 						new sap.m.Select (oView.createId("SelectRegionId"), {
-							selectedKey : "{/Address/RegionId}",
+							enabled : "{/enabled/Always}",
+                            selectedKey : "{/Address/RegionId}",
 							items : {
                                 path : "/Options/Regions",
                                 template : new sap.ui.core.Item({
@@ -86,7 +93,8 @@ sap.ui.jsfragment("fragments.premise.AddressEdit", {
 					label : "Timezone",
 					fields: [
 						new sap.m.Select (oView.createId("SelectTimezoneId"), {
-							selectedKey : "{/Address/TimezoneId}",
+							enabled : "{/enabled/Always}",
+                            selectedKey : "{/Address/TimezoneId}",
 							items : {
                                 path : "/Options/Timezones",
                                 template : new sap.ui.core.Item({

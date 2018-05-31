@@ -1224,10 +1224,10 @@ sap.ui.controller("pages.Device", {
                                     }
     //                            }
                             } else {
-                                oController.byId( sIOLabel ).setText("IO Offline");
+                                oController.byId( sIOLabel ).setNumber("N/A");
                             }
                         } else {
-                            oController.byId( sIOLabel ).setText("IO Offline");
+                            oController.byId( sIOLabel ).setNumber("N/A");
                         }
 
                     } catch( e5678) {
@@ -1241,10 +1241,12 @@ sap.ui.controller("pages.Device", {
                     oController.RecursiveLoadAjaxData();
                 },
                 "onFail" : function (response) {
-                    iomy.common.showMessage({
-                        text : "There was an error retriving the value of IO "+iIOId,
-                        view : oController.getView()
-                    });
+//                    iomy.common.showMessage({
+//                        text : "There was an error retriving the value of IO "+iIOId,
+//                        view : oController.getView()
+//                    });
+//                    
+                    oController.byId( sIOLabel ).setNumber("N/A");
                     // Add to the IO Error count
                     oController.iIOErrorCount++;
 

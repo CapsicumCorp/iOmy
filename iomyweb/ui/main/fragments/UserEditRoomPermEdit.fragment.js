@@ -22,6 +22,7 @@ sap.ui.jsfragment("fragments.UserEditRoomPermEdit", {
 					label:  "Premise",
 					fields: [
 						new sap.m.Select ({
+							enabled : "{/enabled/Always}",
 							selectedKey: "{/Form/RoomPerm/PremiseId}",
 							items: {
 								path:     "/AllPremises",
@@ -43,6 +44,7 @@ sap.ui.jsfragment("fragments.UserEditRoomPermEdit", {
 					label:  "Room",
 					fields: [
 						iomy.widgets.selectBoxRoom({
+							enabled : "{/enabled/Always}",
 							selectedKey: "{/Form/RoomPerm/Id}",
 							template: {
 								path: "/RoomSelectOptions",
@@ -66,6 +68,7 @@ sap.ui.jsfragment("fragments.UserEditRoomPermEdit", {
 					label:  "Permission Level",
 					fields: [
 						new sap.m.Select({
+							enabled : "{/enabled/Always}",
 							selectedKey: "{/Form/RoomPerm/PermLevel}",
 							items: {
 								path: "/PermLevelsRoom",

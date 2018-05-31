@@ -80,6 +80,12 @@ sap.ui.jsview("pages.security.Security", {
                     vertical : true,
                     content : [
                         iomy.widgets.DeviceToolbar(oController, "Security"),
+                        
+                        new sap.m.ObjectListItem (oView.createId("entryDevices"), {        
+                            title: "No security devices found",
+                            visible: "{/visible/IfNoCamerasFound}"
+                        }),
+                        
                         new sap.ui.layout.HorizontalLayout({
                             allowWrapping: true,
                             content: {

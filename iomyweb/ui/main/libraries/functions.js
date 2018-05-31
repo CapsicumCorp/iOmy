@@ -1850,7 +1850,9 @@ $.extend(iomy.functions, {
             for (var i = 0; i < aPermissionLevels.length; i++) {
                 if (iMin === null) {
                     iMin = aPermissionLevels[i];
-                } else if (iMin > aPermissionLevels[i]) {
+                } 
+                
+                if (iMin > aPermissionLevels[i]) {
                     iMin = aPermissionLevels[i];
                 }
             }

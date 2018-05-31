@@ -160,6 +160,7 @@ sap.ui.jsview("pages.user.UserSettings", {
 														}
 													}),
 													new sap.m.Button( oView.createId("InfoBlock_BtnSave"), {
+														enabled : "{/enabled/Always}",
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
@@ -168,6 +169,7 @@ sap.ui.jsview("pages.user.UserSettings", {
 														}
 													}),
 													new sap.m.Button( oView.createId("InfoBlock_BtnCancel"), {
+                                                        enabled : "{/enabled/Always}",
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
@@ -223,6 +225,7 @@ sap.ui.jsview("pages.user.UserSettings", {
 														}
 													}),
 													new sap.m.Button( oView.createId("AddrBlock_BtnSave"), {
+														enabled : "{/enabled/Always}",
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
@@ -230,6 +233,7 @@ sap.ui.jsview("pages.user.UserSettings", {
 														}
 													}),
 													new sap.m.Button( oView.createId("AddrBlock_BtnCancel"), {
+														enabled : "{/enabled/Always}",
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {
@@ -325,6 +329,7 @@ sap.ui.jsview("pages.user.UserSettings", {
 														}
 													}),
 													new sap.m.Button( oView.createId("UserRoomPermissionsBlock_BtnSave"), {
+														enabled : "{/enabled/Always}",
 														icon:    "sap-icon://save",
 														visible: false,
 														press:   function( oEvent ) {
@@ -332,6 +337,7 @@ sap.ui.jsview("pages.user.UserSettings", {
 														}
 													}),
 													new sap.m.Button( oView.createId("UserRoomPermissionsBlock_BtnCancel"), {
+														enabled : "{/enabled/Always}",
 														icon:    "sap-icon://cancel",
 														visible: false,
 														press:   function( oEvent ) {

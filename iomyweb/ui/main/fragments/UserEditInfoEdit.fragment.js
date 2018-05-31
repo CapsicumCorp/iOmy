@@ -16,6 +16,7 @@ sap.ui.jsfragment("fragments.UserEditInfoEdit", {
 					label : "Given Names",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value:"{/UserInfo/Givennames}"
 						})
 					]
@@ -24,6 +25,7 @@ sap.ui.jsfragment("fragments.UserEditInfoEdit", {
 					label : "Surname",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value:"{/UserInfo/Surnames}"
 						})
 					]
@@ -32,6 +34,7 @@ sap.ui.jsfragment("fragments.UserEditInfoEdit", {
 					label : "Display Name",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value:"{/UserInfo/Displayname}"
 						})
 					]
@@ -40,6 +43,7 @@ sap.ui.jsfragment("fragments.UserEditInfoEdit", {
 					label : "Alert Email",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value:"{/UserInfo/Email}"
 						})
 					]
@@ -48,8 +52,9 @@ sap.ui.jsfragment("fragments.UserEditInfoEdit", {
 					label : "Alert Mobile",
 					fields: [
 						new sap.m.Input ({
+							enabled : "{/enabled/Always}",
 							value: "{/UserInfo/Phone}"
-						}),
+						})
 					]
 				})
 			]
