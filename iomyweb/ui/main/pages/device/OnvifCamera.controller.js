@@ -81,13 +81,13 @@ sap.ui.controller("pages.device.OnvifCamera", {
 					oController.sMode = evt.data.Mode;
 				}
 				
-				if( oController.sMode==="Player" ) {
-					oView.byId("PageContainer_Thumbnail").setVisible( false );
-					oView.byId("PageContainer_Player").setVisible( true );
-				} else {
-					oView.byId("PageContainer_Thumbnail").setVisible( true );
-					oView.byId("PageContainer_Player").setVisible( false );
-				}
+//				if( oController.sMode==="Player" ) {
+//					oView.byId("PageContainer_Thumbnail").setVisible( false );
+//					oView.byId("PageContainer_Player").setVisible( true );
+//				} else {
+//					oView.byId("PageContainer_Thumbnail").setVisible( true );
+//					oView.byId("PageContainer_Player").setVisible( false );
+//				}
 				
                 oController.loadProfile();
 			}
@@ -164,6 +164,25 @@ sap.ui.controller("pages.device.OnvifCamera", {
         oView.wBtnMoveRight.setEnabled(bStatus);
     },
     
+    RefreshModel : function () {
+        var oController     = this;
+        var oView           = oController.getView();
+        var oData           = {};
+        var oModel          = null;
+        
+        try {
+            oData = {
+                "visible" : true
+            };
+            
+            oModel = new sap.ui.model.json.JSONModel(oData);
+            oView.setModel(oModel);
+            
+        } catch (e) {
+            $.sap.log.error("Failed to refresh the model ("+e.name+"): " + e.message);
+        }
+    },
+    
 	/**
      * Wrapper function for the PTZ Move command in the iomy.devices.onvif
      * library to send the desired number of steps vertically and horizontally
@@ -184,32 +203,36 @@ sap.ui.controller("pages.device.OnvifCamera", {
         // Lock all the PTZ buttons
         oController.setPTZButtonsEnabled(false);
         
-        iomy.devices.onvif.PTZMove({
-            thingID : oController.oThing.Id,
-            profileName : oController.sThumbnailProfileName,
-            xpos : iPosX,
-            ypos : iPosY,
-            
-            onSuccess : function (response) {
-                jQuery.sap.log.debug(JSON.stringify(response));
-                if( oController.sMode==="Thumbnail" ) {
-                    oController.loadThumbnail();
-                }
-                
-            },
+        try {
+            iomy.devices.onvif.PTZMove({
+                thingID : oController.oThing.Id,
+                profileName : oController.sThumbnailProfileName,
+                xpos : iPosX,
+                ypos : iPosY,
 
-            onFail : function (sErrMesg) {
-                jQuery.sap.log.error(sErrMesg);
-                iomy.common.showError(sErrMesg, "Error",
-                    function () {
-                        // Unlock all the PTZ buttons
-                        if( oController.sMode==="Thumbnail" ) {
-                            oController.setPTZButtonsEnabled(true);
-                        }
+                onSuccess : function (response) {
+                    jQuery.sap.log.debug(JSON.stringify(response));
+                    if( oController.sMode==="Thumbnail" ) {
+                        oController.loadThumbnail();
                     }
-                );
-            }
-        });
+
+                },
+
+                onFail : function (sErrMesg) {
+                    jQuery.sap.log.error(sErrMesg);
+                    iomy.common.showError(sErrMesg, "Error",
+                        function () {
+                            // Unlock all the PTZ buttons
+                            if( oController.sMode==="Thumbnail" ) {
+                                oController.setPTZButtonsEnabled(true);
+                            }
+                        }
+                    );
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to run a PTZ move command ("+e.name+"): " + e.message);
+        }
     },
     
     PTZMoveUp : function () {
@@ -261,48 +284,52 @@ sap.ui.controller("pages.device.OnvifCamera", {
         //---------------------------------------------------//
         // Check that it can find the device before it does anything
         //---------------------------------------------------//
-        iomy.devices.onvif.LookupProfiles({ 
-            linkID : oController.oThing.LinkId,
-            
-            // Function if Lookup is successful (Onvif server is attached)
-            onSuccess : function () {
-                var sThumbnailUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.oThing.Id;
+        try {
+            iomy.devices.onvif.LookupProfiles({ 
+                linkID : oController.oThing.LinkId,
 
-                // Set the CSS rule using the API URL with parameters
-                document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
+                // Function if Lookup is successful (Onvif server is attached)
+                onSuccess : function () {
+                    var sThumbnailUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.oThing.Id;
 
-                // Update the JS time stamp
-                oController.updateThumnailTimestamp();
+                    // Set the CSS rule using the API URL with parameters
+                    document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
 
-                // Clear the old timeout instance to avoid a race condition when either
-                // accessing the page multiple times with the same or a different
-                // device.
-                if (oController.oTimeoutThumbnailRefresh !== null) {
-                    clearTimeout(oController.oTimeoutThumbnailRefresh);
-                    oController.oTimeoutThumbnailRefresh = null;
+                    // Update the JS time stamp
+                    oController.updateThumnailTimestamp();
+
+                    // Clear the old timeout instance to avoid a race condition when either
+                    // accessing the page multiple times with the same or a different
+                    // device.
+                    if (oController.oTimeoutThumbnailRefresh !== null) {
+                        clearTimeout(oController.oTimeoutThumbnailRefresh);
+                        oController.oTimeoutThumbnailRefresh = null;
+                    }
+
+                    // Create the new timeout to call this function again after 5 minutes
+                    // (300 seconds).
+                    if (oController.oTimeoutThumbnailRefresh === null) {
+                        oController.oTimeoutThumbnailRefresh = setTimeout(function() {
+                            oController.loadThumbnail();
+                        }, 300000);
+                    }
+                    // Unlock all the PTZ buttons
+                    oController.setPTZButtonsEnabled(true);
+                },
+
+                // Function if Lookup fails (Onvif server not found)
+                onFail : function (response) {
+                    jQuery.sap.log.error("Error checking for the Onvif device (onFail): "+iomy.devices.onvif.sProfileLookupErrors);
+                    oView.wSnapshotTimeField.setText("Failed to load the latest snapshot");
+
+                    // If there is an error, the page is to be redrawn when the user
+                    // goes back to the same device.
+                    oController.bUIDrawn = false;
                 }
-
-                // Create the new timeout to call this function again after 5 minutes
-                // (300 seconds).
-                if (oController.oTimeoutThumbnailRefresh === null) {
-                    oController.oTimeoutThumbnailRefresh = setTimeout(function() {
-                        oController.loadThumbnail();
-                    }, 300000);
-                }
-                // Unlock all the PTZ buttons
-                oController.setPTZButtonsEnabled(true);
-            },
-            
-            // Function if Lookup fails (Onvif server not found)
-            onFail : function (response) {
-                jQuery.sap.log.error("Error checking for the Onvif device (onFail): "+iomy.devices.onvif.sProfileLookupErrors);
-                oView.wSnapshotTimeField.setText("Failed to load the latest snapshot");
-                
-                // If there is an error, the page is to be redrawn when the user
-                // goes back to the same device.
-                oController.bUIDrawn = false;
-            }
-        });
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to refresh the model ("+e.name+"): " + e.message);
+        }
     },
     
     //---------------------------------------------------//

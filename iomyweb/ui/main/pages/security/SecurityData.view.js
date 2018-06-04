@@ -59,7 +59,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                         new sap.m.ObjectHeader({
                             title: "{/title}",
                             number: "{/count/thumbnails}",
-                            numberUnit: "Thumbnail",
+                            numberUnit: "{/misc/thumbnailText}",
                         }),
                         new sap.m.IconTabBar({
                             items : [
@@ -75,6 +75,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                                     ]
                                 }),
                                 new sap.m.IconTabFilter({
+                                    visible : "{/visible/IfViewingOnvifCamera}",
                                     text: "Thumbnails",
                                     icon : "sap-icon://camera",
                                     content : [
@@ -84,13 +85,23 @@ sap.ui.jsview("pages.security.SecurityData", {
                                                     densityAware : false,
                                                     width : "90%",
                                                     height : "90%",
-                                                    src:"{/data/thumbnailUrl}"
+                                                    src : "{/data/thumbnailUrl}",
+                                                    alt : "Failed to load thumbnail",
+                                                    
+                                                    load : function () {
+                                                        oController.UpdateThumbnailCount(1);
+                                                    },
+                                                    
+                                                    error : function () {
+                                                        //oController.UpdateThumbnailCount(0);
+                                                    }
                                                 })
                                             ]
                                         })
                                     ]
                                 }),
                                 new sap.m.IconTabFilter({
+                                    visible : "{/visible/IfViewingOnvifCamera}",
                                     text: "Settings",
                                     icon : "sap-icon://settings",
                                     content : [

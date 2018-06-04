@@ -65,21 +65,26 @@ sap.ui.controller("pages.security.Security", {
         //------------------------------------------------//
 		//-- Build and Bind Model to the View           --//
 		//------------------------------------------------//
-        oController.CameraList = iomy.devices.getCameraList(true);
-        var iElements = iomy.functions.getNumberOf(oController.CameraList);
-        
-        oData = {
-            "lists" : {
-                "Cameras" : oController.CameraList
-            },
-            "visible" : {
-                "IfNoCamerasFound" : iElements === 0
-            }
-        };
-        
-        oModel = new sap.ui.model.json.JSONModel(oData);
-        oModel.setSizeLimit(420);
-        oView.setModel(oModel);
+        try {
+            oController.CameraList = iomy.devices.getCameraList(true);
+            var iElements = iomy.functions.getNumberOf(oController.CameraList);
+
+            oData = {
+                "lists" : {
+                    "Cameras" : oController.CameraList
+                },
+                "visible" : {
+                    "IfNoCamerasFound" : iElements === 0
+                }
+            };
+
+            oModel = new sap.ui.model.json.JSONModel(oData);
+            oModel.setSizeLimit(420);
+            oView.setModel(oModel);
+            
+        } catch (e) {
+            $.sap.log.error("Failed to refresh the model ("+e.name+"): " + e.message);
+        }
         
     },
     

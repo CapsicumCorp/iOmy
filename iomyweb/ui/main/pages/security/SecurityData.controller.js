@@ -46,11 +46,11 @@ sap.ui.controller("pages.security.SecurityData", {
                 
                 if (evt.data.CameraId !== undefined && evt.data.CameraId !== null) {
                     oController.iCameraId = evt.data.CameraId;
+                    iDeviceType = iomy.common.ThingList["_"+oController.iCameraId].TypeId;
                 } else {
                     oController.iCameraId = null;
                 }
                 
-                iDeviceType = iomy.common.ThingList["_"+oController.iCameraId].TypeId;
                 oController.RefreshModel();
                 
                 oController.iCameraTypeId = iDeviceType;
@@ -98,6 +98,7 @@ sap.ui.controller("pages.security.SecurityData", {
         var oView       = this.getView();
         var oData       = {};
         var oModel      = null;
+        var bOnvif      = iomy.common.ThingList["_"+oController.iCameraId].TypeId == iomy.devices.onvif.ThingTypeId;
         
         try {
             //------------------------------------------------//
@@ -115,8 +116,12 @@ sap.ui.controller("pages.security.SecurityData", {
                 "enabled" : {
                     "IfAllowed" : true
                 },
+                "misc" : {
+                    "thumbnailText" : ""
+                },
                 "visible" : {
-                    "IfStreamAuthSelected" : false
+                    "IfStreamAuthSelected" : false,
+                    "IfViewingOnvifCamera" : bOnvif
                 },
                 "fields" : {
                     "ptzDisabled" : false,
@@ -125,6 +130,11 @@ sap.ui.controller("pages.security.SecurityData", {
                     "streamPassword" : ""
                 }
             };
+            
+            if (bOnvif) {
+                oData.count.thumbnails = 0;
+                oData.misc.thumbnailText = "Thumbnail(s)";
+            }
 
             oModel = new sap.ui.model.json.JSONModel(oData);
             oModel.setSizeLimit(420);
@@ -144,10 +154,26 @@ sap.ui.controller("pages.security.SecurityData", {
             var sUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.iCameraId;
             
             oModel.setProperty("/data/thumbnailUrl", sUrl);
-            oModel.setProperty("/count/thumbnails", 1);
             
         } catch (e) {
             $.sap.log.error("Failed to update thumbnail ("+e.name+"): " + e.message);
+        }
+    },
+    
+    UpdateThumbnailCount : function (iCount) {
+        var oView       = this.getView();
+        var oModel      = oView.getModel();
+        
+        try {
+            //-- Until we have support for multiple thumbnails the default count is 1. --//
+            if (!iomy.validation.isValueGiven(iCount)) {
+                iCount = 1;
+            }
+            
+            oModel.setProperty("/count/thumbnails", iCount);
+            
+        } catch (e) {
+            $.sap.log.error("Failed to update thumbnail count ("+e.name+"): " + e.message);
         }
     },
     
@@ -348,7 +374,7 @@ sap.ui.controller("pages.security.SecurityData", {
                                 var iNewAuthType = oSettingsFormData.streamAuthType;
                                 
                                 iomy.common.showMessage({
-                                    text : "Stream data updated."
+                                    text : "Stream settings updated."
                                 });
 
                                 oController.ToggleStreamDataFields(true);
@@ -397,9 +423,16 @@ sap.ui.controller("pages.security.SecurityData", {
         var oView           = oController.getView();
         var oModel          = oView.getModel();
         
+        //--------------------------------------------------------------------//
+        // Attempt to load the stream settings.
+        //--------------------------------------------------------------------//
         try {
+            //-- Disable the controls. --//
             oController.ToggleStreamDataFields(false);
             
+            //--------------------------------------------------------------------//
+            // Run the function to load the stream
+            //--------------------------------------------------------------------//
             iomy.devices.onvif.loadStreamAuthMethod({
                 thingID : oController.iCameraId,
                 
@@ -440,6 +473,7 @@ sap.ui.controller("pages.security.SecurityData", {
                                 );
                             
                             } else {
+                                
                                 oController.ToggleStreamDataFields(true);
                                 oController.ToggleOnvifStreamAuthenticationForm();
                             }

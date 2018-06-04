@@ -71,6 +71,10 @@ sap.ui.controller("pages.FFMPEG", {
             "title" : sTitle,
             "data" : {
                 "videoContent" : "<iframe height='300px' width='100%' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iThingId+"'></iframe>"
+            },
+            
+            "visible" : {
+                "IfPTZControlsAreEnabled" : false
             }
         };
         

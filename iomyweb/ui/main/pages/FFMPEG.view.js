@@ -67,79 +67,9 @@ sap.ui.jsview("pages.FFMPEG", {
                                             content: "{/data/videoContent}"
 										})
 									]
-								}).addStyleClass("ChildFlexGrow ChildTextCenter"),
+								}).addStyleClass("ChildFlexGrow ChildTextCenter")
 							]
-						}),
-						/*new sap.m.FlexBox ({
-                            visible : "{/visible/IfPTZControlsAreEnabled}",
-							layoutData : new sap.m.FlexItemData({
-								growFactor : 1
-							}),
-							items: [
-								new sap.m.VBox ({
-									width: "200px",
-									items: [
-										new sap.m.Button ({
-											height: "50px",
-											width: "200px",
-											icon : "sap-icon://slim-arrow-up",
-
-                                            press : function () {
-                                                iomy.devices.onvif.ptzMove({
-                                                    ypos : -5,
-                                                    thingID : oController.iThingId
-                                                });
-                                            }
-										}),
-										new sap.m.HBox ({
-											items : [
-												new sap.m.Button ({
-													height: "50px",
-													width: "50px",
-													icon : "sap-icon://slim-arrow-left",
-                                                    
-                                                    press : function () {
-                                                        iomy.devices.onvif.ptzMove({
-                                                            xpos : -5,
-                                                            thingID : oController.iThingId
-                                                        });
-                                                    }
-												}),
-												new sap.m.Button ({
-													height: "50px",
-													width: "90px",
-													text:"Center"
-												}).addStyleClass("MarLeft5px MarRight5px"),
-												new sap.m.Button ({
-													height: "50px",
-													width: "50px",
-													icon : "sap-icon://slim-arrow-right",
-                                                    
-                                                    press : function () {
-                                                        iomy.devices.onvif.ptzMove({
-                                                            xpos : 5,
-                                                            thingID : oController.iThingId
-                                                        });
-                                                    }
-												}),
-											]
-										}),
-										new sap.m.Button ({
-											height: "50px",
-											width: "200px",
-											icon : "sap-icon://slim-arrow-down",
-
-                                            press : function () {
-                                                iomy.devices.onvif.ptzMove({
-                                                    ypos : 5,
-                                                    thingID : oController.iThingId
-                                                });
-                                            }
-                                        })
-                                    ]
-								}).addStyleClass("ElementCenter")
-							]
-						})*/
+						})
 					]
 				})
 			]
