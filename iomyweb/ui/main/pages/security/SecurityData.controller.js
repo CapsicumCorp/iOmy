@@ -52,6 +52,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 }
                 
                 oController.RefreshModel();
+                oController.ResetTabPosition();
                 
                 oController.iCameraTypeId = iDeviceType;
                 oController.LoadStream();
@@ -117,7 +118,8 @@ sap.ui.controller("pages.security.SecurityData", {
                     "IfAllowed" : true
                 },
                 "misc" : {
-                    "thumbnailText" : ""
+                    "thumbnailText" : "",
+                    "selectedTab" : null
                 },
                 "visible" : {
                     "IfStreamAuthSelected" : false,
@@ -143,6 +145,17 @@ sap.ui.controller("pages.security.SecurityData", {
             $.sap.log.error("Failed to refresh the model ("+e.name+"): " + e.message);
         }
         
+    },
+    
+    ResetTabPosition : function () {
+        var oView   = this.getView();
+        var oModel  = oView.getModel();
+        
+        try {
+            console.log(oModel.setProperty("/misc/selectedTab", null));
+        } catch (e) {
+            $.sap.log.error("Something weird went wrong ("+e.name+"): " + e.message);
+        }
     },
     
     UpdateThumbnail : function () {
@@ -364,43 +377,52 @@ sap.ui.controller("pages.security.SecurityData", {
                 streamPassword : oSettingsFormData.streamPassword,
                 
                 onComplete : function () {
-                    //-- Toggle PTZ controls no matter what. --//
-                    iomy.devices.onvif.togglePTZControls({
-                        thingID : oController.iCameraId,
-                        enabled : !oSettingsFormData.ptzDisabled,
+                    try {
+                        //-- Toggle PTZ controls no matter what. --//
+                        iomy.devices.onvif.togglePTZControls({
+                            thingID : oController.iCameraId,
+                            enabled : !oSettingsFormData.ptzDisabled,
 
-                        onComplete : function () {
-                            if (aErrorMessages.length === 0) {
-                                var iNewAuthType = oSettingsFormData.streamAuthType;
-                                
-                                iomy.common.showMessage({
-                                    text : "Stream settings updated."
-                                });
+                            onComplete : function () {
+                                if (aErrorMessages.length === 0) {
+                                    var iNewAuthType = oSettingsFormData.streamAuthType;
 
-                                oController.ToggleStreamDataFields(true);
-                                oController.RefreshModel();
-                                oModel.setProperty("/fields/streamAuthType", iNewAuthType);
-                                oController.ToggleOnvifStreamAuthenticationForm();
+                                    iomy.common.showMessage({
+                                        text : "Stream settings updated."
+                                    });
 
-                                switch (oController.iCameraTypeId) {
-                                    case iomy.devices.onvif.ThingTypeId:
-                                        oController.UpdateThumbnail();
-                                        break;
+                                    oController.ToggleStreamDataFields(true);
+                                    //oController.RefreshModel();
+                                    oModel.setProperty("/fields/streamAuthType", iNewAuthType);
+                                    oController.ToggleOnvifStreamAuthenticationForm();
 
-                                }
-                            } else {
-                                iomy.common.showError(aErrorMessages.join("\n\n"), "Error",
-                                    function () {
-                                        oController.ToggleStreamDataFields(true);
+                                    switch (oController.iCameraTypeId) {
+                                        case iomy.devices.onvif.ThingTypeId:
+                                            oController.UpdateThumbnail();
+                                            break;
+
                                     }
-                                );
-                            }
-                        },
+                                } else {
+                                    iomy.common.showError(aErrorMessages.join("\n\n"), "Error",
+                                        function () {
+                                            oController.ToggleStreamDataFields(true);
+                                        }
+                                    );
+                                }
+                            },
 
-                        onFail : function (sErrorMessage) {
-                            aErrorMessages.push(sErrorMessage);
-                        }
-                    });
+                            onFail : function (sErrorMessage) {
+                                aErrorMessages.push(sErrorMessage);
+                            }
+                        });
+                        
+                    } catch (e) {
+                        iomy.common.showError(e.message, "Error",
+                            function () {
+                                oController.ToggleStreamDataFields(true);
+                            }
+                        );
+                    }
                 },
                 
                 onFail : function (sErrorMessage) {
@@ -437,7 +459,6 @@ sap.ui.controller("pages.security.SecurityData", {
                 thingID : oController.iCameraId,
                 
                 onSuccess : function (iAuthType) {
-                    //console.log(iAuthType);
                     oModel.setProperty("/fields/streamAuthType", iAuthType);
                     
                 },
@@ -450,35 +471,43 @@ sap.ui.controller("pages.security.SecurityData", {
                     //---------------------------------------------------------------------------//
                     // Load the PTZ Control status.
                     //---------------------------------------------------------------------------//
-                    iomy.devices.onvif.loadPTZControlStatus({
-                        thingID : oController.iCameraId,
-                        
-                        onSuccess : function (iStatus) {
-                            var bState = iStatus === 1;
-                            
-                            oModel.setProperty("/fields/ptzDisabled", bState);
-                        },
-                        
-                        onFail : function (sErrorMessage) {
-                            aErrorMessages.push(sErrorMessage);
-                        },
-                        
-                        onComplete : function () {
-                            if (aErrorMessages.length > 0) {
-                                iomy.common.showError(aErrorMessages.join("\n\n"), "Error",
-                                    function () {
-                                        oController.ToggleStreamDataFields(true);
-                                        oController.ToggleOnvifStreamAuthenticationForm();
-                                    }
-                                );
-                            
-                            } else {
-                                
+                    try {
+                        iomy.devices.onvif.loadPTZControlStatus({
+                            thingID : oController.iCameraId,
+
+                            onSuccess : function (iStatus) {
+                                var bState = iStatus === 1;
+
+                                oModel.setProperty("/fields/ptzDisabled", bState);
+                            },
+
+                            onFail : function (sErrorMessage) {
+                                aErrorMessages.push(sErrorMessage);
+                            },
+
+                            onComplete : function () {
+                                if (aErrorMessages.length > 0) {
+                                    iomy.common.showError(aErrorMessages.join("\n\n"), "Error",
+                                        function () {
+                                            oController.ToggleStreamDataFields(true);
+                                            oController.ToggleOnvifStreamAuthenticationForm();
+                                        }
+                                    );
+
+                                } else {
+                                    oController.ToggleStreamDataFields(true);
+                                    oController.ToggleOnvifStreamAuthenticationForm();
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        iomy.common.showError(e.message, "Error",
+                            function () {
                                 oController.ToggleStreamDataFields(true);
                                 oController.ToggleOnvifStreamAuthenticationForm();
                             }
-                        }
-                    });
+                        );
+                    }
                 }
             });
             

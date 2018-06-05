@@ -62,6 +62,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                             numberUnit: "{/misc/thumbnailText}",
                         }),
                         new sap.m.IconTabBar({
+                            selectedKey : "{/misc/selectedTab}",
                             items : [
                                 new sap.m.IconTabFilter({
                                     text: "Stream",

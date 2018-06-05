@@ -210,12 +210,10 @@ sap.ui.jsview("pages.device.OnvifCamera", {
                                                             height: "50px",
                                                             width: "200px",
                                                             icon : "sap-icon://slim-arrow-up",
+                                                            value : "{/enabled/Always}",
 
                                                             press : function () {
-                                                                iomy.devices.onvif.ptzMove({
-                                                                    ypos : -5,
-                                                                    thingID : oController.iThingId
-                                                                });
+                                                                oController.PTZMove(0, 5);
                                                             }
                                                         }),
                                                         new sap.m.HBox ({
@@ -224,12 +222,10 @@ sap.ui.jsview("pages.device.OnvifCamera", {
                                                                     height: "50px",
                                                                     width: "50px",
                                                                     icon : "sap-icon://slim-arrow-left",
+                                                                    value : "{/enabled/Always}",
 
                                                                     press : function () {
-                                                                        iomy.devices.onvif.ptzMove({
-                                                                            xpos : -5,
-                                                                            thingID : oController.iThingId
-                                                                        });
+                                                                        oController.PTZMove(-5, 0);
                                                                     }
                                                                 }),
                                                                 new sap.m.HBox ({
@@ -241,12 +237,10 @@ sap.ui.jsview("pages.device.OnvifCamera", {
                                                                     height: "50px",
                                                                     width: "50px",
                                                                     icon : "sap-icon://slim-arrow-right",
+                                                                    value : "{/enabled/Always}",
 
                                                                     press : function () {
-                                                                        iomy.devices.onvif.ptzMove({
-                                                                            xpos : 5,
-                                                                            thingID : oController.iThingId
-                                                                        });
+                                                                        oController.PTZMove(5, 0);
                                                                     }
                                                                 }),
                                                             ]
@@ -255,12 +249,10 @@ sap.ui.jsview("pages.device.OnvifCamera", {
                                                             height: "50px",
                                                             width: "200px",
                                                             icon : "sap-icon://slim-arrow-down",
+                                                            value : "{/enabled/Always}",
 
                                                             press : function () {
-                                                                iomy.devices.onvif.ptzMove({
-                                                                    ypos : 5,
-                                                                    thingID : oController.iThingId
-                                                                });
+                                                                oController.PTZMove(0, -5);
                                                             }
                                                         })
                                                     ]

@@ -1077,24 +1077,28 @@ $.extend(iomy.devices.onvif,{
             //--------------------------------------------------------------------------------//
             if (iIOId !== null) {
                 iomy.apiodata.AjaxRequest({
-                    Url             : iomy.apiodata.ODataLocation("dataint"),
+                    Url             : iomy.apiodata.ODataLocation("datatinyint"),
                     Columns         : ["CALCEDVALUE"],
                     WhereClause     : ["IO_PK eq " + iIOId],
                     OrderByClause   : [],
                     
                     onSuccess : function (responseType, data) {
                         try {
+                            var iState = 0;
+                            
                             if (responseType === "JSON") {
                                 if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE !== null && data[0].CALCEDVALUE !== undefined) {
-                                    // Parse the URL through the success callback function.
-                                    fnSuccess(data[0].CALCEDVALUE);
-                                    fnComplete();
+                                    // Save the state from the database.
+                                    iState = data[0].CALCEDVALUE;
+                                    
                                 } else {
-                                    //$.sap.log.error("Value found upon error: " + data[0].CALCEDVALUE);
+                                    // The IO was not found, print a warning that it is assumed that the controls are enabled.
                                     $.sap.log.error(JSON.stringify(data));
-                                    fnFail("Cannot find out if the PTZ controls are disabled.");
-                                    fnComplete();
+                                    $.sap.log.error("PTZ control status not found. Assuming that it's enabled.");
                                 }
+                                
+                                fnSuccess(iState);
+                                fnComplete();
                             } else {
                                 fnFail("API returned " + responseType + " in loadPTZControlStatus(), expected JSON.");
                                 fnComplete();

@@ -24,6 +24,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 sap.ui.controller("pages.device.OnvifCamera", {
 	bUIDrawn : false,
+    bPTZDisabled : true,
     
     aElementsToDestroy : [],
     
@@ -38,7 +39,7 @@ sap.ui.controller("pages.device.OnvifCamera", {
     
     oThing : null,
     
-    iID : null,
+    iThingId : null,
     UTSLastUpdate : null,
     sStreamProfileName : null,
     sStreamProfileUrl : null,
@@ -64,32 +65,40 @@ sap.ui.controller("pages.device.OnvifCamera", {
 			// Everything is rendered in this function before rendering.
 			onBeforeShow : function (evt) {
                 
-                // Import the given Thing
-                oController.oThing = iomy.common.ThingList['_'+evt.data.ThingId];
-                
-//                oController.loadLinkConn(oController.oThing.LinkId);
-//                oController.displayRoomLocation();
-                
-                oView.wSnapshotTimeField.setText("Loading...");
-                
-                oView.byId("ToolbarTitle").setText( iomy.common.ThingList["_"+evt.data.ThingId].DisplayName );
-				
-				//-- Store the Page Mode --//
-				oController.sMode = "Thumbnail";
-				
-				if( typeof evt.data.Mode!=="undefined") {
-					oController.sMode = evt.data.Mode;
-				}
-				
-//				if( oController.sMode==="Player" ) {
-//					oView.byId("PageContainer_Thumbnail").setVisible( false );
-//					oView.byId("PageContainer_Player").setVisible( true );
-//				} else {
-//					oView.byId("PageContainer_Thumbnail").setVisible( true );
-//					oView.byId("PageContainer_Player").setVisible( false );
-//				}
-				
-                oController.loadProfile();
+                if (evt.data.ThingId !== null && evt.data.ThingId !== undefined) {
+                    // Import the given Thing
+                    oController.oThing = iomy.common.ThingList['_'+evt.data.ThingId];
+                    oController.iThingId = evt.data.ThingId;
+
+    //                oController.loadLinkConn(oController.oThing.LinkId);
+    //                oController.displayRoomLocation();
+
+                    oView.wSnapshotTimeField.setText("Loading...");
+
+                    oView.byId("ToolbarTitle").setText( iomy.common.ThingList["_"+evt.data.ThingId].DisplayName );
+
+                    //-- Store the Page Mode --//
+                    oController.sMode = "Thumbnail";
+
+                    if( typeof evt.data.Mode!=="undefined") {
+                        oController.sMode = evt.data.Mode;
+                    }
+
+    //				if( oController.sMode==="Player" ) {
+    //					oView.byId("PageContainer_Thumbnail").setVisible( false );
+    //					oView.byId("PageContainer_Player").setVisible( true );
+    //				} else {
+    //					oView.byId("PageContainer_Thumbnail").setVisible( true );
+    //					oView.byId("PageContainer_Player").setVisible( false );
+    //				}
+
+                    oController.RefreshModel();
+                    oController.loadProfile();
+                    oController.SetPTZControlStatus();
+                    
+                } else {
+                    $.sap.log.error("Thing ID was not given as a parameter.");
+                }
 			}
 		});
 	},
@@ -144,24 +153,13 @@ sap.ui.controller("pages.device.OnvifCamera", {
     setPTZButtonsEnabled : function(bStatus) {
         var oController = this;
         var oView       = this.getView();
+        var oModel      = oView.getModel();
         
-        // If the camera has NO PTZ capability, this command is useless, so
-        // terminate the function.
-        if (oController.bHasPTZ === false) {
-            return;
+        try {
+            oModel.setProperty("/enabled/Always", bStatus);
+        } catch (e) {
+            $.sap.log.error("Unexpected error toggling PTZ buttons. ("+e.name+"): " + e.message);
         }
-        
-        // Default behaviour is to enable the PTZ controls.
-        if (bStatus === undefined) {
-            bStatus = true;
-        }
-        
-        oController.bPTZButtonsEnabled = bStatus;
-        
-        oView.wBtnMoveUp.setEnabled(bStatus);
-        oView.wBtnMoveDown.setEnabled(bStatus);
-        oView.wBtnMoveLeft.setEnabled(bStatus);
-        oView.wBtnMoveRight.setEnabled(bStatus);
     },
     
     RefreshModel : function () {
@@ -172,7 +170,9 @@ sap.ui.controller("pages.device.OnvifCamera", {
         
         try {
             oData = {
-                "visible" : true
+                "visible" : {
+                    "IfPTZControlsAreEnabled" : false
+                }
             };
             
             oModel = new sap.ui.model.json.JSONModel(oData);
@@ -180,6 +180,56 @@ sap.ui.controller("pages.device.OnvifCamera", {
             
         } catch (e) {
             $.sap.log.error("Failed to refresh the model ("+e.name+"): " + e.message);
+        }
+    },
+    
+    SetPTZControlStatus : function () {
+        var oController     = this;
+        var oView           = oController.getView();
+        var oModel          = oView.getModel();
+        var aErrorMessages  = [];
+        
+        //---------------------------------------------------------------------------//
+        // Load the PTZ Control status.
+        //---------------------------------------------------------------------------//
+        try {
+            iomy.devices.onvif.loadPTZControlStatus({
+                thingID : oController.oThing.Id,
+
+                onSuccess : function (iStatus) {
+                    var bState = iStatus === 0;
+                    
+                    oController.bPTZDisabled = !bState;
+
+                    oModel.setProperty("/visible/IfPTZControlsAreEnabled", bState);
+                },
+
+                onFail : function (sErrorMessage) {
+                    aErrorMessages.push(sErrorMessage);
+                },
+
+                onComplete : function () {
+                    if (aErrorMessages.length > 0) {
+                        iomy.common.showError(aErrorMessages.join("\n\n"), "Error",
+                            function () {
+//                                oController.ToggleStreamDataFields(true);
+//                                oController.ToggleOnvifStreamAuthenticationForm();
+                            }
+                        );
+
+                    } else {
+//                        oController.ToggleStreamDataFields(true);
+//                        oController.ToggleOnvifStreamAuthenticationForm();
+                    }
+                }
+            });
+        } catch (e) {
+            iomy.common.showError(e.message, "Error",
+                function () {
+//                    oController.ToggleStreamDataFields(true);
+//                    oController.ToggleOnvifStreamAuthenticationForm();
+                }
+            );
         }
     },
     
@@ -385,95 +435,99 @@ sap.ui.controller("pages.device.OnvifCamera", {
         var sUrlWhereClause     = "";
         var bCollectingName     = true;
         
-        // Prepare the filter statements for both OData requests
-        $.each(oController.oThing.IO, function(sI,mIO) {
-            
-            if (sI !== null && sI !== undefined && mIO !== null && mIO !== undefined) {
-                if (bCollectingName) {
-                    aNameWhereClause.push("IO_PK eq "+mIO.Id);
-                    // Switch the collecting name status
-                    bCollectingName = !bCollectingName;
-                } else {
-                    aUrlWhereClause.push("IO_PK eq "+mIO.Id);
-                    bCollectingName = !bCollectingName;
-                }
-            }
-            
-        });
-        
-        sNameWhereClause = aNameWhereClause.join(" or ");
-        sUrlWhereClause = aUrlWhereClause.join(" or ");
-        
-        
-        
-        // Start loading the profile names
-        iomy.apiodata.AjaxRequest({
-            Url             : iomy.apiodata.ODataLocation("datashortstring"),
-            Columns         : ["DATASHORTSTRING_VALUE"],
-            WhereClause     : [sNameWhereClause],
-            OrderByClause   : [],
-            
-            onSuccess : function (type, data) {
-                
-                if (data.length > 0) {
-                    oController.sStreamProfileName       = data[0].DATASHORTSTRING_VALUE;
-                    oController.sThumbnailProfileName    = data[1].DATASHORTSTRING_VALUE;
-                }
-                
-                // Then start loading the profile URLs
-                iomy.apiodata.AjaxRequest({
-                    Url             : iomy.apiodata.ODataLocation("datamedstring"),
-                    Columns         : ["DATAMEDSTRING_VALUE"],
-                    WhereClause     : [sUrlWhereClause],
-                    OrderByClause   : [],
+        try {
+            // Prepare the filter statements for both OData requests
+            $.each(oController.oThing.IO, function(sI,mIO) {
 
-                    onSuccess : function (type, data) {
-                        var oRoomInfo       = iomy.common.RoomsList["_"+oController.oThing.PremiseId]["_"+oController.oThing.RoomId];
-                        var sThumbnailUrl   = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+oController.oThing.Id;
-                        
-                        if (data.length > 0) {
-                            oController.sStreamProfileUrl        = data[0].DATAMEDSTRING_VALUE;
-                            oController.sThumbnailProfileUrl     = data[1].DATAMEDSTRING_VALUE;
-                        }
-                        
-                        // Display the location of the camera.
-                        oView.wLocationField.setText(oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName);
-                        
-                        
-                        if( oController.sMode==="Player" ) {
-                            //----------------------------------------//
-                            //-- IF FFMPEG PLAYER MODE              --//
-                            //----------------------------------------//
-                            oController.loadFFMPEGPlayer();
-                            
-                        } else {
-                            //----------------------------------------//
-                            //-- IF THUMBNAIL MODE                  --//
-                            //----------------------------------------//
-                            
-                            // Set the CSS rule using the API URL with parameters
-                            document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
-                            
-                            oController.loadThumbnail();
-                            
-                        }
-                        
-                        
-                        
-                    },
-                    onFail : function (response) {
-                        jQuery.sap.log.error("Error loading the profile URLs: "+JSON.stringify(response));
-                        iomy.common.showError("Error loading the profile URLs");
+                if (sI !== null && sI !== undefined && mIO !== null && mIO !== undefined) {
+                    if (bCollectingName) {
+                        aNameWhereClause.push("IO_PK eq "+mIO.Id);
+                        // Switch the collecting name status
+                        bCollectingName = !bCollectingName;
+                    } else {
+                        aUrlWhereClause.push("IO_PK eq "+mIO.Id);
+                        bCollectingName = !bCollectingName;
                     }
-                });
-            },
-            
-            onFail : function (response) {
-                jQuery.sap.log.error("Error loading the profile names: "+JSON.stringify(response));
-                iomy.common.showError("Error loading the profile names");
-            }
-        });
+                }
+
+            });
+
+            sNameWhereClause = aNameWhereClause.join(" or ");
+            sUrlWhereClause = aUrlWhereClause.join(" or ");
+
+
+
+            // Start loading the profile names
+            iomy.apiodata.AjaxRequest({
+                Url             : iomy.apiodata.ODataLocation("datashortstring"),
+                Columns         : ["DATASHORTSTRING_VALUE"],
+                WhereClause     : [sNameWhereClause],
+                OrderByClause   : [],
+
+                onSuccess : function (type, data) {
+
+                    if (data.length > 0) {
+                        oController.sStreamProfileName       = data[0].DATASHORTSTRING_VALUE;
+                        oController.sThumbnailProfileName    = data[1].DATASHORTSTRING_VALUE;
+                    }
+
+                    // Then start loading the profile URLs
+                    iomy.apiodata.AjaxRequest({
+                        Url             : iomy.apiodata.ODataLocation("datamedstring"),
+                        Columns         : ["DATAMEDSTRING_VALUE"],
+                        WhereClause     : [sUrlWhereClause],
+                        OrderByClause   : [],
+
+                        onSuccess : function (type, data) {
+                            var oRoomInfo       = iomy.common.RoomsList["_"+oController.oThing.PremiseId]["_"+oController.oThing.RoomId];
+                            var sThumbnailUrl   = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=OpenThingThumbnail&ThingId="+oController.oThing.Id;
+
+                            if (data.length > 0) {
+                                oController.sStreamProfileUrl        = data[0].DATAMEDSTRING_VALUE;
+                                oController.sThumbnailProfileUrl     = data[1].DATAMEDSTRING_VALUE;
+                            }
+
+                            // Display the location of the camera.
+                            oView.wLocationField.setText(oRoomInfo.RoomName + " in " + oRoomInfo.PremiseName);
+
+
+                            if( oController.sMode==="Player" ) {
+                                //----------------------------------------//
+                                //-- IF FFMPEG PLAYER MODE              --//
+                                //----------------------------------------//
+                                oController.loadFFMPEGPlayer();
+
+                            } else {
+                                //----------------------------------------//
+                                //-- IF THUMBNAIL MODE                  --//
+                                //----------------------------------------//
+
+                                // Set the CSS rule using the API URL with parameters
+                                document.getElementById(oController.createId("CameraThumbnail")).style = "background-image: url("+sThumbnailUrl+")";
+
+                                oController.loadThumbnail();
+
+                            }
+
+
+
+                        },
+                        onFail : function (response) {
+                            jQuery.sap.log.error("Error loading the profile URLs: "+JSON.stringify(response));
+                            iomy.common.showError("Error loading the profile URLs");
+                        }
+                    });
+                },
+
+                onFail : function (response) {
+                    jQuery.sap.log.error("Error loading the profile names: "+JSON.stringify(response));
+                    iomy.common.showError("Error loading the profile names");
+                }
+            });
         
+        } catch (e) {
+            $.sap.log.error("Failed to load the profiles ("+e.name+"): " + e.message);
+        }
                 
     }
 
