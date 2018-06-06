@@ -212,6 +212,7 @@ sap.ui.controller("pages.security.SecurityData", {
             switch (oController.iCameraTypeId) {
                 case iomy.devices.ipcamera.ThingTypeId:
                     oView.byId("streamTab").removeAllPages();
+                
                     //--------------------------------------------------------//
                     // Create the content of the stream tab.
                     //--------------------------------------------------------//
@@ -219,7 +220,7 @@ sap.ui.controller("pages.security.SecurityData", {
                         new sap.m.Image ({
                             densityAware : false,
                             src:"{/data/streamUrl}",
-                           
+
                             error : function () {
                                 //--------------------------------------------------------//
                                 // Create a notice that the stream failed to load.
@@ -381,7 +382,7 @@ sap.ui.controller("pages.security.SecurityData", {
                         //-- Toggle PTZ controls no matter what. --//
                         iomy.devices.onvif.togglePTZControls({
                             thingID : oController.iCameraId,
-                            enabled : !oSettingsFormData.ptzDisabled,
+                            disabled : oSettingsFormData.ptzDisabled,
 
                             onComplete : function () {
                                 if (aErrorMessages.length === 0) {

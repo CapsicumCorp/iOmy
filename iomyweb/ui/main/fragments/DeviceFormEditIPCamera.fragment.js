@@ -59,7 +59,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
                             label : "Room this device is located in",
                             fields: [
                                 new sap.m.Select (oView.createId("DeviceRoom"), {
-                                    enabled : "{/enabled/IfAcceptingInput}",
+                                    enabled : "{/enabled/IfRoomsExist}",
                                     selectedKey: "{/CurrentDevice/RoomId}",
                                     items: {
                                         path: "/Rooms",

@@ -26,6 +26,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("pages.device.DeviceForm", {
     aFormFragments:     {},
     
+    bRoomsExist             : false,
     bEditExisting           : false,
     bLoadingOnvifProfiles   : false,
     bSubmitting             : false,
@@ -195,6 +196,7 @@ sap.ui.controller("pages.device.DeviceForm", {
         var oModel      = oView.getModel();
         
         oModel.setProperty("/enabled/Always",                       bEnabled);
+        oModel.setProperty("/enabled/IfRoomsExist",                 bEnabled);
         oModel.setProperty("/enabled/IfOnvifProfilesHaveLoaded",    bEnabled && !oController.bLoadingOnvifProfiles && !oController.bSubmitting);
         oModel.setProperty("/enabled/IfAcceptingInput",             bEnabled && oController.bAcceptingInput);
         oModel.setProperty("/enabled/IfOnvifCameraIsSelected",      bEnabled && oController.bOnvifCameraSelected);
@@ -345,128 +347,134 @@ sap.ui.controller("pages.device.DeviceForm", {
     },
 
     RefreshModel: function( oConfig ) {
-        //---------------------------------------------------//
-        // If oConfig is undefined. Give it an empty object.
-        //---------------------------------------------------//
-        if (oConfig === undefined || oConfig === null) {
-            oConfig = {};
-        }
-        
-        //------------------------------------------------//
-        //-- Declare Variables                          --//
-        //------------------------------------------------//
-        var oController      = this;
-        var oView            = oController.getView();
-        
-        //------------------------------------------------//
-        //-- Build and Bind Model to the View           --//
-        //------------------------------------------------//
-        var oJSON = iomy.functions.getDeviceFormJSON({
-            roomID : oController.iRoomId,
-            premiseID : oController.iPremiseId
-        });
-        
-        oJSON.Rooms         = oController.PrepareRoomListForModel(1);
-        oJSON.Hubs          = iomy.common.HubList;
-        oJSON.OnvifProfiles = {};
-        oJSON.IPCamTypes    = {
-            "_1" : {
-                "TypeName" : "MJPEG"
+        try {
+            //---------------------------------------------------//
+            // If oConfig is undefined. Give it an empty object.
+            //---------------------------------------------------//
+            if (oConfig === undefined || oConfig === null) {
+                oConfig = {};
             }
-        };
-        
-        oJSON.enabled = {
-            "Always"                    : true,
-            "IfOnvifProfilesHaveLoaded" : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
-            "IfAcceptingInput"          : true && oController.bAcceptingInput,
-            "IfOnvifCameraIsSelected"   : true && oController.bOnvifCameraSelected,
-            "IfOnvifProfilesFound"      : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
-        };
-        
-        oJSON.visible = {
-            "IfStreamAuthSelected" : false
-        };
-        
-        var fnComplete = function () {
-            oView.setModel( 
-                new sap.ui.model.json.JSONModel(oJSON)
-            );
 
             //------------------------------------------------//
-            //-- Trigger the onSuccess Event                --//
+            //-- Declare Variables                          --//
             //------------------------------------------------//
-            if( oConfig.onSuccess ) {
-                oConfig.onSuccess();
-            }
-        };
-        
-        if (oController.bEditExisting) {
-            var oCurrentDevice = JSON.parse( JSON.stringify( iomy.common.ThingList["_"+oController.iThingId] ) );
-            
-            oJSON.CurrentDevice = {
-                "ThingName" : oCurrentDevice.DisplayName,
-                "RoomId"    : oCurrentDevice.RoomId
+            var oController      = this;
+            var oView            = oController.getView();
+
+            //------------------------------------------------//
+            //-- Build and Bind Model to the View           --//
+            //------------------------------------------------//
+            var oJSON = iomy.functions.getDeviceFormJSON({
+                roomID : oController.iRoomId,
+                premiseID : oController.iPremiseId
+            });
+
+            oJSON.Rooms         = oController.PrepareRoomListForModel(1);
+            oJSON.Hubs          = iomy.common.HubList;
+            oJSON.OnvifProfiles = {};
+            oJSON.IPCamTypes    = {
+                "_1" : {
+                    "TypeName" : "MJPEG"
+                }
             };
-            
-            //----------------------------------------------------------------//
-            // If editing an IP Webcam, load the connection information as 
-            // well.
-            //----------------------------------------------------------------//
-            if (oCurrentDevice.TypeId == iomy.devices.ipcamera.ThingTypeId) {
-                
-                var fnSetData = function (mData) {
-                    oJSON.CurrentDevice.HubId       = mData.hubID;
-                    
-                    oJSON.CurrentDevice.Protocol    = mData.protocol;
-                    oJSON.CurrentDevice.IPAddress   = mData.address;
-                    oJSON.CurrentDevice.IPPort      = mData.port;
 
-                    oJSON.CurrentDevice.Path        = mData.path;
-                    oJSON.CurrentDevice.Username    = mData.username;
-                    oJSON.CurrentDevice.Password    = mData.password;
+            oJSON.enabled = {
+                "Always"                    : true,
+                "IfAcceptingInput"          : true && oController.bAcceptingInput,
+                "IfRoomsExist"              : true && oController.bAcceptingInput && oController.bRoomsExist,
+                "IfOnvifProfilesHaveLoaded" : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
+                "IfOnvifCameraIsSelected"   : true && oController.bOnvifCameraSelected,
+                "IfOnvifProfilesFound"      : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
+            };
+
+            oJSON.visible = {
+                "IfStreamAuthSelected" : false
+            };
+
+            var fnComplete = function () {
+                oView.setModel( 
+                    new sap.ui.model.json.JSONModel(oJSON)
+                );
+
+                //------------------------------------------------//
+                //-- Trigger the onSuccess Event                --//
+                //------------------------------------------------//
+                if( oConfig.onSuccess ) {
+                    oConfig.onSuccess();
+                }
+            };
+
+            if (oController.bEditExisting) {
+                var oCurrentDevice = JSON.parse( JSON.stringify( iomy.common.ThingList["_"+oController.iThingId] ) );
+
+                oJSON.CurrentDevice = {
+                    "ThingName" : oCurrentDevice.DisplayName,
+                    "RoomId"    : oCurrentDevice.RoomId
                 };
-                
-                fnComplete(); // Just to wipe the old data.
-                
-                iomy.devices.ipcamera.loadCameraInformation({
-                    thingID : oController.iThingId,
-                    
-                    onSuccess : function (mData) {
-                        fnSetData(mData);
-                        
-                        fnComplete();
-                        oController.bAcceptingInput = true;
-                        oController.ToggleControls(true);
-                    },
-                    
-                    onWarning : function (mData, sErrorMessage) {
-                        fnSetData(mData);
-                        
-                        iomy.common.showWarning(sErrorMessage, "Failed to load some data",
-                            function () {
-                                fnComplete();
-                                oController.bAcceptingInput = true;
-                                oController.ToggleControls(true);
-                            }
-                        );
-                    },
-                    
-                    onFail : function (sErrorMessage) {
-                        iomy.common.showError(sErrorMessage, "Failed to load data",
-                            function () {
-                                fnComplete();
-                                oController.ToggleControls(true);
-                            }
-                        );
-                    }
-                });
-                
+
+                //----------------------------------------------------------------//
+                // If editing an IP Webcam, load the connection information as 
+                // well.
+                //----------------------------------------------------------------//
+                if (oCurrentDevice.TypeId == iomy.devices.ipcamera.ThingTypeId) {
+
+                    var fnSetData = function (mData) {
+                        oJSON.CurrentDevice.HubId       = mData.hubID;
+
+                        oJSON.CurrentDevice.Protocol    = mData.protocol;
+                        oJSON.CurrentDevice.IPAddress   = mData.address;
+                        oJSON.CurrentDevice.IPPort      = mData.port;
+
+                        oJSON.CurrentDevice.Path        = mData.path;
+                        oJSON.CurrentDevice.Username    = mData.username;
+                        oJSON.CurrentDevice.Password    = mData.password;
+                    };
+
+                    fnComplete(); // Just to wipe the old data.
+
+                    iomy.devices.ipcamera.loadCameraInformation({
+                        thingID : oController.iThingId,
+
+                        onSuccess : function (mData) {
+                            fnSetData(mData);
+
+                            fnComplete();
+                            oController.bAcceptingInput = true;
+                            oController.ToggleControls(true);
+                        },
+
+                        onWarning : function (mData, sErrorMessage) {
+                            fnSetData(mData);
+
+                            iomy.common.showWarning(sErrorMessage, "Failed to load some data",
+                                function () {
+                                    fnComplete();
+                                    oController.bAcceptingInput = true;
+                                    oController.ToggleControls(true);
+                                }
+                            );
+                        },
+
+                        onFail : function (sErrorMessage) {
+                            iomy.common.showError(sErrorMessage, "Failed to load data",
+                                function () {
+                                    fnComplete();
+                                    oController.ToggleControls(true);
+                                }
+                            );
+                        }
+                    });
+
+                } else {
+                    fnComplete();
+                }
+
             } else {
                 fnComplete();
             }
             
-        } else {
-            fnComplete();
+        } catch (e) {
+            $.sap.log.error("Failed to refresh the model in the device form ("+e.name+"): " + e.message);
         }
         
     },
@@ -514,12 +522,15 @@ sap.ui.controller("pages.device.DeviceForm", {
                     "RoomId" : iUnassignedRoomId,
                     "RoomName" : "No rooms configured for premise"
                 };
+                
             }
+            oController.bRoomsExist = false;
             
             oController.bNoRooms = true;
             
         } else {
             oController.bNoRooms = false;
+            oController.bRoomsExist = true;
             
             if (bHasUnassigned) {
                 if (bEditing) {

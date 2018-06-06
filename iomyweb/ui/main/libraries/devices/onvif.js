@@ -730,24 +730,24 @@ $.extend(iomy.devices.onvif,{
                 //---------------------------------------------------------------------------//
                 // Check that the new state is present.
                 //---------------------------------------------------------------------------//
-                if (iomy.validation.isValueGiven(mSettings.enabled)) {
-                    if (iomy.validation.isBoolean(mSettings.enabled)) {
-                        if (mSettings.enabled) {
+                if (iomy.validation.isValueGiven(mSettings.disabled)) {
+                    if (iomy.validation.isBoolean(mSettings.disabled)) {
+                        if (mSettings.disabled) {
                             iEnabled = 1;
                         } else {
                             iEnabled = 0;
                         }
                         
-                    } else if (iomy.validation.isNumber(mSettings.enabled)) {
-                        if (mSettings.enabled < 0 || mSettings.enabled > 1) {
+                    } else if (iomy.validation.isNumber(mSettings.disabled)) {
+                        if (mSettings.disabled < 0 || mSettings.disabled > 1) {
                             iEnabled = 0;
                             $.sap.log.error("enabled was not 0 or 1. Defaulting to disabled (0).");
                         } else {
-                            iEnabled = mSettings.enabled;
+                            iEnabled = mSettings.disabled;
                         }
                         
                     } else {
-                        aErrorMessages.push("enabled is not a boolean. Found " + typeof mSettings.enabled);
+                        aErrorMessages.push("enabled is not a boolean. Found " + typeof mSettings.disabled);
                     }
                 } else {
                     aErrorMessages.push("Whether the PTZ controls are enabled or not should be specified.");
@@ -938,13 +938,13 @@ $.extend(iomy.devices.onvif,{
                     Url             : iomy.apiodata.ODataLocation("dataint"),
                     Columns         : ["CALCEDVALUE"],
                     WhereClause     : ["IO_PK eq " + iIOId],
-                    OrderByClause   : [],
+                    OrderByClause   : ["UTS desc"],
                     
                     onSuccess : function (responseType, data) {
                         try {
                             if (responseType === "JSON") {
                                 if (data.length > 0 && data[0] !== undefined && data[0].CALCEDVALUE !== null && data[0].CALCEDVALUE !== undefined) {
-                                    // Parse the URL through the success callback function.
+                                    // Parse the stream authentication type ID through the success callback function.
                                     fnSuccess(data[0].CALCEDVALUE);
                                     fnComplete();
                                 } else {
@@ -1080,7 +1080,7 @@ $.extend(iomy.devices.onvif,{
                     Url             : iomy.apiodata.ODataLocation("datatinyint"),
                     Columns         : ["CALCEDVALUE"],
                     WhereClause     : ["IO_PK eq " + iIOId],
-                    OrderByClause   : [],
+                    OrderByClause   : ["UTS desc"],
                     
                     onSuccess : function (responseType, data) {
                         try {

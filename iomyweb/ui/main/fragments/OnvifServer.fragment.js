@@ -64,7 +64,7 @@ sap.ui.jsfragment("fragments.OnvifServer", {
 							fields: [ 
 								iomy.widgets.selectBoxRoom({
                                     selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Room}",
-                                    enabled : "{/enabled/Always}",
+                                    enabled : "{/enabled/IfRoomsExist}",
                                     template : {
                                         path : "/Rooms",
                                         item : new sap.ui.core.Item({

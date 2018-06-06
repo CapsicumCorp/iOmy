@@ -393,7 +393,7 @@ $.extend(iomy.devices.ipcamera,{
         //--------------------------------------------------------------------//
         // Variables
         //--------------------------------------------------------------------//
-        //var oModule                      = this;
+        var oModule                      = this;
         var bError                       = false;
         var aErrorMessages               = [];
         var sMode                        = "";
@@ -407,13 +407,14 @@ $.extend(iomy.devices.ipcamera,{
         var sIPAddress;
         var sIPPort;
         var sStreamPath;
-//        var bAuthenticationRequired;
-//        var sUsername;
-//        var sPassword;
+        var bAuthenticationRequired;
+        var sUsername;
+        var sPassword;
         var mIPAddressResult;
         var mThingIdResult;
         var fnSuccess;
         var fnFail;
+        var fnComplete;
         
         var sFileTypeMissing            = "File type must be specified.";
         var sHubIDMissing               = "Hub ID must be specified.";
@@ -482,19 +483,19 @@ $.extend(iomy.devices.ipcamera,{
             // password are specified.
             //--------------------------------------------------------------------//
             // TODO : Once we support authentication, modify this code to suit this function.
-    //        if (bAuthenticationRequired) {
-    //            if (sUsername === "") {
-    //                fnAppendError("Username must be specified.");
-    //            } else {
-    //            
-    //            if (sPassword === "") {
-    //                fnAppendError("Password must be given.");
-    //            }
-    //            
-    //            if (oModule.CheckAuthenticationFieldsForSpaces() === true) {
-    //                fnAppendError("Neither the username nor the password can contain spaces.");
-    //            }
-    //        }
+            if (bAuthenticationRequired) {
+                if (sUsername === "") {
+                    fnAppendError("Username must be specified.");
+                }
+                
+                if (sPassword === "") {
+                    fnAppendError("Password must be given.");
+                }
+                
+                if (oModule.CheckAuthenticationFieldsForSpaces() === true) {
+                    fnAppendError("Neither the username nor the password can contain spaces.");
+                }
+            }
 
             //-- Check Port --//
             if (mSettings.ipPort === "" || mSettings.ipPort === undefined || mSettings.ipPort === null) {
@@ -550,6 +551,13 @@ $.extend(iomy.devices.ipcamera,{
                 fnFail = mSettings.onFail;
             }
             
+            //-- Completed callback --//
+            if (mSettings.onComplete === undefined) {
+                fnComplete = function () {};
+            } else {
+                fnComplete = mSettings.onComplete;
+            }
+            
             if (bError) {
                 throw new IllegalArgumentException("* "+aErrorMessages.join("\n* "));
             }
@@ -596,10 +604,10 @@ $.extend(iomy.devices.ipcamera,{
             DisplayName     : mThing.DisplayName
         });
         
-//            if (bAuthenticationRequired) {
-//                mAPIDataString.Username = sUsername;
-//                mAPIDataString.Password = sPassword;
-//            }
+        if (bAuthenticationRequired) {
+            mAPIDataString.Username = sUsername;
+            mAPIDataString.Password = sPassword;
+        }
 
         try {
             //----------------------------------------------------------------//
@@ -612,20 +620,29 @@ $.extend(iomy.devices.ipcamera,{
 
                 "onSuccess"    : function (responseType, data) {
                     try {
-                        if (data.Error === true) {
-                            fnFail(data.ErrMesg);
+                        if (responseType === "JSON") {
+                            if (data.Error === true) {
+                                fnFail(data.ErrMesg);
 
+                            } else {
+                                fnSuccess(data);
+
+                            }
                         } else {
-                            fnSuccess(data);
-
+                            fnFail("API returned " + responseType +". Expected JSON");
                         }
+                        
+                        fnComplete();
+                        
                     } catch (ex) {
                         fnFail(ex.message);
+                        fnComplete();
                     }
                 },
 
                 "onFail"    : function (error) {
                     fnFail(error.responseText);
+                    fnComplete();
                 }
             });
             
@@ -633,6 +650,7 @@ $.extend(iomy.devices.ipcamera,{
             var sExMesg = "Error attempting to submit IP Webcam information ("+e.name+"): " + e.message;
             $.sap.log.error(sExMesg);
             fnFail(sExMesg);
+            fnComplete();
         }
     },
     
