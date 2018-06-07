@@ -1539,8 +1539,8 @@ if($bError===false) {
 							$sErrMesg .= "Internal API Error! \n";
 							$sErrMesg .= "This API hasn't been configured on what to do with this particular Thing Type!";
 							
-							echo "Actual Type: ".$aThingInfo['ThingTypeId']."\n";
-							echo "Expected HueType: ".LookupFunctionConstant("HueThingTypeId")." \n";
+							//echo "Actual Type: ".$aThingInfo['ThingTypeId']."\n";
+							//echo "Expected HueType: ".LookupFunctionConstant("HueThingTypeId")." \n";
 						}
 						
 					//----------------------------------------//

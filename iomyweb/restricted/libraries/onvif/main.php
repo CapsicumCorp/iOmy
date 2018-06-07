@@ -293,7 +293,6 @@ class PHPOnvif {
 		//-- 9.0 - RETURN RESULTS                                       --//
 		//----------------------------------------------------------------//
 		return $aResult;
-		
 	}
 	
 	
@@ -2396,7 +2395,7 @@ class PHPOnvif {
 	//================================================================================================//
 	//== EDIT EXISTING DEVICE IN THE DATABASE                                                       ==//
 	//================================================================================================//
-	public function EditThingStreamsInDatabase( $iThingId, $sStreamProfileName, $sThumbnailProfileName, $aPostStreamAuth ) {
+	public function EditThingStreamsInDatabase( $iThingId, $iLinkId, $sStreamProfileName, $sThumbnailProfileName, $aPostStreamAuth ) {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
 		//----------------------------------------------------------------//
@@ -3009,7 +3008,7 @@ class PHPOnvif {
 	//================================================================================================//
 	//== EDIT EXISTING DEVICE IN THE DATABASE                                                       ==//
 	//================================================================================================//
-	public function EditThingAuthTypeInDB( $iThingId, $aPostStreamAuth ) {
+	public function EditThingAuthTypeInDB( $iThingId, $iLinkId, $aPostStreamAuth ) {
 		//----------------------------------------------------------------//
 		//-- 1.0 - INITIALISE                                           --//
 		//----------------------------------------------------------------//
@@ -3387,6 +3386,7 @@ class PHPOnvif {
 				//--------------------------------------------------------//
 				} else {
 					$iAuthType = 0;
+					
 				}
 				
 				//------------------------------------------------------------//
@@ -3456,6 +3456,7 @@ class PHPOnvif {
 				}
 			} else {
 				$iAuthType = 0;
+				
 			}
 		}
 		

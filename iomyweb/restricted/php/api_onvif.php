@@ -1305,7 +1305,7 @@ if( $bError===false ) {
 						//--------------------------------//
 						//-- Create the Profile         --//
 						//--------------------------------//
-						$aResult = $oPHPOnvifClient->EditThingStreamsInDatabase( $iPostThingId, $sPostStreamProfileName, $sPostThumbProfileName, $aPostStreamAuth );
+						$aResult = $oPHPOnvifClient->EditThingStreamsInDatabase( $iPostThingId, $iPostLinkId, $sPostStreamProfileName, $sPostThumbProfileName, $aPostStreamAuth );
 						
 						if( $aResult['Error']===true ) {
 							$bError = true;
@@ -1332,7 +1332,7 @@ if( $bError===false ) {
 						//--------------------------------//
 						//-- Create the Profile         --//
 						//--------------------------------//
-						$aResult = $oPHPOnvifClient->EditThingAuthTypeInDB( $iPostThingId, $sPostStreamProfileName, $sPostThumbProfileName, $aPostStreamAuth );
+						$aResult = $oPHPOnvifClient->EditThingAuthTypeInDB( $iPostThingId, $iPostLinkId, $aPostStreamAuth );
 						
 						if( $aResult['Error']===true ) {
 							$bError = true;
