@@ -108,7 +108,7 @@ sap.ui.controller("pages.security.SecurityData", {
             oData = {
                 "title" : iomy.common.ThingList["_"+oController.iCameraId].DisplayName,
                 "count" : {
-                    "thumbnails" : 0
+                    "thumbnails" : ""
                 },
                 "data"  : {
                     "streamUrl" : "",
@@ -152,9 +152,20 @@ sap.ui.controller("pages.security.SecurityData", {
         var oModel  = oView.getModel();
         
         try {
-            console.log(oModel.setProperty("/misc/selectedTab", null));
+            oModel.setProperty("/misc/selectedTab", null);
         } catch (e) {
             $.sap.log.error("Something weird went wrong ("+e.name+"): " + e.message);
+        }
+    },
+    
+    SetMJPEGStream : function (sUrl) {
+        var oView   = this.getView();
+        var oModel  = oView.getModel();
+        
+        try {
+            oModel.setProperty("/data/streamUrl", sUrl);
+        } catch (e) {
+            $.sap.log.error("Failed to load MJPEG stream ("+e.name+"): " + e.message);
         }
     },
     
@@ -216,24 +227,9 @@ sap.ui.controller("pages.security.SecurityData", {
                     //--------------------------------------------------------//
                     // Create the content of the stream tab.
                     //--------------------------------------------------------//
-                    oView.byId("streamTab").addPage(
-                        new sap.m.Image ({
-                            densityAware : false,
-                            src:"{/data/streamUrl}",
-
-                            error : function () {
-                                //--------------------------------------------------------//
-                                // Create a notice that the stream failed to load.
-                                //--------------------------------------------------------//
-                                oView.byId("streamTab").removeAllPages();
-                                oView.byId("streamTab").addPage(
-                                    new sap.m.ObjectListItem ({
-                                        title: "Failed to load the stream"
-                                    })
-                                );
-                            }
-                        })
-                    );
+                    if (oView.byId("mjpegStream") !== undefined) {
+                        oView.byId("mjpegStream").destroy();
+                    }
                 
                     //--------------------------------------------------------//
                     // Load stream URL.
@@ -242,7 +238,27 @@ sap.ui.controller("pages.security.SecurityData", {
                         thingID : oController.iCameraId,
 
                         onSuccess : function (sUrl) {
-                            oModel.setProperty("/data/streamUrl", sUrl);
+                            //oView.byId("mjpegStream").setSrc(sUrl);
+                            console.log(sUrl);
+                            
+                            oView.byId("streamTab").addPage(
+                                new sap.m.Image ({
+                                    src : sUrl,
+                                    densityAware : false,
+
+                                    error : function () {
+                                        //--------------------------------------------------------//
+                                        // Create a notice that the stream failed to load.
+                                        //--------------------------------------------------------//
+                                        oView.byId("streamTab").removeAllPages();
+                                        oView.byId("streamTab").addPage(
+                                            new sap.m.ObjectListItem ({
+                                                title: "Failed to load the stream"
+                                            })
+                                        );
+                                    }
+                                })
+                            );
                         },
 
                         onFail : function (sError) {

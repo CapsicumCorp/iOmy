@@ -483,19 +483,19 @@ $.extend(iomy.devices.ipcamera,{
             // password are specified.
             //--------------------------------------------------------------------//
             // TODO : Once we support authentication, modify this code to suit this function.
-            if (bAuthenticationRequired) {
-                if (sUsername === "") {
-                    fnAppendError("Username must be specified.");
-                }
-                
-                if (sPassword === "") {
-                    fnAppendError("Password must be given.");
-                }
-                
-                if (oModule.CheckAuthenticationFieldsForSpaces() === true) {
-                    fnAppendError("Neither the username nor the password can contain spaces.");
-                }
-            }
+//            if (bAuthenticationRequired) {
+//                if (sUsername === "") {
+//                    fnAppendError("Username must be specified.");
+//                }
+//                
+//                if (sPassword === "") {
+//                    fnAppendError("Password must be given.");
+//                }
+//                
+//                if (oModule.CheckAuthenticationFieldsForSpaces() === true) {
+//                    fnAppendError("Neither the username nor the password can contain spaces.");
+//                }
+//            }
 
             //-- Check Port --//
             if (mSettings.ipPort === "" || mSettings.ipPort === undefined || mSettings.ipPort === null) {
@@ -604,10 +604,10 @@ $.extend(iomy.devices.ipcamera,{
             DisplayName     : mThing.DisplayName
         });
         
-        if (bAuthenticationRequired) {
+        //if (bAuthenticationRequired) {
             mAPIDataString.Username = sUsername;
             mAPIDataString.Password = sPassword;
-        }
+        //}
 
         try {
             //----------------------------------------------------------------//
