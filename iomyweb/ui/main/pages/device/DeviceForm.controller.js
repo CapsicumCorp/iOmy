@@ -1028,6 +1028,8 @@ sap.ui.controller("pages.device.DeviceForm", {
                     ipPort              : oCurrentFormData.IPPort,
                     streamPath          : oCurrentFormData.Path,
                     protocol            : oCurrentFormData.Protocol,
+                    username            : oCurrentFormData.Username,
+                    password            : oCurrentFormData.Password,
                     fileType            : "MJPEG",
                     
                     editing : true,

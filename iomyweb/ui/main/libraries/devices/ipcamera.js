@@ -504,8 +504,22 @@ $.extend(iomy.devices.ipcamera,{
                 sIPPort = mSettings.ipPort;
             }
 
+            //-- Find Username --//
+            if (mSettings.username === undefined || mSettings.username === null) {
+                sUsername = "";
+            } else {
+                sUsername = mSettings.username;
+            }
+
+            //-- Find Password --//
+            if (mSettings.password === undefined || mSettings.password === null) {
+                sPassword = "";
+            } else {
+                sPassword = mSettings.password;
+            }
+
             //-- Check Protocol --//
-            if (mSettings.protocol === "") {
+            if (mSettings.protocol === "" || mSettings.protocol === undefined || mSettings.protocol === null) {
                 sProtocol = "http";
             } else {
                 sProtocol = mSettings.protocol;
@@ -601,13 +615,10 @@ $.extend(iomy.devices.ipcamera,{
             Protocol        : sProtocol,
             Path            : sStreamPath,
             LinkName        : iLinkName,
-            DisplayName     : mThing.DisplayName
+            DisplayName     : mThing.DisplayName,
+            Username        : sUsername,
+            Password        : sPassword
         });
-        
-        //if (bAuthenticationRequired) {
-            mAPIDataString.Username = sUsername;
-            mAPIDataString.Password = sPassword;
-        //}
 
         try {
             //----------------------------------------------------------------//
