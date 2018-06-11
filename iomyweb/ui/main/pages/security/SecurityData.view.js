@@ -224,7 +224,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                                                                     }
 																}),
 																new sap.m.Button (oView.createId("ButtonCancel"), {
-																	text: "Cancel",
+																	text: "Revert",
 																	type: sap.m.ButtonType.Reject,
                                                                     enabled : "{/enabled/Always}",
                                                                     
