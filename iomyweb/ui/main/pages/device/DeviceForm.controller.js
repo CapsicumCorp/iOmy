@@ -833,7 +833,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                         if (sDevTypeKey === "thingType"+iomy.devices.onvif.ThingTypeId) {
                             iomy.devices.onvif.togglePTZControls({
                                 thingID : data.Data.Data[0].ThingId,
-                                enabled : oCurrentFormData.PTZDisabled,
+                                disabled : oCurrentFormData.PTZDisabled,
 
                                 onFail : function (sErrorMessage) {
                                     aErrorMessages.push(sErrorMessage);
