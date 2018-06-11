@@ -329,7 +329,13 @@ sap.ui.controller("pages.security.SecurityData", {
 
                             onFail : function (response) {
                                 oView.byId("streamTab").removeAllPages();
-                                iomy.common.showError(response, "Error");
+                                
+                                if (response.status == 500 || response.status == 503) {
+                                    iomy.common.showError("Please try again. If the problem persists, restart iOmy.", "Failed to load stream");
+                                    $.sap.log.error("Failed to load the data: " + response.responseText);
+                                } else {
+                                    iomy.common.showError(response.responseText, "Error");
+                                }
                                 
                                 //--------------------------------------------------------//
                                 // Create a notice that the stream failed to load.
