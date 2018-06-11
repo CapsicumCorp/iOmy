@@ -286,7 +286,13 @@ public class BluetoothHWAndroidLib implements AssociationListener {
                     // If this message occurs, the CSRMesh library seems to give up call disconnect
                     //   and then reconnect to get CSRMesh going again
                     parentActivity.csrMeshBridgeConnected=false;
-                    parentActivity.mService.disconnectBridge();
+                    try {
+                        parentActivity.mService.disconnectBridge();
+                    } catch (Exception e) {
+                        //Sometimes disconnectBridge will trigger an exception in BluetoothGatt such as
+                        //  android.os.DeadObjectException.  We'll just ignore these for now
+                        displayException("MeshService.MESSAGE_BRIDGE_CONNECT_TIMEOUT: DisconnectBridge: ", e);
+                    }
                     break;
                 case MeshService.MESSAGE_TIMEOUT:{
                     int expectedMsg = msg.getData().getInt(MeshService.EXTRA_EXPECTED_MESSAGE);
