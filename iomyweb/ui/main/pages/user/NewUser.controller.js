@@ -127,7 +127,7 @@ sap.ui.controller("pages.user.NewUser", {
 				aPremiseData = JSON.parse(JSON.stringify(iomy.common.PremiseList ));
 				aPremiseData['_0'] = {
 					Id: 0,
-					Name: "All Premise"
+					Name: "All Premises"
 				};
 			}
 		}catch(e1){

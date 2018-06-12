@@ -36,12 +36,12 @@ sap.ui.jsfragment("fragments.UserEditAddressEdit", {
 							items: {
 								path: "/Languages",
 								template: oItemTemplateLanguages
-							},
+							}
 						})
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Street Address:",
+					label : "Street Address",
 					fields: [
 						new sap.m.Input ({
                             enabled : "{/enabled/Always}",
@@ -50,7 +50,7 @@ sap.ui.jsfragment("fragments.UserEditAddressEdit", {
 					]
 				}),
 				new sap.ui.layout.form.FormElement({
-					label : "Unit Number (if applicable):",
+					label : "Unit Number (if applicable)",
 					fields: [
 						new sap.m.Input ({
 							enabled : "{/enabled/Always}",

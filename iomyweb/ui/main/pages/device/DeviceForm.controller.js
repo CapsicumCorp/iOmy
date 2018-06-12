@@ -381,7 +381,7 @@ sap.ui.controller("pages.device.DeviceForm", {
             oJSON.enabled = {
                 "Always"                    : true,
                 "IfAcceptingInput"          : true && oController.bAcceptingInput,
-                "IfRoomsExist"              : true && oController.bAcceptingInput && oController.bRoomsExist,
+                "IfRoomsExist"              : true && oController.bRoomsExist,
                 "IfOnvifProfilesHaveLoaded" : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
                 "IfOnvifCameraIsSelected"   : true && oController.bOnvifCameraSelected,
                 "IfOnvifProfilesFound"      : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded

@@ -204,18 +204,34 @@ sap.ui.jsview("pages.device.OnvifCamera", {
                                             }),
                                             items: [
                                                 new sap.m.VBox ({
-                                                    width: "200px",
+                                                    width: "160px",
                                                     items: [
-                                                        new sap.m.Button ({
-                                                            height: "50px",
-                                                            width: "200px",
-                                                            icon : "sap-icon://slim-arrow-up",
-                                                            value : "{/enabled/Always}",
+                                                        // Top Row
+                                                        new sap.m.HBox ({
+                                                            items : [
+                                                                new sap.m.HBox ({
+                                                                    height: "50px",
+                                                                    width: "50px",
+                                                                    //text:"Center"
+                                                                }),
+                                                                new sap.m.Button ({
+                                                                    height: "50px",
+                                                                    width: "50px",
+                                                                    icon : "sap-icon://slim-arrow-up",
+                                                                    value : "{/enabled/Always}",
 
-                                                            press : function () {
-                                                                oController.PTZMove(0, 5);
-                                                            }
+                                                                    press : function () {
+                                                                        oController.PTZMove(0, 5);
+                                                                    }
+                                                                }).addStyleClass("MarLeft5px MarRight5px"),
+                                                                new sap.m.HBox ({
+                                                                    height: "50px",
+                                                                    width: "50px",
+                                                                    //text:"Center"
+                                                                }),
+                                                            ]
                                                         }),
+                                                        // Middle Row
                                                         new sap.m.HBox ({
                                                             items : [
                                                                 new sap.m.Button ({
@@ -230,7 +246,7 @@ sap.ui.jsview("pages.device.OnvifCamera", {
                                                                 }),
                                                                 new sap.m.HBox ({
                                                                     height: "50px",
-                                                                    width: "90px",
+                                                                    width: "50px",
                                                                     //text:"Center"
                                                                 }).addStyleClass("MarLeft5px MarRight5px"),
                                                                 new sap.m.Button ({
@@ -245,15 +261,30 @@ sap.ui.jsview("pages.device.OnvifCamera", {
                                                                 }),
                                                             ]
                                                         }),
-                                                        new sap.m.Button ({
-                                                            height: "50px",
-                                                            width: "200px",
-                                                            icon : "sap-icon://slim-arrow-down",
-                                                            value : "{/enabled/Always}",
+                                                        // Bottom Row
+                                                        new sap.m.HBox ({
+                                                            items : [
+                                                                new sap.m.HBox ({
+                                                                    height: "50px",
+                                                                    width: "50px",
+                                                                    //text:"Center"
+                                                                }),
+                                                                new sap.m.Button ({
+                                                                    height: "50px",
+                                                                    width: "50px",
+                                                                    icon : "sap-icon://slim-arrow-down",
+                                                                    value : "{/enabled/Always}",
 
-                                                            press : function () {
-                                                                oController.PTZMove(0, -5);
-                                                            }
+                                                                    press : function () {
+                                                                        oController.PTZMove(0, -5);
+                                                                    }
+                                                                }).addStyleClass("MarLeft5px MarRight5px"),
+                                                                new sap.m.HBox ({
+                                                                    height: "50px",
+                                                                    width: "50px",
+                                                                    //text:"Center"
+                                                                })
+                                                            ]
                                                         })
                                                     ]
                                                 }).addStyleClass("ElementCenter")

@@ -42,7 +42,7 @@ sap.ui.controller("pages.user.UserForm", {
 			
 			onBeforeShow: function ( oEvent ) {
 				try {
-					//------------------------------------------------------------//
+                    //------------------------------------------------------------//
 					//-- Store the Users Id                                     --//
 					//------------------------------------------------------------//
 					oController.iUserId = oEvent.data.userID;
@@ -81,9 +81,20 @@ sap.ui.controller("pages.user.UserForm", {
 						},
                         
                         "enabled" : {
-                            "Always" : true
+                            "Always" : true,
+                            "IfAbleToChangePremisePermission" : false
                         }
 					};
+                    
+                    //------------------------------------------//
+                    //-- Refresh the model to clear any data. --//
+                    //------------------------------------------//
+                    oController.RefreshModel( oController, {
+                        Reset:     "All",
+                        onFail: function() {
+                            iomy.common.showError("Problem refreshing the Model", "Edit Other User Page");
+                        }
+                    });
                     
 					//------------------------------------------------------------//
 					//-- STEP 2 - Start Loading the Ajax Data                   --//
@@ -696,7 +707,7 @@ sap.ui.controller("pages.user.UserForm", {
 					oConfig.onSuccess();
 				} catch( e0003 ) {
 					//-- Error with the onSuccess Event --//
-					$.sap.log.error("Critical Error in the RefreshModel onSuccess event on the UserForm page!");
+					$.sap.log.error("Critical Error in the RefreshModel onSuccess event on the UserForm page ("+e.name+"): " + e.message);
 				}
 			}
 			
@@ -705,7 +716,7 @@ sap.ui.controller("pages.user.UserForm", {
 			//----------------//
 			//-- ERROR:     --//
 			//----------------//
-			$.sap.log.error("Critical Error in the RefreshModel function on the UserForm page!");
+			$.sap.log.error("Critical Error in the RefreshModel function on the UserForm page ("+e.name+"): " + e.message);
 			
 			if(oConfig.onFail) {
 				oConfig.onFail();
