@@ -250,6 +250,9 @@ sap.ui.controller("pages.server.DBIndex", {
                         } else {
                             sError = "Failed to disable indexing.";
                         }
+                        
+                        // Add clarification as to what the issue could be.
+                        sError += " Make sure that the database admin username and password are correct. The password can be found by accessing 'Settings' after opening the menu on the app.";
 
                         iomy.common.showError(sError, "Error",
                             function () {

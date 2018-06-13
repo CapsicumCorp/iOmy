@@ -109,7 +109,7 @@ sap.ui.jsview("pages.RulesList", {
 										 new sap.m.Button(oView.createId("ButtonToggle"), {
                                             text: "Toggle",
                                             type: sap.m.ButtonType.Default,
-                                            //enabled : "{/ControlButtonsEnabled}",
+                                            enabled : "{/ControlButtonsEnabled}",
                                             press : function () {
                                                 oController.toggleRuleStates();
                                             }
