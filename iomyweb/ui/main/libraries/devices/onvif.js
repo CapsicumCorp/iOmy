@@ -590,11 +590,11 @@ $.extend(iomy.devices.onvif,{
                             aErrorMessages.push("Stream username is required.");
                         }
 
-                        if (iomy.validation.isValueGiven( mSettings.streamPassword )) {
-                            sStreamPassword = mSettings.streamPassword;
-                        } else {
-                            aErrorMessages.push("Stream password is required.");
-                        }
+//                        if (iomy.validation.isValueGiven( mSettings.streamPassword )) {
+//                            sStreamPassword = mSettings.streamPassword;
+//                        } else {
+//                            aErrorMessages.push("Stream password is required.");
+//                        }
                     }
                 }
                 

@@ -193,7 +193,7 @@ sap.ui.jsview("pages.security.SecurityData", {
                                                             ]
                                                         }),
                                                         new sap.ui.layout.form.FormElement({
-                                                            label : iomy.widgets.RequiredLabel("Stream Password"),
+                                                            label : "Stream Password",
                                                             visible : "{/visible/IfStreamAuthSelected}",
                                                             fields: [
                                                                 new sap.m.Input({
