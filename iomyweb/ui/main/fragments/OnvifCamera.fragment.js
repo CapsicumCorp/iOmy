@@ -130,7 +130,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							]
 						}),
                         new sap.ui.layout.form.FormElement({
-							label : iomy.widgets.RequiredLabel("Stream Password"),
+							label : "Stream Password",
                             visible : "{/visible/IfStreamAuthSelected}",
 							fields: [ 
 								new sap.m.Input({

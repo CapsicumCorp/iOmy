@@ -196,7 +196,7 @@ sap.ui.controller("pages.device.DeviceForm", {
         var oModel      = oView.getModel();
         
         oModel.setProperty("/enabled/Always",                       bEnabled);
-        oModel.setProperty("/enabled/IfRoomsExist",                 bEnabled);
+        oModel.setProperty("/enabled/IfRoomsExist",                 bEnabled && oController.bRoomsExist);
         oModel.setProperty("/enabled/IfOnvifProfilesHaveLoaded",    bEnabled && !oController.bLoadingOnvifProfiles && !oController.bSubmitting);
         oModel.setProperty("/enabled/IfAcceptingInput",             bEnabled && oController.bAcceptingInput);
         oModel.setProperty("/enabled/IfOnvifCameraIsSelected",      bEnabled && oController.bOnvifCameraSelected);
@@ -302,6 +302,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                     
                     oController.SetHubIdOfOnvifServer();
                     oController.LoadOnvifProfilesForSelectBoxes();
+                    oController.SetOnvifServer();
                     
                     if (bEditing) {
                         
@@ -644,6 +645,15 @@ sap.ui.controller("pages.device.DeviceForm", {
 //        oView.getModel().setProperty( "/"+sDevTypeKey+"/HubId", iomy.functions.getHubConnectedToLink(iLinkId).HubId);
         
         oView.byId("DevTypeSelect").setSelectedKey("thingType"+iomy.devices.onvif.ThingTypeId);
+    },
+    
+    SetOnvifServer : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var sDevTypeKey         = oView.byId("DevTypeSelect").getSelectedKey();
+//        var iLinkId             = oView.getModel().getProperty("/"+sDevTypeKey+"/Server");
+//        
+        oView.getModel().setProperty( "/"+sDevTypeKey+"/OnvifServer", "");
     },
     
     CreateDevice : function () {
