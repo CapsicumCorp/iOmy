@@ -59,7 +59,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
                             label : "Room this device is located in",
                             fields: [
                                 new sap.m.Select (oView.createId("DeviceRoom"), {
-                                    enabled : "{/enabled/IfRoomsExist}",
+                                    enabled : "{/enabled/IfRoomsExistAndAcceptingInput}",
                                     selectedKey: "{/CurrentDevice/RoomId}",
                                     items: {
                                         path: "/Rooms",
@@ -130,6 +130,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 							fields: [ 
 								new sap.m.Input(oView.createId("InputPassword"), {
 									placeholder: "optional",
+                                    type : sap.m.InputType.Password,
                                     enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/Password}"
 								})

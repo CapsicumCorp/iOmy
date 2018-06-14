@@ -197,6 +197,7 @@ sap.ui.controller("pages.device.DeviceForm", {
         
         oModel.setProperty("/enabled/Always",                       bEnabled);
         oModel.setProperty("/enabled/IfRoomsExist",                 bEnabled && oController.bRoomsExist);
+        oModel.setProperty("/enabled/IfRoomsExistAndAcceptingInput",bEnabled && oController.bRoomsExist && oController.bAcceptingInput);
         oModel.setProperty("/enabled/IfOnvifProfilesHaveLoaded",    bEnabled && !oController.bLoadingOnvifProfiles && !oController.bSubmitting);
         oModel.setProperty("/enabled/IfAcceptingInput",             bEnabled && oController.bAcceptingInput);
         oModel.setProperty("/enabled/IfOnvifCameraIsSelected",      bEnabled && oController.bOnvifCameraSelected);
@@ -380,12 +381,13 @@ sap.ui.controller("pages.device.DeviceForm", {
             };
 
             oJSON.enabled = {
-                "Always"                    : true,
-                "IfAcceptingInput"          : true && oController.bAcceptingInput,
-                "IfRoomsExist"              : true && oController.bRoomsExist,
-                "IfOnvifProfilesHaveLoaded" : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
-                "IfOnvifCameraIsSelected"   : true && oController.bOnvifCameraSelected,
-                "IfOnvifProfilesFound"      : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
+                "Always"                        : true,
+                "IfRoomsExist"                  : true && oController.bRoomsExist,
+                "IfRoomsExistAndAcceptingInput" : true && oController.bRoomsExist && oController.bAcceptingInput,
+                "IfAcceptingInput"              : true && oController.bAcceptingInput,
+                "IfOnvifProfilesHaveLoaded"     : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
+                "IfOnvifCameraIsSelected"       : true && oController.bOnvifCameraSelected,
+                "IfOnvifProfilesFound"          : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
             };
 
             oJSON.visible = {

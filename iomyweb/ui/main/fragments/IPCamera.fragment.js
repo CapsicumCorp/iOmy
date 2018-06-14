@@ -157,6 +157,7 @@ sap.ui.jsfragment("fragments.IPCamera", {
 							fields: [ 
 								new sap.m.Input({
 									placeholder: "optional",
+                                    type : sap.m.InputType.Password,
                                     value : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/Password}",
                                     enabled : "{/enabled/Always}"
 								}),
