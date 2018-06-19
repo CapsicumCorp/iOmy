@@ -526,7 +526,7 @@ sap.ui.controller("pages.Device", {
                                         new sap.m.ObjectAttribute ({
                                             text: "link",
                                             customContent : new sap.m.Link ({
-                                                text: "Take Screenshot",
+                                                text: "View Thumbnail",
                                                 press : function () {
                                                     iomy.common.NavigationChangePage( "pOnvifSnapshot" , { "ThingId": mDevice.DeviceId, "Mode":"Thumbnail" } , false);
 
