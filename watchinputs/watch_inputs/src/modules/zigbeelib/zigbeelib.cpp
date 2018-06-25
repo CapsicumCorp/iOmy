@@ -400,6 +400,7 @@ struct zigbeedevice {
   char retrycnt=0; //Number of times we have retried sending to this Zigbee device
   char notconnected=0; //1=This device has been marked as not connected so packet sending will be suspended
   time_t connectretrytime=0; //The time to retry sending of a packet on a device that has been marked as not connected
+  bool connectedforretry=false; //True=Device is only marked as connected to attempt retrying
   long inuse=0; //This zigbee device is currently in use, increment before using and decrement when finished using, 0=available for reuse
   localzigbeedevice_t *parentlocaldevice; //The parent device that this zigbee device is associated with (Map it to the structure for the parent local zigbee device when using)
   int timeoutcnt=0; //Starts at 0 and incremented every time a timeout occurs when sending to this device
@@ -2233,6 +2234,18 @@ STATIC void __zigbeelib_send_queue_remove_packet(int localzigbeeindex, int packe
   MOREDEBUG_EXITINGFUNC();
 }
 
+//Remove all packets queued to send to the destination as they are most likely all timing out
+void __zigbeelib_remove_packets_queued_to_device(int localzigbeeindex, uint16_t netaddr, long *localzigbeelocked, long *zigbeelocked) {
+  localzigbeedevice_t *localzigbeedeviceptr=&zigbeelib_localzigbeedevices[localzigbeeindex];
+  int i;
+
+  for (i=0; i<MAX_SEND_QUEUE_ITEMS; i++) {
+    if (localzigbeedeviceptr->sendqueue_items[i].inuse && localzigbeedeviceptr->sendqueue_items[i].send_netaddr==netaddr) {
+      __zigbeelib_send_queue_remove_packet(localzigbeeindex, i, localzigbeelocked, zigbeelocked);
+    }
+  }
+}
+
 //There have been too many retries while sending to a Zigbee device so remove it from memory
 //NOTE: The caller should mark localzigbee inuse before calling this function
 void __zigbeelib_send_queue_too_many_retries(int localzigbeeindex, int zigbeeidx, uint16_t netaddr, long *localzigbeelocked, long *zigbeelocked) {
@@ -2267,6 +2280,7 @@ void __zigbeelib_send_queue_too_many_retries(int localzigbeeindex, int zigbeeidx
  
     //Mark the zigbee device as not connected
     zigbeedeviceptr->notconnected=1;
+    zigbeedeviceptr->connectedforretry=false;
 
     clock_gettime(CLOCK_REALTIME, &curtime);
 
@@ -2275,15 +2289,8 @@ void __zigbeelib_send_queue_too_many_retries(int localzigbeeindex, int zigbeeidx
   zigbeelib_markzigbee_notinuse(zigbeedeviceptr, localzigbeelocked, zigbeelocked);
 
   //Remove all packets queued to send to the destination as they are most likely all timing out
-  {
-    int i;
+  __zigbeelib_remove_packets_queued_to_device(localzigbeeindex, netaddr, localzigbeelocked, zigbeelocked);
 
-    for (i=0; i<MAX_SEND_QUEUE_ITEMS; i++) {
-      if (localzigbeedeviceptr->sendqueue_items[i].inuse && localzigbeedeviceptr->sendqueue_items[i].send_netaddr==netaddr) {
-        __zigbeelib_send_queue_remove_packet(localzigbeeindex, i, localzigbeelocked, zigbeelocked);
-      }
-    }
-  }
   zigbeelib_unlockzigbee(zigbeelocked);
 
   MOREDEBUG_EXITINGFUNC();
@@ -2424,6 +2431,7 @@ STATIC int __zigbeelib_send_queue_find_next_packet_to_send(int localzigbeeindex,
             clock_gettime(CLOCK_REALTIME, &curtime);
             if (curtime.tv_sec>zigbeedeviceptr->connectretrytime && zigbeedeviceptr->lastresponsetime+MAX_TIME_ZIGBEE_NO_PACKETS<curtime.tv_sec) {
               zigbeedeviceptr->notconnected=0;
+              zigbeedeviceptr->connectedforretry=true;
 
 							//Reconfigure reporting and assume pending attribute requests in case the device has lost them
 							for (auto &endpointit : zigbeedeviceptr->endpoints) {
@@ -2934,6 +2942,7 @@ void zigbeelib_send_queue_match_packet_response(int localzigbeeindex, uint8_t pa
 
         //Mark the zigbee device as connected as we have received a packet
         zigbeedeviceptr->notconnected=0;
+        zigbeedeviceptr->connectedforretry=false;
         addr=zigbeedeviceptr->addr;
 
 				//Reconfigure reporting and assume pending attribute requests in case the device has lost them
@@ -4749,6 +4758,7 @@ void zigbeelib_process_zdo_response_received(int localzigbeeindex, zigbee_zdo_re
     if (zigbeedevices[pos].notconnected) {
       //Mark the zigbee device as connected as we have received a packet
       zigbeedevices[pos].notconnected=0;
+      zigbeedevices[pos].connectedforretry=false;
 
 			//Reconfigure reporting and assume pending attribute requests in case the device has lost them
 			for (auto &endpointit : zigbeedevices[pos].endpoints) {
@@ -5190,6 +5200,7 @@ void zigbeelib_process_zcl_response_received(int localzigbeeindex, zigbee_zcl_co
     if (zigbeedevices[pos].notconnected) {
       //Mark the zigbee device as connected as we have received a packet
       zigbeedevices[pos].notconnected=0;
+      zigbeedevices[pos].connectedforretry=false;
 
 			//Reconfigure reporting and assume pending attribute requests in case the device has lost them
 			for (auto &endpointit : zigbeedevices[pos].endpoints) {
@@ -5615,6 +5626,7 @@ int zigbeelib_add_zigbee_device(int localzigbeeindex, uint64_t addr, uint16_t ne
       debuglibifaceptr->debuglib_printf(1, "%s: 16-bit address for Zigbee device: %016" PRIX64 " has changed from %04" PRIX16 " to %04" PRIX16 "\n", __func__, addr, zigbeedeviceit->second.netaddr, netaddr);
 
       zigbeedeviceit->second.notconnected=0;
+      zigbeedeviceit->second.connectedforretry=false;
 
 			//Reconfigure reporting and assume pending attribute requests in case the device has lost them
 			for (auto &endpointit : zigbeedeviceit->second.endpoints) {
@@ -7415,15 +7427,18 @@ STATIC void zigbeelib_refresh_zigbee_data(void) {
 			zigbeelib_configure_zigbeedevice_reporting(i, zigbeedeviceit, localzigbee_addr, localzigbee_netaddr, localzigbee_haendpointid, localzigbee_features, localzigbeelocked, zigbeelocked);
 			zigbeelib_sync_zigbee_attributes_to_database(i, zigbeedeviceit, localzigbee_addr, localzigbee_netaddr, localzigbee_haendpointid, localzigbee_features, localzigbeelocked, zigbeelocked);
 
-      if (!zigbeedeviceit.second.notconnected) {
+      if (!zigbeedeviceit.second.connectedforretry && !zigbeedeviceit.second.notconnected) {
         struct timespec curtime;
 
         clock_gettime(CLOCK_REALTIME, &curtime);
         if (zigbeedeviceit.second.lastresponsetime+MAX_TIME_ZIGBEE_NO_PACKETS<curtime.tv_sec) {
-          //Mark the zigbee device as not connected
+          //Mark the zigbee device as not connected but only if it's not time to retry
           debuglibifaceptr->debuglib_printf(1, "%s: Zigbee device: %016llX, %04hX hasn't checked in for more than %d seconds so will be marked as not connected\n", __func__, zigbeedeviceit.second.addr, zigbeedeviceit.second.netaddr, MAX_TIME_ZIGBEE_NO_PACKETS);
 
           zigbeedeviceit.second.notconnected=1;
+
+          //Remove all packets queued to send to the destination as they might be timing out
+          __zigbeelib_remove_packets_queued_to_device(i, zigbeedeviceit.second.netaddr, &localzigbeelocked, &zigbeelocked);
         }
       }
       zigbeelib_markzigbee_notinuse(&zigbeedeviceit.second, &localzigbeelocked, &zigbeelocked);
