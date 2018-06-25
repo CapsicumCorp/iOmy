@@ -6192,7 +6192,7 @@ static int16_t zigbeelib_highlevel_set_onoff_zigbee_device(uint64_t zigbeeaddr, 
     return ZIGBEELIB_HIGH_LEVEL_ERROR_ENDPOINT_NOT_FOUND;
   }
   //Need to send a special command to change on/off value
-  debuglibifaceptr->debuglib_printf(1, "%s: Setting state: %d for local zigbee: %016" PRIX64 ", zigbee: %016" PRIX64 ", endpoint: %d\n", __PRETTY_FUNCTION__, zigbeelib_localzigbeedevices[i].addr, zigbeedeviceptr->addr, endpointid, (int) state);
+  debuglibifaceptr->debuglib_printf(1, "%s: Setting state: %d for local zigbee: %016" PRIX64 ", zigbee: %016" PRIX64 ", endpoint: %d\n", __PRETTY_FUNCTION__, state, zigbeelib_localzigbeedevices[i].addr, zigbeedeviceptr->addr, endpointid);
   long localzigbeelocked=0, zigbeelocked=0;
   zigbeelib_homeautomation_send_on_off(i, found, zigbeelib_localzigbeedevices[i].haendpointid, endpointid, state, &localzigbeelocked, &zigbeelocked);
 
