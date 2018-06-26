@@ -23,6 +23,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 sap.ui.controller("pages.security.SecurityData", {
+    aFormFragments:     {},
     
     iCameraId : null,
     iCameraTypeId : null,
@@ -59,10 +60,14 @@ sap.ui.controller("pages.security.SecurityData", {
                 
                 switch (iDeviceType) {
                     case iomy.devices.onvif.ThingTypeId:
+                        iomy.common.ShowFormFragment( oController, "EditOnvifStreamSettings", "CameraSettingsTab", "Content" );
                         oController.UpdateThumbnail();
                         oController.LoadStreamSettings();
                         break;
                         
+                    case iomy.devices.ipcamera.ThingTypeId:
+                        iomy.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "CameraSettingsTab", "Content" );
+                        break;
                 }
                 
 			}
@@ -222,6 +227,8 @@ sap.ui.controller("pages.security.SecurityData", {
             
             switch (oController.iCameraTypeId) {
                 case iomy.devices.ipcamera.ThingTypeId:
+                    var iDeviceId = oController.iCameraId;
+                    
                     oView.byId("streamTab").removeAllPages();
                 
                     //--------------------------------------------------------//
@@ -263,7 +270,9 @@ sap.ui.controller("pages.security.SecurityData", {
 
                         onFail : function (sError) {
                             $.sap.log.error("Failed to load the stream URL: " + sError);
-                            iomy.common.showError("Ensure that the connection settings are correct, and that the stream is online.", "Stream Not Available");
+                            if (oApp.getCurrentPage() === oView && iDeviceId === oController.iCameraId) {
+                                iomy.common.showError("Ensure that the connection settings are correct, and that the stream is online.", "Stream Not Available");
+                            }
                         }
                     });
                     
