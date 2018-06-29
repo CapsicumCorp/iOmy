@@ -301,38 +301,64 @@ sap.ui.controller("pages.security.SecurityData", {
                                     }
                                 }
 
+                                //--------------------------------------------------------//
+                                // Create the content of the stream tab.
+                                //--------------------------------------------------------//
+                                oView.byId("streamTab").addPage(
+                                    new sap.ui.core.HTML({
+                                        preferDOM: true,
+                                        content: "{/data/videoContent}"
+                                    })
+                                );
+                            
                                 if (bManagedStream) {
-                                    //--------------------------------------------------------//
-                                    // Create the content of the stream tab.
-                                    //--------------------------------------------------------//
-                                    oView.byId("streamTab").addPage(
-                                        new sap.ui.core.HTML({
-                                            preferDOM: true,
-                                            content: "{/data/videoContent}"
-                                        })
-                                    );
-
                                     oModel.setProperty("/data/videoContent", "<iframe height='300px' width='100%' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iCameraId+"'></iframe>");
 
                                 } else {
+                                    iomy.devices.onvif.getStreamURL({
+                                        ThingId : oController.iCameraId,
+                                        
+                                        onSuccess : function (sUrl) {
+                                            var aVideoHtml = [
+                                                '<video width="100%" height="300px" controls>',
+                                                '    <source src="'+sUrl+'" type="video/mp4">',
+                                                '    Your browser does not support HTML 5 videos.',
+                                                '</video>'
+                                            ];
+
+                                            oModel.setProperty("/data/videoContent", aVideoHtml.join());
+                                        },
+                                        
+                                        onFail : function (response) {
+                                            $.sap.log.error("Failed to load the stream URL: " + response.responseText);
+                                            var aVideoHtml = [
+                                                '<video width="100%" height="300px" controls>',
+                                                //'    <source src="'+sUrl+'" type="video/mp4">',
+                                                '    Your browser does not support HTML 5 videos.',
+                                                '</video>'
+                                            ];
+
+                                            oModel.setProperty("/data/videoContent", aVideoHtml.join());
+                                        }
+                                    });
                                     //--------------------------------------------------------//
                                     // Create a notice to add this camera to the managed stream
                                     // list.
                                     //--------------------------------------------------------//
-                                    oView.byId("streamTab").addPage(
-                                        new sap.m.ObjectListItem ({
-                                            title: sErrorMessage,
-                                            type: "Active",
-                                            attributes : [
-                                                new sap.m.ObjectAttribute ({
-                                                    text: "Tap to manage this stream"
-                                                })
-                                            ],
-                                            press : function () {
-                                                iomy.common.NavigationChangePage("pAddStream" , { "ThingId" : oController.iCameraId } , false);
-                                            }
-                                        })
-                                    );
+//                                    oView.byId("streamTab").addPage(
+//                                        new sap.m.ObjectListItem ({
+//                                            title: sErrorMessage,
+//                                            type: "Active",
+//                                            attributes : [
+//                                                new sap.m.ObjectAttribute ({
+//                                                    text: "Tap to manage this stream"
+//                                                })
+//                                            ],
+//                                            press : function () {
+//                                                iomy.common.NavigationChangePage("pAddStream" , { "ThingId" : oController.iCameraId } , false);
+//                                            }
+//                                        })
+//                                    );
                                 }
                             },
 

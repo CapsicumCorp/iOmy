@@ -156,6 +156,7 @@ $.extend( iomy.widgets, {
 		var oNavDevices;		//-- OBJECT:	Stores the UI5 List Item that holds the Devices Select			--//
 		var oNavPremise;		//-- OBJECT:	Stores the UI5 List Item that holds the Premise Select			--//
 		var oNavRoom;			//-- OBJECT:	Stores the UI5 List Item that holds the Room Select				--//
+		var oNavSecurity;       //-- OBJECT:	Stores the UI5 List Item that holds the Security Select			--//
 		var oNavRules;			//-- OBJECT:	Stores the UI5 List Item that holds the Rules Select			--//
 		var oNavUsers;			//-- OBJECT:	Stores the UI5 List Item that holds the Users Select			--//
 		var oNavLinks;			//-- OBJECT:	Stores the UI5 List Item that holds the Important Links Select  --//
@@ -211,6 +212,14 @@ $.extend( iomy.widgets, {
 //                }
                 
                 iomy.common.NavigationChangePage( "pRoomList" , {bEditing: false} , true);
+			}
+		});
+		
+		oNavSecurity = new sap.tnt.NavigationListItem ({
+			icon: "sap-icon://shield",
+			text: "Security",
+			select : function () {
+				iomy.common.NavigationChangePage( "pSecurity" , {} , true);
 			}
 		});
 		
@@ -270,7 +279,7 @@ $.extend( iomy.widgets, {
 			expanded : true,
 			item : new sap.tnt.NavigationList ({
 				items : [
-					oNavHome, oNavDevices, oNavRoom, oNavPremise, oNavRules, oNavUsers, oNavAdvanced
+					oNavHome, oNavDevices, oNavRoom, oNavPremise, oNavSecurity, oNavRules, oNavUsers, oNavAdvanced
 				]
 			}),
 			fixedItem : new sap.tnt.NavigationList ({

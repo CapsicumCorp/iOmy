@@ -75,14 +75,14 @@ sap.ui.jsview("pages.Advanced", {
                                         iomy.common.NavigationChangePage( "pManagedStreams" , {} , false);
                                     }
                                 }),
-                                new sap.m.ObjectListItem (oView.createId("entrySecurity"), {        
-                                    title: "Security",
-                                    type: "Active",
-                                   // number: 
-                                    press : function () {
-                                        iomy.common.NavigationChangePage( "pSecurity" , {} , false);
-                                    }
-                                }),
+//                                new sap.m.ObjectListItem (oView.createId("entrySecurity"), {        
+//                                    title: "Security",
+//                                    type: "Active",
+//                                   // number: 
+//                                    press : function () {
+//                                        iomy.common.NavigationChangePage( "pSecurity" , {} , false);
+//                                    }
+//                                }),
                                 new sap.m.ObjectListItem (oView.createId("entryAbout"), {        
                                     title: "About",
                                     type: "Active",

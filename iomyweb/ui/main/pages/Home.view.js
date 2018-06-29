@@ -84,6 +84,13 @@ sap.ui.jsview("pages.Home", {
                                         iomy.common.NavigationChangePage( "pPremise" , {} , false);
                                     }
                                 }),
+                                new sap.m.ObjectListItem (oView.createId("entrySecurity"), {        
+                                    title: "Security",
+                                    type: "Active",
+                                    press : function () {
+                                        iomy.common.NavigationChangePage( "pSecurity" , {} , false);
+                                    }
+                                }),
                                 new sap.m.ObjectListItem (oView.createId("entryRules"), {        
                                     title: "Rules",
                                     type: "Active",
