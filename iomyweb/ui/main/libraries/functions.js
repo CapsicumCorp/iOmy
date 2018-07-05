@@ -1803,6 +1803,59 @@ $.extend(iomy.functions, {
         }
     },
     
+    prepareRoomListSelectBoxOptions : function (oController, iPremiseId) {
+        var bEditing            = this.bEditExisting;
+        var aRoomList           = JSON.parse( JSON.stringify( iomy.common.RoomsList["_"+iPremiseId] ) );
+        var iRoomCount          = iomy.functions.getNumberOfRoomsInPremise(iPremiseId);
+        var iUnassignedRoomId   = 0;
+        var bUnassignedOnly     = false;
+        var bHasUnassigned      = false;
+        
+        $.each(aRoomList, function (sI, mRoom) {
+            iUnassignedRoomId = mRoom.RoomId;
+            mRoom.Enabled = true;
+            
+            if (mRoom.RoomName === "Unassigned") {
+                if (iRoomCount === 1) {
+                    bUnassignedOnly = true;
+                }
+                
+                bHasUnassigned = true;
+            }
+            
+            return false;
+        });
+        
+        if (bUnassignedOnly) {
+            aRoomList = {};
+            
+            if (!bEditing) {
+                aRoomList["_"+iUnassignedRoomId] = {
+                    "RoomId" : iUnassignedRoomId,
+                    "RoomName" : "No rooms configured for premise"
+                };
+                
+            }
+            oController.bRoomsExist = false;
+            
+            oController.bNoRooms = true;
+            
+        } else {
+            oController.bNoRooms = false;
+            oController.bRoomsExist = true;
+            
+            if (bHasUnassigned) {
+                if (bEditing) {
+                    aRoomList["_"+iUnassignedRoomId].Enabled = false;
+                } else {
+                    delete aRoomList["_"+iUnassignedRoomId];
+                }
+            }
+        }
+        
+        return aRoomList;
+    },
+    
     //------------------------------------------------------------------------//
     // Section for permissions.
     //------------------------------------------------------------------------//

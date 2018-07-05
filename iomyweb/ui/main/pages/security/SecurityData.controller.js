@@ -122,6 +122,9 @@ sap.ui.controller("pages.security.SecurityData", {
                 "enabled" : {
                     "IfAllowed" : true
                 },
+                "options" : {
+                    "rooms" : oController.PrepareRoomListForModel(1)
+                },
                 "misc" : {
                     "thumbnailText" : "",
                     "selectedTab" : null
