@@ -385,6 +385,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                 "IfRoomsExist"                  : true && oController.bRoomsExist,
                 "IfRoomsExistAndAcceptingInput" : true && oController.bRoomsExist && oController.bAcceptingInput,
                 "IfAcceptingInput"              : true && oController.bAcceptingInput,
+                "IfSettingsChanged"             : true && oController.bAcceptingInput && oController.areThereChanges(),
                 "IfOnvifProfilesHaveLoaded"     : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
                 "IfOnvifCameraIsSelected"       : true && oController.bOnvifCameraSelected,
                 "IfOnvifProfilesFound"          : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
@@ -783,7 +784,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                             if (data.Data.LinkId !== undefined) {
                                 iLinkId = data.Data.LinkId;
                             }
-                        // I found the Open Weather Map feed link ID in this variable!
+                        //-- I found the Open Weather Map feed link ID in this variable! --//
                         } else if (data.WeatherStation !== undefined) {
                             if (data.WeatherStation.LinkId !== undefined) {
                                 iLinkId = data.WeatherStation.LinkId;
@@ -1042,7 +1043,11 @@ sap.ui.controller("pages.device.DeviceForm", {
     },
     
     ToggleSubmitButton : function () {
-        this.getView().byId("ButtonSubmit").setEnabled( this.areThereChanges() );
+        var oController = this;
+        var oView       = oController.getView();
+        var oModel      = oView.getModel();
+        
+        oModel.setProperty( "/enabled/IfSettingsChanged", oController.bAcceptingInput && oController.areThereChanges() );
     },
     
     RunZigbeeCommand : function () {

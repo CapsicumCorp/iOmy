@@ -79,7 +79,7 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
 								new sap.m.Button (oView.createId("ButtonSubmit"), {
 									type: sap.m.ButtonType.Accept,
 									text: "Save",
-                                    enabled : "{/enabled/IfAcceptingInput}",
+                                    enabled : "{/enabled/IfSettingsChanged}",
                                     press : function () {
                                         oController.EditDevice();
                                     }

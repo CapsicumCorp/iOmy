@@ -27,6 +27,10 @@ sap.ui.controller("pages.security.SecurityData", {
     
     iCameraId : null,
     iCameraTypeId : null,
+    
+    bRoomsExist             : false,
+    bNoRooms                : false,
+    bAcceptingInput         : false,
 	
 /**
 * Called when a controller is instantiated and its View controls (if available) are already created.
@@ -81,8 +85,11 @@ sap.ui.controller("pages.security.SecurityData", {
         var oView       = oController.getView();
         var oModel      = oView.getModel();
         
-        oModel.setProperty("/enabled/IfAllowed", bEnabled);
-        oModel.setProperty("/enabled/Always", bEnabled);
+        oModel.setProperty("/enabled/Always",                       bEnabled);
+        oModel.setProperty("/enabled/IfAllowed",                    bEnabled);
+        oModel.setProperty("/enabled/IfRoomsExist",                 bEnabled && oController.bRoomsExist);
+        oModel.setProperty("/enabled/IfRoomsExistAndAcceptingInput",bEnabled && oController.bRoomsExist && oController.bAcceptingInput);
+        oModel.setProperty("/enabled/IfAcceptingInput",             bEnabled && oController.bAcceptingInput);
     },
     
     ToggleOnvifStreamAuthenticationForm : function () {
@@ -105,6 +112,14 @@ sap.ui.controller("pages.security.SecurityData", {
         var oData       = {};
         var oModel      = null;
         var bOnvif      = iomy.common.ThingList["_"+oController.iCameraId].TypeId == iomy.devices.onvif.ThingTypeId;
+        var iPremiseId  = iomy.common.ThingList["_"+oController.iCameraId].PremiseId;
+        var aRoomList   = iomy.functions.prepareRoomListSelectBoxOptions(oController, iPremiseId);
+        
+        var fnComplete = function () {
+            oModel = new sap.ui.model.json.JSONModel(oData);
+            oModel.setSizeLimit(420);
+            oView.setModel(oModel);
+        }
         
         try {
             //------------------------------------------------//
@@ -120,11 +135,15 @@ sap.ui.controller("pages.security.SecurityData", {
                     "thumbnailUrl" : ""
                 },
                 "enabled" : {
-                    "IfAllowed" : true
+                    "Always"                        : true,
+                    "IfAllowed"                     : true,
+                    "IfRoomsExist"                  : true && oController.bRoomsExist,
+                    "IfRoomsExistAndAcceptingInput" : true && oController.bRoomsExist && oController.bAcceptingInput,
+                    "IfAcceptingInput"              : true && oController.bAcceptingInput
                 },
-                "options" : {
-                    "rooms" : oController.PrepareRoomListForModel(1)
-                },
+//                "options" : {
+//                    "rooms" : aRoomList
+//                },
                 "misc" : {
                     "thumbnailText" : "",
                     "selectedTab" : null
@@ -138,6 +157,30 @@ sap.ui.controller("pages.security.SecurityData", {
                     "streamAuthType" : 0,
                     "streamUsername" : "",
                     "streamPassword" : ""
+                },
+                
+                //-- Model elements that need to be ported to the more structured format. --//
+                "Rooms" : aRoomList,
+                "Hubs" : iomy.common.HubList,
+                "IPCamTypes" : {
+                    "_1" : {
+                        "TypeName" : "MJPEG"
+                    }
+                },
+                
+                "CurrentDevice" : {
+                    "Hub" : "",
+                    "Premise" : iPremiseId,
+                    "Room" : iomy.common.ThingList["_"+oController.iCameraId].RoomId,
+                    "IPCamType" : "MJPEG",
+                    "Protocol" : "http",
+                    "IPAddress" : "",
+                    "IPPort" : "",
+                    "Path" : "",
+                    "DisplayName" : "",
+                    "LinkName" : "",
+                    "Username" : "",
+                    "Password" : ""
                 }
             };
             
@@ -145,10 +188,70 @@ sap.ui.controller("pages.security.SecurityData", {
                 oData.count.thumbnails = 0;
                 oData.misc.thumbnailText = "Thumbnail(s)";
             }
+            
+            var oCurrentDevice = JSON.parse( JSON.stringify( iomy.common.ThingList["_"+oController.iCameraId] ) );
 
-            oModel = new sap.ui.model.json.JSONModel(oData);
-            oModel.setSizeLimit(420);
-            oView.setModel(oModel);
+            oData.CurrentDevice = {
+                "ThingName" : oCurrentDevice.DisplayName,
+                "RoomId"    : oCurrentDevice.RoomId
+            };
+
+            //----------------------------------------------------------------//
+            // If editing an IP Webcam, load the connection information as 
+            // well.
+            //----------------------------------------------------------------//
+            if (oCurrentDevice.TypeId == iomy.devices.ipcamera.ThingTypeId) {
+
+                var fnSetData = function (mData) {
+                    oData.CurrentDevice.HubId       = mData.hubID;
+
+                    oData.CurrentDevice.Protocol    = mData.protocol;
+                    oData.CurrentDevice.IPAddress   = mData.address;
+                    oData.CurrentDevice.IPPort      = mData.port;
+
+                    oData.CurrentDevice.Path        = mData.path;
+                    oData.CurrentDevice.Username    = mData.username;
+                    oData.CurrentDevice.Password    = mData.password;
+                };
+
+                fnComplete(); // Just to wipe the old data.
+
+                iomy.devices.ipcamera.loadCameraInformation({
+                    thingID : oController.iCameraId,
+
+                    onSuccess : function (mData) {
+                        fnSetData(mData);
+
+                        fnComplete();
+                        oController.bAcceptingInput = true;
+                        oController.ToggleStreamDataFields(true);
+                    },
+
+                    onWarning : function (mData, sErrorMessage) {
+                        fnSetData(mData);
+
+                        iomy.common.showWarning(sErrorMessage, "Failed to load some data",
+                            function () {
+                                fnComplete();
+                                oController.bAcceptingInput = true;
+                                oController.ToggleStreamDataFields(true);
+                            }
+                        );
+                    },
+
+                    onFail : function (sErrorMessage) {
+                        iomy.common.showError(sErrorMessage, "Failed to load data",
+                            function () {
+                                fnComplete();
+                                oController.ToggleStreamDataFields(true);
+                            }
+                        );
+                    }
+                });
+
+            } else {
+                fnComplete();
+            }
         } catch (e) {
             $.sap.log.error("Failed to refresh the model ("+e.name+"): " + e.message);
         }
@@ -579,6 +682,134 @@ sap.ui.controller("pages.security.SecurityData", {
                     oController.ToggleOnvifStreamAuthenticationForm();
                 }
             );
+        }
+    },
+    
+    SubmitIPWebcamData : function () {
+        var oController         = this;
+        var oView               = this.getView();
+        var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
+        
+        try {
+            var mInputInfo = iomy.validation.validateEditIPWebCamForm(oCurrentFormData);
+            
+            if (!mInputInfo.bIsValid) {
+                throw new IllegalArgumentException(mInputInfo.aErrorMessages.join("\n\n"));
+            }
+            
+            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                oController.bAcceptingInput = false;
+                oController.ToggleStreamDataFields(false);
+                
+                iomy.devices.ipcamera.submitWebcamInformation({
+                    thingID             : oController.iThingId,
+                    
+                    hubID               : oCurrentFormData.HubId,
+                    ipAddress           : oCurrentFormData.IPAddress,
+                    ipPort              : oCurrentFormData.IPPort,
+                    streamPath          : oCurrentFormData.Path,
+                    protocol            : oCurrentFormData.Protocol,
+                    username            : oCurrentFormData.Username,
+                    password            : oCurrentFormData.Password,
+                    fileType            : "MJPEG",
+                    
+                    editing : true,
+
+                    onSuccess : function () {
+                        iomy.common.RefreshCoreVariables({
+                            onSuccess : function () {
+                                oController.RefreshModel();
+                                
+                                iomy.common.showMessage({
+                                    text : "IP Webcam updated."
+                                });
+
+                                oController.bAcceptingInput = true;
+                                oController.ToggleStreamDataFields(true);
+                            }
+                        });
+                    },
+
+                    onFail : function (sErrorMessage) {
+                        iomy.common.showError(sErrorMessage, "Failed to update settings",
+                            function () {
+                                oController.bAcceptingInput = true;
+                                oController.ToggleStreamDataFields(true);
+                            }
+                        );
+                    }
+                });
+
+            }
+
+        } catch (e) {
+            iomy.common.showError(e.message, "Failed to update settings",
+                function () {
+                    oController.bAcceptingInput = true;
+                    oController.ToggleStreamDataFields(true);
+                }
+            );
+        }
+    },
+    
+    EditDevice : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var bError              = false;
+        var oCurrentFormData    = oView.getModel().getProperty( "/CurrentDevice/" );
+        
+        //--------------------------------------------------------------------//
+        // Check that the display name is filled out.
+        //--------------------------------------------------------------------//
+        if (oCurrentFormData.ThingName === "") {
+            bError = true;
+            iomy.common.showError("A device name must be given.", "Error");
+        }
+        
+        if (!bError) {
+//            if (oController.areThereChanges()) {
+                oController.ToggleStreamDataFields(false);
+
+                //--------------------------------------------------------------------//
+                // Run the request to edit an existing device.
+                //--------------------------------------------------------------------//
+                try {
+                    iomy.devices.editThing({
+                        thingID     : oController.iCameraId,
+                        thingName   : oCurrentFormData.ThingName,
+                        roomID      : oCurrentFormData.RoomId,
+
+                        onSuccess : function () {
+                            if (oController.iCameraTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                                oController.SubmitIPWebcamData();
+                            } else {
+                                oController.ToggleStreamDataFields(true);
+                            }
+                        },
+
+                        onWarning : function () {
+                            oController.ToggleStreamDataFields(true);
+                        },
+
+                        onFail : function () {
+                            oController.ToggleStreamDataFields(true);
+                        }
+                    });
+                } catch (e) {
+                    iomy.common.showError(e.message, "Error",
+                        function () {
+                            oController.ToggleStreamDataFields(true);
+                        }
+                    );
+                }
+//            } else {
+//                if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+//                    oController.ToggleStreamDataFields(false);
+//                    oController.SubmitIPWebcamData();
+//                } else {
+//                    oController.ToggleStreamDataFields(true);
+//                }
+//            }
         }
     }
 });
