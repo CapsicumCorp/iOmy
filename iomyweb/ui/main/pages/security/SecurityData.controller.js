@@ -25,8 +25,10 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 sap.ui.controller("pages.security.SecurityData", {
     aFormFragments:     {},
     
-    iCameraId : null,
-    iCameraTypeId : null,
+    iThingId : null,
+    iThingTypeId : null,
+    
+    sCurrentTab : null,
     
     bRoomsExist             : false,
     bNoRooms                : false,
@@ -50,16 +52,17 @@ sap.ui.controller("pages.security.SecurityData", {
 				iomy.navigation._setToggleButtonTooltip(!sap.ui.Device.system.desktop, oView);
                 
                 if (evt.data.CameraId !== undefined && evt.data.CameraId !== null) {
-                    oController.iCameraId = evt.data.CameraId;
-                    iDeviceType = iomy.common.ThingList["_"+oController.iCameraId].TypeId;
+                    oController.iThingId = evt.data.CameraId;
+                    iDeviceType = iomy.common.ThingList["_"+oController.iThingId].TypeId;
                 } else {
-                    oController.iCameraId = null;
+                    oController.iThingId = null;
                 }
                 
+                oController.sCurrentTab = null;
                 oController.RefreshModel();
                 oController.ResetTabPosition();
                 
-                oController.iCameraTypeId = iDeviceType;
+                oController.iThingTypeId = iDeviceType;
                 oController.LoadStream();
                 
                 switch (iDeviceType) {
@@ -71,6 +74,10 @@ sap.ui.controller("pages.security.SecurityData", {
                         
                     case iomy.devices.ipcamera.ThingTypeId:
                         iomy.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "CameraSettingsTab", "Content" );
+                        break;
+                        
+                    default:
+                        $.sap.log.error("Cannot recognise device type: device type " + oController.iDeviceType + " is not on the list.");
                         break;
                 }
                 
@@ -111,22 +118,22 @@ sap.ui.controller("pages.security.SecurityData", {
         var oView       = this.getView();
         var oData       = {};
         var oModel      = null;
-        var bOnvif      = iomy.common.ThingList["_"+oController.iCameraId].TypeId == iomy.devices.onvif.ThingTypeId;
-        var iPremiseId  = iomy.common.ThingList["_"+oController.iCameraId].PremiseId;
+        var bOnvif      = iomy.common.ThingList["_"+oController.iThingId].TypeId == iomy.devices.onvif.ThingTypeId;
+        var iPremiseId  = iomy.common.ThingList["_"+oController.iThingId].PremiseId;
         var aRoomList   = iomy.functions.prepareRoomListSelectBoxOptions(oController, iPremiseId);
         
         var fnComplete = function () {
             oModel = new sap.ui.model.json.JSONModel(oData);
             oModel.setSizeLimit(420);
             oView.setModel(oModel);
-        }
+        };
         
         try {
             //------------------------------------------------//
             //-- Build and Bind Model to the View           --//
             //------------------------------------------------//
             oData = {
-                "title" : iomy.common.ThingList["_"+oController.iCameraId].DisplayName,
+                "title" : iomy.common.ThingList["_"+oController.iThingId].DisplayName,
                 "count" : {
                     "thumbnails" : ""
                 },
@@ -146,7 +153,7 @@ sap.ui.controller("pages.security.SecurityData", {
 //                },
                 "misc" : {
                     "thumbnailText" : "",
-                    "selectedTab" : null
+                    "selectedTab" : oController.sCurrentTab
                 },
                 "visible" : {
                     "IfStreamAuthSelected" : false,
@@ -171,7 +178,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 "CurrentDevice" : {
                     "Hub" : "",
                     "Premise" : iPremiseId,
-                    "Room" : iomy.common.ThingList["_"+oController.iCameraId].RoomId,
+                    "Room" : iomy.common.ThingList["_"+oController.iThingId].RoomId,
                     "IPCamType" : "MJPEG",
                     "Protocol" : "http",
                     "IPAddress" : "",
@@ -189,7 +196,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 oData.misc.thumbnailText = "Thumbnail(s)";
             }
             
-            var oCurrentDevice = JSON.parse( JSON.stringify( iomy.common.ThingList["_"+oController.iCameraId] ) );
+            var oCurrentDevice = JSON.parse( JSON.stringify( iomy.common.ThingList["_"+oController.iThingId] ) );
 
             oData.CurrentDevice = {
                 "ThingName" : oCurrentDevice.DisplayName,
@@ -217,7 +224,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 fnComplete(); // Just to wipe the old data.
 
                 iomy.devices.ipcamera.loadCameraInformation({
-                    thingID : oController.iCameraId,
+                    thingID : oController.iThingId,
 
                     onSuccess : function (mData) {
                         fnSetData(mData);
@@ -263,7 +270,7 @@ sap.ui.controller("pages.security.SecurityData", {
         var oModel  = oView.getModel();
         
         try {
-            oModel.setProperty("/misc/selectedTab", null);
+            oModel.setProperty("/misc/selectedTab", this.sCurrentTab);
         } catch (e) {
             $.sap.log.error("Something weird went wrong ("+e.name+"): " + e.message);
         }
@@ -286,7 +293,7 @@ sap.ui.controller("pages.security.SecurityData", {
         var oModel      = oView.getModel();
         
         try {
-            var sUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.iCameraId;
+            var sUrl = iomy.apiphp.APILocation("onvifthumbnail")+"?Mode=UpdateThingThumbnail&ThingId="+oController.iThingId;
             
             oModel.setProperty("/data/thumbnailUrl", sUrl);
             
@@ -331,9 +338,9 @@ sap.ui.controller("pages.security.SecurityData", {
         
         try {
             
-            switch (oController.iCameraTypeId) {
+            switch (oController.iThingTypeId) {
                 case iomy.devices.ipcamera.ThingTypeId:
-                    var iDeviceId = oController.iCameraId;
+                    var iDeviceId = oController.iThingId;
                     
                     oView.byId("streamTab").removeAllPages();
                 
@@ -348,7 +355,7 @@ sap.ui.controller("pages.security.SecurityData", {
                     // Load stream URL.
                     //--------------------------------------------------------//
                     iomy.devices.ipcamera.loadStreamUrl({
-                        thingID : oController.iCameraId,
+                        thingID : oController.iThingId,
 
                         onSuccess : function (sUrl) {
                             //oView.byId("mjpegStream").setSrc(sUrl);
@@ -376,7 +383,7 @@ sap.ui.controller("pages.security.SecurityData", {
 
                         onFail : function (sError) {
                             $.sap.log.error("Failed to load the stream URL: " + sError);
-                            if (oApp.getCurrentPage() === oView && iDeviceId === oController.iCameraId) {
+                            if (oApp.getCurrentPage() === oView && iDeviceId === oController.iThingId) {
                                 iomy.common.showError("Ensure that the connection settings are correct, and that the stream is online.", "Stream Not Available");
                             }
                         }
@@ -401,7 +408,7 @@ sap.ui.controller("pages.security.SecurityData", {
                                 for (var i = 0; i < aData.length; i++) {
                                     var mStream         = aData[i];
 
-                                    if (mStream.ThingId === oController.iCameraId) {
+                                    if (mStream.ThingId === oController.iThingId) {
                                         bManagedStream = true;
                                         break;
                                     }
@@ -418,11 +425,11 @@ sap.ui.controller("pages.security.SecurityData", {
                                 );
                             
                                 if (bManagedStream) {
-                                    oModel.setProperty("/data/videoContent", "<iframe height='300px' width='100%' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iCameraId+"'></iframe>");
+                                    oModel.setProperty("/data/videoContent", "<iframe height='300px' width='100%' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iThingId+"'></iframe>");
 
                                 } else {
                                     iomy.devices.onvif.getStreamURL({
-                                        ThingId : oController.iCameraId,
+                                        ThingId : oController.iThingId,
                                         
                                         onSuccess : function (sUrl) {
                                             var aVideoHtml = [
@@ -461,7 +468,7 @@ sap.ui.controller("pages.security.SecurityData", {
 //                                                })
 //                                            ],
 //                                            press : function () {
-//                                                iomy.common.NavigationChangePage("pAddStream" , { "ThingId" : oController.iCameraId } , false);
+//                                                iomy.common.NavigationChangePage("pAddStream" , { "ThingId" : oController.iThingId } , false);
 //                                            }
 //                                        })
 //                                    );
@@ -535,7 +542,7 @@ sap.ui.controller("pages.security.SecurityData", {
             // Go to change the stream authentication type and then toggle PTZ controls.
             //---------------------------------------------------------------------------------//
             iomy.devices.onvif.changeStreamAuthMethod({
-                thingID : oController.iCameraId,
+                thingID : oController.iThingId,
                 authType : parseInt(oSettingsFormData.streamAuthType),
                 streamUsername : oSettingsFormData.streamUsername,
                 streamPassword : oSettingsFormData.streamPassword,
@@ -544,7 +551,7 @@ sap.ui.controller("pages.security.SecurityData", {
                     try {
                         //-- Toggle PTZ controls no matter what. --//
                         iomy.devices.onvif.togglePTZControls({
-                            thingID : oController.iCameraId,
+                            thingID : oController.iThingId,
                             disabled : oSettingsFormData.ptzDisabled,
 
                             onComplete : function () {
@@ -560,7 +567,7 @@ sap.ui.controller("pages.security.SecurityData", {
                                     oModel.setProperty("/fields/streamAuthType", iNewAuthType);
                                     oController.ToggleOnvifStreamAuthenticationForm();
 
-                                    switch (oController.iCameraTypeId) {
+                                    switch (oController.iThingTypeId) {
                                         case iomy.devices.onvif.ThingTypeId:
                                             oController.UpdateThumbnail();
                                             break;
@@ -620,7 +627,7 @@ sap.ui.controller("pages.security.SecurityData", {
             // Run the function to load the stream
             //--------------------------------------------------------------------//
             iomy.devices.onvif.loadStreamAuthMethod({
-                thingID : oController.iCameraId,
+                thingID : oController.iThingId,
                 
                 onSuccess : function (iAuthType) {
                     oModel.setProperty("/fields/streamAuthType", iAuthType);
@@ -637,7 +644,7 @@ sap.ui.controller("pages.security.SecurityData", {
                     //---------------------------------------------------------------------------//
                     try {
                         iomy.devices.onvif.loadPTZControlStatus({
-                            thingID : oController.iCameraId,
+                            thingID : oController.iThingId,
 
                             onSuccess : function (iStatus) {
                                 var bState = iStatus === 1;
@@ -752,6 +759,21 @@ sap.ui.controller("pages.security.SecurityData", {
         }
     },
     
+    CancelInput :function () {
+        var oController     = this;
+        var oView           = oController.getView();
+        var oModel          = oView.getModel();
+        
+        try {
+            oController.sCurrentTab = oModel.getProperty("/misc/selectedTab");
+            this.RefreshModel();
+            oController.ToggleStreamDataFields(false);
+        } catch (e) {
+            $.sap.log.error("Something very strange occurred when reverting changes to the MJPEG stream ("+e.name+"): " + e.message);
+        }
+        
+    },
+    
     EditDevice : function () {
         var oController         = this;
         var oView               = oController.getView();
@@ -775,12 +797,12 @@ sap.ui.controller("pages.security.SecurityData", {
                 //--------------------------------------------------------------------//
                 try {
                     iomy.devices.editThing({
-                        thingID     : oController.iCameraId,
+                        thingID     : oController.iThingId,
                         thingName   : oCurrentFormData.ThingName,
                         roomID      : oCurrentFormData.RoomId,
 
                         onSuccess : function () {
-                            if (oController.iCameraTypeId == iomy.devices.ipcamera.ThingTypeId) {
+                            if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                                 oController.SubmitIPWebcamData();
                             } else {
                                 oController.ToggleStreamDataFields(true);
