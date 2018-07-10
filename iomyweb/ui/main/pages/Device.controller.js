@@ -447,7 +447,7 @@ sap.ui.controller("pages.Device", {
                                             })
                                         }),
                                         new sap.m.ObjectAttribute (oView.createId("deviceStatus"+mDevice.DeviceId), {
-                                            text: "Status: "+(mDevice.DeviceStatus == 1 ? "On" : "Off")
+                                            text: "Status: " + (mDevice.DeviceStatus == 1 ? "On" : "Off")
                                         }),
                                         new sap.m.ObjectAttribute (oView.createId("deviceSerial"+mDevice.DeviceId), {
                                             text: "Serial: " + iomy.devices.getSerialCodeOfDevice(mDevice.DeviceId)
@@ -548,7 +548,8 @@ sap.ui.controller("pages.Device", {
                                             iomy.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
 
                                         } else {
-                                            iomy.devices.onvif.loadStream(mDevice.DeviceId);
+//                                            iomy.devices.onvif.loadStream(mDevice.DeviceId);
+                                            iomy.common.NavigationChangePage( "pSecurityData" , { "CameraId" : mDevice.DeviceId } , false);
                                         }
                                     }
                                 })
@@ -586,12 +587,10 @@ sap.ui.controller("pages.Device", {
                                     ],
                                     press : function () {
                                         if (oController.bEditing) {
-                                            sPageId = "pDeviceForm";
+                                            iomy.common.NavigationChangePage( "pDeviceForm" , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                         } else {
-                                            sPageId = "pMJPEG";
+                                            iomy.common.NavigationChangePage( "pSecurityData" , { "CameraId" : mDevice.DeviceId } , false);
                                         }
-
-                                        iomy.common.NavigationChangePage( sPageId , { "ThingId": mDevice.DeviceId, bEditing : oController.bEditing } , false);
                                     }
                                 })
                             );

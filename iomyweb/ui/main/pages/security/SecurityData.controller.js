@@ -118,8 +118,9 @@ sap.ui.controller("pages.security.SecurityData", {
         var oView       = this.getView();
         var oData       = {};
         var oModel      = null;
-        var bOnvif      = iomy.common.ThingList["_"+oController.iThingId].TypeId == iomy.devices.onvif.ThingTypeId;
-        var iPremiseId  = iomy.common.ThingList["_"+oController.iThingId].PremiseId;
+        var mThing      = iomy.common.ThingList["_"+oController.iThingId];
+        var bOnvif      = mThing.TypeId == iomy.devices.onvif.ThingTypeId;
+        var iPremiseId  = mThing.PremiseId;
         var aRoomList   = iomy.functions.prepareRoomListSelectBoxOptions(oController, iPremiseId);
         
         var fnComplete = function () {
@@ -133,7 +134,7 @@ sap.ui.controller("pages.security.SecurityData", {
             //-- Build and Bind Model to the View           --//
             //------------------------------------------------//
             oData = {
-                "title" : iomy.common.ThingList["_"+oController.iThingId].DisplayName,
+                "title" : mThing.DisplayName,
                 "count" : {
                     "thumbnails" : ""
                 },
@@ -160,6 +161,8 @@ sap.ui.controller("pages.security.SecurityData", {
                     "IfViewingOnvifCamera" : bOnvif
                 },
                 "fields" : {
+                    "deviceName" : mThing.DisplayName,
+                    "roomID" : mThing.RoomId,
                     "ptzDisabled" : false,
                     "streamAuthType" : 0,
                     "streamUsername" : "",
@@ -178,7 +181,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 "CurrentDevice" : {
                     "Hub" : "",
                     "Premise" : iPremiseId,
-                    "Room" : iomy.common.ThingList["_"+oController.iThingId].RoomId,
+                    "Room" : mThing.RoomId,
                     "IPCamType" : "MJPEG",
                     "Protocol" : "http",
                     "IPAddress" : "",
@@ -196,8 +199,13 @@ sap.ui.controller("pages.security.SecurityData", {
                 oData.misc.thumbnailText = "Thumbnail(s)";
             }
             
-            var oCurrentDevice = JSON.parse( JSON.stringify( iomy.common.ThingList["_"+oController.iThingId] ) );
+            var oCurrentDevice = JSON.parse( JSON.stringify( mThing ) );
 
+            //--------------------------------------------------------------------------//
+            // These model properties are for the IP webcam stream form. These will be
+            // made redundant once the DeviceForm controller has its model structure
+            // updated.
+            //--------------------------------------------------------------------------//
             oData.CurrentDevice = {
                 "ThingName" : oCurrentDevice.DisplayName,
                 "RoomId"    : oCurrentDevice.RoomId
@@ -528,6 +536,41 @@ sap.ui.controller("pages.security.SecurityData", {
         }
     },
     
+    SaveOnvifStreamNameAndRoom : function () {
+        var oController         = this;
+        var oView               = oController.getView();
+        var oModel              = oView.getModel();
+        var oSettingsFormData   = oModel.getProperty("/fields");
+        
+        try {
+            iomy.devices.editThing({
+                thingID     : oController.iThingId,
+                thingName   : oSettingsFormData.deviceName,
+                roomID      : oSettingsFormData.roomID,
+
+                onSuccess : function () {
+                    oController.SaveStreamSettings();
+                },
+
+                onWarning : function () {
+                    oController.SaveStreamSettings();
+                },
+
+                onFail : function () {
+                    oController.SaveStreamSettings();
+                }
+            });
+        } catch (e) {
+            //-- More than likely, a developer's error caused this clause to run. --//
+            iomy.common.showError(e.message, "Error",
+                function () {
+                    //-- Continue with the other settings. --//
+                    oController.SaveStreamSettings();
+                }
+            );
+        }
+    },
+    
     SaveStreamSettings : function () {
         var oController         = this;
         var oView               = oController.getView();
@@ -615,6 +658,7 @@ sap.ui.controller("pages.security.SecurityData", {
         var aErrorMessages  = [];
         var oView           = oController.getView();
         var oModel          = oView.getModel();
+        var mThing          = iomy.common.ThingList["_"+oController.iThingId];
         
         //--------------------------------------------------------------------//
         // Attempt to load the stream settings.
@@ -622,6 +666,9 @@ sap.ui.controller("pages.security.SecurityData", {
         try {
             //-- Disable the controls. --//
             oController.ToggleStreamDataFields(false);
+            
+            oModel.setProperty("/fields/deviceName", mThing.DisplayName);
+            oModel.setProperty("/fields/roomID", mThing.RoomId);
             
             //--------------------------------------------------------------------//
             // Run the function to load the stream

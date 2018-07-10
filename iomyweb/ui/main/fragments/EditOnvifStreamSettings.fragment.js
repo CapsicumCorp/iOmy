@@ -7,6 +7,12 @@ sap.ui.jsfragment("fragments.EditOnvifStreamSettings", {
 		//--------------------------------------------//
 		var oFragContent = null;
         var oView = oController.getView();
+        
+        var oRoomItemTemplate = new sap.ui.core.Item({
+            key : "{RoomId}",
+            text : "{RoomName}",
+            enabled : "{Enabled}"
+        });
 		
 		
 		//--------------------------------------------//
@@ -40,6 +46,38 @@ sap.ui.jsfragment("fragments.EditOnvifStreamSettings", {
             formContainers : [
                 new sap.ui.layout.form.FormContainer({
                     formElements : [
+                        new sap.ui.layout.form.FormElement({
+                            label : iomy.widgets.RequiredLabel("Device Name"),
+                            fields: [
+                                new sap.m.Input ({
+									placeholder : "Display Name",
+                                    value : "{/fields/deviceName}",
+                                    enabled : "{/enabled/IfAllowed}",
+                                    
+                                    liveChange : function () {
+                                        oController.ToggleSubmitButton();
+                                    }
+								})
+                            ]
+                        }),
+                        new sap.ui.layout.form.FormElement({
+                            label : "Room",
+                            fields: [
+                                new sap.m.Select ({
+                                    selectedKey: "{/fields/roomID}",
+                                    enabled : "{/enabled/IfRoomsExist}",
+                                    
+                                    items: {
+                                        path: "/Rooms",
+                                        template: oRoomItemTemplate
+                                    },
+                                    
+                                    change : function () {
+                                        oController.ToggleSubmitButton();
+                                    }
+                                })
+                            ]
+                        }),
                         new sap.ui.layout.form.FormElement({
                             label : "Stream Authentication",
                             fields: [
@@ -105,7 +143,7 @@ sap.ui.jsfragment("fragments.EditOnvifStreamSettings", {
                                     type: sap.m.ButtonType.Accept,
                                     enabled : "{/enabled/IfAllowed}",
                                     press : function () {
-                                        oController.SaveStreamSettings();
+                                        oController.SaveOnvifStreamNameAndRoom();
                                     }
                                 }),
                                 new sap.m.Button ({

@@ -56,7 +56,7 @@ sap.ui.jsfragment("fragments.DeviceFormEdit", {
                             ]
                         }),
                         new sap.ui.layout.form.FormElement(oView.createId("EditThingRoomSelector"), {
-                            label : "Room this device is located in",
+                            label : "Room",
                             fields: [
                                 new sap.m.Select (oView.createId("DeviceRoom"), {
                                     selectedKey: "{/CurrentDevice/RoomId}",
