@@ -706,6 +706,201 @@ $.extend( iomy.widgets, {
             required : true
         });
     },
+    
+    PTZControlBox : function (mSettings) {
+        var vVisible    = true;
+        
+        var fnOnUp      = function () {};
+        var fnOnDown    = function () {};
+        var fnOnLeft    = function () {};
+        var fnOnRight   = function () {};
+        
+        var sVisibleMissing = "The visible parameter is not found. Defaulting to true.";
+        var sOnUpMissing    = "The onUp parameter not found. An empty function will be used.";
+        var sOnDownMissing  = "The onDown parameter not found. An empty function will be used.";
+        var sOnLeftMissing  = "The onLeft parameter not found. An empty function will be used.";
+        var sOnRightMissing = "The onRight parameter not found. An empty function will be used.";
+        
+        try {
+            //--------------------------------------------------------------------//
+            // Check that the visibility status and press event functions are
+            // given.
+            //--------------------------------------------------------------------//
+            if (iomy.validation.isValueGiven(mSettings)) {
+
+                //--------------------------------------------------------------------//
+                // Visibility
+                //--------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.visible)) {
+                    if (iomy.validation.isBoolean(mSettings.visible) || iomy.validation.isString(mSettings.visible)) {
+                        vVisible = mSettings.visible;
+                    } else {
+                        $.sap.log.error("The visible parameter is not valid (" + typeof mSettings.visible + " found). Defaulting to true.");
+                    }
+                } else {
+                    $.sap.log.error(sVisibleMissing);
+                }
+
+                //--------------------------------------------------------------------//
+                // Up button event
+                //--------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onUp)) {
+                    if (iomy.validation.isFunction(mSettings.onUp)) {
+                        fnOnUp = mSettings.onUp;
+                    } else {
+                        $.sap.log.error("The onUp parameter is not a valid function (" + typeof mSettings.onUp + " found). An empty function will be used.");
+                    }
+                } else {
+                    $.sap.log.error(sOnUpMissing);
+                }
+
+                //--------------------------------------------------------------------//
+                // Down button event
+                //--------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onDown)) {
+                    if (iomy.validation.isFunction(mSettings.onDown)) {
+                        fnOnDown = mSettings.onDown;
+                    } else {
+                        $.sap.log.error("The onDown parameter is not a valid function (" + typeof mSettings.onDown + " found). An empty function will be used.");
+                    }
+                } else {
+                    $.sap.log.error(sOnDownMissing);
+                }
+
+                //--------------------------------------------------------------------//
+                // Left button event
+                //--------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onLeft)) {
+                    if (iomy.validation.isFunction(mSettings.onLeft)) {
+                        fnOnLeft = mSettings.onLeft;
+                    } else {
+                        $.sap.log.error("The onLeft parameter is not a valid function (" + typeof mSettings.onLeft + " found). An empty function will be used.");
+                    }
+                } else {
+                    $.sap.log.error(sOnLeftMissing);
+                }
+
+                //--------------------------------------------------------------------//
+                // Right button event
+                //--------------------------------------------------------------------//
+                if (iomy.validation.isValueGiven(mSettings.onRight)) {
+                    if (iomy.validation.isFunction(mSettings.onRight)) {
+                        fnOnRight = mSettings.onRight;
+                    } else {
+                        $.sap.log.error("The onRight parameter is not a valid function (" + typeof mSettings.onRight + " found). An empty function will be used.");
+                    }
+                } else {
+                    $.sap.log.error(sOnRightMissing);
+                }
+            } else {
+                $.sap.log.error(sOnUpMissing);
+                $.sap.log.error(sOnDownMissing);
+                $.sap.log.error(sOnLeftMissing);
+                $.sap.log.error(sOnRightMissing);
+            }
+
+            return new sap.m.VBox({
+                visible : vVisible,
+                items : [
+                    new sap.m.FlexBox ({
+                        layoutData : new sap.m.FlexItemData({
+                            growFactor : 1
+                        }),
+                        items: [
+                            new sap.m.FlexBox ({
+                                layoutData : new sap.m.FlexItemData({
+                                    growFactor : 1
+                                }),
+                                items: [
+                                    new sap.m.VBox ({
+                                        width: "160px",
+                                        items: [
+                                            // Top Row
+                                            new sap.m.HBox ({
+                                                items : [
+                                                    new sap.m.HBox ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        //text:"Center"
+                                                    }),
+                                                    new sap.m.Button ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        icon : "sap-icon://slim-arrow-up",
+                                                        value : "{/enabled/Always}",
+
+                                                        press : fnOnUp
+                                                    }).addStyleClass("MarLeft5px MarRight5px"),
+                                                    new sap.m.HBox ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        //text:"Center"
+                                                    }),
+                                                ]
+                                            }),
+                                            // Middle Row
+                                            new sap.m.HBox ({
+                                                items : [
+                                                    new sap.m.Button ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        icon : "sap-icon://slim-arrow-left",
+                                                        value : "{/enabled/Always}",
+
+                                                        press : fnOnLeft
+                                                    }),
+                                                    new sap.m.HBox ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        //text:"Center"
+                                                    }).addStyleClass("MarLeft5px MarRight5px"),
+                                                    new sap.m.Button ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        icon : "sap-icon://slim-arrow-right",
+                                                        value : "{/enabled/Always}",
+
+                                                        press : fnOnRight
+                                                    }),
+                                                ]
+                                            }),
+                                            // Bottom Row
+                                            new sap.m.HBox ({
+                                                items : [
+                                                    new sap.m.HBox ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        //text:"Center"
+                                                    }),
+                                                    new sap.m.Button ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        icon : "sap-icon://slim-arrow-down",
+                                                        value : "{/enabled/Always}",
+
+                                                        press : fnOnDown
+                                                    }).addStyleClass("MarLeft5px MarRight5px"),
+                                                    new sap.m.HBox ({
+                                                        height: "50px",
+                                                        width: "50px",
+                                                        //text:"Center"
+                                                    })
+                                                ]
+                                            })
+                                        ]
+                                    }).addStyleClass("ElementCenter")
+                                ]
+                            })
+                        ]
+                    })
+                ]
+            });
+        } catch (e) {
+            $.sap.log.error("Error creating the PTZ control box ("+e.name+"): " + e.message);
+            
+            return new sap.m.VBox({});
+        }
+    },
 	
 	//-- Scroll Container for the "Mjpeg" image --//
 	MJPEGCont : function (oCurrentController, mSettings) {

@@ -1239,6 +1239,7 @@ sap.ui.controller("pages.user.UserForm", {
 													//-- Load the Display Fragment          --//
 													//----------------------------------------//
 													oController.ToggleButtonsAndView( oController, "UserInfoShow" );
+                                                    oController.ToggleControls(true);
 												},
 												onFail: function() {
 													iomy.common.showError("Problem refreshing the model after updating the new User Information!", "Edit Other User Page",
@@ -1377,6 +1378,7 @@ sap.ui.controller("pages.user.UserForm", {
                                                         //-- Load the Display Fragment          --//
                                                         //----------------------------------------//
                                                         oController.ToggleButtonsAndView( oController, "UserAddressShow" );
+                                                        oController.ToggleControls(true);
                                                     },
                                                     
                                                     onFail: function() {
@@ -1597,6 +1599,7 @@ sap.ui.controller("pages.user.UserForm", {
 
                                         } else {
                                             oController.UpdatePremisePermissionModel();
+                                            oController.ToggleControls(true);
                                         }
                                     } catch( e3 ) {
                                         //------------------------------------------------//
@@ -1701,6 +1704,7 @@ sap.ui.controller("pages.user.UserForm", {
                                     }
 
                                     oController.UpdatePremisePermissionModel();
+                                    oController.ToggleControls(true);
                                 },
 
                                 onWarning : function () {
@@ -1861,6 +1865,7 @@ sap.ui.controller("pages.user.UserForm", {
 
                                     } else {
                                         oController.UpdateRoomPermissionModel();
+                                        oController.ToggleControls(true);
                                     }
                                 } catch( e3 ) {
                                     //------------------------------------------------//
@@ -1966,6 +1971,7 @@ sap.ui.controller("pages.user.UserForm", {
                                 }
                                 
                                 oController.UpdateRoomPermissionModel();
+                                oController.ToggleControls(true);
                             },
                             
                             onWarning : function () {

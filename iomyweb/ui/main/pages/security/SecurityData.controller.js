@@ -158,7 +158,8 @@ sap.ui.controller("pages.security.SecurityData", {
                 },
                 "visible" : {
                     "IfStreamAuthSelected" : false,
-                    "IfViewingOnvifCamera" : bOnvif
+                    "IfViewingOnvifCamera" : bOnvif,
+                    "IfPTZControlsAreEnabled" : false
                 },
                 "fields" : {
                     "deviceName" : mThing.DisplayName,
@@ -328,6 +329,82 @@ sap.ui.controller("pages.security.SecurityData", {
     },
     
     /**
+     * Wrapper function for the PTZ Move command in the iomy.devices.onvif
+     * library to send the desired number of steps vertically and horizontally
+     * to the function.
+     * 
+     * Examples:
+     * 
+     * * PTZMove(-4,2)      4 steps left and 2 steps up
+     * * PTZMove(2,2)       2 steps right and 2 steps up
+     * * PTZMove(0,-5)      5 steps down
+     * 
+     * @param {type} iPosX      Steps to move horizontally
+     * @param {type} iPosY      Steps to move vertically
+     */
+    PTZMove : function (iPosX, iPosY) {
+        var oController = this;
+        
+        // Lock all the PTZ buttons
+        oController.setPTZButtonsEnabled(false);
+        
+        try {
+            iomy.devices.onvif.PTZMove({
+                thingID : oController.oThing.Id,
+                profileName : oController.sThumbnailProfileName,
+                xpos : iPosX,
+                ypos : iPosY,
+
+                onSuccess : function (response) {
+                    jQuery.sap.log.debug(JSON.stringify(response));
+                    if( oController.sMode==="Thumbnail" ) {
+                        oController.loadThumbnail();
+                    }
+
+                },
+
+                onFail : function (sErrMesg) {
+                    jQuery.sap.log.error(sErrMesg);
+                    iomy.common.showError(sErrMesg, "Error",
+                        function () {
+                            // Unlock all the PTZ buttons
+                            if( oController.sMode==="Thumbnail" ) {
+                                oController.setPTZButtonsEnabled(true);
+                            }
+                        }
+                    );
+                }
+            });
+        } catch (e) {
+            $.sap.log.error("Failed to run a PTZ move command ("+e.name+"): " + e.message);
+        }
+    },
+    
+    PTZMoveUp : function () {
+        var oController = this;
+        
+        oController.PTZMove(0, 5);
+    },
+    
+    PTZMoveDown : function () {
+        var oController = this;
+        
+        oController.PTZMove(0, -5);
+    },
+    
+    PTZMoveLeft : function () {
+        var oController = this;
+        
+        oController.PTZMove(-5, 0);
+    },
+    
+    PTZMoveRight : function () {
+        var oController = this;
+        
+        oController.PTZMove(5, 0);
+    },
+    
+    /**
      * Loads either an Onvif stream managed by WatchInputs, or an image tag
      * pointing to a MJPEG stream.
      */
@@ -426,9 +503,33 @@ sap.ui.controller("pages.security.SecurityData", {
                                 // Create the content of the stream tab.
                                 //--------------------------------------------------------//
                                 oView.byId("streamTab").addPage(
-                                    new sap.ui.core.HTML({
-                                        preferDOM: true,
-                                        content: "{/data/videoContent}"
+                                    new sap.m.VBox({
+                                        items : [
+                                            new sap.ui.core.HTML({
+                                                preferDOM: true,
+                                                content: "{/data/videoContent}"
+                                            }),
+                                            
+                                            iomy.widgets.PTZControlBox({
+                                                visible: "{/visible/IfPTZControlsAreEnabled}",
+                                                
+                                                onUp : function () {
+                                                    oController.PTZMove(0, 5);
+                                                },
+                                                
+                                                onDown : function () {
+                                                    oController.PTZMove(0, -5);
+                                                },
+                                                
+                                                onLeft : function () {
+                                                    oController.PTZMove(-5, 0);
+                                                },
+                                                
+                                                onRight : function () {
+                                                    oController.PTZMove(5, 0);
+                                                }
+                                            })
+                                        ]
                                     })
                                 );
                             
@@ -543,6 +644,8 @@ sap.ui.controller("pages.security.SecurityData", {
         var oSettingsFormData   = oModel.getProperty("/fields");
         
         try {
+            oController.ToggleStreamDataFields(false);
+            
             iomy.devices.editThing({
                 thingID     : oController.iThingId,
                 thingName   : oSettingsFormData.deviceName,
@@ -697,6 +800,7 @@ sap.ui.controller("pages.security.SecurityData", {
                                 var bState = iStatus === 1;
 
                                 oModel.setProperty("/fields/ptzDisabled", bState);
+                                oModel.setProperty("/visible/IfPTZControlsAreEnabled", !bState);
                             },
 
                             onFail : function (sErrorMessage) {

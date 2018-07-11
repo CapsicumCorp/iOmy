@@ -408,6 +408,10 @@ $.extend(iomy.validation, {
         return mResults;
     },
     
+    isString : function (fnValue) {
+        return typeof fnValue === "string";
+    },
+    
     isFunction : function (fnValue) {
         return typeof fnValue === "function";
     },

@@ -40,7 +40,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 				new sap.ui.layout.form.FormContainer({
 					formElements : [
 						new sap.ui.layout.form.FormElement({
-							label : "Assign to Onvif Server",
+							label : "Onvif Server",
 							fields: [ 
 								iomy.widgets.selectBoxOnvifServer(oView.createId("SelectOnvifServer"), {
 									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/OnvifServer}",
@@ -61,7 +61,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Profile to use for the video stream",
+							label : "Stream Profile",
 							fields: [ 
 								new sap.m.Select(oView.createId("SelectStreamProfile"), {
 									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/StreamProfile}",
@@ -77,7 +77,7 @@ sap.ui.jsfragment("fragments.OnvifCamera", {
 							]
 						}),
 						new sap.ui.layout.form.FormElement({
-							label : "Profile to use for thumbnails",
+							label : "Thumbnail Profile",
 							fields: [ 
 								new sap.m.Select(oView.createId("SelectThumbnailProfile"), {
 									selectedKey : "{/"+oView.byId("DevTypeSelect").getSelectedKey()+"/ThumbnailProfile}",

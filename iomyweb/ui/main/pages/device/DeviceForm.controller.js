@@ -103,6 +103,9 @@ sap.ui.controller("pages.device.DeviceForm", {
                 
                 oController.bAcceptingInput = false;
                 
+                oController.sOldThingText           = iomy.common.ThingList["_"+oController.iThingID].DisplayName;
+                oController.iOldRoomID              = iomy.common.ThingList["_"+oController.iThingID].RoomId;
+                
                 oController.loadDeviceForm();
             }
             
@@ -496,7 +499,56 @@ sap.ui.controller("pages.device.DeviceForm", {
     
     PrepareRoomListForModel : function (iPremiseId) {
         var oController         = this;
-        return iomy.functions.prepareRoomListSelectBoxOptions(oController, iPremiseId);
+        var bEditing            = this.bEditExisting;
+        var aRoomList           = JSON.parse( JSON.stringify( iomy.common.RoomsList["_"+iPremiseId] ) );
+        var iRoomCount          = iomy.functions.getNumberOfRoomsInPremise(iPremiseId);
+        var iUnassignedRoomId   = 0;
+        var bUnassignedOnly     = false;
+        var bHasUnassigned      = false;
+        
+        $.each(aRoomList, function (sI, mRoom) {
+            iUnassignedRoomId = mRoom.RoomId;
+            mRoom.Enabled = true;
+            
+            if (mRoom.RoomName === "Unassigned") {
+                if (iRoomCount === 1) {
+                    bUnassignedOnly = true;
+                }
+                
+                bHasUnassigned = true;
+            }
+            
+            return false;
+        });
+        
+        if (bUnassignedOnly) {
+            aRoomList = {};
+            
+            if (!bEditing) {
+                aRoomList["_"+iUnassignedRoomId] = {
+                    "RoomId" : iUnassignedRoomId,
+                    "RoomName" : "No rooms configured for premise"
+                };
+                
+            }
+            oController.bRoomsExist = false;
+            
+            oController.bNoRooms = true;
+            
+        } else {
+            oController.bNoRooms = false;
+            oController.bRoomsExist = true;
+            
+            if (bHasUnassigned) {
+                if (bEditing) {
+                    aRoomList["_"+iUnassignedRoomId].Enabled = false || oController.isOldRoomTheUnassigned();
+                } else {
+                    delete aRoomList["_"+iUnassignedRoomId];
+                }
+            }
+        }
+        
+        return aRoomList;
     },
     
     CancelInput : function () {
@@ -784,7 +836,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                             if (data.Data.LinkId !== undefined) {
                                 iLinkId = data.Data.LinkId;
                             }
-                        //-- I found the Open Weather Map feed link ID in this variable! --//
+                        // I found the Open Weather Map feed link ID in this variable!
                         } else if (data.WeatherStation !== undefined) {
                             if (data.WeatherStation.LinkId !== undefined) {
                                 iLinkId = data.WeatherStation.LinkId;
@@ -956,14 +1008,12 @@ sap.ui.controller("pages.device.DeviceForm", {
     areThereChanges : function () {
         var oController             = this;
         var oView                   = oController.getView();
-        var iThingID				= oController.iThingId;
-		var sOldThingText           = iomy.common.ThingList["_"+iThingID].DisplayName;
-        var iOldRoomID              = iomy.common.ThingList["_"+iThingID].RoomId;
-        var iRoomId                 = oView.byId("DeviceRoom").getSelectedKey();
-        var sThingText              = oView.byId("DeviceName").getValue();
+        var oModel                  = oView.getModel();
+        var iRoomId                 = oModel.getProperty("/CurrentDevice/RoomId");
+        var sThingText              = oModel.getProperty("/CurrentDevice/ThingName");
         
-		var bDifferentThingName     = sOldThingText !== sThingText;
-        var bDifferentRoom          = iOldRoomID != iRoomId;
+		var bDifferentThingName     = oController.sOldThingText !== sThingText;
+        var bDifferentRoom          = oController.iOldRoomID != iRoomId;
         
         return (bDifferentThingName || bDifferentRoom);
     },
@@ -1047,7 +1097,7 @@ sap.ui.controller("pages.device.DeviceForm", {
         var oView       = oController.getView();
         var oModel      = oView.getModel();
         
-        oModel.setProperty( "/enabled/IfSettingsChanged", oController.bAcceptingInput && oController.areThereChanges() );
+        oModel.setProperty( "/enabled/IfSettingsChanged", oController.areThereChanges() );
     },
     
     RunZigbeeCommand : function () {
