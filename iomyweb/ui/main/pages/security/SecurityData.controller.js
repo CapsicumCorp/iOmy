@@ -346,11 +346,11 @@ sap.ui.controller("pages.security.SecurityData", {
         var oController = this;
         
         // Lock all the PTZ buttons
-        oController.setPTZButtonsEnabled(false);
+        //oController.setPTZButtonsEnabled(false);
         
         try {
             iomy.devices.onvif.PTZMove({
-                thingID : oController.oThing.Id,
+                thingID : oController.iThingId,
                 profileName : oController.sThumbnailProfileName,
                 xpos : iPosX,
                 ypos : iPosY,
@@ -369,7 +369,7 @@ sap.ui.controller("pages.security.SecurityData", {
                         function () {
                             // Unlock all the PTZ buttons
                             if( oController.sMode==="Thumbnail" ) {
-                                oController.setPTZButtonsEnabled(true);
+                                //oController.setPTZButtonsEnabled(true);
                             }
                         }
                     );
@@ -703,6 +703,7 @@ sap.ui.controller("pages.security.SecurityData", {
                             onComplete : function () {
                                 if (aErrorMessages.length === 0) {
                                     var iNewAuthType = oSettingsFormData.streamAuthType;
+                                    oModel.setProperty("/visible/IfPTZControlsAreEnabled", !oSettingsFormData.ptzDisabled);
 
                                     iomy.common.showMessage({
                                         text : "Stream settings updated."

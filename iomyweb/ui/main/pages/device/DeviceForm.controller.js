@@ -82,6 +82,9 @@ sap.ui.controller("pages.device.DeviceForm", {
                 if (oEvent.data.ThingId !== undefined && oEvent.data.ThingId !== null) {
                     oController.bEditExisting   = true;
                     oController.iThingId        = oEvent.data.ThingId;
+                    
+                    oController.sOldThingText   = iomy.common.ThingList["_"+oController.iThingId].DisplayName;
+                    oController.iOldRoomID      = iomy.common.ThingList["_"+oController.iThingId].RoomId;
                 } else {
                     oController.bEditExisting   = false;
                     oController.iThingId        = null;
@@ -102,9 +105,6 @@ sap.ui.controller("pages.device.DeviceForm", {
                 }
                 
                 oController.bAcceptingInput = false;
-                
-                oController.sOldThingText           = iomy.common.ThingList["_"+oController.iThingID].DisplayName;
-                oController.iOldRoomID              = iomy.common.ThingList["_"+oController.iThingID].RoomId;
                 
                 oController.loadDeviceForm();
             }
@@ -388,7 +388,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                 "IfRoomsExist"                  : true && oController.bRoomsExist,
                 "IfRoomsExistAndAcceptingInput" : true && oController.bRoomsExist && oController.bAcceptingInput,
                 "IfAcceptingInput"              : true && oController.bAcceptingInput,
-                "IfSettingsChanged"             : true && oController.bAcceptingInput && oController.areThereChanges(),
+                "IfSettingsChanged"             : true && oController.areThereChanges(),
                 "IfOnvifProfilesHaveLoaded"     : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
                 "IfOnvifCameraIsSelected"       : true && oController.bOnvifCameraSelected,
                 "IfOnvifProfilesFound"          : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
@@ -1093,11 +1093,7 @@ sap.ui.controller("pages.device.DeviceForm", {
     },
     
     ToggleSubmitButton : function () {
-        var oController = this;
-        var oView       = oController.getView();
-        var oModel      = oView.getModel();
-        
-        oModel.setProperty( "/enabled/IfSettingsChanged", oController.areThereChanges() );
+        this.getView().byId("ButtonSubmit").setEnabled( this.areThereChanges() );
     },
     
     RunZigbeeCommand : function () {
