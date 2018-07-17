@@ -48,7 +48,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
 						new sap.ui.layout.form.FormElement({
                             label : iomy.widgets.RequiredLabel("Device Name"),
                             fields: [
-                                new sap.m.Input ({
+                                new sap.m.Input (oView.createId("DeviceName"), {
 									placeholder : "Display Name",
                                     enabled : "{/enabled/IfAcceptingInput}",
                                     value : "{/CurrentDevice/ThingName}"
@@ -58,7 +58,7 @@ sap.ui.jsfragment("fragments.DeviceFormEditIPCamera", {
                         new sap.ui.layout.form.FormElement({
                             label : "Room",
                             fields: [
-                                new sap.m.Select ({
+                                new sap.m.Select (oView.createId("DeviceRoom"), {
                                     enabled : "{/enabled/IfRoomsExistAndAcceptingInput}",
                                     selectedKey: "{/CurrentDevice/RoomId}",
                                     items: {

@@ -120,6 +120,10 @@ sap.ui.controller("pages.device.DeviceForm", {
         if (oView.byId("DeviceName") !== undefined) {
             oView.byId("DeviceName").destroy();
         }
+        
+        if (oView.byId("DeviceRoom") !== undefined) {
+            oView.byId("DeviceRoom").destroy();
+        }
 
         if (oView.byId("EditThingRoomSelector") !== undefined) {
             oView.byId("EditThingRoomSelector").destroy();
@@ -167,7 +171,7 @@ sap.ui.controller("pages.device.DeviceForm", {
             iomy.common.ShowFormFragment( oController, "DeviceFormAdd", "DevTypeBlock", "Block" );
 
             //if (!oController.bDeviceOptionSelectorDrawn) {
-                var oSBox = iomy.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"),{
+                var oSBox = iomy.widgets.selectBoxNewDeviceOptions (oView.createId("DevTypeSelect"), {
                     selectedKey : "start",
                     enabled : "{/enabled/Always}",
                     change : function () {
@@ -388,7 +392,6 @@ sap.ui.controller("pages.device.DeviceForm", {
                 "IfRoomsExist"                  : true && oController.bRoomsExist,
                 "IfRoomsExistAndAcceptingInput" : true && oController.bRoomsExist && oController.bAcceptingInput,
                 "IfAcceptingInput"              : true && oController.bAcceptingInput,
-                "IfSettingsChanged"             : true && oController.areThereChanges(),
                 "IfOnvifProfilesHaveLoaded"     : true && !oController.bLoadingOnvifProfiles && !oController.bSubmitting,
                 "IfOnvifCameraIsSelected"       : true && oController.bOnvifCameraSelected,
                 "IfOnvifProfilesFound"          : true && oController.bOnvifCameraSelected && oController.bProfilesLoaded
@@ -399,9 +402,10 @@ sap.ui.controller("pages.device.DeviceForm", {
             };
 
             var fnComplete = function () {
-                oView.setModel( 
-                    new sap.ui.model.json.JSONModel(oJSON)
-                );
+                var oModel = new sap.ui.model.json.JSONModel(oJSON);
+                oView.setModel(oModel);
+            
+                oModel.setProperty("/enabled/IfSettingsChanged", true);
 
                 //------------------------------------------------//
                 //-- Trigger the onSuccess Event                --//
@@ -958,7 +962,7 @@ sap.ui.controller("pages.device.DeviceForm", {
         }
         
         if (!bError) {
-            if (oController.areThereChanges()) {
+            //if (oController.areThereChanges()) {
                 oController.ToggleControls(false);
 
                 //--------------------------------------------------------------------//
@@ -994,14 +998,14 @@ sap.ui.controller("pages.device.DeviceForm", {
                         }
                     );
                 }
-            } else {
-                if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
-                    oController.ToggleControls(false);
-                    oController.SubmitIPWebcamData();
-                } else {
-                    oController.ToggleControls(true);
-                }
-            }
+//            } else {
+//                if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
+//                    oController.ToggleControls(false);
+//                    oController.SubmitIPWebcamData();
+//                } else {
+//                    oController.ToggleControls(true);
+//                }
+//            }
         }
     },
     
@@ -1093,7 +1097,7 @@ sap.ui.controller("pages.device.DeviceForm", {
     },
     
     ToggleSubmitButton : function () {
-        this.getView().byId("ButtonSubmit").setEnabled( this.areThereChanges() );
+        //this.getView().byId("ButtonSubmit").setEnabled( this.areThereChanges() );
     },
     
     RunZigbeeCommand : function () {
