@@ -77,6 +77,10 @@ sap.ui.controller("pages.security.SecurityData", {
                             oView.byId("DeviceName").destroy();
                         }
                         
+                        if (oView.byId("DeviceRoom") !== undefined) {
+                            oView.byId("DeviceRoom").destroy();
+                        }
+                        
                         iomy.common.ShowFormFragment( oController, "DeviceFormEditIPCamera", "CameraSettingsTab", "Content" );
                         break;
                         
