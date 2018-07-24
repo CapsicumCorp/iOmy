@@ -59,6 +59,7 @@ sap.ui.controller("pages.security.SecurityData", {
                 }
                 
                 oController.sCurrentTab = null;
+                oController.bAcceptingInput = false;
                 oController.RefreshModel();
                 oController.ResetTabPosition();
                 
