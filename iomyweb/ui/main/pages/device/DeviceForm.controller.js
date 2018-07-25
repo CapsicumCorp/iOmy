@@ -156,7 +156,7 @@ sap.ui.controller("pages.device.DeviceForm", {
                 iomy.common.ShowFormFragment( oController, "DeviceFormEdit", "DevTypeBlock", "Block" );
             }
 
-            if (oController.bNoRooms) {
+            if (oController.bNoRooms && oView.byId("EditThingRoomSelector") !== undefined) {
                 oView.byId("EditThingRoomSelector").setVisible(false);
             }
             
