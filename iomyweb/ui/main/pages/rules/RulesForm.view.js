@@ -146,7 +146,7 @@ sap.ui.jsview("pages.rules.RulesForm", {
 															]
 														}),
 														new sap.ui.layout.form.FormElement({
-															label : "Time",
+															label : iomy.widgets.RequiredLabel("Time"),
 															fields: [
 																new sap.m.TimePicker ({
 																	valueFormat: "HH:mm:ss",
