@@ -625,7 +625,7 @@ static int marktizigbee_inuse(tizigbeedevice_t& tizigbeedevice) {
   //Increment inuse value
   ++(tizigbeedevice.inuse);
 #ifdef TIZIGBEELIB_MOREDEBUG
-  debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu TI Zigbee: %016llX now inuse: %d\n", __PRETTY_FUNCTION__, pthread_self(), tizigbeedevice->addr, tizigbeedevice->inuse);
+  debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu TI Zigbee: %016llX now inuse: %d\n", __PRETTY_FUNCTION__, pthread_self(), tizigbeedevice.addr, tizigbeedevice.inuse);
 #endif
 
   unlocktizigbee();
@@ -1080,7 +1080,10 @@ static void send_tizigbee_zb_write_configuration(tizigbeedevice_t& tizigbeedevic
 }
 
 static void zdo_disable_zigbee_join_mode(tizigbeedevice_t& tizigbeedevice) {
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zdo_mgmt_permit_join_req_t apicmd;
+
+  MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
   apicmd.cmd=htons(ZDO_MGMT_PERMIT_JOIN_REQ);
@@ -1164,7 +1167,6 @@ static void send_zigbee_zdo(void *localzigbeedevice, zdo_general_request_t *zdoc
     rxonidle: 0=The device we are sending to is sleepy so increase timeouts if possible, 1=The device we are sending to is not sleepy
 */
 static void send_zigbee_zcl(void *localzigbeedevice, zcl_general_request_t *zclcmd, int expect_response, char rxonidle, long *localzigbeelocked, long *zigbeelocked) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=static_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=static_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
   tizigbeedevice_t& tizigbeedevice=*static_cast<tizigbeedevice_t *>(localzigbeedevice);
@@ -1241,7 +1243,7 @@ static void send_zigbee_zcl(void *localzigbeedevice, zcl_general_request_t *zclc
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_sys_ping_response(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   tizigbee_sys_ping_response_t *apicmd=reinterpret_cast<tizigbee_sys_ping_response_t *>(tizigbeedevice.receivebuf.data());
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1253,8 +1255,6 @@ static void process_sys_ping_response(tizigbeedevice_t& tizigbeedevice) {
 
   tizigbeedevice.capabilities=capabilities;
   unlocktizigbee();
-
-  const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
   debuglibifaceptr->debuglib_printf(1, "%s: TI Zigbee Capabilities (0x%04" PRIX16 "):\n", __PRETTY_FUNCTION__, capabilities);
   if ((capabilities & CAPABILITIES::MT_CAP_SYS)==CAPABILITIES::MT_CAP_SYS) {
@@ -1292,7 +1292,6 @@ static void process_sys_ping_response(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_sys_version_response(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_sys_version_response_t *apicmd=reinterpret_cast<tizigbee_sys_version_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1322,7 +1321,6 @@ static void process_sys_version_response(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_sys_reset_response(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_sys_reset_response_t *apicmd=reinterpret_cast<tizigbee_sys_reset_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1353,7 +1351,6 @@ static void process_sys_reset_response(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zb_device_info_response(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_get_device_info_response_t *apicmd=reinterpret_cast<tizigbee_zb_get_device_info_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1415,7 +1412,6 @@ static void process_zb_device_info_response(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zb_read_configuration_response_nv_logical_type(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_read_configuration_response_nv_logical_type_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_logical_type_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1428,7 +1424,6 @@ static void process_zb_read_configuration_response_nv_logical_type(tizigbeedevic
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zb_read_configuration_response_nv_precfgkey(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_read_configuration_response_nv_precfgkey_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_precfgkey_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1448,7 +1443,6 @@ static void process_zb_read_configuration_response_nv_precfgkey(tizigbeedevice_t
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zb_read_configuration_response_nv_precfgkeys_enable(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_read_configuration_response_nv_precfgkeys_enable_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_precfgkeys_enable_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1466,7 +1460,6 @@ static void process_zb_read_configuration_response_nv_precfgkeys_enable(tizigbee
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zb_read_configuration_response_nv_security_mode(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_read_configuration_response_nv_security_mode_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_nv_security_mode_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1478,7 +1471,6 @@ static void process_zb_read_configuration_response_nv_security_mode(tizigbeedevi
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zb_read_configuration_response(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_read_configuration_response_t *apicmd=reinterpret_cast<tizigbee_zb_read_configuration_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1519,7 +1511,6 @@ static void process_zb_read_configuration_response(tizigbeedevice_t& tizigbeedev
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zb_write_configuration_response(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zb_write_configuration_response_t *apicmd=reinterpret_cast<tizigbee_zb_write_configuration_response_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1591,7 +1582,6 @@ static void process_zdo_msg_cb_register_srsp(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zdo_startup_from_app_srsp(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1627,7 +1617,6 @@ static void process_zdo_startup_from_app_srsp(tizigbeedevice_t& tizigbeedevice) 
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zdo_generic_srsp(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zdo_generic_srsp_t *apicmd=reinterpret_cast<tizigbee_zdo_generic_srsp_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
@@ -1653,7 +1642,6 @@ static void process_zdo_generic_srsp(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zdo_state_change_ind(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zdo_state_change_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_state_change_ind_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1677,7 +1665,6 @@ static void process_zdo_state_change_ind(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zdo_leave_ind(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zdo_leave_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_leave_ind_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1693,7 +1680,6 @@ static void process_zdo_leave_ind(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zdo_tc_device_ind(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zdo_tc_device_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_tc_device_ind_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1711,7 +1697,6 @@ static void process_zdo_tc_device_ind(tizigbeedevice_t& tizigbeedevice) {
     the temp join timer expires
 */
 static void process_zdo_permit_join_ind(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   tizigbee_zdo_permit_join_ind_t *apicmd=reinterpret_cast<tizigbee_zdo_permit_join_ind_t *>(tizigbeedevice.receivebuf.data());
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
 
@@ -1727,7 +1712,6 @@ static void process_zdo_permit_join_ind(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_zdo_msg_cb_incoming(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=reinterpret_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=reinterpret_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
   tizigbee_zdo_msg_cb_incoming_t *apicmd=reinterpret_cast<tizigbee_zdo_msg_cb_incoming_t *>(tizigbeedevice.receivebuf.data());
@@ -1778,7 +1762,6 @@ static void process_zdo_msg_cb_incoming(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A reference to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_af_incoming_msg(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=static_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=static_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
   tizigbee_af_incoming_msg_t *apicmd=reinterpret_cast<tizigbee_af_incoming_msg_t *>(tizigbeedevice.receivebuf.data());
@@ -1909,7 +1892,6 @@ static void process_zcl_send_status(tizigbeedevice_t& tizigbeedevice) {
   Args: tizigbeedevice A pointer to tizigbeedevice structure used to store info about the tizigbee device including the receive buffer containing the packet
 */
 static void process_response_timeout(tizigbeedevice_t& tizigbeedevice) {
-  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   const debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=static_cast<const debuglib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("debuglib", DEBUGLIBINTERFACE_VER_1));
   const zigbeelib_ifaceptrs_ver_1_t *zigbeelibifaceptr=static_cast<const zigbeelib_ifaceptrs_ver_1_t *>(getmoduledepifaceptr("zigbeelib", ZIGBEELIBINTERFACE_VER_1));
 
@@ -2630,6 +2612,8 @@ static int processcommand(const char *buffer, int clientsock) {
   if (!cmdserverlibifaceptr) {
     return CMDLISTENER_NOTHANDLED;
   }
+  MOREDEBUG_ADDDEBUGLIBIFACEPTR();
+
   MOREDEBUG_ENTERINGFUNC();
   len=strlen(buffer);
   if (strncmp(buffer, "tizigbee_form_network ", 22)==0 && len>=38) {
