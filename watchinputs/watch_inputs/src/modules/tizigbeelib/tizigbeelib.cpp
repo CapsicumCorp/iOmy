@@ -883,7 +883,7 @@ static void send_tizigbee_simple_command(tizigbeedevice_t& tizigbeedevice, uint1
 */
 static void send_tizigbee_simple_command(tizigbeedevice_t& tizigbeedevice, uint16_t cmd, uint8_t param1) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  tizigbee_api_header_t apicmd;
+  tizigbee_api_header_with_8bit_param_t apicmd;
 
 #ifdef TIZIGBEELIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Entering %s: thread id: %lu With Command: %04" PRIX16 "\n", __PRETTY_FUNCTION__, pthread_self(), cmd);
@@ -891,7 +891,7 @@ static void send_tizigbee_simple_command(tizigbeedevice_t& tizigbeedevice, uint1
   //Fill in the packet details and send the packet
   apicmd.cmd=htons(cmd);
   apicmd.length=1;
-  apicmd.payload=param1;
+  apicmd.param1=param1;
   __tizigbee_send_api_packet(tizigbeedevice, reinterpret_cast<uint8_t *>(&apicmd));
 
   MOREDEBUG_EXITINGFUNC();

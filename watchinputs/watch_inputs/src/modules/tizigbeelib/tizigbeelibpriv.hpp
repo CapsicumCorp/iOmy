@@ -477,6 +477,14 @@ typedef struct {
   uint8_t frame_start; //Always set to 0xFE
   uint8_t length; //Number of bytes in the payload
   uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
+  uint8_t param1; //First parameter goes here
+  uint8_t checksum;
+} __attribute__((packed)) tizigbee_api_header_with_8bit_param_t;
+
+typedef struct {
+  uint8_t frame_start; //Always set to 0xFE
+  uint8_t length; //Number of bytes in the payload
+  uint16_t cmd; //TI Zigbee Command : First byte: MSB, Second byte: LSB
   uint16_t param1; //First parameter goes here
   uint8_t checksum;
 } __attribute__((packed)) tizigbee_api_header_with_16bit_param_t;
