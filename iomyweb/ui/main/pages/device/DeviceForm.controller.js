@@ -220,12 +220,6 @@ sap.ui.controller("pages.device.DeviceForm", {
         var oModel      = oView.getModel();
         
         oModel.setProperty("/enabled/IfOnvifCameraIsSelected", bEnabled && oController.bOnvifCameraSelected);
-        
-//        oView.byId("SelectOnvifServer").setEnabled(bEnabled);
-//        oView.byId("InputStreamName").setEnabled(bEnabled);
-//        oView.byId("SelectStreamProfile").setEnabled(bEnabled);
-//        oView.byId("SelectThumbnailProfile").setEnabled(bEnabled);
-//        oView.byId("ButtonSubmit").setEnabled(bEnabled);
     },
     
     ToggleOnvifStreamAuthenticationForm : function () {
@@ -248,16 +242,6 @@ sap.ui.controller("pages.device.DeviceForm", {
         var oModel      = oView.getModel();
         
         oModel.setProperty("/enabled/IfAcceptingInput", bEnabled && !oController.bLoadingOnvifProfiles);
-        
-//        oView.byId("DeviceName").setEnabled(bEnabled);
-//        oView.byId("DeviceRoom").setEnabled(bEnabled);
-//        oView.byId("InputCamType").setEnabled(bEnabled);
-//        oView.byId("InputIPProtocol").setEnabled(bEnabled);
-//        oView.byId("InputIPAddress").setEnabled(bEnabled);
-//        oView.byId("InputIPPort").setEnabled(bEnabled);
-//        oView.byId("InputPath").setEnabled(bEnabled);
-//        oView.byId("InputUsername").setEnabled(bEnabled);
-//        oView.byId("InputPassword").setEnabled(bEnabled);
         
         this.ToggleControls(bEnabled);
     },
@@ -337,16 +321,6 @@ sap.ui.controller("pages.device.DeviceForm", {
                     }
                     
                     break;
-                    
-                //-- CSR Mesh (Bluetooth) --//
-//                case "linkType"+iomy.devices.csrmesh.LinkTypeId:
-//                    iomy.common.ShowFormFragment( oController, "CSRMesh", "DevSettingsBlock", "Block" );
-//                    
-//                    if (bEditing) {
-//                        
-//                    }
-//                    
-//                    break;
                     
                 default:
                     $.sap.log.error("DevTypeToggle: Critcal Error. sDevType set incorrectly:"+sDevType);
@@ -1034,6 +1008,10 @@ sap.ui.controller("pages.device.DeviceForm", {
                 throw new IllegalArgumentException(mInputInfo.aErrorMessages.join("\n\n"));
             }
             
+            //--------------------------------------------------------------------//
+            // Only attempt the submission if the device being added or modified
+            // is an MJPEG stream
+            //--------------------------------------------------------------------//
             if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                 oController.bAcceptingInput = false;
                 oController.ToggleControls(false);
@@ -1081,6 +1059,7 @@ sap.ui.controller("pages.device.DeviceForm", {
             }
 
         } catch (e) {
+            //-- An unexpected error occurred. --//
             iomy.common.showError(e.message, "Failed to update settings",
                 function () {
                     oController.bAcceptingInput = true;
@@ -1099,6 +1078,10 @@ sap.ui.controller("pages.device.DeviceForm", {
     ToggleSubmitButton : function () {
         //this.getView().byId("ButtonSubmit").setEnabled( this.areThereChanges() );
     },
+    
+    //========================================================================//
+    // Zigbee Telnet functionality.
+    //========================================================================//
     
     RunZigbeeCommand : function () {
         var oController         = this;

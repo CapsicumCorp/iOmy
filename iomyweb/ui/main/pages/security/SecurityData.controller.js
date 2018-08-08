@@ -58,6 +58,7 @@ sap.ui.controller("pages.security.SecurityData", {
                     oController.iThingId = null;
                 }
                 
+                //-- Assign the controller variables their default values. --//
                 oController.sCurrentTab = null;
                 oController.bAcceptingInput = false;
                 oController.RefreshModel();
@@ -241,6 +242,7 @@ sap.ui.controller("pages.security.SecurityData", {
 
                 fnComplete(); // Just to wipe the old data.
 
+                //-- Load the camera information into the settings form. --//
                 iomy.devices.ipcamera.loadCameraInformation({
                     thingID : oController.iThingId,
 
@@ -542,6 +544,10 @@ sap.ui.controller("pages.security.SecurityData", {
                                     })
                                 );
                             
+                                //--------------------------------------------------------------------------//
+                                // Use the stream player in resources/video if it's managed by WatchInputs.
+                                // Otherwise, draw a HTML5 video element.
+                                //--------------------------------------------------------------------------//
                                 if (bManagedStream) {
                                     oModel.setProperty("/data/videoContent", "<iframe height='300px' width='100%' scrolling='no' frameborder='0' src='resources/video/streamplayer.php?StreamId="+oController.iThingId+"'></iframe>");
 
@@ -655,6 +661,7 @@ sap.ui.controller("pages.security.SecurityData", {
         try {
             oController.ToggleStreamDataFields(false);
             
+            //-- Save the name and the room, then save the actual stream settings. --//
             iomy.devices.editThing({
                 thingID     : oController.iThingId,
                 thingName   : oSettingsFormData.deviceName,
@@ -865,6 +872,9 @@ sap.ui.controller("pages.security.SecurityData", {
                 throw new IllegalArgumentException(mInputInfo.aErrorMessages.join("\n\n"));
             }
             
+            //--------------------------------------------------------------------//
+            // Only proceed if the device is an MJPEG stream.
+            //--------------------------------------------------------------------//
             if (oController.iThingTypeId == iomy.devices.ipcamera.ThingTypeId) {
                 oController.bAcceptingInput = false;
                 oController.ToggleStreamDataFields(false);
