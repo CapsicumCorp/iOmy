@@ -655,11 +655,20 @@ bool databaseReadyBluetooth() {
   //Get bluetooth host mac address
   methodid=env->GetStaticMethodID(gbluetoothhwandroidlib_class, "getbluetoothHostMacAddress", "()Ljava/lang/String;");
   jbluetoothHostMacAddress=static_cast<jstring>(env->CallStaticObjectMethod(gbluetoothhwandroidlib_class, methodid));
+  if (jbluetoothHostMacAddress==NULL) {
+    JNIDetachThread(wasdetached);
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: Unable to retrieve bluetooth mac address\n", __func__);
+    return false;
+  }
   bluetoothHostMacAddress=env->GetStringUTFChars(jbluetoothHostMacAddress, NULL);
   bluetoothHostMacAddressStr=bluetoothHostMacAddress;
   env->ReleaseStringUTFChars(jbluetoothHostMacAddress, bluetoothHostMacAddress);
   JNIDetachThread(wasdetached);
 
+  if (bluetoothHostMacAddressStr.length()!=17) {
+    debuglibifaceptr->debuglib_printf(1, "Exiting %s: Unsupported mac address format: %s\n", __func__, bluetoothHostMacAddressStr.c_str());
+    return false;
+  }
   //Remove colons
   minbluetoothHostMacAddressStr=bluetoothHostMacAddressStr.substr(0, 2);
   minbluetoothHostMacAddressStr+=bluetoothHostMacAddressStr.substr(3, 2);
