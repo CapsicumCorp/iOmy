@@ -24,7 +24,10 @@ package com.capsicumcorp.iomy.libraries.watchinputs;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.ref.WeakReference;
+import java.net.NetworkInterface;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import android.Manifest;
@@ -42,6 +45,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.ParcelUuid;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import com.csr.mesh.ConfigModelApi;
@@ -87,27 +91,6 @@ public class BluetoothHWAndroidLib implements AssociationListener {
     public BluetoothHWAndroidLib(Context context) {
         this.context=context;
         this.instance=this;
-
-        //https://stackoverflow.com/questions/25653129/how-to-get-bluetooth-mac-address-on-android
-        String result = null;
-        if (context.checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH)
-                == PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // Hardware ID are restricted in Android 6+
-                // https://developer.android.com/about/versions/marshmallow/android-6.0-changes.html#behavior-hardware-id
-                // Getting bluetooth mac via reflection for devices with Android 6+
-                result = android.provider.Settings.Secure.getString(context.getContentResolver(),
-                        "bluetooth_address");
-            } else {
-                BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();
-                result = bta != null ? bta.getAddress() : "";
-            }
-        }
-        //-----------------------------------------------------------------------------------------
-
-        bluetoothHostMacAddress=result;
-
-        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib Mac Address="+bluetoothHostMacAddress);
     }
 	@TargetApi(18)
     public static int init() {
@@ -455,7 +438,84 @@ public class BluetoothHWAndroidLib implements AssociationListener {
         }
         ConfigModelApi.getInfo(deviceId, ConfigModelApi.DeviceInfo.MODEL_LOW);
     }
+    public static String getMacAddr() {
+        //Get first available mac address as that should be fairly unique
+        //https://stackoverflow.com/questions/11705906/programmatically-getting-the-mac-of-an-android-device
+        try {
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                byte[] macBytes = nif.getHardwareAddress();
+                if (macBytes == null) {
+                    continue;
+                }
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    String hex = Integer.toHexString(b & 0xFF);
+                    if (hex.length() == 1)
+                        hex = "0".concat(hex);
+                    res1.append(hex.concat(":"));
+                }
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib Found mac address="+res1+" from network interface: "+nif.getName());
+
+                return res1.toString();
+            }
+        } catch (Exception ex) {
+        }
+        return null;
+    }
+
     public static String getbluetoothHostMacAddress() {
+        //https://stackoverflow.com/questions/25653129/how-to-get-bluetooth-mac-address-on-android
+        String result = null;
+        if (getInstance().context.checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH)
+                == PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= 26) {
+                //Reflection no longer works to get the bluetooth mac address in Android 8 and
+                //  it may cause crashes in future versions so just do nothing and
+                //  fallback to getting a network mac address below
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // Hardware ID are restricted in Android 6+
+                // https://developer.android.com/about/versions/marshmallow/android-6.0-changes.html#behavior-hardware-id
+                // Getting bluetooth mac via reflection for devices with Android 6+
+                // NOTE: This code can't be removed as existing Android 6 and 7 users will depend on this
+                //   for a consistent comm address in the database
+                result = android.provider.Settings.Secure.getString(getInstance().context.getContentResolver(),
+                        "bluetooth_address");
+            } else {
+                BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();
+                result = bta != null ? bta.getAddress() : "";
+            }
+            if (result==null) {
+                //Unable to get the bluetooth mac address so use the Android unique device id
+                //https://developer.android.com/reference/android/provider/Settings.Secure#ANDROID_ID
+                String androidId = Settings.Secure.getString(getInstance().context.getContentResolver(), Settings.Secure.ANDROID_ID);;
+                if (androidId!=null && androidId.length()>=16) {
+                    //Generate a fake mac address based on the android id
+                    result=androidId.substring(0, 2)+":";
+                    result+=androidId.substring(2, 4)+":";
+                    result+=androidId.substring(4, 6)+":";
+                    result+=androidId.substring(10, 12)+":";
+                    result+=androidId.substring(12, 14)+":";
+                    result+=androidId.substring(14, 16);
+
+                    Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib Found unique id from android device id: "+androidId);
+                } else {
+                    //Just get the mac address of another network device instead
+                    //NOTE: This can change depending on what interfaces are active at the time
+                    result=getMacAddr();
+                }
+            }
+        }
+        //-----------------------------------------------------------------------------------------
+
+        getInstance().bluetoothHostMacAddress=result;
+
+        Log.println(Log.INFO, MainLib.getInstance().getAppName(), "BluetoothHWAndroidLib Mac Address="+getInstance().bluetoothHostMacAddress);
+
         return getInstance().bluetoothHostMacAddress;
     }
     public void newUuid(UUID uuid, int uuidHash, int rssi, int ttl) {
