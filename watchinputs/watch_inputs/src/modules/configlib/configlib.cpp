@@ -2,7 +2,7 @@
 Title: Configuration Library for Watch Inputs
 Author: Matthew Stapleton (Capsicum Corporation) <matthew@capsicumcorp.com>
 Description: Provides interfaces to load configuration items from a file.
-Copyright: Capsicum Corporation 2010-2016
+Copyright: Capsicum Corporation 2010-2019
 
 This file is part of Watch Inputs which is part of the iOmy project.
 
@@ -411,7 +411,6 @@ int configlib_init(void) {
 	if (configlib_inuse>1) {
     //Already initialised
 		debuglibifaceptr->debuglib_printf(1, "Exiting %s, already initialised, use count=%d\n", __func__, configlib_inuse);
-    pthread_mutex_unlock(&configlibmutex);
 		return 0;
   }
 	cfgfilename="";
@@ -443,7 +442,6 @@ void configlib_shutdown(void) {
 
   if (configlib_inuse==0) {
     //Already uninitialised
-    pthread_mutex_unlock(&configlibmutex);
     debuglibifaceptr->debuglib_printf(1, "WARNING: Exiting %s, Already shutdown\n", __func__);
     return;
   }
@@ -451,7 +449,6 @@ void configlib_shutdown(void) {
 	if (configlib_inuse>0) {
 		//Module still in use
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, Still in use, use count=%d\n", __func__, configlib_inuse);
-		pthread_mutex_unlock(&configlibmutex);
 		return;
 	}
 	//No longer in use
