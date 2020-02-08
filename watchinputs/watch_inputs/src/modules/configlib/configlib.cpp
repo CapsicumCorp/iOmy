@@ -43,6 +43,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <pthread.h>
 #include <fcntl.h>
+#include <algorithm>
 #include <list>
 #include <map>
 #include <string>
@@ -500,15 +501,8 @@ int configlib_unregister_readcfgfile_post_listener(readcfgfile_post_func_ptr_t f
     configlib_unlockconfig();
     return -1;
   }
-  found=false;
-  for (std::list<readcfgfile_post_func_ptr_t>::iterator it=post_listener_func_ptrs.begin(); it!=post_listener_func_ptrs.end(); ++it) {
-    if (*it==funcptr) {
-      found=true;
-      posit=it;
-      break;
-    }
-  }
-  if (found) {
+  posit=std::find(post_listener_func_ptrs.begin(), post_listener_func_ptrs.end(), funcptr);
+  if (posit != post_listener_func_ptrs.end()) {
     post_listener_func_ptrs.erase(posit);
     result=0;
   } else {
