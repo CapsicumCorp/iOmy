@@ -63,6 +63,7 @@ Baud rate seems to be ignored on the TI Z-Stack firmware as it uses cdc_acm usb 
 #include <array>
 #include <list>
 #include <map>
+#include <string>
 #ifdef __ANDROID__
 #include <jni.h>
 #include <android/log.h>
