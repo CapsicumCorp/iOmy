@@ -41,13 +41,14 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <fcntl.h>
 #include <algorithm>
 #include <list>
 #include <map>
 #include <string>
 #include <stdexcept>
+#include <boost/thread/lock_guard.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <boost/atomic/atomic.hpp>
 #ifdef __ANDROID__
 #include <jni.h>
@@ -58,55 +59,6 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include "main/mainlib.h"
 #include "modules/debuglib/debuglib.h"
 #include "modules/commonlib/commonlib.h"
-
-#ifdef DEBUG
-#pragma message("CONFIGLIB_PTHREAD_LOCK and CONFIGLIB_PTHREAD_UNLOCK debugging has been enabled")
-#include <errno.h>
-#define CONFIGLIB_PTHREAD_LOCK(mutex) { \
-  int lockresult; \
-  lockresult=pthread_mutex_lock(mutex); \
-  if (lockresult==EDEADLK) { \
-    printf("-------------------- WARNING --------------------\nMutex deadlock in file: %s function: %s line: %d\n-------------------------------------------------\n", __FILE__, __func__, __LINE__); \
-    configlib_backtrace(); \
-  } else if (lockresult!=0) { \
-    printf("-------------------- WARNING --------------------\nMutex lock returned error: %d in file: %s function: %s line: %d\n-------------------------------------------------\n", lockresult, __FILE__, __func__, __LINE__); \
-    configlib_backtrace(); \
-  } \
-}
-
-#define CONFIGLIB_PTHREAD_UNLOCK(mutex) { \
-  int lockresult; \
-  lockresult=pthread_mutex_unlock(mutex); \
-  if (lockresult==EPERM) { \
-    printf("-------------------- WARNING --------------------\nMutex already unlocked in file: %s function: %s line: %d\n-------------------------------------------------\n", __FILE__, __func__, __LINE__); \
-    configlib_backtrace(); \
-  } else if (lockresult!=0) { \
-    printf("-------------------- WARNING --------------------\nMutex unlock returned error: %d in file: %s function: %s line: %d\n-------------------------------------------------\n", lockresult, __FILE__, __func__, __LINE__); \
-    configlib_backtrace(); \
-  } \
-}
-
-#else
-
-#define CONFIGLIB_PTHREAD_LOCK(mutex) pthread_mutex_lock(mutex)
-#define CONFIGLIB_PTHREAD_UNLOCK(mutex) pthread_mutex_unlock(mutex)
-
-#endif
-
-#ifdef CONFIGLIB_LOCKDEBUG
-#define LOCKDEBUG_ENTERINGFUNC() { \
-  debuglibifaceptr->debuglib_printf(1, "Entering %s thread id: %lu line: %d\n", __func__, pthread_self(), __LINE__); \
-}
-#define LOCKDEBUG_EXITINGFUNC() { \
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s thread id: %lu line: %d\n", __func__, pthread_self(), __LINE__); \
-}
-#define LOCKDEBUG_ADDDEBUGLIBIFACEPTR() debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) configlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-#else
-  #define LOCKDEBUG_ENTERINGFUNC() { }
-  #define LOCKDEBUG_EXITINGFUNC() { }
-  #define LOCKDEBUG_ADDDEBUGLIBIFACEPTR() { }
-#endif
-
 
 #ifdef CONFIGLIB_MOREDEBUG
 #define MOREDEBUG_ENTERINGFUNC() { \
@@ -147,15 +99,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 
 static int configlib_inuse=0; //Only shutdown when inuse = 0
 
-#ifdef DEBUG
-static pthread_mutexattr_t errorcheckmutexattr;
-
-STATIC pthread_mutex_t configlibmutex;
-#else
-static pthread_mutex_t configlibmutex = PTHREAD_MUTEX_INITIALIZER;
-#endif
-static pthread_key_t lockkey;
-static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
+static boost::recursive_mutex configlibBoostMutex;
 
 static boost::atomic<int> configloaded(0);
 static boost::atomic<int> configloadpending(0);
@@ -296,109 +240,6 @@ moduleinfo_ver_1_t configlib_moduleinfo_ver_1={
   (moduledep_ver_1_t (*)[]) &configlib_deps
 };
 
-#ifndef __ANDROID__
-//Display a stack back trace
-//Modified from the backtrace man page example
-STATIC INLINE void configlib_backtrace(void) {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) configlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  int j, nptrs;
-  void *buffer[100];
-  char **strings;
-
-  nptrs = backtrace(buffer, 100);
-  debuglibifaceptr->debuglib_printf(1, "%s: backtrace() returned %d addresses\n", __func__, nptrs);
-
-  //The call backtrace_symbols_fd(buffer, nptrs, STDOUT_FILENO)
-  //would produce similar output to the following:
-
-  strings = backtrace_symbols(buffer, nptrs);
-  if (strings == NULL) {
-    debuglibifaceptr->debuglib_printf(1, "%s: More backtrace info unavailable\n", __func__);
-    return;
-  }
-  for (j = 0; j < nptrs; j++) {
-    debuglibifaceptr->debuglib_printf(1, "%s: %s\n", __func__, strings[j]);
-  }
-  free(strings);
-}
-#else
-//backtrace is only supported on glibc
-STATIC INLINE void configlib_backtrace(void) {
-  //Do nothing on non-backtrace supported systems
-}
-#endif
-
-//Initialise a thread local store for the lock counter
-static void configlib_makelockkey(void) {
-  (void) pthread_key_create(&lockkey, NULL);
-}
-
-/*
-  Apply the configlib mutex lock if not already applied otherwise increment the lock count
-*/
-void configlib_lockconfig() {
-  LOCKDEBUG_ADDDEBUGLIBIFACEPTR();
-  long *lockcnt;
-
-  LOCKDEBUG_ENTERINGFUNC();
-
-  (void) pthread_once(&lockkey_onceinit, configlib_makelockkey);
-
-  //Get the lock counter from thread local store
-  lockcnt = (long *) pthread_getspecific(lockkey);
-  if (lockcnt==NULL) {
-    //Allocate storage for the lock counter
-    lockcnt=(long *) malloc(sizeof(long));
-    (void) pthread_setspecific(lockkey, lockcnt);
-    *lockcnt=0;
-  }
-  if ((*lockcnt)==0) {
-    //Lock the thread if not already locked
-    CONFIGLIB_PTHREAD_LOCK(&configlibmutex);
-  }
-  //Increment the lock count
-  ++(*lockcnt);
-
-#ifdef CONFIGLIB_LOCKDEBUG
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *lockcnt);
-#endif
-}
-
-/*
-  Decrement the lock count and if 0, release the configlib mutex lock
-*/
-void configlib_unlockconfig() {
-  debuglib_ifaceptrs_ver_1_t *debuglibifaceptr=(debuglib_ifaceptrs_ver_1_t *) configlib_deps[DEBUGLIB_DEPIDX].ifaceptr;
-  long *lockcnt;
-
-  LOCKDEBUG_ENTERINGFUNC();
-
-  (void) pthread_once(&lockkey_onceinit, configlib_makelockkey);
-
-  //Get the lock counter from thread local store
-  lockcnt = (long *) pthread_getspecific(lockkey);
-  if (lockcnt==NULL) {
-    debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu LOCKING MISMATCH TRIED TO UNLOCK WHEN LOCK COUNT IS 0 AND ALREADY UNLOCKED\n", __func__, pthread_self());
-    //configlib_backtrace();
-    return;
-  }
-  --(*lockcnt);
-  if ((*lockcnt)==0) {
-    //Unlock the thread if not already unlocked
-    CONFIGLIB_PTHREAD_UNLOCK(&configlibmutex);
-  }
-#ifdef CONFIGLIB_LOCKDEBUG
-  debuglibifaceptr->debuglib_printf(1, "Exiting %s: thread id: %lu line: %d Lock count=%ld\n", __func__, pthread_self(), __LINE__, *lockcnt);
-#endif
-
-  if ((*lockcnt)==0) {
-    //Deallocate storage for the lock counter so don't have to free it at thread exit
-    free(lockcnt);
-    lockcnt=NULL;
-    (void) pthread_setspecific(lockkey, lockcnt);
-  }
-}
-
 /*
   Initialise the config library
   Returns 0 for success or other value on error
@@ -422,13 +263,6 @@ int configlib_init(void) {
 
   post_listener_func_ptrs.clear();
 
-#ifdef DEBUG
-  //Enable error checking on mutexes if debugging is enabled
-  pthread_mutexattr_init(&errorcheckmutexattr);
-  pthread_mutexattr_settype(&errorcheckmutexattr, PTHREAD_MUTEX_ERRORCHECK);
-
-  pthread_mutex_init(&configlibmutex, &errorcheckmutexattr);
-#endif
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 
   return 0;
@@ -459,12 +293,6 @@ void configlib_shutdown(void) {
 	configloadpending.store(0);
 	configloaded.store(0);
 
-#ifdef DEBUG
-  //Destroy main mutexes
-  pthread_mutex_destroy(&configlibmutex);
-
-  pthread_mutexattr_destroy(&errorcheckmutexattr);
-#endif
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 }
 
@@ -474,14 +302,14 @@ void configlib_shutdown(void) {
   Returns: 0 if success or non-zero on error
 */
 int configlib_register_readcfgfile_post_listener(readcfgfile_post_func_ptr_t funcptr) {
-  configlib_lockconfig();
-  if (configlib_inuse==0) {
-    configlib_unlockconfig();
-    return -1;
-  }
-  post_listener_func_ptrs.push_back(funcptr);
-  configlib_unlockconfig();
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(configlibBoostMutex);
 
+    if (configlib_inuse==0) {
+      return -1;
+    }
+    post_listener_func_ptrs.push_back(funcptr);
+  }
   return 0;
 }
 
@@ -491,25 +319,20 @@ int configlib_register_readcfgfile_post_listener(readcfgfile_post_func_ptr_t fun
   Returns: 0 if success or non-zero on error
 */
 int configlib_unregister_readcfgfile_post_listener(readcfgfile_post_func_ptr_t funcptr) {
-  bool found;
-  int result;
-  std::list<readcfgfile_post_func_ptr_t>::iterator posit;
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(configlibBoostMutex);
 
-  configlib_lockconfig();
-  if (configlib_inuse==0) {
-    configlib_unlockconfig();
-    return -1;
+    if (configlib_inuse==0) {
+      return -1;
+    }
+    std::list<readcfgfile_post_func_ptr_t>::iterator posit=std::find(post_listener_func_ptrs.begin(), post_listener_func_ptrs.end(), funcptr);
+    if (posit != post_listener_func_ptrs.end()) {
+      post_listener_func_ptrs.erase(posit);
+      return 0;
+    } else {
+      return -1;
+    }
   }
-  posit=std::find(post_listener_func_ptrs.begin(), post_listener_func_ptrs.end(), funcptr);
-  if (posit != post_listener_func_ptrs.end()) {
-    post_listener_func_ptrs.erase(posit);
-    result=0;
-  } else {
-    result=-1;
-  }
-  configlib_unlockconfig();
-
-  return result;
 }
 
 /*
@@ -556,101 +379,95 @@ int configlib_readcfgfile(void) {
   std::string curblock="<global>"; //If we see an item outside of a block put it in block: <global>
 
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
-  configlib_lockconfig();
-	if (configlib_inuse==0) {
-    configlib_unlockconfig();
-		debuglibifaceptr->debuglib_printf(1, "Exiting %s, not initialised\n", __func__);
-		return -1;
-	}
-	if (cfgfilename=="") {
-    configlib_unlockconfig();
-    debuglibifaceptr->debuglib_printf(1, "Exiting %s, config filename not configured\n", __func__);
-    return -1;
-  }
-  configloadpending.store(0);
-  mainlibifaceptr->newdescriptorlock();
-  int cfgfilefd=commonlibifaceptr->open_with_cloexec(cfgfilename.c_str(), O_RDONLY);
-  mainlibifaceptr->newdescriptorunlock();
-  if (cfgfilefd<0) {
-    configloadpending.store(1);
-    configlib_unlockconfig();
-    debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, cfgfilename.c_str());
-    return -1;
-  }
-  file=fdopen(cfgfilefd, "rb");
-  if (file == NULL) {
-    configloadpending.store(1);
-    configlib_unlockconfig();
-    debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, cfgfilename.c_str());
-    return -1;
-  }
-  linebuf=(char *) malloc(BUFFER_SIZE*sizeof(char));
-  if (!linebuf) {
-    fclose(file);
-    configloadpending.store(1);
-    configlib_unlockconfig();
-    debuglibifaceptr->debuglib_printf(1, "%s: Not enough memory to load configuration\n", __func__);
-    return -2;
-  }
-  if (abort==1) {
+  {
+    boost::lock_guard<boost::recursive_mutex> guard(configlibBoostMutex);
+
+    if (configlib_inuse==0) {
+      debuglibifaceptr->debuglib_printf(1, "Exiting %s, not initialised\n", __func__);
+      return -1;
+    }
+    if (cfgfilename=="") {
+      debuglibifaceptr->debuglib_printf(1, "Exiting %s, config filename not configured\n", __func__);
+      return -1;
+    }
+    configloadpending.store(0);
+    mainlibifaceptr->newdescriptorlock();
+    int cfgfilefd=commonlibifaceptr->open_with_cloexec(cfgfilename.c_str(), O_RDONLY);
+    mainlibifaceptr->newdescriptorunlock();
+    if (cfgfilefd<0) {
+      configloadpending.store(1);
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, cfgfilename.c_str());
+      return -1;
+    }
+    file=fdopen(cfgfilefd, "rb");
+    if (file == NULL) {
+      configloadpending.store(1);
+      debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, cfgfilename.c_str());
+      return -1;
+    }
+    linebuf=(char *) malloc(BUFFER_SIZE*sizeof(char));
+    if (!linebuf) {
+      fclose(file);
+      configloadpending.store(1);
+      debuglibifaceptr->debuglib_printf(1, "%s: Not enough memory to load configuration\n", __func__);
+      return -2;
+    }
+    if (abort==1) {
+      fclose(file);
+      free(linebuf);
+      configloadpending.store(1);
+      debuglibifaceptr->debuglib_printf(1, "%s: Configuration load aborted due to error\n", __func__);
+      return -3;
+    }
+    cfgfileitems.clear();
+    while (fgets(linebuf, BUFFER_SIZE, file) !=NULL) {
+      size_t tmplen;
+
+      tmplen=strlen(linebuf)-1;
+      if (tmplen>0 && linebuf[tmplen] == '\n') {
+        //Remove the newline at the end of the line
+        linebuf[tmplen]=0;
+        --tmplen;
+      }
+      if (tmplen>0 && linebuf[tmplen] == '\r') {
+        //Carriage return will be present with DOS format
+        //Remove the carriage return at the end of the line
+        linebuf[tmplen]=0;
+        --tmplen;
+      }
+      if (linebuf[0]==0 || linebuf[0]=='#' || linebuf[0]==';') {
+        //Ignore commented lines
+        continue;
+      }
+      if (linebuf[0]=='[' && linebuf[tmplen]==']') {
+        linebuf[tmplen]=0;
+        curblock=linebuf+1;
+        debuglibifaceptr->debuglib_printf(1, "%s: Found a block: %s\n", __func__, curblock.c_str());
+        continue;
+      }
+      char *equalsptr;
+      equalsptr=strchr(linebuf, '=');
+      if (!equalsptr) {
+        //Not found
+        continue;
+      }
+      //Left side of equals is the value
+      //Right side of equals is the attr type string
+      *equalsptr=0; //Convert = into nul
+      std::string value=equalsptr+1;
+
+      debuglibifaceptr->debuglib_printf(1, "%s: Found a name=value pair: [%s]: %s=%s\n", __func__, curblock.c_str(), linebuf, value.c_str());
+      cfgfileitems[curblock][linebuf]=value;
+    }
     fclose(file);
     free(linebuf);
-    configloadpending.store(1);
-    configlib_unlockconfig();
-    debuglibifaceptr->debuglib_printf(1, "%s: Configuration load aborted due to error\n", __func__);
-    return -3;
+    linebuf=NULL;
+
+    configloadpending.store(0);
+    configloaded.store(1);
+
+    configlib_call_readcfgfile_post_listeners();
   }
-  cfgfileitems.clear();
-  while (fgets(linebuf, BUFFER_SIZE, file) !=NULL) {
-		size_t tmplen;
-
-		tmplen=strlen(linebuf)-1;
-    if (tmplen>0 && linebuf[tmplen] == '\n') {
-      //Remove the newline at the end of the line
-      linebuf[tmplen]=0;
-			--tmplen;
-    }
-    if (tmplen>0 && linebuf[tmplen] == '\r') {
-			//Carriage return will be present with DOS format
-      //Remove the carriage return at the end of the line
-      linebuf[tmplen]=0;
-      --tmplen;
-    }
-    if (linebuf[0]==0 || linebuf[0]=='#' || linebuf[0]==';') {
-      //Ignore commented lines
-      continue;
-    }
-    if (linebuf[0]=='[' && linebuf[tmplen]==']') {
-      linebuf[tmplen]=0;
-      curblock=linebuf+1;
-      debuglibifaceptr->debuglib_printf(1, "%s: Found a block: %s\n", __func__, curblock.c_str());
-      continue;
-    }
-    char *equalsptr;
-    equalsptr=strchr(linebuf, '=');
-    if (!equalsptr) {
-      //Not found
-      continue;
-    }
-    //Left side of equals is the value
-    //Right side of equals is the attr type string
-    *equalsptr=0; //Convert = into nul
-    std::string value=equalsptr+1;
-
-    debuglibifaceptr->debuglib_printf(1, "%s: Found a name=value pair: [%s]: %s=%s\n", __func__, curblock.c_str(), linebuf, value.c_str());
-		cfgfileitems[curblock][linebuf]=value;
-	}
-  fclose(file);
-  free(linebuf);
-	linebuf=NULL;
-
-  configloadpending.store(0);
-  configloaded.store(1);
-
-  configlib_call_readcfgfile_post_listeners();
-
-  configlib_unlockconfig();
-
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 
   return 0;
@@ -684,14 +501,15 @@ static void configlib_cancelpendingload() {
 bool configlib_getnamevalue_cpp(const std::string &block, const std::string &name, std::string &value) {
   std::string tmpvalue;
 	try {
-	  configlib_lockconfig();
-	  if (!configloaded) {
-	    throw std::runtime_error("Config not loaded");
+	  {
+	    boost::lock_guard<boost::recursive_mutex> guard(configlibBoostMutex);
+
+	    if (!configloaded) {
+	      throw std::runtime_error("Config not loaded");
+	    }
+	    tmpvalue=cfgfileitems.at(block).at(name);
 	  }
-	  tmpvalue=cfgfileitems.at(block).at(name);
-    configlib_unlockconfig();
 	} catch (std::exception& e) {
-		configlib_unlockconfig();
 		return false;
 	}
   value=tmpvalue;
