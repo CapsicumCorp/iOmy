@@ -35,6 +35,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <list>
 #include <string>
+#include <stdexcept>
 #ifdef __ANDROID__
 #include <jni.h>
 #include <android/log.h>
