@@ -47,6 +47,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <list>
 #include <map>
 #include <string>
+#include <stdexcept>
 #include <boost/atomic/atomic.hpp>
 #ifdef __ANDROID__
 #include <jni.h>
@@ -677,25 +678,25 @@ static void configlib_cancelpendingload() {
 }
 
 /*
-  C++ version: Get a vslue from the configuration
+  C++ version: Get a value from the configuration
   Returns true on success and value contains the value or false on failure and value is unchanged
 */
 bool configlib_getnamevalue_cpp(const std::string &block, const std::string &name, std::string &value) {
-  configlib_lockconfig();
-	if (!configloaded) {
-		configlib_unlockconfig();
-		return false;
-	}
-	std::string tmpvalue;
+  std::string tmpvalue;
 	try {
-		tmpvalue=cfgfileitems.at(block).at(name);
+	  configlib_lockconfig();
+	  if (!configloaded) {
+	    throw std::runtime_error("Config not loaded");
+	  }
+	  tmpvalue=cfgfileitems.at(block).at(name);
+    configlib_unlockconfig();
 	} catch (std::exception& e) {
 		configlib_unlockconfig();
 		return false;
 	}
-	value=tmpvalue;
-	configlib_unlockconfig();
-	return true;
+  value=tmpvalue;
+
+  return true;
 }
 
 /*
