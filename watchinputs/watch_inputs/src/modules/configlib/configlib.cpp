@@ -705,16 +705,12 @@ bool configlib_getnamevalue_cpp(const std::string &block, const std::string &nam
   NOTE: If non-null is returned you must run free on the value when finished
 */
 char *configlib_getnamevalue_c(const char *block, const char *name) {
-	char *valuestr;
-	std::string tmpblock, tmpname, tmpvalue;
+	char *valuestr=nullptr;
+	std::string tmpblock=block, tmpname=name, tmpvalue;
 
-	tmpblock=block;
-	tmpname=name;
-	if (configlib_getnamevalue_cpp(tmpblock, tmpname, tmpvalue)==false) {
-		return nullptr;
+	if (configlib_getnamevalue_cpp(tmpblock, tmpname, tmpvalue)==true) {
+	  valuestr=strdup(tmpvalue.c_str());
 	}
-	valuestr=strdup(tmpvalue.c_str());
-
 	return valuestr;
 }
 
