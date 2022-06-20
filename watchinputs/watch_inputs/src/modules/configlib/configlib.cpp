@@ -47,6 +47,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #include <list>
 #include <map>
 #include <string>
+#include <boost/atomic/atomic.hpp>
 #ifdef __ANDROID__
 #include <jni.h>
 #include <android/log.h>
@@ -155,8 +156,8 @@ static pthread_mutex_t configlibmutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t lockkey;
 static pthread_once_t lockkey_onceinit = PTHREAD_ONCE_INIT;
 
-static int configloaded=0;
-static int configloadpending=0;
+static boost::atomic<int> configloaded(0);
+static boost::atomic<int> configloadpending(0);
 static std::string cfgfilename="";
 
 //Lists
@@ -414,8 +415,8 @@ int configlib_init(void) {
 		return 0;
   }
 	cfgfilename="";
-	configloaded=0;
-	configloadpending=0;
+	configloaded.store(0);
+	configloadpending.store(0);
   cfgfileitems.clear();
 
   post_listener_func_ptrs.clear();
@@ -454,8 +455,8 @@ void configlib_shutdown(void) {
 	//No longer in use
   post_listener_func_ptrs.clear();
 
-	configloadpending=0;
-	configloaded=0;
+	configloadpending.store(0);
+	configloaded.store(0);
 
 #ifdef DEBUG
   //Destroy main mutexes
@@ -565,19 +566,19 @@ int configlib_readcfgfile(void) {
     debuglibifaceptr->debuglib_printf(1, "Exiting %s, config filename not configured\n", __func__);
     return -1;
   }
-  configloadpending=0;
+  configloadpending.store(0);
   mainlibifaceptr->newdescriptorlock();
   int cfgfilefd=commonlibifaceptr->open_with_cloexec(cfgfilename.c_str(), O_RDONLY);
   mainlibifaceptr->newdescriptorunlock();
   if (cfgfilefd<0) {
-    configloadpending=1;
+    configloadpending.store(1);
     configlib_unlockconfig();
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, cfgfilename.c_str());
     return -1;
   }
   file=fdopen(cfgfilefd, "rb");
   if (file == NULL) {
-    configloadpending=1;
+    configloadpending.store(1);
     configlib_unlockconfig();
     debuglibifaceptr->debuglib_printf(1, "%s: Failed to open file: %s\n", __func__, cfgfilename.c_str());
     return -1;
@@ -585,7 +586,7 @@ int configlib_readcfgfile(void) {
   linebuf=(char *) malloc(BUFFER_SIZE*sizeof(char));
   if (!linebuf) {
     fclose(file);
-    configloadpending=1;
+    configloadpending.store(1);
     configlib_unlockconfig();
     debuglibifaceptr->debuglib_printf(1, "%s: Not enough memory to load configuration\n", __func__);
     return -2;
@@ -593,7 +594,7 @@ int configlib_readcfgfile(void) {
   if (abort==1) {
     fclose(file);
     free(linebuf);
-    configloadpending=1;
+    configloadpending.store(1);
     configlib_unlockconfig();
     debuglibifaceptr->debuglib_printf(1, "%s: Configuration load aborted due to error\n", __func__);
     return -3;
@@ -642,8 +643,8 @@ int configlib_readcfgfile(void) {
   free(linebuf);
 	linebuf=NULL;
 
-  configloadpending=0;
-  configloaded=1;
+  configloadpending.store(0);
+  configloaded.store(1);
 
   configlib_call_readcfgfile_post_listeners();
 
@@ -658,35 +659,21 @@ int configlib_readcfgfile(void) {
   Returns 1 if the configuration has been loaded at least once or 0 if not.
 */
 int configlib_isloaded() {
-  int val;
-
-  configlib_lockconfig();
-  val=configloaded;
-  configlib_unlockconfig();
-
-  return val;
+  return configloaded.load();
 }
 
 /*
   Returns 1 if the configuration attempted to load but failed, 0 if not.
 */
 static int configlib_loadpending() {
-  int val;
-
-  configlib_lockconfig();
-  val=configloadpending;
-  configlib_unlockconfig();
-
-  return val;
+  return configloadpending.load();
 }
 
 /*
   Cancel a previous pending load attempt
 */
 static void configlib_cancelpendingload() {
-  configlib_lockconfig();
-  configloadpending=0;
-  configlib_unlockconfig();
+  configloadpending.store(0);
 }
 
 /*
