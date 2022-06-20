@@ -8,6 +8,7 @@ lint.xml
 *.apk
 
 # autoconf files to not commit
+config.h
 *.in
 Makefile
 config.log
