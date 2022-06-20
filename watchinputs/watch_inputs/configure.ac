@@ -35,7 +35,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_CC
 AC_PROG_CXX
 dnl AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
+LT_INIT
 
 # Checks for required libraries.
 AC_CHECK_LIB([pthread], [pthread_create], [LIBPTHREAD=true], [], [])
