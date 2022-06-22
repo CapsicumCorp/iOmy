@@ -48,10 +48,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //#define SERIALPORTLIB_MOREDEBUG
 //#endif
 
-#include "config.h"
-
 #ifndef __ANDROID__
+#include "config.h"
 #include <execinfo.h>
+#else
+#include "android_config.h"
 #endif
 #include <inttypes.h>
 #include <stdio.h>

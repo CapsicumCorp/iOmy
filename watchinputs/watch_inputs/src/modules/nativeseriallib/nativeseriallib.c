@@ -35,10 +35,11 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //#define NATIVESERIALLIB_MOREDEBUG
 //#endif
 
-#include "config.h"
-
 #ifndef __ANDROID__
+#include "config.h"
 #include <execinfo.h>
+#else
+#include "android_config.h"
 #endif
 #include <errno.h>
 #include <inttypes.h>
