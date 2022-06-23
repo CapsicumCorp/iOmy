@@ -1,3 +1,63 @@
-apply from: '../../../../WatchInputsAndroid/common_cpp_ndkbuild.gradle'
+apply plugin: 'com.android.model.native'
 
-ext.thismodulename='configlib'
+final local_APP_ABIS=APP_ABIS
+
+//NOTE: Only list boost libraries that this library uses here
+final local_BOOST_SHARED_LIBS=["boost_system", "boost_thread"]
+
+model {
+    android {
+        compileSdkVersion NDKCOMPILESDKVERSION
+    }
+    android.ndk {
+        moduleName 'configlib'
+        if (rootProject.ext.has('NDKTOOLCHAIN')) {
+            toolchain NDKTOOLCHAIN
+        }
+        if (rootProject.ext.has('NDKTOOLCHAINVER')) {
+            toolchainVersion NDKTOOLCHAINVER
+        }
+        CFlags.addAll(COMMON_CFLAGS)
+        cppFlags.addAll(COMMON_CPPFLAGS)
+        cppFlags.add("-I" + getBoostIncDir())
+        ldLibs.addAll(local_BOOST_SHARED_LIBS)
+        if (rootProject.ext.has('NDKSTL')) {
+            stl NDKSTL
+        }
+    }
+    android.sources {
+        main {
+            jni {
+                exportedHeaders {
+                    srcDir "../.."
+                }
+                source {
+                    srcDir "."
+                }
+            }
+        }
+    }
+    android.productFlavors {
+        local_APP_ABIS.each { abi ->
+            create(getFlavorName(abi)) {
+                ndk.with {
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+
+                }
+            }
+        }
+        create("fat") {
+            ndk {
+                local_APP_ABIS.each { abi ->
+                    abiFilters.add(abi)
+                    getPrebuiltLibPaths(abi).each { path ->
+                        ldFlags.addAll("-L" + path)
+                    }
+                }
+            }
+        }
+    }
+}
