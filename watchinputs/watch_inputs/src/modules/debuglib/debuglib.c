@@ -33,7 +33,12 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 //  sem_timedwait
 #define _POSIX_C_SOURCE 200112L
 
-#include <config.h>
+#ifndef __ANDROID__
+#include "config.h"
+#include <execinfo.h>
+#else
+#include "android_config.h"
+#endif
 
 #include <stdio.h>
 #include <stdarg.h>
