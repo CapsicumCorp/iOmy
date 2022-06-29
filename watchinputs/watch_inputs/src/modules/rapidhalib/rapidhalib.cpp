@@ -67,6 +67,7 @@ NOTE: We have seen the following RapidHA firmware versions:
 #include <semaphore.h>
 #include <endian.h>
 #include <arpa/inet.h>
+#include <boost/atomic/atomic.hpp>
 #ifdef __ANDROID__
 #include <jni.h>
 #endif
@@ -274,7 +275,7 @@ STATIC char needtoquit=0; //Set to 1 when rapidhalib should exit
 
 static pthread_t rapidhalib_mainthread=0;
 
-STATIC int rapidhalib_numrapidhadevices=0;
+static boost::atomic<int> gnumrapidhadevices(0);
 STATIC rapidhadevice_t rapidhalib_newrapidha; //Used for new rapidha devices that haven't been fully detected yet
 STATIC rapidhadevice_t *rapidhalib_rapidhadevices; //A list of detected rapidha devices
 
@@ -533,39 +534,22 @@ void rapidhalib_unlockrapidha(void) {
 }
 
 /*
-  Thread unsafe get the number of rapidha devices
-*/
-static inline int _rapidhalib_getnumrapidhadevices(void) {
-  return rapidhalib_numrapidhadevices;
-}
-
-/*
   Thread safe get the number of rapidha devices
 */
-static inline int rapidhalib_getnumrapidhadevices(long *rapidhalocked) {
-  int val;
-
-  rapidhalib_lockrapidha();
-  val=_rapidhalib_getnumrapidhadevices();
-  rapidhalib_unlockrapidha();
-
-  return val;
-}
-
-/*
-  Thread unsafe set the number of rapidha devices
-*/
-STATIC INLINE void _rapidhalib_setnumrapidhadevices(int numrapidhadevices) {
-  rapidhalib_numrapidhadevices=numrapidhadevices;
+static inline int rapidhalib_getnumrapidhadevices() {
+  return gnumrapidhadevices.load();;
 }
 
 /*
   Thread safe set the number of rapidha devices
 */
-STATIC INLINE void rapidhalib_setnumrapidhadevices(int numrapidhadevices, long *rapidhalocked) {
-  rapidhalib_lockrapidha();
-  _rapidhalib_setnumrapidhadevices(numrapidhadevices);
-  rapidhalib_unlockrapidha();
+static inline void rapidhalib_setnumrapidhadevices(int numrapidhadevices) {
+  gnumrapidhadevices.store(numrapidhadevices);
+}
+
+//Thread safe increment the number of rapidha devices
+static inline void increment_numrapidhadevices() {
+  gnumrapidhadevices.add(1);
 }
 
 /*
@@ -2600,7 +2584,7 @@ STATIC int rapidhalib_find_rapidha_device(uint64_t addr, long *rapidhalocked) {
 
   MOREDEBUG_ENTERINGFUNC();
   rapidhalib_lockrapidha();
-  numrapidhadevices=_rapidhalib_getnumrapidhadevices();
+  numrapidhadevices=rapidhalib_getnumrapidhadevices();
   for (i=0; i<numrapidhadevices; i++) {
     if (rapidhalib_rapidhadevices[i].addr==addr && !rapidhalib_rapidhadevices[i].removed && !rapidhalib_rapidhadevices[i].needtoremove) {
       match_found=i;
@@ -2874,8 +2858,8 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
   //Allocate new memory for the send and receive buffers
   rapidhalib_rapidhadevices[list_numitems].receivebuf=(unsigned char *) malloc(BUFFER_SIZE*sizeof(unsigned char));
 
-  if (i==rapidhalib_numrapidhadevices) {
-    ++rapidhalib_numrapidhadevices;
+  if (i==rapidhalib_getnumrapidhadevices()) {
+    increment_numrapidhadevices();
   }
   rapidhalib_unlockrapidha();
 
@@ -2994,7 +2978,7 @@ STATIC int rapidhalib_processcommand(const char *buffer, int clientsock) {
 
     //Format: get_rapidha_info
     rapidhalib_lockrapidha();
-    numrapidhadevices=_rapidhalib_getnumrapidhadevices();
+    numrapidhadevices=rapidhalib_getnumrapidhadevices();
     for (i=0; i<numrapidhadevices; i++) {
       uint8_t firmmaj, firmmin, firmbuild;
       uint8_t network_state, device_type, cfgstate, channel;
@@ -3172,7 +3156,7 @@ int rapidhalib_serial_device_removed(int serdevidx) {
 
   rapidhalib_lockrapidha();
 
-  numrapidhadevices=_rapidhalib_getnumrapidhadevices();
+  numrapidhadevices=rapidhalib_getnumrapidhadevices();
   for (i=0; i<numrapidhadevices; i++) {
     rapidhadeviceptr=&rapidhalib_rapidhadevices[i];
     if (rapidhadeviceptr->removed) {
@@ -3469,7 +3453,7 @@ STATIC void rapidhalib_refresh_rapidha_data(void) {
   //Refresh data from rapidha devices
   MOREDEBUG_ENTERINGFUNC();
   localzigbeedevice.devicetype="RapidHA";
-  numrapidhadevices=rapidhalib_getnumrapidhadevices(&rapidhalocked);
+  numrapidhadevices=rapidhalib_getnumrapidhadevices();
   for (i=0; i<numrapidhadevices; i++) {
     int zigbeelibindex;
     rapidhadevice_t *rapidhadeviceptr;
@@ -3708,7 +3692,7 @@ int rapidhalib_init(void) {
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Can't initialise main thread sleep semaphore\n", __func__);
     return -2;
   }
-  rapidhalib_numrapidhadevices=0;
+  rapidhalib_setnumrapidhadevices(0);
   if (!rapidhalib_rapidhadevices) {
     rapidhalib_rapidhadevices=reinterpret_cast<rapidhadevice_t *>(calloc(MAX_RAPIDHA_DEVICES, sizeof(rapidhadevice_t)));
     if (!rapidhalib_rapidhadevices) {
@@ -3772,7 +3756,7 @@ void rapidhalib_shutdown(void) {
 
   //Free allocated memory
   if (rapidhalib_rapidhadevices) {
-    for (i=0; i<rapidhalib_numrapidhadevices; i++) {
+    for (i=0; i<rapidhalib_getnumrapidhadevices(); i++) {
       if (rapidhalib_rapidhadevices[i].firmwarefile_fd!=-1) {
         close(rapidhalib_rapidhadevices[i].firmwarefile_fd);
         rapidhalib_rapidhadevices[i].firmwarefile_fd=-1;
@@ -3786,7 +3770,7 @@ void rapidhalib_shutdown(void) {
         rapidhalib_rapidhadevices[i].receivebuf=NULL;
       }
     }
-    rapidhalib_numrapidhadevices=0;
+    rapidhalib_setnumrapidhadevices(0);
     free(rapidhalib_rapidhadevices);
     rapidhalib_rapidhadevices=NULL;
   }
