@@ -1,5 +1,5 @@
 lib_LTLIBRARIES = rapidhalib.la
-rapidhalib_la_SOURCES = rapidhalib.cpp
+rapidhalib_la_SOURCES = rapidhalib.c
 rapidhalib_la_LDFLAGS = -module -version-info 0:0:0
 if LINK_LIBPTHREAD
   USE_LIBPTHREAD=-lpthread
@@ -13,4 +13,4 @@ endif
 rapidhalib_la_LIBADD=$(USE_LIBPTHREAD) -lrt
 
 AM_CFLAGS=-I$(top_srcdir)/src $(COMMONCFLAGS) $(ENABLE_RAPIDHALIB_LOCKDEBUG) $(ENABLE_RAPIDHALIB_MOREDEBUG)
-AM_CXXFLAGS=-I$(top_srcdir)/src $(COMMONCPPFLAGS) $(ENABLE_RAPIDHALIB_LOCKDEBUG) $(ENABLE_RAPIDHALIB_MOREDEBUG)
+

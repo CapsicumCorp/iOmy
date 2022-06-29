@@ -305,63 +305,55 @@ int rapidhalib_serial_device_removed(int serdevidx);
 
 STATIC moduledep_ver_1_t rapidhalib_deps[]={
   {
-    "debuglib",
-    nullptr,
-    DEBUGLIBINTERFACE_VER_1,
-    1
+    .modulename="debuglib",
+    .ifacever=DEBUGLIBINTERFACE_VER_1,
+    .required=1
   },
   {
-    "serialportlib",
-    nullptr,
-    SERIALPORTLIBINTERFACE_VER_1,
-    1
+    .modulename="serialportlib",
+    .ifacever=SERIALPORTLIBINTERFACE_VER_1,
+    .required=1
   },
   {
-    "cmdserverlib",
-    nullptr,
-    CMDSERVERLIBINTERFACE_VER_1,
-    0
+    .modulename="cmdserverlib",
+    .ifacever=CMDSERVERLIBINTERFACE_VER_1,
+    .required=0
   },
   {
-    "commonlib",
-    nullptr,
-    COMMONLIBINTERFACE_VER_1,
-    1
+    .modulename="commonlib",
+    .ifacever=COMMONLIBINTERFACE_VER_1,
+    .required=1
   },
   {
-    "zigbeelib",
-    nullptr,
-    ZIGBEELIBINTERFACE_VER_1,
-    1
+    .modulename="zigbeelib",
+    .ifacever=ZIGBEELIBINTERFACE_VER_1,
+    .required=1
   },
   {
-    "commonlib",
-    nullptr,
-    COMMONLIBINTERFACE_VER_2,
-    1
+    .modulename="commonlib",
+    .ifacever=COMMONLIBINTERFACE_VER_2,
+    .required=1
   },
   {
-    "mainlib",
-    nullptr,
-    MAINLIBINTERFACE_VER_2,
-    1
+    .modulename="mainlib",
+    .ifacever=MAINLIBINTERFACE_VER_2,
+    .required=1
   },
   {
-    nullptr, nullptr, 0, 0
+    .modulename=NULL
   }
 };
 
 static moduleinfo_ver_1_t rapidhalib_moduleinfo_ver_1={
-  MODULEINFO_VER_1,
-  "rapidhalib",
-  rapidhalib_init,
-  rapidhalib_shutdown,
-  rapidhalib_start,
-  rapidhalib_stop,
-  rapidhalib_register_listeners,
-  rapidhalib_unregister_listeners,
-  nullptr,
-  (moduledep_ver_1_t (*)[]) &rapidhalib_deps
+  .moduleinfover=MODULEINFO_VER_1,
+  .modulename="rapidhalib",
+  .initfunc=rapidhalib_init,
+  .shutdownfunc=rapidhalib_shutdown,
+  .startfunc=rapidhalib_start,
+  .stopfunc=rapidhalib_stop,
+  .registerlistenersfunc=rapidhalib_register_listeners,
+  .unregisterlistenersfunc=rapidhalib_unregister_listeners,
+  .moduledeps=&rapidhalib_deps
 };
 
 static serialdevicehandler_iface_ver_1_t rapidhalib_devicehandler_iface_ver_1={

@@ -25,7 +25,7 @@ along with iOmy.  If not, see <http://www.gnu.org/licenses/>.
 #define _GNU_SOURCE
 
 #ifndef __ANDROID__
-#include "android_config.h"
+#include <config.h>
 #endif
 
 #include <unistd.h>
