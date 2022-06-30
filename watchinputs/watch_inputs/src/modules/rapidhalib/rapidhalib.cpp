@@ -264,14 +264,14 @@ static int rapidhalib_waitingforresponse; //Set to one of the RAPIDHA_WAITING_FO
 static int rapidhalib_waitresult; //Set to 1 if the receive function receives the response that was being waited for
 
 //Used by the receive function to decide whether to use rapidhalib_rapidhadevices or rapidhalib_newrapidha
-STATIC int rapidhalib_detectingdevice; //Set to 1 when a device is being detected
+static boost::atomic<bool> rapidhalib_detectingdevice(false); //Set to true when a device is being detected
 
 static sem_t rapidhalib_mainthreadsleepsem; //Used for main thread sleeping
 
 static int rapidhalib_inuse=0; //Only shutdown when inuse = 0
 static int rapidhalib_shuttingdown=0;
 
-STATIC char needtoquit=0; //Set to 1 when rapidhalib should exit
+STATIC boost::atomic<bool> needtoquit(false); //Set to true when rapidhalib should exit
 
 static pthread_t rapidhalib_mainthread=0;
 
@@ -279,13 +279,13 @@ static boost::atomic<int> gnumrapidhadevices(0);
 STATIC rapidhadevice_t rapidhalib_newrapidha; //Used for new rapidha devices that haven't been fully detected yet
 STATIC rapidhadevice_t *rapidhalib_rapidhadevices; //A list of detected rapidha devices
 
-STATIC int rapidhalib_needmoreinfo=0; //Set to non-zero when a RapidHA/Zigbee device needs more info to indicate that we shouldn't sleep for very long
+STATIC boost::atomic<int> rapidhalib_needmoreinfo(0); //Set to non-zero when a RapidHA/Zigbee device needs more info to indicate that we shouldn't sleep for very long
 
 //Function Declarations
 int rapidhalib_markrapidha_inuse(void *rapidhadevice, long *rapidhalocked);
 int rapidhalib_markrapidha_notinuse(void *rapidhadevice, long *rapidhalocked);
-static void rapidhalib_setneedtoquit(int val, long *rapidhalocked);
-static int rapidhalib_getneedtoquit(long *rapidhalocked);
+static inline void rapidhalib_setneedtoquit(bool val);
+static inline bool rapidhalib_getneedtoquit();
 int rapidhalib_start(void);
 void rapidhalib_stop(void);
 int rapidhalib_init(void);
@@ -533,16 +533,12 @@ void rapidhalib_unlockrapidha(void) {
   }
 }
 
-/*
-  Thread safe get the number of rapidha devices
-*/
+//Thread safe get the number of rapidha devices
 static inline int rapidhalib_getnumrapidhadevices() {
   return gnumrapidhadevices.load();;
 }
 
-/*
-  Thread safe set the number of rapidha devices
-*/
+//Thread safe set the number of rapidha devices
 static inline void rapidhalib_setnumrapidhadevices(int numrapidhadevices) {
   gnumrapidhadevices.store(numrapidhadevices);
 }
@@ -552,108 +548,34 @@ static inline void increment_numrapidhadevices() {
   gnumrapidhadevices.add(1);
 }
 
-/*
-  Thread unsafe get detecting device
-*/
-static inline int _rapidhalib_getdetectingdevice(void) {
-  return rapidhalib_detectingdevice;
+//Thread safe get detecting device
+static inline bool rapidhalib_getdetectingdevice() {
+  return rapidhalib_detectingdevice.load();
 }
 
-/*
-  Thread safe get detecting device
-*/
-static inline int rapidhalib_getdetectingdevice(long *rapidhalocked) {
-  int val;
-
-  rapidhalib_lockrapidha();
-  val=_rapidhalib_getdetectingdevice();
-  rapidhalib_unlockrapidha();
-
-  return val;
+//Thread safe set detecting device
+static inline void rapidhalib_setdetectingdevice(bool detectingdevice) {
+  rapidhalib_detectingdevice.store(detectingdevice);
 }
 
-/*
-  Thread unsafe set detecting device
-*/
-static inline void _rapidhalib_setdetectingdevice(int detectingdevice) {
-  rapidhalib_detectingdevice=detectingdevice;
+//Thread safe get need more info value
+static inline int rapidhalib_getneedmoreinfo() {
+  return rapidhalib_needmoreinfo.load();
 }
 
-/*
-  Thread safe set detecting device
-*/
-static inline void rapidhalib_setdetectingdevice(int detectingdevice, long *rapidhalocked) {
-  rapidhalib_lockrapidha();
-  _rapidhalib_setdetectingdevice(detectingdevice);
-  rapidhalib_unlockrapidha();
+//Thread safe set need more info value
+static inline void rapidhalib_setneedmoreinfo(int needmoreinfo) {
+  rapidhalib_needmoreinfo.store(needmoreinfo);
 }
 
-/*
-  Thread unsafe get need more info value
-*/
-STATIC INLINE int _rapidhalib_getneedmoreinfo(void) {
-  return rapidhalib_needmoreinfo;
+//Thread safe add to need more info value
+static inline void rapidhalib_addtoneedmoreinfo(int addvalue) {
+  rapidhalib_needmoreinfo.add(addvalue);
 }
 
-/*
-  Thread safe get need more info value
-*/
-STATIC INLINE int rapidhalib_getneedmoreinfo(long *rapidhalocked) {
-  int val;
-
-  rapidhalib_lockrapidha();
-  val=_rapidhalib_getneedmoreinfo();
-  rapidhalib_unlockrapidha();
-
-  return val;
-}
-
-/*
-  Thread unsafe set need more info value
-*/
-STATIC INLINE void _rapidhalib_setneedmoreinfo(int needmoreinfo) {
-  rapidhalib_needmoreinfo=needmoreinfo;
-}
-
-/*
-  Thread safe set need more info value
-*/
-STATIC INLINE void rapidhalib_setneedmoreinfo(int needmoreinfo, long *rapidhalocked) {
-  rapidhalib_lockrapidha();
-  _rapidhalib_setneedmoreinfo(needmoreinfo);
-  rapidhalib_unlockrapidha();
-}
-
-/*
-  Thread unsafe add to need more info value
-*/
-STATIC INLINE void _rapidhalib_addtoneedmoreinfo(int addvalue) {
-  rapidhalib_needmoreinfo+=addvalue;
-}
-
-/*
-  Thread safe add to need more info value
-*/
-STATIC INLINE void rapidhalib_addtoneedmoreinfo(int addvalue, long *rapidhalocked) {
-  rapidhalib_lockrapidha();
-  _rapidhalib_addtoneedmoreinfo(addvalue);
-  rapidhalib_unlockrapidha();
-}
-
-/*
-  Thread unsafe subtract from need more info value
-*/
-STATIC INLINE void _rapidhalib_subtractneedmoreinfo(int subtractvalue) {
-  //You can subtrace a number by adding the negative value of it
-  _rapidhalib_addtoneedmoreinfo(-subtractvalue);
-}
-
-/*
-  Thread safe subtract from need more info value
-*/
-STATIC INLINE void rapidhalib_subtractneedmoreinfo(int subtractvalue, long *rapidhalocked) {
-  //You can subtrace a number by adding the negative value of it
-  rapidhalib_addtoneedmoreinfo(-subtractvalue, rapidhalocked);
+//Thread safe subtract from need more info value
+static inline void rapidhalib_subtractneedmoreinfo(int subtractvalue) {
+  rapidhalib_needmoreinfo.sub(subtractvalue);
 }
 
 /*
@@ -2456,7 +2378,7 @@ void rapidhalib_receiveraw(int UNUSED(serdevidx), int handlerdevidx, char *buffe
     //Assign to rapidhadevice element
     rapidhadevice=(rapidhadevice_t *) &rapidhalib_rapidhadevices[handlerdevidx];
   } else {
-    if (rapidhalib_getdetectingdevice(&rapidhalocked)) {
+    if (rapidhalib_getdetectingdevice()) {
       //Only handle data from newrapidha if we are currently detecting an rapidha
       rapidhadevice=&rapidhalib_newrapidha;
 
@@ -2813,12 +2735,12 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
   rapidhalib_newrapidha.serdevidx=serdevidx;
   rapidhalib_newrapidha.sendFuncptr=sendFuncptr;
 
-  rapidhalib_setdetectingdevice(1, &rapidhalocked);
+  rapidhalib_setdetectingdevice(true);
   debuglibifaceptr->debuglib_printf(1, "%s: serial device index=%d\n", __func__, serdevidx);
 
   detectresult=rapidhalib_detect_rapidha(&rapidhalib_newrapidha, 0, &rapidhalocked);
   if (detectresult<0) {
-    rapidhalib_setdetectingdevice(0, &rapidhalocked);
+    rapidhalib_setdetectingdevice(false);
     PTHREAD_UNLOCK(&rapidhalibmutex_detectingdevice);
     debuglibifaceptr->debuglib_printf(1, "Exiting %s line: %d\n", __func__, __LINE__);
     return -1;
@@ -2833,7 +2755,7 @@ int rapidhalib_isDeviceSupported(int serdevidx, int (*sendFuncptr)(int serdevidx
     }
   }
   if (i==MAX_RAPIDHA_DEVICES) {
-    rapidhalib_setdetectingdevice(0, &rapidhalocked);
+    rapidhalib_setdetectingdevice(false);
     rapidhalib_unlockrapidha();
     PTHREAD_UNLOCK(&rapidhalibmutex_detectingdevice);
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Max limit of %d RapidHA devices has been reached\n", __func__, MAX_RAPIDHA_DEVICES);
@@ -3379,7 +3301,7 @@ STATIC void rapidhalib_dofirmwareupgrade(rapidhadevice_t *rapidhadevice, long *r
   offsetsecscnt=0;
   prevfirmware_offset=0;
   offsetnotprogressing=0;
-  while (firmware_progress>0 && secscnt<RAPIDHA_FIRMWARE_UPDATE_MAX_WAIT_TIME && !rapidhalib_getneedtoquit(rapidhalocked)) {
+  while (firmware_progress>0 && secscnt<RAPIDHA_FIRMWARE_UPDATE_MAX_WAIT_TIME && !rapidhalib_getneedtoquit()) {
     //Wait until firmware progress is no longer above 0 or until we've waited too long
     sleep(1);
     rapidhalib_lockrapidha();
@@ -3570,13 +3492,13 @@ STATIC void *rapidhalib_mainloop(void* UNUSED(val)) {
   debuglibifaceptr->debuglib_printf(1, "Entering %s\n", __func__);
 
   //Loop until this thread is canceled
-  while (!rapidhalib_getneedtoquit(&rapidhalocked)) {
+  while (!rapidhalib_getneedtoquit()) {
     clock_gettime(CLOCK_REALTIME, &semwaittime);
     currenttime=semwaittime.tv_sec;
 
     rapidhalib_refresh_rapidha_data();
 
-    if (rapidhalib_getneedtoquit(&rapidhalocked)) {
+    if (rapidhalib_getneedtoquit()) {
       break;
     }
     //Sleep until the next second
@@ -3592,28 +3514,12 @@ STATIC void *rapidhalib_mainloop(void* UNUSED(val)) {
   return (void *) 0;
 }
 
-static inline void _rapidhalib_setneedtoquit(int val) {
-  needtoquit=val;
+static inline void rapidhalib_setneedtoquit(bool val) {
+  needtoquit.store(val);
 }
 
-static inline void rapidhalib_setneedtoquit(int val, long *rapidhalocked) {
-  rapidhalib_lockrapidha();
-  _rapidhalib_setneedtoquit(val);
-  rapidhalib_unlockrapidha();
-}
-
-static inline int _rapidhalib_getneedtoquit(void) {
-  return needtoquit;
-}
-
-static inline int rapidhalib_getneedtoquit(long *rapidhalocked) {
-  int val;
-
-  rapidhalib_lockrapidha();
-  val=_rapidhalib_getneedtoquit();
-  rapidhalib_unlockrapidha();
-
-  return val;
+static inline bool rapidhalib_getneedtoquit() {
+  return needtoquit.load();
 }
 
 //NOTE: Don't need to thread lock since when this function is called only one thread will be using the variables that are used in this function
@@ -3653,7 +3559,7 @@ void rapidhalib_stop(void) {
     //Cancel the main thread and wait for it to exit
     debuglibifaceptr->debuglib_printf(1, "%s: Cancelling the main thread\n", __func__);
     PTHREAD_LOCK(&rapidhalibmutex);
-    _rapidhalib_setneedtoquit(1);
+    rapidhalib_setneedtoquit(true);
     sem_post(&rapidhalib_mainthreadsleepsem);
     PTHREAD_UNLOCK(&rapidhalibmutex);
     debuglibifaceptr->debuglib_printf(1, "%s: Waiting for main thread to exit\n", __func__);
@@ -3686,7 +3592,7 @@ int rapidhalib_init(void) {
     serialportlibifaceptr->init();
   }
   //Let the database library know that we want to use it
-  needtoquit=0;
+  rapidhalib_setneedtoquit(false);
   if (sem_init(&rapidhalib_mainthreadsleepsem, 0, 0)==-1) {
     //Can't initialise semaphore
     debuglibifaceptr->debuglib_printf(1, "Exiting %s: Can't initialise main thread sleep semaphore\n", __func__);
