@@ -230,39 +230,53 @@ typedef struct {
   uint8_t payload; //Payload goes here: set by the caller, variable length
 } __attribute__((packed)) rapidha_api_header_t;
 
-//Can also use this for network comissioning join network
+//RapidHA Simple Command
+//LSB 2-byte Checksum follows the payload and is the sum of all values from primary header to end of payload
 typedef struct {
   uint8_t frame_start; //Always set to 0xF1
   uint8_t header_primary; //Primary frame type
   uint8_t header_secondary; //Command Subset of the given primary frame type
   uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
-  uint8_t length; //Number of bytes between the length and the checksum
+  uint8_t length=0; //Number of bytes between the length and the checksum
+  uint16_t checksum; //Simple commands don't have a payload and have a fixed length so we can put the checksum field in here
+} __attribute__((packed)) rapidha_simple_command_t;
+
+//Can also use this for network comissioning join network
+typedef struct {
+  uint8_t frame_start; //Always set to 0xF1
+  uint8_t header_primary=RAPIDHA_NETWORK_COMISSIONING; //Primary frame type
+  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
+  uint8_t length=15; //Number of bytes between the length and the checksum
   uint32_t channelmask; //Use 0x03FFF800 to be compliant with ZigBee HA and SE and FCC
   uint8_t auto_options; //Bit0=1 - Auto PAN ID
                         //Bit1=1 - Auto Extended ID
   uint16_t panid; //Short PAN ID of network
   uint64_t extpanid; //Extended PAN ID of network
+  uint16_t checksum;
 } __attribute__((packed)) rapidha_network_comissioning_form_network_t;
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xF1
-  uint8_t header_primary; //Primary frame type
-  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t header_primary=RAPIDHA_NETWORK_COMISSIONING; //Primary frame type
+  uint8_t header_secondary=RAPIDHA_NETWORK_COMISSIONING_PERMIT_JOIN; //Command Subset of the given primary frame type
   uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
-  uint8_t length; //Number of bytes between the length and the checksum
+  uint8_t length=1; //Number of bytes between the length and the checksum
   uint8_t duration; //The duration in seconds to permit joining, 0xFF=Permanent duration
+  uint16_t checksum;
 } __attribute__((packed)) rapidha_network_comissioning_permit_join_t;
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xF1
-  uint8_t header_primary; //Primary frame type
-  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t header_primary=RAPIDHA_ZIGBEE_SUPPORT_CONFIG; //Primary frame type
+  uint8_t header_secondary=RAPIDHA_SUPPORT_CONFIG_DEVICE_TYPE_WRITE; //Command Subset of the given primary frame type
   uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
-  uint8_t length; //Number of bytes between the length and the checksum
+  uint8_t length=2; //Number of bytes between the length and the checksum
   uint8_t device_function_type; //0x00=Full Function Device (Router or Coordinator)
                                 //0x01=Reduced Function Device (End Device)
   uint8_t sleepy; //0x00=Non-Sleepy (Use this for Full Function Device as well)
                   //0x01=Sleepy
+  uint16_t checksum;
 } __attribute__((packed)) rapidha_support_config_device_type_write_t;
 
 typedef struct {
@@ -318,11 +332,12 @@ typedef struct {
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xF1
-  uint8_t header_primary; //Primary frame type
-  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t header_primary=RAPIDHA_ZIGBEE_SUPPORT_CONFIG; //Primary frame type
+  uint8_t header_secondary=RAPIDHA_SUPPORT_CONFIG_ATTRIBUTE_REPORT_PASSTHROUGH_CONTROL; //Command Subset of the given primary frame type
   uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
-  uint8_t length; //Number of bytes between the length and the checksum
+  uint8_t length=1; //Number of bytes between the length and the checksum
   uint8_t enable; //0=Disable passthrough of reporting, 1=Enable passthrough of reporting
+  uint16_t checksum;
 } __attribute__((packed)) rapidha_support_config_attribute_report_passthrough_control_t;
 
 typedef struct {
@@ -560,10 +575,10 @@ typedef struct {
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xF1
-  uint8_t header_primary; //Primary frame type
-  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t header_primary=RAPIDHA_BOOTLOAD; //Primary frame type
+  uint8_t header_secondary=RAPIDHA_BOOTLOAD_QUERY_NEXT_IMAGE_RESPONSE; //Command Subset of the given primary frame type
   uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
-  uint8_t length; //Number of bytes between the length and the checksum
+  uint8_t length=24; //Number of bytes between the length and the checksum
   uint16_t netaddr; //0xFFFF indicates that 64-bit address is used
   uint64_t addr; //64-bit address
   uint8_t endpoint; //Use 0xFF to request on all endpoints
@@ -572,6 +587,7 @@ typedef struct {
   uint16_t imagetype; //Set to 0 when sending from host
   uint32_t fileversion; //Set to 0 when sending from host
   uint32_t imagesize; //Set to the size of the firmware file
+  uint16_t checksum;
 } __attribute__((packed)) rapidha_bootload_query_next_image_response_t;
 
 typedef struct {
@@ -641,10 +657,10 @@ typedef struct {
 
 typedef struct {
   uint8_t frame_start; //Always set to 0xF1
-  uint8_t header_primary; //Primary frame type
-  uint8_t header_secondary; //Command Subset of the given primary frame type
+  uint8_t header_primary=RAPIDHA_BOOTLOAD; //Primary frame type
+  uint8_t header_secondary=RAPIDHA_BOOTLOAD_UPGRADE_EBD_RESPONSE; //Command Subset of the given primary frame type
   uint8_t frameid; //Set this with get_next_frameid : 0-127 from Host 128-255 from module
-  uint8_t length; //Number of bytes between the length and the checksum
+  uint8_t length=27; //Number of bytes between the length and the checksum
   uint16_t netaddr; //0xFFFF indicates that 64-bit address is used
   uint64_t addr; //64-bit address
   uint8_t endpoint; //Use 0xFF to request on all endpoints
@@ -658,6 +674,7 @@ typedef struct {
   uint32_t fileversion; //Set to 0 when sending from host
   uint32_t curtime; //0=Now
   uint32_t upgrade_time; //0=Now
+  uint16_t checksum;
 } __attribute__((packed)) rapidha_bootload_upgrade_end_response_t;
 
 typedef struct {

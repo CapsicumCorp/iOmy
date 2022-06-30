@@ -67,6 +67,7 @@ NOTE: We have seen the following RapidHA firmware versions:
 #include <semaphore.h>
 #include <endian.h>
 #include <arpa/inet.h>
+#include <array>
 #include <boost/atomic/atomic.hpp>
 #ifdef __ANDROID__
 #include <jni.h>
@@ -810,23 +811,15 @@ STATIC void __rapidhalib_rapidha_send_api_packet(rapidhadevice_t *rapidhadevice,
 */
 void rapidhalib_send_rapidha_simple_command(rapidhadevice_t *rapidhadevice, uint8_t primary, uint8_t secondary, long *rapidhalocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  rapidha_api_header_t *apicmd;
+  rapidha_simple_command_t apicmd;
 
 #ifdef RAPIDHALIB_MOREDEBUG
   debuglibifaceptr->debuglib_printf(1, "Entering %s: thread id: %lu With primary: %d, secondary: %d\n", __func__, pthread_self(), primary, secondary);
 #endif
   //Fill in the packet details and send the packet
-  //NOTE: We do minus 1 as the zigbeepayload value will overlap with the first byte of the zigbee command
-  apicmd=(rapidha_api_header_t *) calloc(1, sizeof(rapidha_api_header_t)+2-1);
-  if (!apicmd) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  apicmd->header_primary=primary;
-  apicmd->header_secondary=secondary;
-  apicmd->length=0;
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
-  free(apicmd);
+  apicmd.header_primary=primary;
+  apicmd.header_secondary=secondary;
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) &apicmd, rapidhalocked);
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -854,25 +847,17 @@ void rapidhalib_send_rapidha_startup_sync_complete(rapidhadevice_t *rapidhadevic
 */
 void rapidhalib_send_rapidha_network_comissioning_join_network(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  rapidha_network_comissioning_form_network_t *apicmd;
+  rapidha_network_comissioning_form_network_t apicmd;
 
   MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
-  apicmd=(rapidha_network_comissioning_form_network_t *) calloc(1, sizeof(rapidha_network_comissioning_form_network_t)+2);
-  if (!apicmd) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  apicmd->header_primary=RAPIDHA_NETWORK_COMISSIONING;
-  apicmd->header_secondary=RAPIDHA_NETWORK_COMISSIONING_JOIN_NETWORK;
-  apicmd->length=sizeof(rapidha_network_comissioning_form_network_t)-5;
-  apicmd->channelmask=0x03FFF800;
-  apicmd->auto_options=3;
-  apicmd->panid=0;
-  apicmd->extpanid=0;
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
-  free(apicmd);
+  apicmd.header_secondary=RAPIDHA_NETWORK_COMISSIONING_JOIN_NETWORK;
+  apicmd.channelmask=0x03FFF800;
+  apicmd.auto_options=3;
+  apicmd.panid=0;
+  apicmd.extpanid=0;
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) &apicmd, rapidhalocked);
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -884,25 +869,17 @@ void rapidhalib_send_rapidha_network_comissioning_join_network(rapidhadevice_t *
 */
 void rapidhalib_send_rapidha_network_comissioning_form_network(rapidhadevice_t *rapidhadevice, int chanmask, long *rapidhalocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  rapidha_network_comissioning_form_network_t *apicmd;
+  rapidha_network_comissioning_form_network_t apicmd;
 
   MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
-  apicmd=(rapidha_network_comissioning_form_network_t *) calloc(1, sizeof(rapidha_network_comissioning_form_network_t)+2);
-  if (!apicmd) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  apicmd->header_primary=RAPIDHA_NETWORK_COMISSIONING;
-  apicmd->header_secondary=RAPIDHA_NETWORK_COMISSIONING_FORM_NETWORK;
-  apicmd->length=sizeof(rapidha_network_comissioning_form_network_t)-5;
-  apicmd->channelmask=chanmask;
-  apicmd->auto_options=3;
-  apicmd->panid=0;
-  apicmd->extpanid=0;
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
-  free(apicmd);
+  apicmd.header_secondary=RAPIDHA_NETWORK_COMISSIONING_FORM_NETWORK;
+  apicmd.channelmask=chanmask;
+  apicmd.auto_options=3;
+  apicmd.panid=0;
+  apicmd.extpanid=0;
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) &apicmd, rapidhalocked);
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -914,22 +891,13 @@ void rapidhalib_send_rapidha_network_comissioning_form_network(rapidhadevice_t *
 void rapidhalib_send_rapidha_network_comissioning_permit_join(void *localzigbeedevice, uint8_t duration, long *rapidhalocked) {
   rapidhadevice_t *rapidhadevice=reinterpret_cast<rapidhadevice_t *>(localzigbeedevice);
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  rapidha_network_comissioning_permit_join_t *apicmd;
+  rapidha_network_comissioning_permit_join_t apicmd;
 
   MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
-  apicmd=(rapidha_network_comissioning_permit_join_t *) calloc(1, sizeof(rapidha_network_comissioning_permit_join_t)+2);
-  if (!apicmd) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  apicmd->header_primary=RAPIDHA_NETWORK_COMISSIONING;
-  apicmd->header_secondary=RAPIDHA_NETWORK_COMISSIONING_PERMIT_JOIN;
-  apicmd->length=sizeof(duration);
-  apicmd->duration=duration;
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
-  free(apicmd);
+  apicmd.duration=duration;
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) &apicmd, rapidhalocked);
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -949,35 +917,25 @@ void rapidhalib_send_rapidha_network_comissioning_network_status_request(rapidha
 */
 void rapidhalib_send_rapidha_support_config_device_type_write(rapidhadevice_t *rapidhadevice, uint8_t device_type, long *rapidhalocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  rapidha_support_config_device_type_write_t *apicmd;
+  rapidha_support_config_device_type_write_t apicmd;
 
   MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
-  apicmd=(rapidha_support_config_device_type_write_t *) calloc(1, sizeof(rapidha_support_config_device_type_write_t)+2);
-  if (!apicmd) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  apicmd->header_primary=RAPIDHA_ZIGBEE_SUPPORT_CONFIG;
-  apicmd->header_secondary=RAPIDHA_SUPPORT_CONFIG_DEVICE_TYPE_WRITE;
-  apicmd->length=sizeof(uint8_t)*2;
-
   if (device_type==1) {
     //Non-Sleepy End Device
-    apicmd->device_function_type=0x01;
-    apicmd->sleepy=0x00;
+    apicmd.device_function_type=0x01;
+    apicmd.sleepy=0x00;
   } else if (device_type==2) {
     //Sleepy End Device
-    apicmd->device_function_type=0x01;
-    apicmd->sleepy=0x01;
+    apicmd.device_function_type=0x01;
+    apicmd.sleepy=0x01;
   } else {
     //Full Function Device
-    apicmd->device_function_type=0x00;
-    apicmd->sleepy=0x00;
+    apicmd.device_function_type=0x00;
+    apicmd.sleepy=0x00;
   }
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
-  free(apicmd);
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) &apicmd, rapidhalocked);
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -1104,24 +1062,14 @@ void rapidhalib_send_rapidha_support_config_clear_endpoint_config(rapidhadevice_
 //Supported on firmware versions >= 1.5.3
 void rapidhalib_send_rapidha_support_config_attribute_report_passthrough_control(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  rapidha_support_config_attribute_report_passthrough_control_t *apicmd;
+  rapidha_support_config_attribute_report_passthrough_control_t apicmd;
 
   MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
-  apicmd=(rapidha_support_config_attribute_report_passthrough_control_t *) calloc(1, sizeof(rapidha_support_config_attribute_report_passthrough_control_t)+2);
-  if (!apicmd) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  //Fill in the packet details and send the packet
-  apicmd->header_primary=RAPIDHA_ZIGBEE_SUPPORT_CONFIG;
-  apicmd->header_secondary=RAPIDHA_SUPPORT_CONFIG_ATTRIBUTE_REPORT_PASSTHROUGH_CONTROL;
-  apicmd->length=1;
-  apicmd->enable=1;
+  apicmd.enable=1;
 
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
-  free(apicmd);
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) &apicmd, rapidhalocked);
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -1273,7 +1221,7 @@ void rapidhalib_send_rapidha_support_config_send_current_time(rapidhadevice_t *r
 */
 void rapidhalib_send_rapidha_bootload_query_next_image_response(rapidhadevice_t *rapidhadevice, int firmwarefile_fd, long *rapidhalocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
-  rapidha_bootload_query_next_image_response_t *apicmd;
+  rapidha_bootload_query_next_image_response_t apicmd;
   off_t filesize;
 
   MOREDEBUG_ENTERINGFUNC();
@@ -1290,26 +1238,16 @@ void rapidhalib_send_rapidha_bootload_query_next_image_response(rapidhadevice_t 
     return;
   }
   //Fill in the packet details and send the packet
-  apicmd=(rapidha_bootload_query_next_image_response_t *) calloc(1, sizeof(rapidha_bootload_query_next_image_response_t)+2);
-  if (!apicmd) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  apicmd->header_primary=RAPIDHA_BOOTLOAD;
-  apicmd->header_secondary=RAPIDHA_BOOTLOAD_QUERY_NEXT_IMAGE_RESPONSE;
-  apicmd->length=sizeof(rapidha_bootload_query_next_image_response_t)-5;
-  apicmd->netaddr=0xFFFF;
-  apicmd->addr=rapidhadevice->addr;
-  apicmd->endpoint=0xFF;
-  apicmd->status=0;
-  apicmd->manu=htole16(0x109A); //Must be 109A for RapidHA
-  apicmd->imagetype=0;
-  apicmd->fileversion=0;
-  apicmd->imagesize=filesize;
+  apicmd.netaddr=0xFFFF;
+  apicmd.addr=rapidhadevice->addr;
+  apicmd.endpoint=0xFF;
+  apicmd.status=0;
+  apicmd.manu=htole16(0x109A); //Must be 109A for RapidHA
+  apicmd.imagetype=0;
+  apicmd.fileversion=0;
+  apicmd.imagesize=filesize;
 
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
-
-  free(apicmd);
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) &apicmd, rapidhalocked);
 
   MOREDEBUG_EXITINGFUNC();
 }
@@ -1387,30 +1325,20 @@ void rapidhalib_send_rapidha_bootload_image_block_response(rapidhadevice_t *rapi
   NOTE: Really basic at the moment
 */
 void rapidhalib_send_rapidha_bootload_upgrade_end_response(rapidhadevice_t *rapidhadevice, uint16_t netaddr, uint64_t addr, uint8_t endpoint, uint16_t manu, uint16_t image_type, uint32_t fileversion, long *rapidhalocked) {
-  rapidha_bootload_upgrade_end_response_t *apicmd;
+  rapidha_bootload_upgrade_end_response_t apicmd;
 
   MOREDEBUG_ENTERINGFUNC();
 
   //Fill in the packet details and send the packet
-  apicmd=(rapidha_bootload_upgrade_end_response_t *) calloc(1, sizeof(rapidha_bootload_upgrade_end_response_t)+3);
-  if (!apicmd) {
-    MOREDEBUG_EXITINGFUNC();
-    return;
-  }
-  apicmd->header_primary=RAPIDHA_BOOTLOAD;
-  apicmd->header_secondary=RAPIDHA_BOOTLOAD_UPGRADE_EBD_RESPONSE;
-  apicmd->length=sizeof(rapidha_bootload_upgrade_end_response_t)-5;
-  apicmd->netaddr=netaddr;
-  apicmd->addr=addr;
-  apicmd->endpoint=endpoint;
-  apicmd->manu=manu;
-  apicmd->image_type=image_type;
-  apicmd->fileversion=fileversion;
-  apicmd->curtime=0;
-  apicmd->upgrade_time=0;
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) apicmd, rapidhalocked);
-
-  free(apicmd);
+  apicmd.netaddr=netaddr;
+  apicmd.addr=addr;
+  apicmd.endpoint=endpoint;
+  apicmd.manu=manu;
+  apicmd.image_type=image_type;
+  apicmd.fileversion=fileversion;
+  apicmd.curtime=0;
+  apicmd.upgrade_time=0;
+  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) &apicmd, rapidhalocked);
 
   MOREDEBUG_EXITINGFUNC();
 }
