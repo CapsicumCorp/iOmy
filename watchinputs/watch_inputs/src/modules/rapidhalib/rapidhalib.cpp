@@ -656,59 +656,42 @@ int rapidhalib_rapidha_connected_to_network(void *localzigbeedevice, long *rapid
   Return a string for the RapidHA network state value
   Args: network_state The network state value
 */
-const char *rapidhalib_get_network_state_string(uint8_t network_state) {
-  const char *network_statestr;
-
+static const char *rapidhalib_get_network_state_string(uint8_t network_state) {
   switch (network_state) {
     case 0x00:
-      network_statestr="Network Down";
-      break;
+      return "Network Down";
     case 0x01:
-      network_statestr="Network Up";
-      break;
+      return "Network Up";
     case 0x02:
-      network_statestr="Joining Network";
-      break;
+      return "Joining Network";
     case 0x03:
-      network_statestr="Forming Network";
-      break;
+      return "Forming Network";
     case 0x04:
-      network_statestr="Rejoining Network";
-      break;
+      return "Rejoining Network";
     case 0xFF:
     default:
-      network_statestr="Unknown";
-      break;
+      return "Unknown";
   }
-  return network_statestr;
 }
 
 /*
   Return a string for the RapidHA device type value
   Args: device_type The device type value
 */
-const char *rapidhalib_get_device_type_string(uint8_t device_type) {
-  const char *devtypestr;
-
+static const char *rapidhalib_get_device_type_string(uint8_t device_type) {
   switch (device_type) {
     case 0:
-      devtypestr="Coordinator";
-      break;
+      return "Coordinator";
     case 1:
-      devtypestr="Router";
-      break;
+      return "Router";
     case 2:
-      devtypestr="End Device";
-      break;
+      return "End Device";
     case 3:
-      devtypestr="Sleepy End Device";
-      break;
+      return "Sleepy End Device";
     case 0xFF:
     default:
-      devtypestr="Unknown";
-      break;
+      return "Unknown";
   }
-  return devtypestr;
 }
 
 //==================
