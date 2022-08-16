@@ -283,8 +283,8 @@ STATIC rapidhadevice_t *rapidhalib_rapidhadevices; //A list of detected rapidha 
 STATIC boost::atomic<int> rapidhalib_needmoreinfo(0); //Set to non-zero when a RapidHA/Zigbee device needs more info to indicate that we shouldn't sleep for very long
 
 //Function Declarations
-int rapidhalib_markrapidha_inuse(void *rapidhadevice, long *rapidhalocked);
-int rapidhalib_markrapidha_notinuse(void *rapidhadevice, long *rapidhalocked);
+static int rapidhalib_markrapidha_inuse(void *rapidhadevice, long *rapidhalocked);
+static int rapidhalib_markrapidha_notinuse(void *rapidhadevice, long *rapidhalocked);
 static inline void rapidhalib_setneedtoquit(bool val);
 static inline bool rapidhalib_getneedtoquit();
 int rapidhalib_start(void);
@@ -583,20 +583,20 @@ static inline void rapidhalib_subtractneedmoreinfo(int subtractvalue) {
   Thread safe mark a rapidha device as in use
   Returns 0 on success or negative value on error
 */
-int rapidhalib_markrapidha_inuse(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
+static int markrapidha_inuse(rapidhadevice_t& rapidhadevice) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
 
   rapidhalib_lockrapidha();
-  if (rapidhadevice->removed || rapidhadevice->needtoremove) {
+  if (rapidhadevice.removed || rapidhadevice.needtoremove) {
     //This device shouldn't be used as it is either removed or is scheduled for removab
     rapidhalib_unlockrapidha();
 
     return -1;
   }
   //Increment rapidha inuse value
-  ++(rapidhadevice->inuse);
+  ++(rapidhadevice.inuse);
 #ifdef RAPIDHALIB_MOREDEBUG
-  debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu RapidHA: %016llX now inuse: %d\n", __func__, pthread_self(), rapidhadevice->addr, rapidhadevice->inuse);
+  debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu RapidHA: %016llX now inuse: %d\n", __func__, pthread_self(), rapidhadevice.addr, rapidhadevice.inuse);
 #endif
 
   rapidhalib_unlockrapidha();
@@ -604,35 +604,43 @@ int rapidhalib_markrapidha_inuse(rapidhadevice_t *rapidhadevice, long *rapidhalo
   return 0;
 }
 
+static int rapidhalib_markrapidha_inuse(void *rapidhadevice, long *UNUSED(rapidhalocked)) {
+  return markrapidha_inuse(*reinterpret_cast<rapidhadevice_t *>(rapidhadevice));
+}
+
 /*
   Thread safe mark a rapidha device as not in use
   Returns 0 on success or negative value on error
 */
-int rapidhalib_markrapidha_notinuse(rapidhadevice_t *rapidhadevice, long *rapidhalocked) {
+static int markrapidha_notinuse(rapidhadevice_t& rapidhadevice) {
   DEBUGLIB_IFACEPTR
 
   rapidhalib_lockrapidha();
-  if (rapidhadevice->removed) {
+  if (rapidhadevice.removed) {
     //This device shouldn't be used as it is removed
     rapidhalib_unlockrapidha();
 
     return -1;
   }
-  if (!rapidhadevice->inuse) {
+  if (!rapidhadevice.inuse) {
     debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu INUSE MISMATCH TRIED TO MARK AS NOT IN USE WHEN INUSE COUNT IS 0\n", __func__, pthread_self());
     rapidhalib_backtrace();
     rapidhalib_unlockrapidha();
     return -2;
   }
   //Decrement rapidha inuse value
-  --(rapidhadevice->inuse);
+  --(rapidhadevice.inuse);
 
 #ifdef RAPIDHALIB_MOREDEBUG
-  debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu RapidHA: %016llX now inuse: %d\n", __func__, pthread_self(), rapidhadevice->addr, rapidhadevice->inuse);
+  debuglibifaceptr->debuglib_printf(1, "%s: thread id: %lu RapidHA: %016llX now inuse: %d\n", __func__, pthread_self(), rapidhadevice.addr, rapidhadevice.inuse);
 #endif
   rapidhalib_unlockrapidha();
 
   return 0;
+}
+
+static int rapidhalib_markrapidha_notinuse(void *rapidhadevice, long *UNUSED(rapidhalocked)) {
+  return markrapidha_notinuse(*reinterpret_cast<rapidhadevice_t *>(rapidhadevice));
 }
 
 //Check if the RapidHA module is connected to a network
@@ -1359,7 +1367,7 @@ void rapidhalib_send_rapidha_bootload_upgrade_end_response(rapidhadevice_t *rapi
     profileid: The profile id to use for the transmission
   When calling this function, your payload should be added to &rapidha_api_explicit_addressing_zigbee_cmd_t->end
 */
-void __rapidhalib_send_zigbee_zdo_new(rapidhadevice_t *rapidhadevice, zdo_general_request_t *zdocmd, int expect_response, char rxonidle, long *rapidhalocked, long *zigbeelocked) {
+void __rapidhalib_send_zigbee_zdo_new(void *rapidhadevice, zdo_general_request_t *zdocmd, int expect_response, char rxonidle, long *rapidhalocked, long *zigbeelocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   rapidha_zdo_send_unicast_t *zdounicast;
   rapidha_zdo_send_bcast_t *zdobcast;
@@ -1395,7 +1403,7 @@ void __rapidhalib_send_zigbee_zdo_new(rapidhadevice_t *rapidhadevice, zdo_genera
     ++zdounicast->length;
     zdobcast->radius=0;
   }
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) zdobcast, rapidhalocked);
+  __rapidhalib_rapidha_send_api_packet((rapidhadevice_t *) rapidhadevice, (unsigned char *) zdobcast, rapidhalocked);
   free(zdobcast);
 
   MOREDEBUG_EXITINGFUNC();
@@ -1417,7 +1425,7 @@ void __rapidhalib_send_zigbee_zdo_new(rapidhadevice_t *rapidhadevice, zdo_genera
     profileid: The profile id to use for the transmission
   When calling this function, your payload should be added to &rapidha_api_explicit_addressing_zigbee_cmd_t->end
 */
-void __rapidhalib_send_zigbee_zcl_new(rapidhadevice_t *rapidhadevice, zcl_general_request_t *zclcmd, int expect_response, char rxonidle, long *rapidhalocked, long *zigbeelocked) {
+void __rapidhalib_send_zigbee_zcl_new(void *rapidhadevice, zcl_general_request_t *zclcmd, int expect_response, char rxonidle, long *rapidhalocked, long *zigbeelocked) {
   MOREDEBUG_ADDDEBUGLIBIFACEPTR();
   rapidha_zcl_send_unicast_t *zclunicast;
   rapidha_zcl_send_bcast_t *zclbcast;
@@ -1465,7 +1473,7 @@ void __rapidhalib_send_zigbee_zcl_new(rapidhadevice_t *rapidhadevice, zcl_genera
     ++zclunicast->length;
     zclbcast->radius=0;
   }
-  __rapidhalib_rapidha_send_api_packet(rapidhadevice, (unsigned char *) zclbcast, rapidhalocked);
+  __rapidhalib_rapidha_send_api_packet((rapidhadevice_t *) rapidhadevice, (unsigned char *) zclbcast, rapidhalocked);
   free(zclbcast);
 
   MOREDEBUG_EXITINGFUNC();
@@ -3649,12 +3657,23 @@ void rapidhalib_unregister_listeners(void) {
   debuglibifaceptr->debuglib_printf(1, "Exiting %s\n", __func__);
 }
 
-moduleinfo_ver_generic_t *rapidhalib_getmoduleinfo() {
+//C Exports
+extern "C" {
+
+extern moduleinfo_ver_generic_t *rapidhalib_getmoduleinfo();
+
+}
+
+extern moduleinfo_ver_generic_t *rapidhalib_getmoduleinfo() {
   return (moduleinfo_ver_generic_t *) &rapidhalib_moduleinfo_ver_1;
 }
 
 #ifdef __ANDROID__
-jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_RapidHALib_jnigetmodulesinfo( JNIEnv* env, jobject obj) {
+extern "C" {
+JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_RapidHALib_jnigetmodulesinfo( JNIEnv* env, jobject obj);
+}
+
+JNIEXPORT jlong Java_com_capsicumcorp_iomy_libraries_watchinputs_RapidHALib_jnigetmodulesinfo( JNIEnv* env, jobject obj) {
   return (jlong) rapidhalib_getmoduleinfo();
 }
 #endif
